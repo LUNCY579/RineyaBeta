@@ -1,0 +1,20 @@
+# Regime T -- matched supervised (target) tokens.  *** PRIMARY REGIME ***
+#
+# Measured on official Qwen/Qwen3-0.6B (../qwen3-0.6b) with its own tokenizer and
+# enable_thinking pinned false, over 4,000 sampled TRAIN rows per view
+# (`rineya-lab budget --sample 4000`):
+#
+#   FULL   43,200 rows -> 3,425,404 target tokens ( 5,530,421 total),  1,350 updates
+#   SPLIT 170,941 rows -> 9,028,676 target tokens (27,192,653 total),  5,341 updates
+#   SPLIT / FULL = 2.64x target tokens, 4.92x total tokens
+#
+# Both arms stop at FULL's native target-token count, the smaller of the two. At
+# this cap SPLIT consumes ~38% of its rows and still touches roughly 85% of the
+# source problems, so supervision volume is controlled without gutting coverage.
+#
+# truncated_targets measured as 0 in BOTH arms at training.max_seq_len 384.
+# These counts are tokenizer- and checkpoint-specific: re-run `rineya-lab budget`
+# if either changes.
+budget:
+  mode: matched_target_tokens
+  max_target_tokens: 3425404

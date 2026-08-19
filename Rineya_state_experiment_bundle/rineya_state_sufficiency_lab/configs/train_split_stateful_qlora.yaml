@@ -1,0 +1,18 @@
+# QLoRA variant of condition C. Mirrors train_full_qlora.yaml exactly.
+extends: train_split_stateful.yaml
+
+experiment:
+  name: split_stateful_qlora
+  output_dir: runs/train_split_stateful_qlora
+  tags: [condition_C, qlora]
+
+model:
+  quantization: 4bit
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_compute_dtype: bfloat16
+  bnb_4bit_use_double_quant: true
+
+training:
+  gradient_checkpointing: true
+  per_device_batch_size: 2
+  gradient_accumulation_steps: 16

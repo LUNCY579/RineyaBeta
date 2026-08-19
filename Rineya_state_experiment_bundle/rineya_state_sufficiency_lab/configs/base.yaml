@@ -1,0 +1,127 @@
+# Shared defaults for every run in the lab.
+#
+# The FULL and SPLIT condition configs both inherit from this file and override
+# ONLY the training representation. Anything that appears in a condition config
+# but not here is, by construction, part of the independent variable -- keep that
+# list as short as it is.
+
+experiment:
+  name: base
+  condition: FULL
+  seed: 20260818
+  output_dir: runs/base
+  notes: ""
+  tags: []
+
+dataset:
+  root: ../rineya_sequence_independence_dataset_v1
+  bundle_zip: null
+  extract_dir: data/extracted
+  verify_hashes: true
+  require_manifest: true
+  train_split: train
+  dev_split: dev
+  test_split: test
+
+model:
+  name_or_path: Qwen/Qwen2.5-1.5B-Instruct
+  revision: null
+  tokenizer_name_or_path: null
+  trust_remote_code: false
+  precision: auto            # bf16 where supported, else fp16 on CUDA, else fp32
+  attn_implementation: null
+  quantization: none
+  local_files_only: false
+  use_portable_template_fallback: true
+
+lora:
+  enabled: true
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  bias: none
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  modules_to_save: []
+  task_type: CAUSAL_LM
+
+data_view:
+  view: full_context
+  order: shuffled
+  one_transition_per_problem: false
+  categories: []
+  max_records: null
+  reshuffle_each_epoch: true
+
+training:
+  epochs: 1.0
+  per_device_batch_size: 4
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0001
+  lr_scheduler: cosine
+  warmup_ratio: 0.03
+  weight_decay: 0.0
+  max_grad_norm: 1.0
+  max_seq_len: 1024
+  prompt_head_keep: 64
+  gradient_checkpointing: false
+  loss_weighting: none
+  logging_steps: 25
+  save_steps: 500
+  save_total_limit: 3
+  resume_from: null
+  dry_run: false
+
+budget:
+  mode: native
+  stop_on_first_limit: true
+
+evaluation:
+  split: dev
+  limit: null
+  protocols: [full_direct]
+  save_raw_generations: true
+  save_per_example_records: true
+  shuffle_eval_order: true
+  audit_sample_size: 25
+  backend:
+    kind: hf
+    adapter_path: null
+    merge_adapter: false
+  generation:
+    max_new_tokens: 320
+    do_sample: false
+    temperature: 0.0
+    batch_size: 8
+  rollout:
+    max_steps_absolute: 16
+    max_steps_margin: 3
+    use_dataset_step_bound: true
+    stagnation_patience: 2
+    loop_detection: true
+    stop_on_invalid: false
+    max_invalid_retries: 0
+    carry_last_valid_state: true
+  scoring:
+    numeric_tolerance_abs: 1.0e-06
+    numeric_tolerance_rel: 1.0e-06
+    strip_trailing_punctuation: true
+    lenient_track_enabled: true
+    symbolic_enabled: true
+    default_scorer: auto
+    case_sensitive_text_types: [string]
+
+comparison:
+  pair_on: problem_id
+  primary_metric: strict_correct
+  alpha: 0.05
+  bootstrap_iterations: 10000
+  randomization_iterations: 10000
+  # PLACEHOLDER. docs/PREREGISTRATION.md requires freezing and justifying the real
+  # margin, and setting margin_frozen: true, before TEST results are opened.
+  non_inferiority_margin_pp: 2.0
+  equivalence_margin_pp: 2.0
+  margin_frozen: false
+  margin_justification: ""
+  stratify_by: [category, total_steps, failure_type]
+  audit_sample_size: 25
+  seed: 20260818

@@ -1,0 +1,24 @@
+# Evaluate the SPLIT (stateful) adapter across all four separated questions.
+extends: base.yaml
+
+experiment:
+  name: eval_split_stateful
+  condition: SPLIT_STATEFUL
+  output_dir: runs/eval_split_stateful
+
+data_view:
+  view: split_stateful
+
+evaluation:
+  split: dev
+  protocols:
+    - oracle_transition        # Q1 local transition competence
+    - full_history_transition  # Q2 state sufficiency (compact vs complete history)
+    - no_state_transition      # Q2 lower bound
+    - oracle_trajectory        # Q3 teacher-forced end-to-end
+    - generated_rollout        # Q3/Q4 autonomous: model consumes its own states
+  backend:
+    kind: hf
+    adapter_path: runs/train_split_stateful/adapter
+  generation:
+    max_new_tokens: 256

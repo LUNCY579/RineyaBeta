@@ -1,0 +1,18 @@
+# Evaluate the FULL adapter in its native inference mode.
+extends: base.yaml
+
+experiment:
+  name: eval_full
+  condition: FULL
+  output_dir: runs/eval_full
+
+evaluation:
+  split: dev            # switch to test ONLY after the preregistration is frozen
+  protocols:
+    - full_direct       # primary end-to-end capability for this arm
+    - direct_answer     # diagnostic: does removing the rationale change the answer
+  backend:
+    kind: hf
+    adapter_path: runs/train_full/adapter
+  generation:
+    max_new_tokens: 384

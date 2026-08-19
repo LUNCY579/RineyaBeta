@@ -1,0 +1,14 @@
+# Pilot condition A -- FULL.
+extends: pilot_mac_base.yaml
+
+experiment:
+  name: pilot_full
+  condition: FULL
+  output_dir: runs/pilot_full
+  tags: [pilot, condition_A]
+
+data_view:
+  view: full_context
+  order: shuffled
+  # Set by scripts/run_mac_pilot.sh from the measured throughput.
+  max_unique_problems: 1000

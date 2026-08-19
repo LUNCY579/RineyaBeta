@@ -1,0 +1,6 @@
+# Regime U -- matched optimizer updates.
+# Measured: FULL's native epoch is 1,350 updates at effective batch 32
+# (per_device_batch_size 16 x gradient_accumulation_steps 2).
+budget:
+  mode: matched_updates
+  max_optimizer_updates: 1350

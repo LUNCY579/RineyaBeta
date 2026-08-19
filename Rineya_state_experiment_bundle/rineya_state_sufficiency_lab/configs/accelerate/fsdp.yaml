@@ -1,0 +1,23 @@
+# FSDP full-shard. Note: with LoRA the sharded parameter count is small; FSDP is
+# most useful when the frozen base itself does not fit on one device.
+compute_environment: LOCAL_MACHINE
+distributed_type: FSDP
+mixed_precision: bf16
+num_machines: 1
+num_processes: 4
+machine_rank: 0
+rdzv_backend: static
+same_network: true
+use_cpu: false
+fsdp_config:
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+  fsdp_transformer_layer_cls_to_wrap: LlamaDecoderLayer   # match the base architecture
+  fsdp_sharding_strategy: FULL_SHARD
+  fsdp_backward_prefetch: BACKWARD_PRE
+  fsdp_state_dict_type: SHARDED_STATE_DICT
+  fsdp_offload_params: false
+  fsdp_use_orig_params: true
+  fsdp_cpu_ram_efficient_loading: true
+  fsdp_sync_module_states: true
+  fsdp_forward_prefetch: false
+  fsdp_activation_checkpointing: false

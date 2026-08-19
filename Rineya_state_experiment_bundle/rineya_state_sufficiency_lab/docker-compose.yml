@@ -1,0 +1,43 @@
+services:
+  lab:
+    build:
+      context: .
+      target: base
+    image: rineya-lab:cpu
+    environment:
+      RINEYA_DATASET_ROOT: /data
+      PYTHONHASHSEED: "0"
+    volumes:
+      - ${RINEYA_DATASET_ROOT:-../rineya_sequence_independence_dataset_v1}:/data:ro
+      - ./runs:/opt/rineya-lab/runs
+    command: ["smoke", "--all"]
+
+  validate:
+    extends: lab
+    command: ["validate-data", "--splits", "dev", "test"]
+
+  tests:
+    extends: lab
+    entrypoint: ["pytest", "-q"]
+    command: []
+
+  train-gpu:
+    build:
+      context: .
+      target: gpu
+    image: rineya-lab:gpu
+    environment:
+      RINEYA_DATASET_ROOT: /data
+      PYTHONHASHSEED: "0"
+    volumes:
+      - ${RINEYA_DATASET_ROOT:-../rineya_sequence_independence_dataset_v1}:/data:ro
+      - ./runs:/opt/rineya-lab/runs
+      - ${HF_HOME:-~/.cache/huggingface}:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: ["train", "-c", "configs/train_split_stateful.yaml"]

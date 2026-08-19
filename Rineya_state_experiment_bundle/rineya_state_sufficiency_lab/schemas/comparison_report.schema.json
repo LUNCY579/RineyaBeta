@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/rineya-lab/comparison-report.schema.json",
+  "title": "Paired FULL vs SPLIT comparison report",
+  "type": "object",
+  "required": ["lab_version", "baseline", "candidate", "settings", "comparisons", "validity_warnings"],
+  "properties": {
+    "baseline": {"$ref": "#/$defs/runProvenance"},
+    "candidate": {"$ref": "#/$defs/runProvenance"},
+    "settings": {
+      "type": "object",
+      "required": ["primary_metric", "alpha", "non_inferiority_margin_pp", "margin_frozen", "pair_on"],
+      "properties": {
+        "pair_on": {"const": "problem_id"},
+        "alpha": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+        "non_inferiority_margin_pp": {"type": "number", "minimum": 0},
+        "equivalence_margin_pp": {"type": "number", "minimum": 0},
+        "margin_frozen": {"type": "boolean"},
+        "margin_justification": {"type": "string"}
+      }
+    },
+    "comparisons": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["label", "baseline_protocol", "candidate_protocol", "metric", "n_paired",
+                     "bootstrap", "mcnemar", "randomization", "decision"],
+        "properties": {
+          "n_paired": {"type": "integer", "minimum": 1},
+          "bootstrap": {
+            "type": "object",
+            "required": ["observed_difference", "ci_low", "ci_high", "alpha", "iterations"],
+            "properties": {
+              "iterations": {"type": "integer", "minimum": 100}
+            }
+          },
+          "mcnemar": {
+            "type": "object",
+            "required": ["applicable"],
+            "properties": {
+              "p_value_two_sided": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+            }
+          },
+          "randomization": {"type": "object"},
+          "decision": {
+            "type": "object",
+            "required": ["superiority", "non_inferiority", "equivalence"],
+            "properties": {
+              "superiority": {"enum": ["candidate_superior", "baseline_superior", "not_established"]},
+              "non_inferiority": {"enum": ["non_inferior", "not_established"]},
+              "equivalence": {"enum": ["equivalent", "not_established"]}
+            }
+          },
+          "strata": {"type": "object"},
+          "track_disagreement": {"type": "object"},
+          "audit_sample": {"type": "array"}
+        }
+      }
+    },
+    "validity_warnings": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "runProvenance": {
+      "type": "object",
+      "required": ["path", "name", "condition"],
+      "properties": {
+        "condition": {"type": "string"},
+        "is_reference_backend": {"type": "boolean"},
+        "eval_problem_ids_sha256": {"type": ["string", "null"]}
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,21 @@
+# Pilot evaluation, SPLIT arm: the three protocols that carry the primary and the
+# two most important secondary questions. The perturbation battery is omitted
+# here purely for runtime and can be run afterwards on the same adapter.
+extends: pilot_mac_base.yaml
+
+experiment:
+  name: pilot_eval_split
+  condition: SPLIT_STATEFUL
+  output_dir: runs/pilot_eval_split
+
+data_view:
+  view: split_stateful
+
+evaluation:
+  limit: null
+  protocols:
+    - generated_rollout      # primary end-to-end for this arm
+    - oracle_transition      # local transition competence
+    - no_state_transition    # the floor that makes the state's contribution legible
+  backend:
+    adapter_path: runs/pilot_split/adapter

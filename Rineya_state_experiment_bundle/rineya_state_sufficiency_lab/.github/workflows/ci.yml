@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  PYTHONHASHSEED: "0"
+  TOKENIZERS_PARALLELISM: "false"
+
+jobs:
+  static:
+    name: Lint and compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff pyyaml jsonschema
+      - name: Ruff
+        run: ruff check src tests
+      - name: Byte-compile
+        run: python -m compileall -q src
+      - name: Parse every YAML config
+        run: |
+          python - <<'PY'
+          import glob, yaml
+          for path in glob.glob("configs/**/*.yaml", recursive=True):
+              yaml.safe_load(open(path))
+              print("ok", path)
+          PY
+      - name: Parse and check every JSON schema
+        run: |
+          python - <<'PY'
+          import glob, json, jsonschema
+          for path in glob.glob("schemas/*.json") + glob.glob("configs/**/*.json", recursive=True):
+              payload = json.load(open(path))
+              if "schemas/" in path:
+                  jsonschema.Draft202012Validator.check_schema(payload)
+              print("ok", path)
+          PY
+      - name: Shell script syntax
+        run: for f in scripts/*.sh; do bash -n "$f"; done
+      - name: PowerShell script syntax
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Get-ChildItem scripts/*.ps1 | ForEach-Object {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) { $errors; throw "Parse errors in $($_.Name)" }
+            Write-Host "ok $($_.Name)"
+          }
+
+  unit:
+    name: Unit tests (no dataset, no torch)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Editable install
+        run: pip install -e ".[validate,symbolic,dev]"
+      - name: Import without torch installed
+        run: |
+          python - <<'PY'
+          import importlib
+          for name in ["rineya_lab", "rineya_lab.cli", "rineya_lab.config",
+                       "rineya_lab.evaluation.runner", "rineya_lab.analysis.compare",
+                       "rineya_lab.training.loop"]:
+              importlib.import_module(name)
+          import importlib.util
+          assert importlib.util.find_spec("torch") is None, "this job must run without torch"
+          print("torch-free import OK")
+          PY
+      - name: Console entry points
+        run: |
+          rineya-lab --version
+          rineya-lab --help > /dev/null
+          rineya-train --help > /dev/null
+          rineya-eval --help > /dev/null
+          rineya-compare --help > /dev/null
+          rineya-validate-data --help > /dev/null
+      - name: Tests (dataset-dependent tests skip cleanly)
+        run: pytest -q
+
+  integration:
+    name: Integration with the dataset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[validate,symbolic,dev]"
+      - name: Locate the dataset
+        id: dataset
+        run: |
+          for candidate in "$RINEYA_DATASET_ROOT" ../rineya_sequence_independence_dataset_v1 \
+                           ./rineya_sequence_independence_dataset_v1; do
+            if [ -n "$candidate" ] && [ -f "$candidate/data/full_context/dev.jsonl" ]; then
+              echo "root=$candidate" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          done
+          echo "root=" >> "$GITHUB_OUTPUT"
+      - name: Validate dataset
+        if: steps.dataset.outputs.root != ''
+        run: rineya-lab validate-data --dataset-root "${{ steps.dataset.outputs.root }}" --splits dev
+      - name: Offline smoke suite
+        if: steps.dataset.outputs.root != ''
+        run: rineya-lab smoke --dataset-root "${{ steps.dataset.outputs.root }}"
+      - name: Skip notice
+        if: steps.dataset.outputs.root == ''
+        run: echo "Dataset not present in this checkout; integration job skipped."
+
+  torch:
+    name: Tiny-model training smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install with torch (CPU wheels)
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[train,validate,symbolic,dev]"
+      - name: Torch-gated tests
+        run: pytest -q -m torch
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --target base -t rineya-lab:cpu .
+      - run: docker run --rm rineya-lab:cpu --version

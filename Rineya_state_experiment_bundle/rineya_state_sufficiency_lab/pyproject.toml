@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rineya-state-sufficiency-lab"
+version = "1.0.0"
+description = "Controlled comparison of full-trajectory versus sequence-free compact-state reasoning supervision."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "Rineya State Sufficiency Lab"}]
+keywords = ["reasoning", "supervised-fine-tuning", "lora", "markov-sufficiency", "evaluation"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "pyyaml>=6.0",
+  "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+train = [
+  "torch>=2.1",
+  "transformers>=4.40",
+  "peft>=0.10",
+  "accelerate>=0.28",
+  "safetensors>=0.4",
+]
+quant = ["bitsandbytes>=0.43"]
+deepspeed = ["deepspeed>=0.14"]
+symbolic = ["sympy>=1.12"]
+validate = ["jsonschema>=4.19"]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "ruff>=0.4"]
+all = [
+  "torch>=2.1", "transformers>=4.40", "peft>=0.10", "accelerate>=0.28",
+  "safetensors>=0.4", "sympy>=1.12", "jsonschema>=4.19", "pytest>=7.4", "ruff>=0.4",
+]
+
+[project.scripts]
+rineya-lab = "rineya_lab.cli:main"
+rineya-train = "rineya_lab.cli:main_train"
+rineya-eval = "rineya_lab.cli:main_eval"
+rineya-compare = "rineya_lab.cli:main_compare"
+rineya-validate-data = "rineya_lab.cli:main_validate_data"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rineya_lab = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
+markers = [
+  "slow: marks tests that download or train models",
+  "torch: requires a working torch/transformers/peft install",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "B905"]

@@ -1,0 +1,15 @@
+extends: dry_run_full.yaml
+
+experiment:
+  name: dry_run_split
+  condition: SPLIT_STATEFUL
+  output_dir: runs/dry_run_split
+
+data_view:
+  view: split_stateful
+  order: shuffled
+  max_records: 200
+
+training:
+  dry_run: true
+  loss_weighting: inverse_transitions

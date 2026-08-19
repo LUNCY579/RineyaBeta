@@ -1,0 +1,14 @@
+# Condition B -- ordered transitions.
+# EXACTLY the same records as condition C, presented in trajectory order.
+# B vs C isolates chronological presentation from state decomposition.
+extends: train_split_stateful.yaml
+
+experiment:
+  name: split_stateful_ordered_lora
+  condition: SPLIT_STATEFUL
+  output_dir: runs/train_split_ordered
+  tags: [condition_B, ordered]
+  notes: "Identical record set to condition C; only the presentation order differs."
+
+data_view:
+  order: trajectory

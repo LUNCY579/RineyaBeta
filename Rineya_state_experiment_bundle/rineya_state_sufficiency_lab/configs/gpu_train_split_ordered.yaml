@@ -1,0 +1,10 @@
+# Condition B -- identical records to condition C, trajectory order.
+extends: gpu_train_split_stateful.yaml
+
+experiment:
+  name: gpu_split_ordered
+  output_dir: runs/gpu_split_ordered
+  tags: [condition_B, ordered]
+
+data_view:
+  order: trajectory

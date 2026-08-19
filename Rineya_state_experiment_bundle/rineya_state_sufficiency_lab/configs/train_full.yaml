@@ -1,0 +1,14 @@
+# Condition A -- FULL.
+# problem -> complete uninterrupted reasoning trajectory + answer.
+extends: base.yaml
+
+experiment:
+  name: full_lora
+  condition: FULL
+  output_dir: runs/train_full
+  tags: [condition_A, full_trajectory]
+  notes: "Baseline arm: one record per problem, one complete rationale per record."
+
+data_view:
+  view: full_context
+  order: shuffled

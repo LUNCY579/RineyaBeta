@@ -1,0 +1,23 @@
+# Condition C -- SPLIT (primary).
+# (problem, compact current state) -> {next step, updated state, done, final answer}
+# Records are GLOBALLY SHUFFLED: transition t-1 never precedes transition t.
+extends: base.yaml
+
+experiment:
+  name: split_stateful_lora
+  condition: SPLIT_STATEFUL
+  output_dir: runs/train_split_stateful
+  tags: [condition_C, sequence_free, stateful]
+  notes: >
+    Primary SPLIT arm. Uses stateful_rollout_messages so the adapter learns to emit
+    the updated compact state as well as the next action; this is what makes the
+    autonomous generated-state rollout possible at evaluation time.
+
+data_view:
+  view: split_stateful
+  order: shuffled
+
+training:
+  # Each source problem expands into ~3.96 transitions. Weighting each row by
+  # 1/total_steps keeps a problem's total gradient mass comparable to FULL's.
+  loss_weighting: inverse_transitions

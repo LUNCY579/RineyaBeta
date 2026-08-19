@@ -1,0 +1,11 @@
+# Ablation -- reverse trajectory order within each problem.
+extends: train_split_stateful.yaml
+
+experiment:
+  name: split_stateful_reverse_lora
+  condition: SPLIT_STATEFUL
+  output_dir: runs/train_split_reverse
+  tags: [ablation, reverse_order]
+
+data_view:
+  order: reverse

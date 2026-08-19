@@ -1,0 +1,18 @@
+# The untouched base checkpoint. Every adapter result should be reported as an
+# absolute score AND as a difference from this run.
+extends: base.yaml
+
+experiment:
+  name: eval_base_model
+  condition: BASE
+  output_dir: runs/eval_base_model
+
+lora:
+  enabled: false
+
+evaluation:
+  split: dev
+  protocols: [full_direct, direct_answer, oracle_transition, generated_rollout]
+  backend:
+    kind: hf
+    adapter_path: null

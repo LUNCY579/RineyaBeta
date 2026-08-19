@@ -1,0 +1,16 @@
+# Ablation -- SPLIT, next step only (no state emission).
+# (problem, compact current state) -> next reasoning step
+extends: train_split_stateful.yaml
+
+experiment:
+  name: split_next_step_lora
+  condition: SPLIT_NEXT_STEP
+  output_dir: runs/train_split_next_step
+  tags: [ablation, next_step_only]
+  notes: >
+    Retained as a separate ablation. This adapter cannot drive an autonomous rollout
+    because it never emits a state; evaluate it with oracle_transition only.
+
+data_view:
+  view: split_next_step
+  order: shuffled

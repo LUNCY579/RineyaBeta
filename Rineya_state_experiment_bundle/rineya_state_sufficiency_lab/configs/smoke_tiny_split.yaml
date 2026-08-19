@@ -1,0 +1,15 @@
+# Offline SPLIT training smoke test. Mirrors smoke_tiny_full.yaml.
+extends: smoke_tiny_full.yaml
+
+experiment:
+  name: smoke_tiny_split
+  condition: SPLIT_STATEFUL
+  output_dir: runs/smoke_tiny_split
+
+data_view:
+  view: split_stateful
+  order: shuffled
+  max_records: 16
+
+training:
+  loss_weighting: inverse_transitions

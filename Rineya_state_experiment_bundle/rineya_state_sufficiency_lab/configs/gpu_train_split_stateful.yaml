@@ -1,0 +1,36 @@
+# Condition C -- SPLIT stateful, globally shuffled. Mirrors gpu_train_full.yaml
+# in every setting except the training representation.
+extends: train_split_stateful.yaml
+
+experiment:
+  name: gpu_split
+  output_dir: runs/gpu_split
+
+model:
+  name_or_path: ../qwen3-0.6b
+  local_files_only: true
+  precision: auto
+  attn_implementation: sdpa
+  chat_template_kwargs:
+    # Pinned OFF for both arms and the baseline. Training targets contain no
+    # reasoning blocks, so leaving Qwen3's thinking mode enabled would make the
+    # evaluation prompt differ from the training prompt and would let the model
+    # perform hidden full-history reasoning at every step -- which is exactly the
+    # thing the compact-state hypothesis is supposed to do without.
+    enable_thinking: false
+
+lora:
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+training:
+  max_seq_len: 384
+  per_device_batch_size: 16
+  gradient_accumulation_steps: 2
+  fp32_trainable_params: true
+  checkpoint_selection: best_dev_loss
+  eval_steps: 100
+  dev_eval_max_records: 512
+  gradient_checkpointing: false
+  logging_steps: 25
+  save_steps: 500
+  loss_weighting: inverse_transitions

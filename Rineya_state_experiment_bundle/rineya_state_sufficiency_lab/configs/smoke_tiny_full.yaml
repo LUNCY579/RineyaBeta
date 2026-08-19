@@ -1,0 +1,36 @@
+# Offline FULL training smoke test: randomly initialised tiny model, byte tokenizer,
+# DEV split, 16 records. Produces an adapter artifact; produces no research result.
+extends: base.yaml
+
+experiment:
+  name: smoke_tiny_full
+  condition: FULL
+  output_dir: runs/smoke_tiny_full
+
+dataset:
+  verify_hashes: false
+  train_split: dev
+
+model:
+  name_or_path: runs/smoke_tiny_model
+  tokenizer_name_or_path: "builtin:byte"
+  precision: fp32
+  local_files_only: true
+
+lora:
+  r: 4
+  alpha: 8
+  target_modules: [q_proj, v_proj]
+
+data_view:
+  view: full_context
+  max_records: 16
+
+training:
+  epochs: 1.0
+  per_device_batch_size: 2
+  gradient_accumulation_steps: 2
+  max_seq_len: 512
+  learning_rate: 0.001
+  logging_steps: 1
+  save_steps: 0

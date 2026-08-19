@@ -1,0 +1,55 @@
+# Shared settings for the CPU pilot on an 8 GB Apple Silicon host.
+#
+# MPS is deliberately NOT used: measured repeatedly, moving a 0.6 B model onto the
+# Metal device on this host drives the process into swap and step times vary by two
+# orders of magnitude. Unstable timing is not merely slow -- if the FULL and SPLIT
+# arms meet different swap conditions, the comparison acquires a confound that has
+# nothing to do with training representation. CPU fp32 is slower but *stable*, and
+# stability is what a controlled comparison actually needs.
+extends: base.yaml
+
+model:
+  name_or_path: ../qwen3-0.6b
+  local_files_only: true
+  precision: fp32
+  chat_template_kwargs:
+    enable_thinking: false
+
+lora:
+  r: 16
+  alpha: 32
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+training:
+  device: cpu
+  max_seq_len: 384
+  # Measured: batch 1 gives 0.082 rows/s, batch 2 only 0.047 rows/s -- larger
+  # micro-batches are slower *per row* here because they push the host into swap.
+  per_device_batch_size: 1
+  gradient_accumulation_steps: 8  # effective batch 8, identical in both arms
+  gradient_checkpointing: true    # trades compute for memory; this host needs it
+  learning_rate: 0.0001
+  lr_scheduler: cosine
+  warmup_ratio: 0.03
+  logging_steps: 5
+  # Frequent checkpoints: a multi-day run on a swapping host WILL be interrupted,
+  # and resume restores the exact position inside the planned epoch.
+  save_steps: 25
+  save_total_limit: 3
+  eval_steps: 50
+  checkpoint_selection: best_dev_loss
+  dev_eval_max_records: 128
+  dev_eval_batch_size: 2
+
+evaluation:
+  split: dev
+  strip_reasoning_blocks: true
+  subset_seed: 20260818
+  generation:
+    # Measured on this host: 12.2 tok/s at batch 1, 15.5 at batch 4, 32.2 at batch 8.
+    # Generation dominates evaluation wall-clock, so this matters more than it looks.
+    batch_size: 8
+    max_new_tokens: 224
+  backend:
+    kind: hf
+    device: cpu

@@ -1,0 +1,10 @@
+# Pilot condition B -- identical records to C, trajectory order.
+extends: pilot_train_split.yaml
+
+experiment:
+  name: pilot_ordered
+  output_dir: runs/pilot_ordered
+  tags: [pilot, condition_B]
+
+data_view:
+  order: trajectory

@@ -1,0 +1,30 @@
+# The untouched checkpoint. Every adapter number is reported as an absolute score
+# AND as a delta from this run.
+extends: eval_base_model.yaml
+
+experiment:
+  name: gpu_eval_base
+  output_dir: runs/gpu_eval_base
+
+model:
+  name_or_path: ../qwen3-0.6b
+  local_files_only: true
+  precision: auto
+  chat_template_kwargs:
+    enable_thinking: false
+
+evaluation:
+  split: dev
+  protocols: [full_direct, direct_answer, oracle_transition, generated_rollout]
+  strip_reasoning_blocks: true
+  subset_seed: 20260818
+  generation:
+    batch_size: 32
+    # The untouched model reasons at length before answering; 320 tokens truncated
+    # it mid-derivation in probing and scored correct reasoning as "no answer
+    # found". The adapters are trained on ~79-token targets and stay well inside
+    # their own 320. A larger budget here is deliberately generous to the baseline.
+    max_new_tokens: 768
+  backend:
+    kind: hf
+    adapter_path: null

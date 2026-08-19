@@ -1,0 +1,11 @@
+# Ablation -- curriculum order: all step 1 rows, then all step 2 rows, ...
+extends: train_split_stateful.yaml
+
+experiment:
+  name: split_stateful_curriculum_lora
+  condition: SPLIT_STATEFUL
+  output_dir: runs/train_split_curriculum
+  tags: [ablation, curriculum_order]
+
+data_view:
+  order: curriculum

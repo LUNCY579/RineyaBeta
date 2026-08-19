@@ -1,0 +1,37 @@
+# The checkpoint under test: official Qwen/Qwen3-0.6B.
+# Both arms load this identical, immutable base.
+#
+# Path is relative so the repo moves to a GPU host unchanged; override with
+#   --set model.name_or_path=/abs/path/to/model
+# or by exporting the directory next to the repo as ../model.
+model:
+  name_or_path: ../qwen3-0.6b
+  local_files_only: true
+  trust_remote_code: false
+  precision: auto            # bf16 on any modern CUDA card
+  attn_implementation: sdpa
+  # This checkpoint ships its own chat template, so the portable fallback is unused.
+  use_portable_template_fallback: true
+
+lora:
+  # Qwen3 attention + MLP projections.
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+training:
+  # Measured p99 total length is 263 (FULL) / 254 (SPLIT); observed max is 377.
+  # 384 truncates nothing in either arm -- verify truncated_targets == 0 in the manifest.
+  max_seq_len: 384
+  fp32_trainable_params: true
+  # Declared, not accidental: the evaluated adapter is the one with the best DEV
+  # target NLL. Identical rule for both arms.
+  checkpoint_selection: best_dev_loss
+  eval_steps: 100
+  dev_eval_max_records: 512
+
+evaluation:
+  generation:
+    # Batched decoding. The full DEV protocol suite is ~80,500 generations per
+    # adapter; unbatched decoding dominates total runtime.
+    batch_size: 32
+    max_new_tokens: 256
+  strip_reasoning_blocks: true

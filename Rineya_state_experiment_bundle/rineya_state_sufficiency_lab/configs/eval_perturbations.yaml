@@ -1,0 +1,14 @@
+# State-perturbation battery. Run against any SPLIT adapter.
+extends: eval_split_stateful.yaml
+
+experiment:
+  name: eval_perturbations
+  output_dir: runs/eval_perturbations
+
+evaluation:
+  protocols:
+    - oracle_transition    # reference point for the perturbations below
+    - no_state_transition  # lower bound: how much does the state contribute at all
+    - last_state_only      # is the state sufficient without the original problem
+    - shuffled_state       # a state from a different step of the same problem
+    - distractor_state     # a state from an unrelated problem

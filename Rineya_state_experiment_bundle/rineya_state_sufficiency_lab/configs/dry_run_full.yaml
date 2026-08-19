@@ -1,0 +1,21 @@
+# CPU-only data-path check: plans the view, applies the chat template, accounts
+# tokens and truncation. No model is constructed.
+extends: train_full.yaml
+
+experiment:
+  name: dry_run_full
+  output_dir: runs/dry_run_full
+
+model:
+  name_or_path: "builtin:byte"
+  tokenizer_name_or_path: "builtin:byte"
+
+dataset:
+  verify_hashes: false
+  train_split: dev
+
+data_view:
+  max_records: 200
+
+training:
+  dry_run: true

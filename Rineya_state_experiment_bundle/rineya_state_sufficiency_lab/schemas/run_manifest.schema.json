@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/rineya-lab/run-manifest.schema.json",
+  "title": "Rineya State Sufficiency Lab training run manifest",
+  "type": "object",
+  "required": ["lab_version", "experiment", "resolved_config", "config_fingerprint",
+               "seeding", "environment", "dataset", "started_at"],
+  "properties": {
+    "lab_version": {"type": "string"},
+    "experiment": {
+      "type": "object",
+      "required": ["name", "condition", "seed", "output_dir"],
+      "properties": {
+        "name": {"type": "string"},
+        "condition": {"enum": ["FULL", "SPLIT_STATEFUL", "SPLIT_NEXT_STEP", "BASE"]},
+        "seed": {"type": "integer"},
+        "output_dir": {"type": "string"},
+        "notes": {"type": "string"},
+        "tags": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "resolved_config": {"type": "object"},
+    "config_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "seeding": {"type": "object", "required": ["seed"]},
+    "environment": {
+      "type": "object",
+      "required": ["python", "platform", "packages"],
+      "properties": {
+        "packages": {"type": "object"},
+        "gpu": {"type": "object"},
+        "git": {"type": "object"},
+        "argv": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "required": ["paths", "integrity"],
+      "properties": {
+        "file_sha256": {"type": "object", "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+      }
+    },
+    "chat_template": {"type": "object"},
+    "view_plan": {
+      "type": "object",
+      "required": ["view", "order", "total_rows", "unique_problems"],
+      "properties": {
+        "view": {"enum": ["full_context", "split_stateful", "split_next_step"]},
+        "order": {"enum": ["shuffled", "trajectory", "reverse", "curriculum"]},
+        "rows_per_epoch": {"type": "array", "items": {"type": "integer"}},
+        "epoch_order_salts": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "order_diagnostics": {"type": "object"},
+    "model": {"type": "object"},
+    "optimization": {"type": "object"},
+    "training": {
+      "type": "object",
+      "required": ["stop_reason", "exposure"],
+      "properties": {
+        "exposure": {
+          "type": "object",
+          "required": ["records_seen", "unique_problems_seen", "input_tokens", "target_tokens",
+                       "padded_tokens", "optimizer_updates", "truncated_prompts", "truncated_targets"],
+          "properties": {
+            "records_seen": {"type": "integer", "minimum": 0},
+            "unique_problems_seen": {"type": "integer", "minimum": 0},
+            "input_tokens": {"type": "integer", "minimum": 0},
+            "target_tokens": {"type": "integer", "minimum": 0},
+            "padded_tokens": {"type": "integer", "minimum": 0},
+            "optimizer_updates": {"type": "integer", "minimum": 0},
+            "truncated_prompts": {"type": "integer", "minimum": 0},
+            "truncated_targets": {"type": "integer", "minimum": 0}
+          }
+        },
+        "wall_clock_seconds": {"type": "number"},
+        "peak_memory_bytes": {"type": ["integer", "null"]},
+        "adapter_dir": {"type": "string"}
+      }
+    },
+    "result": {"type": "object"}
+  },
+  "additionalProperties": true
+}

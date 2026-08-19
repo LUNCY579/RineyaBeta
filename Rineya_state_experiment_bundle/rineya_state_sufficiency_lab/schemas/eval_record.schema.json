@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/rineya-lab/eval-record.schema.json",
+  "title": "One scored evaluation item",
+  "type": "object",
+  "required": ["record_id", "protocol", "problem_id", "category", "domain", "total_steps",
+               "strict_correct", "lenient_correct", "extraction_route", "parse_status", "failure_type"],
+  "properties": {
+    "record_id": {"type": "string"},
+    "protocol": {
+      "enum": ["full_direct", "direct_answer", "oracle_transition", "full_history_transition",
+               "no_state_transition", "last_state_only", "shuffled_state", "distractor_state",
+               "oracle_trajectory", "generated_rollout"]
+    },
+    "problem_id": {"type": "string"},
+    "transition_id": {"type": ["string", "null"]},
+    "category": {"type": "string"},
+    "domain": {"type": "string"},
+    "answer_type": {"type": ["string", "null"]},
+    "step_index": {"type": ["integer", "null"]},
+    "total_steps": {"type": "integer", "minimum": 0},
+    "prompt": {"type": "string"},
+    "raw_response": {"type": ["string", "null"]},
+    "prediction": {"type": ["string", "null"]},
+    "gold": {"type": ["string", "null"]},
+    "strict_correct": {"type": "boolean"},
+    "lenient_correct": {"type": "boolean"},
+    "extraction_route": {
+      "enum": ["json_exact", "json_fenced", "json_embedded", "json_repaired", "tag_final_answer",
+               "boxed_latex", "labeled_answer", "plain_text_step", "last_line_fallback", "empty_output", "refusal",
+               "no_answer_found", "none"]
+    },
+    "parse_status": {
+      "enum": ["ok", "empty", "refusal", "malformed", "ambiguous", "missing_fields",
+               "invalid_completion_flag", "not_found", "backend_failure", "overlong"]
+    },
+    "scorer": {"type": ["string", "null"]},
+    "failure_type": {
+      "enum": ["correct", "empty_output", "refusal", "malformed_structure", "missing_fields",
+               "invalid_completion_flag", "ambiguous_answer", "no_answer_found", "overlong_output",
+               "backend_failure", "nontermination", "loop", "stagnation", "premature_completion",
+               "wrong_answer", "wrong_transition", "state_drift"]
+    },
+    "components": {"type": "object"},
+    "meta": {"type": "object"}
+  },
+  "additionalProperties": false
+}

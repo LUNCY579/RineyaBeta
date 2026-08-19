@@ -1,0 +1,12 @@
+# Format control -- SPLIT next-step-only (plain text targets, no JSON contract).
+# Used to bound how much of any FULL/SPLIT difference is output-format compliance.
+extends: gpu_train_split_stateful.yaml
+
+experiment:
+  name: gpu_split_next_step
+  condition: SPLIT_NEXT_STEP
+  output_dir: runs/gpu_split_next_step
+  tags: [ablation, next_step_only, format_control]
+
+data_view:
+  view: split_next_step

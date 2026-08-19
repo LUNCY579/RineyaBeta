@@ -1,0 +1,24 @@
+extends: eval_full.yaml
+
+experiment:
+  name: gpu_eval_full
+  output_dir: runs/gpu_eval_full
+
+model:
+  name_or_path: ../qwen3-0.6b
+  local_files_only: true
+  precision: auto
+  chat_template_kwargs:
+    enable_thinking: false
+
+evaluation:
+  split: dev
+  protocols: [full_direct, direct_answer]
+  strip_reasoning_blocks: true
+  subset_seed: 20260818
+  generation:
+    batch_size: 32
+    max_new_tokens: 320
+  backend:
+    kind: hf
+    adapter_path: runs/gpu_full/adapter

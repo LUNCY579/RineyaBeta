@@ -1,0 +1,7 @@
+# Regime N -- native recipe.  *** CONTEXT ONLY -- NEVER THE HEADLINE ***
+#
+# One natural epoch over each representation. SPLIT receives 2.62x the supervised
+# tokens and 4.93x the total tokens of FULL, so a SPLIT advantage under this
+# regime alone is uninterpretable. Report it beside Regime T, never instead of it.
+budget:
+  mode: native

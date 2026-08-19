@@ -1,0 +1,28 @@
+# Paired FULL-vs-SPLIT comparison settings.
+extends: base.yaml
+
+experiment:
+  name: compare_full_vs_split
+  output_dir: runs/comparison
+
+comparison:
+  baseline_run: runs/eval_full
+  candidate_run: runs/eval_split_stateful
+  pair_on: problem_id
+  primary_metric: strict_correct
+  # Primary contrast: each arm evaluated in the inference mode it was trained for.
+  protocol_pairs:
+    - full_direct:generated_rollout
+    - full_direct:oracle_trajectory
+    - direct_answer:direct_answer
+  default_end_to_end_pair: full_direct:generated_rollout
+  alpha: 0.05
+  bootstrap_iterations: 10000
+  randomization_iterations: 10000
+  non_inferiority_margin_pp: 2.0
+  equivalence_margin_pp: 2.0
+  margin_frozen: false
+  margin_justification: >
+    REPLACE THIS. State the smallest accuracy loss that would change a practical
+    decision about adopting sequence-free compact-state training, and why.
+  stratify_by: [category, total_steps, failure_type]

@@ -1,0 +1,32 @@
+extends: eval_split_stateful.yaml
+
+experiment:
+  name: gpu_eval_split
+  output_dir: runs/gpu_eval_split
+
+model:
+  name_or_path: ../qwen3-0.6b
+  local_files_only: true
+  precision: auto
+  chat_template_kwargs:
+    enable_thinking: false
+
+evaluation:
+  split: dev
+  protocols:
+    - oracle_transition
+    - full_history_transition
+    - no_state_transition
+    - last_state_only
+    - shuffled_state
+    - distractor_state
+    - oracle_trajectory
+    - generated_rollout
+  strip_reasoning_blocks: true
+  subset_seed: 20260818
+  generation:
+    batch_size: 32
+    max_new_tokens: 224
+  backend:
+    kind: hf
+    adapter_path: runs/gpu_split/adapter

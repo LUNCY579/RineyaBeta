@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/rineya-lab/eval-report.schema.json",
+  "title": "Aggregate evaluation report",
+  "type": "object",
+  "required": ["lab_version", "experiment", "resolved_config", "config_fingerprint",
+               "backend", "eval_set", "protocols", "total_items"],
+  "properties": {
+    "backend": {
+      "type": "object",
+      "required": ["backend", "is_reference"],
+      "properties": {
+        "backend": {"enum": ["hf", "reference", "abstract"]},
+        "is_reference": {"type": "boolean"}
+      }
+    },
+    "eval_set": {
+      "type": "object",
+      "required": ["split", "problems", "problem_ids_sha256"],
+      "properties": {
+        "split": {"enum": ["train", "dev", "test"]},
+        "problems": {"type": "integer", "minimum": 0},
+        "transitions": {"type": "integer", "minimum": 0},
+        "problem_ids_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "protocols": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["protocol", "total_items", "scored_items", "strict", "lenient",
+                     "failure_distribution", "failure_groups", "extraction_routes"],
+        "properties": {
+          "total_items": {"type": "integer", "minimum": 0},
+          "scored_items": {"type": "integer", "minimum": 0},
+          "strict": {
+            "type": "object",
+            "required": ["correct", "accuracy"],
+            "properties": {
+              "correct": {"type": "integer", "minimum": 0},
+              "accuracy": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+            }
+          },
+          "lenient": {"type": "object"},
+          "track_disagreement": {"type": "object"},
+          "failure_distribution": {"type": "object", "additionalProperties": {"type": "integer"}},
+          "failure_groups": {"type": "object"},
+          "by_category": {"type": "object"},
+          "by_total_steps": {"type": "object"},
+          "by_step_index": {"type": "object"},
+          "transition_components": {"type": "object"},
+          "rollout": {"type": "object"}
+        }
+      }
+    },
+    "derived": {
+      "type": "object",
+      "properties": {
+        "free_rollout_gap": {"type": ["object", "null"]},
+        "state_sufficiency": {"type": ["object", "null"]}
+      }
+    },
+    "audit_sample": {"type": "array"},
+    "warning": {"type": "string"},
+    "total_items": {"type": "integer", "minimum": 0}
+  },
+  "additionalProperties": true
+}

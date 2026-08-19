@@ -1,0 +1,17 @@
+# Pilot condition C -- SPLIT, globally shuffled.
+# Budget is matched to FULL on supervised tokens (regime T), set by the runner.
+extends: pilot_mac_base.yaml
+
+experiment:
+  name: pilot_split
+  condition: SPLIT_STATEFUL
+  output_dir: runs/pilot_split
+  tags: [pilot, condition_C]
+
+data_view:
+  view: split_stateful
+  order: shuffled
+  max_unique_problems: 1000
+
+training:
+  loss_weighting: inverse_transitions

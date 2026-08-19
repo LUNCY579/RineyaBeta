@@ -1,0 +1,18 @@
+# The next-step-only ablation cannot roll out autonomously: it never emits a state.
+extends: eval_split_stateful.yaml
+
+experiment:
+  name: eval_split_next_step
+  condition: SPLIT_NEXT_STEP
+  output_dir: runs/eval_split_next_step
+
+data_view:
+  view: split_next_step
+
+evaluation:
+  protocols:
+    - oracle_transition
+    - full_history_transition
+    - no_state_transition
+  backend:
+    adapter_path: runs/train_split_next_step/adapter

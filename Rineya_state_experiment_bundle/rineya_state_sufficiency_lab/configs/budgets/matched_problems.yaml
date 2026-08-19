@@ -1,0 +1,14 @@
+# Regime P -- matched unique source-problem exposure.  *** CONFIRMATORY REGIME ***
+#
+# One transition per source problem per epoch, so each SPLIT epoch contains
+# exactly 43,200 records -- the same curriculum FULL sees. This is the purest
+# "same problems, different representation" contrast; it samples only part of
+# each trajectory per epoch, which is the trade it makes.
+#
+# Applies to the SPLIT arm. FULL is already one record per problem.
+data_view:
+  one_transition_per_problem: true
+
+budget:
+  mode: matched_problems
+  max_unique_problems: 43200

@@ -1,0 +1,20 @@
+# Pilot evaluation, FULL arm.
+#
+# Evaluated on the FULL DEV split, not a subset. Statistical power comes from the
+# number of paired PROBLEMS, not from training size: shrinking TRAIN costs
+# generality ("at this training scale"), shrinking EVAL costs the ability to
+# conclude anything at all. Only TRAIN is reduced in this pilot.
+extends: pilot_mac_base.yaml
+
+experiment:
+  name: pilot_eval_full
+  condition: FULL
+  output_dir: runs/pilot_eval_full
+
+evaluation:
+  limit: null
+  protocols: [full_direct]
+  generation:
+    max_new_tokens: 320
+  backend:
+    adapter_path: runs/pilot_full/adapter

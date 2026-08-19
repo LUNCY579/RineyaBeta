@@ -1,0 +1,23 @@
+# Pilot baseline: untouched Qwen3-0.6B, the zero point every adapter is reported against.
+extends: pilot_mac_base.yaml
+
+experiment:
+  name: pilot_eval_base
+  condition: BASE
+  output_dir: runs/pilot_eval_base
+
+lora:
+  enabled: false
+
+evaluation:
+  # A deterministic 800-problem subset of the same DEV pool (subset_seed is shared,
+  # so it is a subset of what the adapters are scored on). The baseline is context
+  # and a G9 reference, not a paired endpoint, and 800 gives about +-3.5 pp -- which
+  # is plenty against a 15 pp lift threshold. Evaluating the verbose untouched model
+  # on all 2,400 would cost ~19 h for no additional inferential value.
+  limit: 800
+  protocols: [full_direct, oracle_transition]
+  generation:
+    max_new_tokens: 768   # the untouched model is verbose; do not cut it off mid-derivation
+  backend:
+    adapter_path: null
