@@ -1,0 +1,17 @@
+* text=auto eol=lf
+
+# The 10 shell launchers must keep LF endings: they are executed on the CUDA
+# host, not on Windows. The .ps1 twins are Windows-only and keep CRLF.
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+Makefile text eol=lf
+
+# Line-oriented data and manifests: LF everywhere so hashes are stable.
+*.jsonl text eol=lf
+*.json  text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.py    text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.csv   text eol=lf

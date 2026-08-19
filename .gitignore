@@ -1,0 +1,67 @@
+# ---------------------------------------------------------------------------
+# Model weights -- published artifacts, fetched from source, never vendored.
+# See Rineya_state_experiment_bundle/README_BUNDLE.md ("Not included").
+# ---------------------------------------------------------------------------
+Qwen3-0.6B/
+qwen3-0.6b/
+model/
+*.safetensors
+*.gguf
+*.bin
+
+# ---------------------------------------------------------------------------
+# Regenerable dataset payloads.
+#
+# These directories are rebuilt deterministically by the generator shipped
+# alongside them and verified against the committed checksum manifests:
+#
+#   rineya_sequence_independence_dataset_v1  scripts/generate_dataset.py --seed 20260818
+#                                            -> data/manifests/sha256sums.txt
+#   ..._Corpus_v2.0                          scripts/generate_dataset.py (seed 20260816)
+#                                            -> manifests/checksums.sha256
+#   ..._Corpus_v3.0                          scripts/generate_dataset.py
+#                                            -> manifests/checksums.sha256
+#
+# Scripts, schemas, manifests, reports, cards and samples ARE tracked, so the
+# payload is reproducible from this repository alone. Corpora that ship no
+# generator (Rineya_Short_Response_Behavior_Corpus_v1.0, Aegis_RAG_v3_train_4410)
+# are committed in full and must not be added here.
+# ---------------------------------------------------------------------------
+Rineya_state_experiment_bundle/rineya_sequence_independence_dataset_v1/data/full_context/
+Rineya_state_experiment_bundle/rineya_sequence_independence_dataset_v1/data/split_transitions/
+Rineya_General_Reasoning_and_Natural_Communication_Corpus_v2.0/data/
+Rineya_General_Reasoning_and_Natural_Communication_Corpus_v3.0/data/
+
+# ---------------------------------------------------------------------------
+# Experiment outputs. Every run is reproducible from a config + seed; the
+# artifacts themselves (adapters, eval records, comparison reports) are not
+# inputs and must not be versioned.
+# ---------------------------------------------------------------------------
+runs/
+outputs/
+data/extracted/
+data/derived_views/
+
+# ---------------------------------------------------------------------------
+# Build, cache, environment
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.env
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.log
+
+# ---------------------------------------------------------------------------
+# Machine-local tooling state
+# ---------------------------------------------------------------------------
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
