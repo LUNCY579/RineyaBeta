@@ -65,3 +65,15 @@ htmlcov/
 .claude/settings.local.json
 .DS_Store
 Thumbs.db
+
+# ---------------------------------------------------------------------------
+# Compression + healing derived data. All of it is reproducible from a script,
+# a seed and a manifest, so it is not an input and must not be versioned. The
+# manifests themselves (mix_manifest.json, trim_manifest.json) ARE tracked --
+# they carry the sha256 needed to verify that a rebuild matched.
+# ---------------------------------------------------------------------------
+artifacts/heal_mixes/**/*.jsonl
+artifacts/heal_runs/**/cache/
+artifacts/heal_runs/**/checkpoints/
+artifacts/verify_resume/
+artifacts/verify_interrupt/
