@@ -11,8 +11,15 @@ from a paper. Reproduce with `scripts/measure/` and `scripts/trim/` (§9).
   logits, zero pre-heal damage (§11).
 - **Phase 0 closed.** Project `.venv` with torch 2.13.0+cu130; CUDA live (§14.1).
 - Healing harness validated on the real card; GPU resume proven bit-exact (§14.3).
-- **B0 ready:** 1,003 steps, ~3.2 h, actual peak 3,882 MiB with 1,238 MiB of
-  measured headroom, 99.6% padding efficiency (§15.5).
+- **Gate baselines measured (§16).** Against stock Qwen3-0.6B on identical cases:
+  the trim is **free on chat DEV** (paired delta +0.0002, CI spans zero) and costs
+  **exactly 9 abstentions in the RAG `conflict` category** (paired delta −0.0127,
+  CI excludes zero). 12 of 16 RAG categories are bit-identical.
+- **B0's success criterion is now pre-declared:** restore `conflict` abstention to
+  ≥93.1% while chat contract fulfilment holds at 1.0000 (§16.4).
+- **B0 needs reconfiguring first.** Its memory characterisation was wrong (§15
+  numbers came from too-short samples; the real run reached 5,090 MiB of a 5,120
+  cap and hung at step 72 with no checkpoint).
 - **Open decision:** B2/B3 at 4k context cannot be both bit-exact and fit on 8 GB.
   Four quantified options in §15.6.
 
