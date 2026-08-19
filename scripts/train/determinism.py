@@ -147,14 +147,21 @@ def code_fingerprint(module_dir: Path | None = None) -> dict:
     setup leaves every other guard satisfied while silently changing the numerics,
     so a resumed run would diverge from its own checkpoint undetected.
 
-    Byte-level hashing means a comment-only edit also trips this. That is the
+    Line endings are normalised before hashing. `.gitattributes` declares
+    `*.py text eol=lf`, so a checkout can rewrite CRLF to LF in the working copy
+    without changing a single token -- and a byte-level hash would then refuse a
+    perfectly valid resume. Newlines are the one difference that is provably inert
+    for Python semantics, so they are the one difference excluded.
+
+    Everything else still trips this, including comment-only edits. That is the
     conservative direction: a hash cannot tell a docstring from a reduction order.
     Override with `resume.allow_code_drift` when the change is known to be inert.
     """
     directory = module_dir or Path(__file__).resolve().parent
     files = {}
     for path in sorted(directory.glob("*.py")):
-        files[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+        source = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+        files[path.name] = hashlib.sha256(source.encode("utf-8")).hexdigest()
     combined = hashlib.sha256(
         "".join(f"{name}:{digest}" for name, digest in sorted(files.items())).encode()
     ).hexdigest()
