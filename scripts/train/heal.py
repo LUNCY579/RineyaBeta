@@ -176,7 +176,8 @@ def main() -> None:
         max_rows_per_microbatch=int(cfg["memory"]["max_rows_per_microbatch"]),
         micro_batches_per_step=int(cfg["train"]["grad_accum"]),
         megabatch_rows=int(cfg["data"].get("megabatch_rows", 2048)),
-        max_len=int(cfg["data"]["max_len"])) for e in range(epochs)]
+        max_len=int(cfg["data"]["max_len"]),
+        width_bucket=int(cfg["data"].get("width_bucket", 1))) for e in range(epochs)]
     total_steps = sum(len(p.steps) for p in plans)
     plan_hash = ";".join(p.hash() for p in plans)
 
@@ -191,8 +192,12 @@ def main() -> None:
               f"supervised {sup_frac:.1%} of real tokens")
         print(f"    widest micro-batch {s['widest_micro_batch']}")
 
-    widest = max((p.widest_micro_batch for p in plans),
-                 key=lambda m: m.padded_cost)
+    # Probe the heaviest *step*, by total padded cost across its micro-batches.
+    # That is what the allocator must actually hold: it reserves a block per
+    # micro-batch width, and a step touches grad_accum different widths.
+    heaviest = max((s for p in plans for s in p.steps),
+                   key=lambda s: sum(m.padded_cost for m in s.micro))
+    probe_shapes = [(len(m.indices), m.max_len) for m in heaviest.micro]
     optimizer = torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad],
         lr=float(cfg["train"]["lr"]), betas=(0.9, 0.999),
@@ -207,19 +212,35 @@ def main() -> None:
     # memory badly enough to refuse budgets that would in fact have fit.
     model.train()
 
-    def probe_step(input_ids, attention_mask, labels):
-        loss, _, _ = forward_loss(model, input_ids, attention_mask, labels,
-                                  normaliser=float(labels.numel()),
-                                  autocast_dtype=autocast_dtype,
-                                  device_type=device.type)
-        loss.backward()
+    def probe_step(batches):
+        normaliser = float(sum(r * s for r, s in probe_shapes))
+        optimizer.zero_grad(set_to_none=True)
+        for ii, am, lb in batches:
+            loss, _, _ = forward_loss(model, ii, am, lb, normaliser=normaliser,
+                                      autocast_dtype=autocast_dtype,
+                                      device_type=device.type)
+            loss.backward()
+        # The optimizer step is part of the probe on purpose: Adam's exp_avg and
+        # exp_avg_sq are created lazily on first use, so a forward/backward-only
+        # probe never accounts for them.
+        optimizer.step()
+        optimizer.zero_grad(set_to_none=True)
 
-    report = mem.probe(probe_step, rows=len(widest.indices), max_len=widest.max_len,
-                       cap_mib=cap,
-                       margin_mib=float(cfg["memory"].get("margin_mib", 512)))
-    print("\n" + report.render())
+    # The probe mutates weights and creates optimizer state, so both are undone
+    # exactly afterwards. Combined with the re-seed below, it cannot influence
+    # training -- which verify_determinism.py checks rather than assumes.
+    before = {n: p.detach().clone() for n, p in model.named_parameters()
+              if p.requires_grad}
+    report = mem.probe(probe_step, shapes=probe_shapes, cap_mib=cap,
+                       margin_mib=float(cfg["memory"].get("margin_mib", 1024)))
+    with torch.no_grad():
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                param.copy_(before[name])
+    del before
+    optimizer.state.clear()
     optimizer.zero_grad(set_to_none=True)
-    # The probe ran a real backward; re-seed so it cannot influence training.
+    print("\n" + report.render())
     determinism.seed_everything(seed)
 
     if not report.ok:

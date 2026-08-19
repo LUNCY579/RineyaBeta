@@ -20,6 +20,26 @@ packed into micro-batches, and then the micro-batch order is shuffled again. So
 padding stays low while the optimizer still sees a well-mixed sequence of batches.
 Every step is seeded, so the result is reproducible.
 
+Width bucketing: available, and measured not to be worth it
+-----------------------------------------------------------
+`width_bucket` rounds padded width up to a multiple of N, capping the number of
+distinct batch shapes at `max_len / N`. The theory was that fewer shapes means
+less allocator churn and therefore a tighter pre-flight probe.
+
+Measured on B0, and it does not pay:
+
+  bucket=1 (off)   padding 99.2%   probe 3,048   actual 3,880 MiB   2.88 h
+  bucket=64        padding 81.6%   probe 3,466   actual 3,880 MiB   3.24 h
+
+Actual peak is identical either way -- 3,880 MiB is the real working set, not a
+function of shape diversity. Bucketing only narrowed the probe's under-estimate
+(27% -> 12%) while costing 22% more padded positions and 12% wall clock. Kept as
+an option, defaulted off.
+
+The operational conclusion is that the probe is a fast *lower bound*, not a
+predictor. Validate a new config with a short real run and read peak_reserved_mib
+from train_log.jsonl; that takes two minutes and is authoritative.
+
 Loss normalisation
 ------------------
 Each step records `supervised_tokens`, the exact number of positions that
@@ -138,6 +158,7 @@ def build_plan(
     micro_batches_per_step: int,
     megabatch_rows: int,
     max_len: int,
+    width_bucket: int = 1,
     drop_overlong: bool = True,
 ) -> Plan:
     if len(total_lengths) != len(supervised_lengths):
@@ -149,6 +170,7 @@ def build_plan(
         "micro_batches_per_step": micro_batches_per_step,
         "megabatch_rows": megabatch_rows,
         "max_len": max_len,
+        "width_bucket": width_bucket,
         "drop_overlong": drop_overlong,
         "n_rows_input": len(total_lengths),
     }
@@ -168,6 +190,11 @@ def build_plan(
     order = list(eligible)
     rng.shuffle(order)
 
+    def bucketed(width: int) -> int:
+        if width_bucket <= 1:
+            return width
+        return min(max_len, -(-width // width_bucket) * width_bucket)
+
     micro: list[MicroBatch] = []
     for start in range(0, len(order), megabatch_rows):
         mega = order[start:start + megabatch_rows]
@@ -177,14 +204,14 @@ def build_plan(
         current_max = 0
         for idx in mega:
             row_len = min(total_lengths[idx], max_len)
-            new_max = max(current_max, row_len)
+            new_max = bucketed(max(current_max, row_len))
             fits = ((len(current) + 1) * new_max <= max_tokens_per_microbatch
                     and len(current) < max_rows_per_microbatch)
             if current and not fits:
                 micro.append(_seal(current, current_max, supervised_lengths, max_len,
                                    total_lengths))
                 current, current_max = [], 0
-                new_max = row_len
+                new_max = bucketed(row_len)
             current.append(idx)
             current_max = new_max
         if current:
