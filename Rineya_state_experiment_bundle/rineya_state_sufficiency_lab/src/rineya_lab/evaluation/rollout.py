@@ -96,9 +96,23 @@ class RolloutResult:
 def max_steps_for(trajectory: Trajectory, cfg: RolloutConfig) -> int:
     """Step budget for one rollout.
 
-    Under controlled testing the dataset's own trajectory length plus a small
-    margin is used; the absolute cap always applies so a pathological model
-    cannot consume unbounded compute.
+    Defaults to the constant ``max_steps_absolute``, deliberately.
+
+    ``use_dataset_step_bound`` derives the budget from ``trajectory.length``,
+    which is *gold* information. Enabling it gives the SPLIT arm a per-problem
+    hint the FULL arm never receives -- 5 steps on a 2-step problem, 12 on a
+    9-step one -- so it tells the model roughly how long the problem is and
+    makes a premature ``done`` likelier to be right. ``full_direct`` gets one
+    fixed-length call and no such hint. It was the default, and it is not
+    defensible on the primary endpoint.
+
+    The constant is generous: 16 against a dataset whose longest trajectory is
+    9 steps, so nothing correct is truncated and every problem is judged under
+    the same budget. Set ``use_dataset_step_bound: true`` only as a declared
+    secondary analysis, and report it as such.
+
+    ``oracle_trajectory`` is unaffected -- there the step count *is* the gold
+    trajectory by construction, which is what teacher forcing means.
     """
     if cfg.use_dataset_step_bound and trajectory is not None:
         return max(2, min(cfg.max_steps_absolute, trajectory.length + cfg.max_steps_margin))

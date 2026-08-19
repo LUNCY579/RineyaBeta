@@ -93,9 +93,16 @@ evaluation:
     temperature: 0.0
     batch_size: 8
   rollout:
+    # A constant budget for every problem. 16 against a dataset whose longest
+    # trajectory is 9 steps, so nothing correct is truncated.
     max_steps_absolute: 16
     max_steps_margin: 3
-    use_dataset_step_bound: true
+    # Deliberately false. When true the budget becomes trajectory.length +
+    # max_steps_margin -- gold information the FULL arm never receives, which
+    # tells SPLIT roughly how long the problem is. Flip it on only as a
+    # declared secondary analysis. oracle_trajectory is unaffected: there the
+    # gold step count is the protocol.
+    use_dataset_step_bound: false
     stagnation_patience: 2
     loop_detection: true
     stop_on_invalid: false

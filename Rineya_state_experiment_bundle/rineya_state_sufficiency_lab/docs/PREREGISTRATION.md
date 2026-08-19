@@ -78,6 +78,11 @@ checkpoint selection rule  : best_dev_loss  (lowest DEV target NLL, eval_steps 1
                              512-record DEV probe, identical rule in both arms)
 decoding parameters        : greedy (do_sample false), max_new_tokens 320 (answers)
                              / 224 (transitions), all declared stop ids passed
+rollout step budget        : constant 16 for every problem
+                             (use_dataset_step_bound false). NOT trajectory.length
+                             + margin -- that is gold information full_direct never
+                             receives. If you report the dataset-bounded variant,
+                             declare it here as a secondary analysis: ______
 seed list                  : ______  (>= 3 seeds required; fill before the run)
 ```
 

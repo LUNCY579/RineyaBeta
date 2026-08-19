@@ -74,7 +74,9 @@ Provide the fields in `docs/DATASET_ASSUMPTIONS.md`, or implement a loader with
 downstream depends only on that surface.
 
 If your trajectories are longer than this dataset's, raise
-`evaluation.rollout.max_steps_absolute`; the per-trajectory bound adapts on its own.
+`evaluation.rollout.max_steps_absolute`. Keep it a constant: leave
+`use_dataset_step_bound` false, or the budget becomes a function of the gold
+trajectory length and leaks it to the SPLIT arm.
 
 ## Add a longer-chain extrapolation study
 

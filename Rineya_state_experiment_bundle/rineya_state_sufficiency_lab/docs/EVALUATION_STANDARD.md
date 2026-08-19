@@ -53,8 +53,18 @@ Prompts that are knowingly out-of-distribution for an arm carry
 
 ## 6. Rollouts are bounded and diagnosed
 
-Under controlled testing the step budget is the trajectory's own length plus a
-small margin, always capped by `max_steps_absolute`. Four control failures are
+The step budget is the constant `max_steps_absolute` (16, against a dataset
+whose longest trajectory is 9 steps), identical for every problem.
+
+It is deliberately *not* derived from the trajectory's own length. Doing so --
+`use_dataset_step_bound: true`, which was the shipped default -- hands the SPLIT
+arm gold information the FULL arm never receives: how long the problem is, and
+therefore when a `done` is plausible. `full_direct` gets one fixed-length call.
+The option remains available for a declared secondary analysis and must be
+reported as such. `oracle_trajectory` is unaffected: there the gold step count
+is the protocol.
+
+Four control failures are
 detected and distinguished: `loop`, `stagnation`, `premature_completion`,
 `nontermination`. First-error depth is recorded by comparing each emitted state
 against the canonical state at that depth.

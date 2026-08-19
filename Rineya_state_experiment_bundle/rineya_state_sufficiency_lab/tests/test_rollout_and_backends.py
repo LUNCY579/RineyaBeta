@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 
 from rineya_lab.config import BackendConfig, RolloutConfig, ScoringConfig
@@ -61,10 +63,27 @@ def test_wrong_mode_diverges_at_the_first_step(trajectory):
     assert result.first_error_depth == 1
 
 
-def test_step_budget_respects_dataset_bound_and_absolute_cap(trajectory):
-    cfg = RolloutConfig(max_steps_absolute=100, max_steps_margin=3)
+def test_step_budget_defaults_to_a_constant_and_leaks_no_gold_length(trajectory):
+    """The default budget must not depend on the gold trajectory length.
+
+    Deriving it from trajectory.length gives SPLIT a per-problem hint that
+    full_direct never receives -- how long the problem is, and therefore when a
+    `done` is plausible. This was the shipped default; it is now opt-in.
+    """
+    default = RolloutConfig(max_steps_absolute=100)
+    assert default.use_dataset_step_bound is False
+    assert max_steps_for(trajectory, default) == 100
+
+    # Two trajectories of different gold length must draw the same budget.
+    shorter = replace(trajectory, transitions=trajectory.transitions[:2])
+    assert shorter.length != trajectory.length
+    assert max_steps_for(shorter, default) == max_steps_for(trajectory, default)
+
+
+def test_dataset_step_bound_is_available_as_a_declared_secondary(trajectory):
+    cfg = RolloutConfig(max_steps_absolute=100, max_steps_margin=3, use_dataset_step_bound=True)
     assert max_steps_for(trajectory, cfg) == trajectory.length + 3
-    capped = RolloutConfig(max_steps_absolute=3, max_steps_margin=10)
+    capped = RolloutConfig(max_steps_absolute=3, max_steps_margin=10, use_dataset_step_bound=True)
     assert max_steps_for(trajectory, capped) == 3
     unbounded = RolloutConfig(max_steps_absolute=9, use_dataset_step_bound=False)
     assert max_steps_for(trajectory, unbounded) == 9

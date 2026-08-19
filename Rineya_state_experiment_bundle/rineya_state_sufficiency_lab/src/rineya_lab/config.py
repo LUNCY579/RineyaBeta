@@ -237,7 +237,11 @@ class RolloutConfig:
 
     max_steps_absolute: int = 16
     max_steps_margin: int = 3
-    use_dataset_step_bound: bool = True
+    # Off by default: deriving the step budget from the gold trajectory length
+    # hands the SPLIT arm a per-problem hint that full_direct never gets. See
+    # rineya_lab.evaluation.rollout.max_steps_for. Enable only as a declared
+    # secondary analysis.
+    use_dataset_step_bound: bool = False
     stagnation_patience: int = 2
     loop_detection: bool = True
     stop_on_invalid: bool = False
