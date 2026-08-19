@@ -192,12 +192,24 @@ def main() -> None:
               f"supervised {sup_frac:.1%} of real tokens")
         print(f"    widest micro-batch {s['widest_micro_batch']}")
 
-    # Probe the heaviest *step*, by total padded cost across its micro-batches.
-    # That is what the allocator must actually hold: it reserves a block per
-    # micro-batch width, and a step touches grad_accum different widths.
-    heaviest = max((s for p in plans for s in p.steps),
-                   key=lambda s: sum(m.padded_cost for m in s.micro))
-    probe_shapes = [(len(m.indices), m.max_len) for m in heaviest.micro]
+    # Probe a synthetic worst-case step rather than any real one, so the result is
+    # an upper bound instead of a sample. Peak memory has two drivers: the widest
+    # single micro-batch (activation peak) and the number of distinct widths the
+    # allocator has to keep blocks for. No real step maximises both -- the heaviest
+    # step by total cost need not contain the widest micro-batch anywhere in the
+    # plan. So the probe step is the `grad_accum` most expensive *distinct* shapes
+    # found across every epoch, which bounds both drivers at once.
+    by_shape: dict[tuple[int, int], int] = {}
+    for p in plans:
+        for step in p.steps:
+            for m in step.micro:
+                by_shape[(len(m.indices), m.max_len)] = m.padded_cost
+    accum = int(cfg["train"]["grad_accum"])
+    probe_shapes = sorted(by_shape, key=lambda k: -by_shape[k])[:accum]
+    # Pad out with the widest shape if the plan has fewer distinct shapes than a
+    # step has micro-batches, so the probe still represents a full step.
+    while len(probe_shapes) < accum:
+        probe_shapes.append(probe_shapes[0])
     optimizer = torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad],
         lr=float(cfg["train"]["lr"]), betas=(0.9, 0.999),
@@ -214,16 +226,22 @@ def main() -> None:
 
     def probe_step(batches):
         normaliser = float(sum(r * s for r, s in probe_shapes))
-        optimizer.zero_grad(set_to_none=True)
-        for ii, am, lb in batches:
-            loss, _, _ = forward_loss(model, ii, am, lb, normaliser=normaliser,
-                                      autocast_dtype=autocast_dtype,
-                                      device_type=device.type)
-            loss.backward()
-        # The optimizer step is part of the probe on purpose: Adam's exp_avg and
-        # exp_avg_sq are created lazily on first use, so a forward/backward-only
-        # probe never accounts for them.
-        optimizer.step()
+        # Twice, deliberately, with no cache flush between. A cold allocator
+        # under-reports steady state badly -- it has no cached blocks yet, so a
+        # single pass measured 2,748 MiB where real training settles at 3,882.
+        # The second pass runs against the first pass's cached blocks, which is
+        # the regime training actually lives in.
+        for _ in range(2):
+            optimizer.zero_grad(set_to_none=True)
+            for ii, am, lb in batches:
+                loss, _, _ = forward_loss(model, ii, am, lb, normaliser=normaliser,
+                                          autocast_dtype=autocast_dtype,
+                                          device_type=device.type)
+                loss.backward()
+            # The optimizer step is part of the probe on purpose: Adam's exp_avg
+            # and exp_avg_sq are created lazily on first use, so a
+            # forward/backward-only probe never accounts for them.
+            optimizer.step()
         optimizer.zero_grad(set_to_none=True)
 
     # The probe mutates weights and creates optimizer state, so both are undone

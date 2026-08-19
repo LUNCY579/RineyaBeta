@@ -48,5 +48,14 @@ if ($MaxSteps -gt 0) { $argv += @("--max-steps", $MaxSteps) }
 if ($Out -ne "")     { $argv += @("--out", $Out) }
 if ($DryRun)         { $argv += "--dry-run" }
 
-& python @argv
+# Prefer the project venv: the ambient `python` may be a CPU-only torch build,
+# which would silently train on the CPU for hours instead of failing.
+$py = "python"
+$venv = Join-Path $repo ".venv\Scripts\python.exe"
+if (Test-Path $venv) { $py = $venv }
+Write-Host "python : $py"
+& $py -c "import torch,sys; assert torch.cuda.is_available(), 'CUDA unavailable in '+sys.executable"
+if ($LASTEXITCODE -ne 0) { Write-Host "refusing to launch: no CUDA in $py"; exit 1 }
+
+& $py @argv
 exit $LASTEXITCODE

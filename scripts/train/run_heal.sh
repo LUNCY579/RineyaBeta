@@ -25,4 +25,13 @@ if command -v nvidia-smi >/dev/null 2>&1; then
   echo "vram   : $(nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader)"
 fi
 
-exec python "${REPO}/scripts/train/heal.py" --config "${REPO}/${CONFIG}" "$@"
+# Prefer the project venv: the ambient `python` may be a CPU-only torch build,
+# which would silently train on the CPU for hours instead of failing.
+PY="python"
+if [ -x "${REPO}/.venv/Scripts/python.exe" ]; then PY="${REPO}/.venv/Scripts/python.exe"
+elif [ -x "${REPO}/.venv/bin/python" ];      then PY="${REPO}/.venv/bin/python"; fi
+echo "python : ${PY}"
+"${PY}" -c "import torch; assert torch.cuda.is_available(), 'CUDA unavailable in '+__import__('sys').executable" || {
+  echo "refusing to launch: no CUDA in ${PY}"; exit 1; }
+
+exec "${PY}" "${REPO}/scripts/train/heal.py" --config "${REPO}/${CONFIG}" "$@"
