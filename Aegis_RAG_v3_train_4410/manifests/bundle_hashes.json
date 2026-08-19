@@ -1,0 +1,45 @@
+{
+  "bundle": "Aegis_RAG_v3_train_4410",
+  "used_by": "rineya.core.aegis.v1.1.0-devfreeze.19L.454M.dual-sft-v1-lr5e4",
+  "aegis_mix_seed": 20260816,
+  "rag_rows": 4410,
+  "source_ids_match_sft": true,
+  "files": {
+    "evidence/knowledge.jsonl": {
+      "bytes": 3425317,
+      "sha256": "73e20ca1528dbc610c8699cc45042b6c47064648ad383aef0812b072a60f2fdd"
+    },
+    "evidence/procedures.jsonl": {
+      "bytes": 90415,
+      "sha256": "98bc811fa6c01a963de4fd27f56e94044101cd3446ab24a980ed4a89e9e81f53"
+    },
+    "evidence/rag_v3.sqlite3": {
+      "bytes": 3756032,
+      "sha256": "d8f0de4ad16c6573679af089930232a01ad05c7a6660dfe7caa60bf869da8778"
+    },
+    "manifests/aegis_mix_manifest.json": {
+      "bytes": 938,
+      "sha256": "a285926a1950c32d96c5d013b1277047c7c6e893117fc1a1a6bfbaa33b2036d8"
+    },
+    "manifests/dataset_manifest.json": {
+      "bytes": 1305,
+      "sha256": "299e0b3d6e3c21d07b2bdbb39df8851ec9c74230060d1451c213546f566ecb41"
+    },
+    "manifests/rag_v3.sqlite3.manifest.json": {
+      "bytes": 569,
+      "sha256": "970c80e9a7d72b31a24af39859817a5d1ec9feb600611945bb1da28a2e65c05f"
+    },
+    "manifests/source_file_hashes.json": {
+      "bytes": 2161,
+      "sha256": "2435620b230a1a08f6ab01b3163caae119408ea83f2bbf1bb4a0aa63d99a4da7"
+    },
+    "rag_v3_train.sft.jsonl": {
+      "bytes": 13584879,
+      "sha256": "ed615a6d67fe4148af0baa5e6120cb6ea03089687daf31feb4cecd7ab847f0f7"
+    },
+    "source/train.reviewed.jsonl": {
+      "bytes": 13928309,
+      "sha256": "b606173cc6dff8358981b23e3cd59dd494dc31ff6cb7c6797519a91c9e3fddb1"
+    }
+  }
+}

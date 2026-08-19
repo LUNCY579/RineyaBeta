@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "database": "artifacts\\teacher_dual_sft_v1\\rag_v3.sqlite3",
+  "database_bytes": 3756032,
+  "record_count": 6200,
+  "knowledge": [
+    {
+      "path": "data\\phase_9_student_distillation\\rag_reasoning_v3_large\\knowledge.jsonl",
+      "sha256": "73e20ca1528dbc610c8699cc45042b6c47064648ad383aef0812b072a60f2fdd"
+    }
+  ],
+  "procedures": [
+    {
+      "path": "data\\phase_9_student_distillation\\rag_reasoning_v3_large\\procedures.jsonl",
+      "sha256": "98bc811fa6c01a963de4fd27f56e94044101cd3446ab24a980ed4a89e9e81f53"
+    }
+  ]
+}

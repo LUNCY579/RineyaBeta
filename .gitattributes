@@ -15,3 +15,9 @@ Makefile text eol=lf
 *.md    text eol=lf
 *.txt   text eol=lf
 *.csv   text eol=lf
+
+# Binary payloads: never eol-convert. The sqlite retrieval DB in
+# Aegis_RAG_v3_train_4410 would be corrupted by normalisation.
+*.sqlite3 binary
+*.sqlite   binary
+*.db       binary

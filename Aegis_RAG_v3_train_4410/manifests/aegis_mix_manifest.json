@@ -1,0 +1,13 @@
+{
+  "seed": 20260816,
+  "rineya_combined": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\Rineya_Short_Response_Behavior_Corpus_v1.0\\data\\sft\\rineya_short_response_combined_train.jsonl",
+  "rineya_rows": 12000,
+  "rag_source": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\data\\phase_9_student_distillation\\rag_reasoning_v3_large\\reviewed_splits\\train.reviewed.jsonl",
+  "rag_converted": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\teacher_dual_sft_v1\\rag_v3_train.sft.jsonl",
+  "rag_rows": 4410,
+  "mix": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\teacher_dual_sft_v1\\mix.jsonl",
+  "mix_rows": 16410,
+  "chat_fraction": 0.7313,
+  "evidence_fraction": 0.2687,
+  "note": "RAG rows had assistant targets appended from approved_answer; official reviewed split was not modified."
+}
