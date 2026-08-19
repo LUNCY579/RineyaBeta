@@ -1079,3 +1079,122 @@ The conflict in §14.4 stands, with numbers attached:
 
 Still yours to resolve: it trades the byte-identical guarantee against the
 long-context capability B2 exists to add. B0 and B1 are unaffected either way.
+
+---
+
+## 16. Gate baselines: what the vocabulary trim actually cost (2026-08-19)
+
+First real gate measurement of R2, against stock Qwen3-0.6B on identical cases
+with the identical vendored v4.5 scorer. `scripts/eval/run_gates.py`.
+
+### 16.1 chat DEV — the trim is free
+
+510 paired cases:
+
+| Metric | stock 596M | **R2 474M** | Delta |
+|---|---:|---:|---:|
+| mean_quality_score | 0.8334 | **0.8336** | +0.0002 |
+| quality_pass_rate | 0.9941 | 0.9961 | +0.0020 |
+| intelligibility_pass_rate | 1.0000 | 1.0000 | 0.0000 |
+| contract_fulfillment | 1.0000 | 1.0000 | 0.0000 |
+| worst_decile quality | 0.6987 | 0.7045 | +0.0058 |
+
+```
+paired mean delta  +0.00019    95% CI [-0.00806, +0.00844]    t = +0.045
+identical 417/510    R2 better 45    stock better 48
+byte-identical replies 308/510 (60.4%)    visible tokens +3.31%
+```
+
+Indistinguishable from zero, effect bounded inside ±0.008. Win/loss 45–48 is
+symmetric noise. **C7 passes outright on both**: zero critical defects, zero
+contract violations, 100% intelligibility — the `imony`-loop pathology that
+retired the 19L soup does not appear.
+
+### 16.2 RAG DEV — the trim costs exactly one thing
+
+752 paired cases. Here the trim **is** detectable, and significantly so:
+
+```
+paired mean delta  -0.01273    95% CI [-0.01955, -0.00592]    t = -3.660
+identical 738/752    R2 better 0    stock better 14
+byte-identical replies 729/752 (96.9%)
+```
+
+Zero cases improved and 14 regressed. That asymmetry is what distinguishes this
+from the chat result: it is a small, one-directional, real degradation.
+
+**And the per-category view shows it is a single failure mode, not a broad decay.**
+Twelve of sixteen categories are bit-identical:
+
+| Category | n | stock | R2 | Delta | Regressed |
+|---|---:|---:|---:|---:|---:|
+| **conflict** | 38 | 0.5847 | **0.3948** | **−0.1898** | **9** |
+| stale_evidence | 38 | 0.5135 | 0.4875 | −0.0260 | 2 |
+| procedure_with_distractor | 25 | 0.3843 | 0.3600 | −0.0243 | 1 |
+| prompt_injection | 38 | 0.6434 | 0.6304 | −0.0130 | 1 |
+| qualified_answer | 38 | 0.2737 | 0.2665 | −0.0072 | 1 |
+| *the other 11 categories* | 615 | — | — | **0.0000** | **0** |
+
+The `conflict` category alone accounts for essentially all of the aggregate loss.
+
+### 16.3 The mechanism: lost abstentions
+
+| | Stock | R2 |
+|---|---:|---:|
+| Correct abstentions (gold = "I don't know…"), 202 cases | 188 (93.1%) | 179 (88.6%) |
+
+**R2 lost exactly 9 abstentions, and they are exactly the 9 `conflict`
+regressions.** In each one, stock answers `"I don't know based on the available
+information."` and R2 instead begins `"Based on the available information, the
+first launch region for X is…"` and runs to the 32-token cap. Same prefix words,
+opposite decision — a token-level nudge flipped the abstain/answer choice.
+
+Two smaller mechanisms appear in the remaining 5 regressions:
+
+- **Entity corruption from re-tokenization.** `BirchInstrument` → `BIRCHINSTRUMENT`.
+  The mixed-case token was trimmed, so the model rebuilt the name from pieces and
+  lost the casing.
+- **Token inflation tripping the brevity contract on identical text.** 10 of the
+  729 byte-identical replies cost more tokens under the 32k tokenizer, and two of
+  them scored lower for that reason alone despite being the same answer.
+
+> **§12.6 predicted this, and named the category.** "Compression breaks
+> *calibration* before it breaks accuracy: a pruned model becomes confidently
+> wrong rather than obviously broken… Aggregate quality can hold while `conflict`,
+> `stale_evidence`, `prompt_injection` and `missing_answer` collapse into confident
+> answers. Gate on the categories, not the mean." Three of the four named
+> categories regressed; `conflict` dominates. The aggregate −0.0127 would have read
+> as diffuse noise. Only the per-category gate localised it.
+
+### 16.4 What this changes
+
+The trim is **free on conversation and free on 11 of 16 grounding categories**, and
+costs **9 abstentions in `conflict`** — about 1.3 quality points in aggregate for
+−20.47% parameters and −14.72% compute.
+
+Crucially, this is the failure mode the healing data is built to fix: the RAG
+corpus carries **1,600 abstain decisions across 300 `conflict` rows**, and the
+prior teacher's dual SFT moved RAG by **+0.313** with abstention rising from 87.6%
+to 99.5% intelligibility. So B0 gets a concrete, pre-declared success criterion
+rather than a vague one:
+
+> **Gate C6 for B0: restore `conflict`-category abstention to ≥ 93.1%** (stock's
+> rate) while chat DEV `contract_fulfillment` stays at 1.0000. Declared before B0
+> is trained.
+
+Secondary target, also now quantified: RAG `contract_violation_case_rate` is
+**19.7%** on R2-base against **0.0%** on chat DEV. That gap is the grounding work
+B0 exists to do.
+
+### 16.5 Cross-architecture note, not a claim
+
+Both R2 and stock land at ~0.833 on chat DEV, matching the prior
+`phase_4_model_soups` teacher's *post-SFT* score (0.8332) with no adapter at all,
+and both beat its baseline (0.7984). On RAG both (~0.67–0.68) sit just under that
+teacher's post-SFT 0.6932 and far above its 0.3801 baseline. Interesting, but a
+different checkpoint — recorded as context, not as a result.
+
+Also unresolved: upstream's RAG summary reports `case_count 1504` against a
+752-row set, exactly 2×. Until that is understood their RAG anchor is a per-case
+mean reference, not a row-for-row equivalent. The stock-vs-R2 pairing above is
+unaffected — same 752 rows, same protocol, both sides.

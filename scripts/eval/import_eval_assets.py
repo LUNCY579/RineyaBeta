@@ -51,6 +51,11 @@ SCORER_FILES = (
      "scripts/common/quality_evaluation.py"),
     ("short-response-model-phase-0-1-2/scripts/common/observable_quality.py",
      "scripts/common/observable_quality.py"),
+    # Supplies finalize_response / build_stopping_criteria / infer_stop_reason.
+    # For mode "eos_only" these reduce to "no extra criteria, no trimming", but the
+    # real functions are used rather than that shortcut reimplemented.
+    ("short-response-model-phase-0-1-2/scripts/common/response_control.py",
+     "scripts/common/response_control.py"),
     ("short-response-model-phase-0-1-2/configs/quality_evaluation.json",
      "configs/quality_evaluation.json"),
     ("short-response-model-phase-0-1-2/configs/quality_issue_taxonomy_v4_5.json",
@@ -100,11 +105,17 @@ SCORER_INVOCATION = {
 }
 
 # Prior scores on the same 510 chat DEV cases, kept as historical reference points.
+# Both gates were scored with the same v4.5 evaluator, so chat and RAG anchors are
+# directly comparable to what R2 will produce.
 ANCHORS = (
-    ("teacher_dual_sft_v1_baseline",
+    ("chat_dev__teacher_baseline",
      "short-response-model-phase-0-1-2/artifacts/teacher_dual_sft_v1/baseline_chat_dev/summary.json"),
-    ("teacher_dual_sft_v1_post_sft",
+    ("chat_dev__teacher_post_sft",
      "short-response-model-phase-0-1-2/artifacts/teacher_dual_sft_v1/post_sft_chat_dev/summary.json"),
+    ("rag_dev__teacher_baseline",
+     "short-response-model-phase-0-1-2/artifacts/teacher_dual_sft_v1/baseline_rag_dev/summary.json"),
+    ("rag_dev__teacher_post_sft",
+     "short-response-model-phase-0-1-2/artifacts/teacher_dual_sft_v1/post_sft_rag_dev/summary.json"),
 )
 
 
@@ -202,8 +213,8 @@ def main() -> None:
             continue
         payload = json.loads(src.read_text(encoding="utf-8"))
         manifest["anchors"][name] = {"upstream": rel, "summary": payload}
-        keys = [k for k in ("quality_score_mean", "mean_quality_score", "quality_pass_rate",
-                            "cases", "count") if k in payload]
+        keys = [k for k in ("mean_quality_score", "quality_pass_rate",
+                            "intelligibility_pass_rate", "case_count") if k in payload]
         print(f"  {name:34s} " + "  ".join(f"{k}={payload[k]}" for k in keys[:3]))
 
     out = ROOT / "manifests" / "eval_assets.json"
