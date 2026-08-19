@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import pytest
 
@@ -25,12 +25,45 @@ def make_cfg(dataset_root, *, condition, view, order, **overrides):
     return load_config(None, extra=data)
 
 
-def test_shuffled_order_has_no_adjacent_same_problem(dataset, dataset_root):
+def test_shuffled_order_scatters_same_problem_rows(dataset, dataset_root):
+    """Condition C must destroy chronology -- but not by being a constrained shuffle.
+
+    This previously asserted both counts were exactly 0, which held on this
+    fixture and failed on the real TRAIN epoch (5 and 1 observed against 3.32
+    and 0.75 expected). Zero is not the invariant; staying at the
+    uniform-shuffle scale is.
+    """
     cfg = make_cfg(dataset_root, condition="SPLIT_STATEFUL", view="split_stateful", order="shuffled")
     plan = build_view_plan(dataset, cfg)
     diagnostics = order_diagnostics(plan)["epoch_0"]
-    assert diagnostics["adjacent_same_problem"] == 0
-    assert diagnostics["adjacent_consecutive_steps"] == 0
+    ref = diagnostics["uniform_shuffle_reference"]
+    assert diagnostics["adjacent_same_problem"] <= ref["adjacent_same_problem_upper"]
+    assert diagnostics["adjacent_consecutive_steps"] <= ref["adjacent_consecutive_steps_upper"]
+    # And the rows really are spread out, not merely un-adjacent.
+    assert diagnostics["mean_gap_between_same_problem_rows"] > 1.0
+
+
+def test_uniform_shuffle_reference_matches_the_closed_form(dataset, dataset_root):
+    """The gate ceiling is only meaningful if the expectation is computed right."""
+    cfg = make_cfg(dataset_root, condition="SPLIT_STATEFUL", view="split_stateful", order="shuffled")
+    plan = build_view_plan(dataset, cfg)
+    rows = plan.epochs[0].rows
+    sizes = Counter(row.problem_id for row in rows)
+    n = len(rows)
+    ref = order_diagnostics(plan)["epoch_0"]["uniform_shuffle_reference"]
+    assert ref["adjacent_same_problem_expected"] == pytest.approx(
+        sum(k * (k - 1) for k in sizes.values()) / n
+    )
+    assert ref["adjacent_consecutive_steps_expected"] == pytest.approx(
+        sum(k - 1 for k in sizes.values()) / n
+    )
+    assert ref["consecutive_pairs_available"] == sum(k - 1 for k in sizes.values())
+    # A trajectory-ordered plan must blow straight through the shuffle ceiling.
+    ordered_cfg = make_cfg(
+        dataset_root, condition="SPLIT_STATEFUL", view="split_stateful", order="trajectory"
+    )
+    ordered = order_diagnostics(build_view_plan(dataset, ordered_cfg))["epoch_0"]
+    assert ordered["adjacent_consecutive_steps"] > ref["adjacent_consecutive_steps_upper"]
 
 
 def test_trajectory_order_keeps_steps_contiguous_and_ascending(dataset, dataset_root):

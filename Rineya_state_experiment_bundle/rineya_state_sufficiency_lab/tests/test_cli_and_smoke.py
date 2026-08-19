@@ -57,7 +57,11 @@ def test_plan_subcommand(dataset_root, tmp_path, capsys):
     assert code == 0
     payload = json.loads((tmp_path / "plan.json").read_text())
     assert payload["plan"]["view"] == "split_stateful"
-    assert payload["order_diagnostics"]["epoch_0"]["adjacent_same_problem"] == 0
+    diagnostics = payload["order_diagnostics"]["epoch_0"]
+    ref = diagnostics["uniform_shuffle_reference"]
+    # Ceiling, not equality -- see test_views.test_shuffled_order_scatters_same_problem_rows.
+    assert diagnostics["adjacent_same_problem"] <= ref["adjacent_same_problem_upper"]
+    assert diagnostics["adjacent_consecutive_steps"] <= ref["adjacent_consecutive_steps_upper"]
 
 
 def test_validate_data_subcommand(dataset_root, tmp_path):

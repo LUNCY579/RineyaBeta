@@ -36,10 +36,19 @@ entering step *t* may state an answer only derived later).
 rineya-lab plan -c configs/train_split_stateful.yaml
 ```
 
-Confirm in `order_diagnostics`:
+Confirm in `order_diagnostics`, against `uniform_shuffle_reference` in the same
+block rather than against zero:
 
-- shuffled → `adjacent_same_problem == 0`
-- trajectory → `adjacent_consecutive_steps > 0`
+- shuffled → `adjacent_same_problem ≤ adjacent_same_problem_upper` **and**
+  `adjacent_consecutive_steps ≤ adjacent_consecutive_steps_upper`
+- trajectory → `adjacent_consecutive_steps ≥ 0.99 × consecutive_pairs_available`
+
+Zero is the wrong expectation for a shuffled epoch. A uniform permutation of
+`n` rows over problems with `k_p` transitions each still leaves
+`Σ k_p(k_p−1)/n` same-problem pairs and `Σ (k_p−1)/n` consecutive-step pairs
+side by side — **3.32** and **0.75** on the real TRAIN epoch, where the measured
+counts are 5 and 1. A shuffle that silently never happened produces 127,741
+consecutive pairs, so the ceiling has four orders of magnitude of headroom.
 
 Then tokenize without building a model:
 

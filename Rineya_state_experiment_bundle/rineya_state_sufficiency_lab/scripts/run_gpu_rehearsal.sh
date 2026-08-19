@@ -31,7 +31,20 @@ $LAB plan -c configs/gpu_train_split_stateful.yaml -o runs/rehearsal_plan.json
 python - <<'PY'
 import json
 assert json.load(open("runs/rehearsal_validation.json"))["status"] == "PASS"
-assert json.load(open("runs/rehearsal_plan.json"))["order_diagnostics"]["epoch_0"]["adjacent_same_problem"] == 0
+# Gate against the uniform-shuffle ceiling, not against zero: a correct global
+# shuffle produces sum_p k_p(k_p-1)/n adjacent same-problem pairs (3.32 on the
+# real TRAIN epoch, measured 5), so == 0 fails on a working shuffle. See
+# order_diagnostics() in rineya_lab/data/views.py.
+shuffled = json.load(open("runs/rehearsal_plan.json"))["order_diagnostics"]["epoch_0"]
+ref = shuffled["uniform_shuffle_reference"]
+assert shuffled["adjacent_same_problem"] <= ref["adjacent_same_problem_upper"], (
+    f"condition C is not globally shuffled: {shuffled['adjacent_same_problem']} adjacent same-problem "
+    f"pairs vs ceiling {ref['adjacent_same_problem_upper']:.1f}"
+)
+assert shuffled["adjacent_consecutive_steps"] <= ref["adjacent_consecutive_steps_upper"], (
+    f"chronology survived the shuffle: {shuffled['adjacent_consecutive_steps']} adjacent consecutive "
+    f"pairs vs ceiling {ref['adjacent_consecutive_steps_upper']:.1f}"
+)
 print("gates OK")
 PY
 

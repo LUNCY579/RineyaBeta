@@ -238,10 +238,22 @@ def run_smoke(
 
 
 def _order_ablation_is_real(plans: dict[str, Any]) -> bool:
-    """Condition B must keep steps adjacent; condition C must not."""
-    ordered = plans["B_ordered_transitions"]["order"]["epoch_0"]["adjacent_consecutive_steps"]
-    unordered = plans["C_unordered_transitions"]["order"]["epoch_0"]["adjacent_same_problem"]
-    return ordered > 0 and unordered == 0
+    """Condition B must keep steps adjacent; condition C must not.
+
+    Condition C is checked against the uniform-shuffle ceiling rather than
+    against zero. A correct global shuffle still places some same-problem rows
+    side by side -- sum_p k_p(k_p-1)/n of them in expectation -- so an equality
+    test would report a working shuffle as broken.
+    """
+    ordered_epoch = plans["B_ordered_transitions"]["order"]["epoch_0"]
+    unordered_epoch = plans["C_unordered_transitions"]["order"]["epoch_0"]
+    available = ordered_epoch["uniform_shuffle_reference"]["consecutive_pairs_available"]
+    ceiling = unordered_epoch["uniform_shuffle_reference"]["adjacent_same_problem_upper"]
+    return (
+        available > 0
+        and ordered_epoch["adjacent_consecutive_steps"] >= 0.99 * available
+        and unordered_epoch["adjacent_same_problem"] <= ceiling
+    )
 
 
 def _tiny_training(dataset, dataset_root: str | None, output_dir: Path) -> tuple[bool, Any]:

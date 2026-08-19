@@ -15,6 +15,7 @@ what makes the B-versus-C order ablation a clean single-variable contrast.
 
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from collections.abc import Iterator
 from dataclasses import dataclass, field
@@ -274,9 +275,25 @@ def iter_examples(
 def order_diagnostics(plan: ViewPlan) -> dict[str, Any]:
     """Evidence that the requested order really was produced.
 
-    For the shuffled condition we report how often two adjacent rows come from
-    the same source problem. The dataset ships with zero adjacent same-problem
-    rows; the training view must not reintroduce them.
+    Both adjacency counts are reported next to the value a *uniform* shuffle
+    would produce, because zero is the wrong expectation for either of them.
+
+    Over ``n`` rows drawn from problems with ``k_p`` transitions each, a
+    uniformly random permutation yields, in expectation,
+
+        adjacent_same_problem      = sum_p k_p (k_p - 1) / n
+        adjacent_consecutive_steps = sum_p (k_p - 1)     / n
+
+    On the real TRAIN epoch (n = 170,941 rows over 43,200 problems) that is
+    3.32 and 0.75 respectively -- not 0. Demanding exactly zero would require a
+    *constrained* shuffle, which reintroduces the very ordering dependence
+    condition C exists to remove, and it makes the gate fail on a correct
+    shuffle: measured counts were 5 and 1.
+
+    ``*_upper`` is a generous Poisson-style bound (lambda + 4*sqrt(lambda) + 4)
+    for gates to assert against. It leaves four orders of magnitude of headroom
+    over a genuine ordering failure, where every one of the sum_p (k_p - 1)
+    consecutive pairs would land adjacent.
     """
     out: dict[str, Any] = {}
     for epoch_plan in plan.epochs:
@@ -294,10 +311,30 @@ def order_diagnostics(plan: ViewPlan) -> dict[str, Any]:
         gaps = [b - a for values in positions.values() for a, b in zip(values, values[1:])]
         if gaps:
             mean_gap = sum(gaps) / len(gaps)
+        row_count = len(rows)
+        sizes = [len(values) for values in positions.values()]
+        expected_same = sum(k * (k - 1) for k in sizes) / row_count if row_count else 0.0
+        expected_consecutive = sum(k - 1 for k in sizes) / row_count if row_count else 0.0
         out[f"epoch_{epoch_plan.epoch}"] = {
-            "rows": len(rows),
+            "rows": row_count,
             "adjacent_same_problem": adjacent_same_problem,
             "adjacent_consecutive_steps": consecutive_steps,
             "mean_gap_between_same_problem_rows": mean_gap,
+            "uniform_shuffle_reference": {
+                "adjacent_same_problem_expected": expected_same,
+                "adjacent_same_problem_upper": _poisson_upper(expected_same),
+                "adjacent_consecutive_steps_expected": expected_consecutive,
+                "adjacent_consecutive_steps_upper": _poisson_upper(expected_consecutive),
+                "consecutive_pairs_available": sum(k - 1 for k in sizes),
+            },
         }
     return out
+
+
+def _poisson_upper(lam: float) -> float:
+    """Generous upper bound on a Poisson(lam) count, for use as a gate ceiling.
+
+    Deliberately loose. The gate's job is to catch a shuffle that never
+    happened, not to test the shuffle's distribution.
+    """
+    return lam + 4.0 * math.sqrt(lam) + 4.0

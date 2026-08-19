@@ -102,8 +102,21 @@ python - <<'PY'
 import json, sys
 if json.load(open("runs/pilot_validation.json"))["status"] != "PASS":
     sys.exit("dataset validation FAILED")
-if json.load(open("runs/pilot_plan.json"))["order_diagnostics"]["epoch_0"]["adjacent_same_problem"] != 0:
-    sys.exit("condition C is not globally shuffled")
+# Ceiling, not equality: a uniform shuffle produces sum_p k_p(k_p-1)/n adjacent
+# same-problem pairs, never reliably zero. See order_diagnostics() in
+# rineya_lab/data/views.py.
+shuffled = json.load(open("runs/pilot_plan.json"))["order_diagnostics"]["epoch_0"]
+ref = shuffled["uniform_shuffle_reference"]
+if shuffled["adjacent_same_problem"] > ref["adjacent_same_problem_upper"]:
+    sys.exit(
+        f"condition C is not globally shuffled: {shuffled['adjacent_same_problem']} adjacent "
+        f"same-problem pairs vs ceiling {ref['adjacent_same_problem_upper']:.1f}"
+    )
+if shuffled["adjacent_consecutive_steps"] > ref["adjacent_consecutive_steps_upper"]:
+    sys.exit(
+        f"chronology survived the shuffle: {shuffled['adjacent_consecutive_steps']} adjacent "
+        f"consecutive pairs vs ceiling {ref['adjacent_consecutive_steps_upper']:.1f}"
+    )
 print("gates OK")
 PY
 [ $? -ne 0 ] && exit 1

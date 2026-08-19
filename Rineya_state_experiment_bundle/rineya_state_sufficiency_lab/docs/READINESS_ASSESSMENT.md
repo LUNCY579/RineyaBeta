@@ -197,7 +197,7 @@ machine · **🔧** gap that must be closed before the real run.
 | Matched target-token budgets | ✅ (`rineya-lab budget` computes the value for both arms) |
 | Matched unique source-problem exposure | ✅ |
 | One-transition-per-problem sampling | ✅ (test asserts exactly one row per problem, rotating across epochs) |
-| Globally shuffled transitions | ✅ (test asserts zero adjacent same-problem rows) |
+| Globally shuffled transitions | ✅ (test asserts both adjacency counts stay at the uniform-shuffle scale; zero is not the invariant — see `order_diagnostics`) |
 | Trajectory-ordered transitions | ✅ (test asserts contiguous ascending steps) |
 | Reverse-order and curriculum ablations | ✅ |
 
@@ -322,8 +322,8 @@ Each is automated and produces a file. A red gate stops the run; I do not
 | Gate | Command | Pass condition | Artifact |
 |---|---|---|---|
 | G1 Dataset integrity | `rineya-lab validate-data` | `status: PASS`, 0 errors, 48,000 / 189,922 | `runs/validation_full.json` |
-| G2 Order really is destroyed | `rineya-lab plan -c train_split_stateful.yaml` | `adjacent_same_problem == 0` | `runs/plan_split.json` |
-| G3 Order really is preserved (cond. B) | `rineya-lab plan -c train_split_ordered.yaml` | `adjacent_consecutive_steps > 0` | `runs/plan_ordered.json` |
+| G2 Order really is destroyed | `rineya-lab plan -c train_split_stateful.yaml` | both adjacency counts ≤ their `uniform_shuffle_reference` ceiling | `runs/plan_split.json` |
+| G3 Order really is preserved (cond. B) | `rineya-lab plan -c train_split_ordered.yaml` | `adjacent_consecutive_steps ≥ 0.99 × consecutive_pairs_available` | `runs/plan_ordered.json` |
 | G4 B and C are record-identical | pytest `test_ordered_and_unordered_conditions_use_the_same_record_set` | passes | test log |
 | G5 No supervision is truncated | `rineya-lab train -c dry_run_*.yaml` | `truncated_targets == 0` in **both** arms | `runs/dry_run_*/run_manifest.json` |
 | G6 Budgets measured | `rineya-lab budget` | matched values computed for both arms | `runs/budget.json` |

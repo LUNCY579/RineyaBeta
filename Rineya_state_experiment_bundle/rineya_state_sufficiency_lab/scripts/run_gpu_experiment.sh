@@ -37,8 +37,40 @@ val = json.load(open("runs/validation.json"))
 assert val["status"] == "PASS", f"G1 dataset validation failed: {val['errors'][:3]}"
 shuffled = json.load(open("runs/plan_shuffled.json"))["order_diagnostics"]["epoch_0"]
 ordered  = json.load(open("runs/plan_ordered.json"))["order_diagnostics"]["epoch_0"]
-assert shuffled["adjacent_same_problem"] == 0, "G2 failed: condition C is not globally shuffled"
-assert ordered["adjacent_consecutive_steps"] > 0, "G3 failed: condition B is not trajectory-ordered"
+
+# G2. A uniform shuffle does NOT produce zero adjacencies: over n rows drawn
+# from problems with k_p transitions each it produces sum_p k_p(k_p-1)/n
+# same-problem pairs and sum_p (k_p-1)/n consecutive-step pairs. On the real
+# TRAIN epoch that is 3.32 and 0.75. Asserting == 0 would demand a constrained
+# shuffle -- reintroducing exactly the ordering dependence condition C removes
+# -- and it fails on a correct shuffle (measured: 5 and 1). Gate against the
+# uniform-shuffle ceiling instead; a shuffle that never happened overshoots it
+# by four orders of magnitude.
+ref = shuffled["uniform_shuffle_reference"]
+assert shuffled["adjacent_same_problem"] <= ref["adjacent_same_problem_upper"], (
+    f"G2 failed: condition C has {shuffled['adjacent_same_problem']} adjacent same-problem pairs, "
+    f"above the uniform-shuffle ceiling {ref['adjacent_same_problem_upper']:.1f} "
+    f"(expected {ref['adjacent_same_problem_expected']:.2f}) -- the rows are not globally shuffled"
+)
+assert shuffled["adjacent_consecutive_steps"] <= ref["adjacent_consecutive_steps_upper"], (
+    f"G2 failed: condition C has {shuffled['adjacent_consecutive_steps']} chronologically adjacent pairs, "
+    f"above the ceiling {ref['adjacent_consecutive_steps_upper']:.1f} "
+    f"(expected {ref['adjacent_consecutive_steps_expected']:.2f}) -- chronology survived the shuffle"
+)
+print(
+    f"G2: adjacent_same_problem={shuffled['adjacent_same_problem']} "
+    f"(expected {ref['adjacent_same_problem_expected']:.2f}, ceiling {ref['adjacent_same_problem_upper']:.1f}), "
+    f"adjacent_consecutive_steps={shuffled['adjacent_consecutive_steps']} "
+    f"(expected {ref['adjacent_consecutive_steps_expected']:.2f})"
+)
+
+# G3. Condition B is the opposite claim: essentially every consecutive pair that
+# exists must be adjacent, so require most of them rather than merely > 0.
+available = ordered["uniform_shuffle_reference"]["consecutive_pairs_available"]
+assert ordered["adjacent_consecutive_steps"] >= 0.99 * available, (
+    f"G3 failed: condition B keeps only {ordered['adjacent_consecutive_steps']} of {available} "
+    "consecutive step pairs adjacent; it is not trajectory-ordered"
+)
 budget = json.load(open("runs/budget.json"))
 for arm in ("primary", "secondary"):
     truncated = budget[arm]["measured"]["truncated_targets"]
