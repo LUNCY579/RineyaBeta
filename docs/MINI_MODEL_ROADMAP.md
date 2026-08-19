@@ -10,9 +10,11 @@ from a paper. Reproduce with `scripts/measure/` and `scripts/trim/` (§9).
 - Rung **R2 built and verified** — 474,021,888 params, −20.47%, bitwise-equivalent
   logits, zero pre-heal damage (§11).
 - **Phase 0 closed.** Project `.venv` with torch 2.13.0+cu130; CUDA live (§14.1).
-- Healing harness validated on the real card: **B0 ready to run**, GPU resume
-  proven bit-exact (§14.3).
-- **Open decision:** B2/B3 at 4k context do not fit bit-exactly on 8 GB (§14.4).
+- Healing harness validated on the real card; GPU resume proven bit-exact (§14.3).
+- **B0 ready:** 1,003 steps, ~3.2 h, actual peak 3,882 MiB with 1,238 MiB of
+  measured headroom, 99.6% padding efficiency (§15.5).
+- **Open decision:** B2/B3 at 4k context cannot be both bit-exact and fit on 8 GB.
+  Four quantified options in §15.6.
 
 ---
 
