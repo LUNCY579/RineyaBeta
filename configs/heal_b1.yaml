@@ -1,0 +1,60 @@
+# Healing run B1 -- B0 + puzzle reasoning
+# See docs/MINI_MODEL_ROADMAP.md §12.7 for why this mix and this staging.
+# Launch via scripts/train/run_heal.ps1: determinism needs env vars set before
+# python starts, and this config cannot set them itself.
+
+seed: 20260819
+device: auto            # auto | cpu
+
+run:
+  dir: artifacts/heal_runs/b1
+  save_every_steps: 200
+  log_every_steps: 20
+  keep_last_checkpoints: 3
+
+model:
+  path: artifacts/rineya-core-en32k-28L      # rung R2, 474,021,888 params
+  dtype: bfloat16                            # forced to float32 on CPU
+  # "eager" is required for bit-exactness: the flash and mem-efficient SDPA
+  # backward passes accumulate nondeterministically.
+  attn_implementation: eager
+
+data:
+  mix: artifacts/heal_mixes/B1/heal_mix_b1.jsonl
+  max_len: 384
+  megabatch_rows: 2048       # length-grouping window; larger = less padding
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.0               # nonzero dropout is fine for determinism but adds
+                             # RNG draws per step for no benefit at one epoch
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+train:
+  epochs: 1
+  lr: 1.0e-4                 # the rate the v3 corpus README already validates
+  schedule: cosine
+  min_lr_ratio: 0.0
+  warmup_steps: 40
+  weight_decay: 0.0
+  grad_clip: 1.0
+  grad_accum: 8         # micro-batches per optimizer step
+  gradient_checkpointing: true
+
+memory:
+  # Hard allocator ceiling. The process cannot exceed this even on an idle card,
+  # so a run cannot starve the desktop. Check `nvidia-smi` free memory first:
+  # desktop apps commonly hold 4-5 GiB of the 8,188 MiB on this laptop.
+  cap_mib: 5120
+  margin_mib: 512
+  # Budget is rows x longest_row_in_batch, i.e. real padded cost. This is what
+  # keeps peak activation memory flat across a mix spanning 99..2,577 tokens.
+  max_tokens_per_microbatch: 8192
+  max_rows_per_microbatch: 16
+
+determinism:
+  strict: true               # refuse nondeterministic kernels rather than warn
+
+resume:
+  allow_env_drift: false     # a new GPU/driver/torch means a different model
