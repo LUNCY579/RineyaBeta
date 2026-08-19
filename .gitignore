@@ -77,3 +77,8 @@ artifacts/heal_runs/**/cache/
 artifacts/heal_runs/**/checkpoints/
 artifacts/verify_resume/
 artifacts/verify_interrupt/
+
+# Imported evaluation payloads. Upstream-owned data, re-importable via
+# scripts/eval/import_eval_assets.py; manifests/eval_assets.json carries the
+# sha256 for each, including the sealed test set.
+artifacts/eval_sets/*.jsonl
