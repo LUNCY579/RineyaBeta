@@ -10,6 +10,7 @@ run will take. Every one of these was previously uncovered.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -21,14 +22,42 @@ pytest.importorskip("transformers")
 from rineya_lab.config import load_config  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-QWEN_DIR = REPO_ROOT.parent / "qwen3-0.6b"
+
+
+def _candidate_qwen_dirs() -> list[Path]:
+    """Where the official Qwen3-0.6B checkpoint might be, most explicit first.
+
+    These eight tests are the only ones that exercise the real tokenizer, chat
+    template, left-padding, LoRA attachment and batched-generation seams -- the
+    code paths the GPU run actually takes. Skipping them because the checkpoint
+    sits one directory over is the worst outcome available: the run proceeds
+    with its highest-risk seams unverified.
+
+    RINEYA_QWEN_DIR mirrors RINEYA_DATASET_ROOT, so a checkpoint anywhere can be
+    tested without moving 1.5 GB or hard-coding a machine path into the repo.
+    """
+    candidates: list[Path] = []
+    override = os.environ.get("RINEYA_QWEN_DIR")
+    if override:
+        candidates.append(Path(override))
+    # The layout README_BUNDLE.md documents, then one level further out, where a
+    # checkpoint shared across sibling projects naturally lives. Windows and
+    # macOS are case-insensitive; Linux is not, so try both spellings.
+    for parent in (REPO_ROOT.parent, REPO_ROOT.parent.parent):
+        candidates.extend([parent / "qwen3-0.6b", parent / "Qwen3-0.6B"])
+    return candidates
 
 
 @pytest.fixture(scope="module")
 def qwen_tokenizer_dir() -> Path:
-    if not (QWEN_DIR / "tokenizer_config.json").exists():
-        pytest.skip("official Qwen3-0.6B tokenizer not present next to the repo")
-    return QWEN_DIR
+    for candidate in _candidate_qwen_dirs():
+        if (candidate / "tokenizer_config.json").exists():
+            return candidate
+    searched = "\n  ".join(str(c) for c in _candidate_qwen_dirs())
+    pytest.skip(
+        "official Qwen3-0.6B tokenizer not found. Set RINEYA_QWEN_DIR, or place the "
+        f"checkpoint at one of:\n  {searched}"
+    )
 
 
 @pytest.fixture(scope="module")

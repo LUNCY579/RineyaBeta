@@ -27,12 +27,27 @@ snapshot_download('Qwen/Qwen3-0.6B', local_dir='../qwen3-0.6b',
 The configs expect the checkpoint at `../qwen3-0.6b`. Anywhere else works via
 `--set model.name_or_path=/abs/path`.
 
+If the checkpoint already exists elsewhere — say one level further out, shared
+across sibling projects — point the eight real-model seam tests at it instead of
+copying 1.5 GB:
+
+```bash
+export RINEYA_QWEN_DIR=/abs/path/to/Qwen3-0.6B
+```
+
+Those tests are the only coverage of the real tokenizer, chat template,
+left-padding, LoRA attachment and batched-generation paths — the ones the GPU run
+actually takes. They **skip silently** when the checkpoint is not found, so
+confirm `pytest -q` reports `266 passed` rather than `258 passed, 8 skipped`
+before trusting a green suite. `../qwen3-0.6b`, `../Qwen3-0.6B` and the same two
+names one directory further out are discovered automatically.
+
 ## Verify the bundle arrived intact
 
 ```bash
 python -m rineya_lab.cli validate-data --splits dev test   # expect status: PASS
 python -m rineya_lab.cli smoke --all                       # expect status: PASS
-pytest -q                                                  # 263 tests
+pytest -q                                                  # 266 tests, 0 skipped once found
 ```
 
 `validate-data` re-derives the FULL/SPLIT pairing and checks file hashes against
