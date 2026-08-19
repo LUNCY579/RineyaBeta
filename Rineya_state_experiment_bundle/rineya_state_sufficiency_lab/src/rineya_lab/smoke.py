@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from rineya_lab.config import LabConfig, load_config
-from rineya_lab.utils.logging import get_logger
+from rineya_lab.utils.logging import close_log_files, get_logger
 from rineya_lab.version import __version__
 
 LOGGER = get_logger("smoke")
@@ -107,7 +107,9 @@ def run_smoke(
 
     temp_dir: tempfile.TemporaryDirectory | None = None
     if output_dir is None:
-        temp_dir = tempfile.TemporaryDirectory(prefix="rineya-smoke-")
+        # ignore_cleanup_errors is the belt to close_log_files()'s braces: any
+        # stray handle on Windows must not turn a PASS into a traceback.
+        temp_dir = tempfile.TemporaryDirectory(prefix="rineya-smoke-", ignore_cleanup_errors=True)
         output_dir = Path(temp_dir.name)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -233,6 +235,10 @@ def run_smoke(
         "modes. It is not a scientific result about the hypothesis."
     )
     if temp_dir is not None and results["status"] == "PASS":
+        # Every evaluate/train call in this run opened a log file inside the
+        # temp tree. Windows refuses to delete a directory holding an open
+        # handle, so release them before cleanup rather than after failing.
+        close_log_files()
         temp_dir.cleanup()
     return results
 

@@ -10,7 +10,7 @@ from rineya_lab.utils.io import (
     write_json,
     write_jsonl,
 )
-from rineya_lab.utils.logging import get_logger, setup_logging
+from rineya_lab.utils.logging import close_log_files, get_logger, setup_logging
 
 __all__ = [
     "sha256_bytes",
@@ -26,4 +26,5 @@ __all__ = [
     "write_jsonl",
     "get_logger",
     "setup_logging",
+    "close_log_files",
 ]

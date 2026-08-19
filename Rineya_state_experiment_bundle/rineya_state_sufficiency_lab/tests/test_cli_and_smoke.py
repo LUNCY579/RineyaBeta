@@ -128,3 +128,61 @@ def test_console_entry_point_is_installed():
     result = subprocess.run([sys.executable, "-m", "rineya_lab.cli", "--version"],
                             capture_output=True, text=True, check=False)
     assert result.returncode == 0 and "rineya-lab" in result.stdout
+
+
+# -- log file handles: one at a time, and released ---------------------------------------
+
+
+def test_setup_logging_keeps_one_log_file_and_releases_the_previous(tmp_path):
+    """Per-run log files must be per-run, and must not stay open.
+
+    setup_logging() used to *add* a FileHandler on every call and remove none.
+    Two consequences, both reproduced by this test before the fix:
+
+      * a line logged during run B also landed in run A's log file, so the
+        per-run artifacts in docs/READINESS_ASSESSMENT.md 6.5 were not per-run;
+      * the handle stayed open, and on Windows that made the directory
+        undeletable -- `smoke --all` passed every probe and then died in
+        TemporaryDirectory.cleanup() with WinError 32 on evaluate.log.
+    """
+    import logging
+    import shutil
+
+    from rineya_lab.utils.logging import close_log_files, get_logger, setup_logging
+
+    root = logging.getLogger("rineya_lab")
+    logger = get_logger("test.logfiles")
+
+    # Earlier tests in this module run evaluate/smoke, which leave a tracked
+    # handler attached. Start from a clean slate so the count below measures
+    # this test's own calls rather than ambient session state.
+    close_log_files()
+    before = [h for h in root.handlers if isinstance(h, logging.FileHandler)]
+    try:
+        first = tmp_path / "run_a" / "train.log"
+        second = tmp_path / "run_b" / "evaluate.log"
+
+        setup_logging(log_file=first)
+        logger.info("belongs to run A")
+        setup_logging(log_file=second)
+        logger.info("belongs to run B")
+
+        # Exactly one file handler is attached, not one per call.
+        attached = [h for h in root.handlers if isinstance(h, logging.FileHandler)]
+        assert len(attached) == len(before) + 1
+
+        # Run A's log did not absorb run B's output.
+        assert "belongs to run A" in first.read_text(encoding="utf-8")
+        assert "belongs to run B" not in first.read_text(encoding="utf-8")
+        assert "belongs to run B" in second.read_text(encoding="utf-8")
+
+        # And once closed, the directory can actually be deleted -- this is the
+        # assertion that fails on Windows with a leaked handle.
+        close_log_files()
+        shutil.rmtree(second.parent)
+        assert not second.parent.exists()
+    finally:
+        close_log_files()
+        for handler in [h for h in root.handlers if isinstance(h, logging.FileHandler) and h not in before]:
+            root.removeHandler(handler)
+            handler.close()
