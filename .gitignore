@@ -86,3 +86,8 @@ artifacts/eval_sets/*.jsonl
 # Exported adapters. Re-derivable from a run checkpoint via
 # scripts/train/export_adapter.py; export_manifest.json carries the provenance.
 artifacts/adapters/**/*.safetensors
+
+# Experiment per-case outputs: bulky (93 MB across 30 runs) and regenerable from
+# the scripts. Summaries, per-category breakdowns and manifests ARE tracked.
+experiments/**/results/**/results.jsonl
+experiments/**/results/*.log

@@ -230,6 +230,15 @@ on the parameter frontier — and kept out of the bit-exactness path, since
 `determinism.py` must keep `eager` attention (§15.2 measured flash and
 mem-efficient backward as nondeterministic: 4.7e-10 and 1.5e-11).
 
+**Now specified in full:** `EXPERIMENT_DESIGN_KV_LONGCTX.md` pre-registers this
+as a study — KV-head compression against RoPE scaling and chunked attention, on
+an iso-memory frontier. Three findings from its Phase 0 audit change the shape of
+A4 as written above: the 8KV control **cannot reach 64K or 128K on this card at
+all**, eager attention is impossible past 4K so the evaluation path needs its own
+weaker determinism contract, and the repository contains **no long-context
+evaluation asset of any kind** — the longest context ever measured here is 1,504
+tokens.
+
 ### A5. Small-scale MoE **[P]** — define the metric before attempting
 Sparse experts raise *total* parameters while lowering *active* ones. That is only
 a frontier gain if "size" means active parameters. **Decide that definition before
