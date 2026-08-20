@@ -32,8 +32,9 @@ EXP = HERE.parent
 REPO = HERE.parents[2]
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO / "experiments/attention_shape/src"))
+sys.path.insert(0, str(REPO))
 
-import significance as sig  # noqa: E402
+from scripts.kv import significance as sig  # noqa: E402
 from compat import force_repeat_kv  # noqa: E402
 
 MODEL = "artifacts/rineya-core-en32k-28L"
