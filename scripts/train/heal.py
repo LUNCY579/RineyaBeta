@@ -52,6 +52,46 @@ from plan import build_plan        # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 _STOP = {"requested": False, "signal": None}
+HEARTBEAT_STALE_S = 150.0
+
+
+def take_run_lock(run_dir: Path) -> Path:
+    """Refuse to start if another instance is live in this run directory.
+
+    Three separate times, a launch left an orphaned trainer alive: the harness or
+    shell wrapper died while the Python child kept running, burning CPU and GPU and
+    competing with the next run. One of those orphans is the likeliest cause of a
+    CUBLAS_STATUS_INTERNAL_ERROR that looked like a kernel bug.
+
+    A heartbeat file avoids process enumeration entirely, which is what makes it
+    portable: the holder rewrites its timestamp every step, so a dead run's lock
+    simply goes stale and the next launch takes it. Signal-based liveness checks are
+    not an option here -- os.kill(pid, 0) terminates the process on Windows.
+    """
+    lock = run_dir / "run.lock"
+    if lock.exists():
+        try:
+            payload = json.loads(lock.read_text(encoding="utf-8"))
+            age = time.time() - float(payload.get("heartbeat", 0))
+        except (json.JSONDecodeError, OSError, ValueError, TypeError):
+            age = HEARTBEAT_STALE_S + 1
+        if age < HEARTBEAT_STALE_S:
+            raise SystemExit(
+                f"another run holds {lock} (pid {payload.get('pid')}, heartbeat "
+                f"{age:.0f}s ago).\nIf you believe it is dead, wait "
+                f"{HEARTBEAT_STALE_S:.0f}s for the lock to go stale, or delete the "
+                f"file. Do not run two trainers on one 8 GB card.")
+        print(f"taking over a stale lock (heartbeat {age:.0f}s old)")
+    beat(lock)
+    return lock
+
+
+def beat(lock: Path) -> None:
+    try:
+        lock.write_text(json.dumps({"pid": os.getpid(), "heartbeat": time.time()}),
+                        encoding="utf-8")
+    except OSError:
+        pass
 
 
 def _request_stop(signum, _frame):
@@ -157,6 +197,7 @@ def main() -> None:
     device = torch.device("cuda:0" if use_cuda else "cpu")
     run_dir = Path(args.out) if args.out else ROOT / cfg["run"]["dir"]
     run_dir.mkdir(parents=True, exist_ok=True)
+    lock = take_run_lock(run_dir)
 
     cap = mem.apply_cap(cfg["memory"].get("cap_mib") if use_cuda else None)
     print(f"device={device}  cap={f'{cap:,.0f} MiB' if cap else 'n/a'}  "
@@ -380,6 +421,7 @@ def main() -> None:
                     "rows": step.rows, "supervised_tokens": step.supervised_tokens,
                     "elapsed_s": round(time.time() - started, 2),
                 }
+                beat(lock)
                 with log_path.open("a", encoding="utf-8") as handle:
                     handle.write(json.dumps({"step": position.global_step,
                                              "epoch": epoch, **metrics,
@@ -391,6 +433,7 @@ def main() -> None:
                           f"rows {position.rows_seen:,d}")
 
                 if _STOP["requested"]:
+                    lock.unlink(missing_ok=True)
                     p = do_save(position, {**metrics, "stopped": "signal"})
                     print(f"checkpointed to {p.name}; resume with --resume auto")
                     return
@@ -402,6 +445,7 @@ def main() -> None:
                                      rows_seen=position.rows_seen,
                                      supervised_tokens_seen=position.supervised_tokens_seen)
 
+        lock.unlink(missing_ok=True)
         final = do_save(position, {"stopped": "complete"})
         print(f"\ntraining complete: {position.global_step:,d} steps, "
               f"{position.rows_seen:,d} rows, "
