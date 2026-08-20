@@ -219,20 +219,40 @@ def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
     n_recent = min(policy.n_recent(), max(0, n - n_sink))
     n_heavy = min(policy.heavy(), max(0, n - n_sink - n_recent))
 
-    # SnapKV pooling: an evidence span is useful as a span, and scoring each
-    # position independently tends to keep scattered singletons out of several
-    # different spans. Max-pooling over a width-p neighbourhood before the top-k
-    # makes a high-scoring token pull its neighbours in with it.
-    if policy.pool > 1 and n > policy.pool:
-        import torch.nn.functional as F
-        s = F.max_pool1d(s, kernel_size=policy.pool, stride=1,
-                         padding=policy.pool // 2)[..., :n]
-
+    # Mask the always-kept regions FIRST, then pool.
+    #
+    # Doing it the other way round -- which this file did until now -- lets the
+    # sinks bleed into the pooling window. R2 puts 46.3% of its attention mass on
+    # the first 4 positions, so with pool=7 (padding 3) slots 4, 5 and 6 inherit
+    # that mass through the max and win top-k unconditionally, on every prompt,
+    # despite carrying no score of their own. Measured on a synthetic case with
+    # heavy=8: pooling kept 1 of 4 genuine content tokens against 4 of 4 without
+    # it, and spent 3 of the 8 heavy slots on positions 4-6.
+    #
+    # Masking first makes the pool window see -inf where the sinks were, so a
+    # neighbour can only be pulled in by a real score.
     middle = s.clone()
     if n_sink:
         middle[..., :n_sink] = float("-inf")
     if n_recent:
         middle[..., n - n_recent:] = float("-inf")
+
+    # SnapKV pooling: an evidence span is useful as a span, and scoring each
+    # position independently tends to keep scattered singletons out of several
+    # different spans. Max-pooling over a width-p neighbourhood makes a
+    # high-scoring token pull its neighbours in with it.
+    if policy.pool > 1 and n > policy.pool:
+        import torch.nn.functional as F
+        pooled = F.max_pool1d(middle, kernel_size=policy.pool, stride=1,
+                              padding=policy.pool // 2)[..., :n]
+        # Re-assert the masks: max_pool1d propagates finite values into the
+        # masked regions, which would make sinks/recent eligible for the heavy
+        # top-k and let a position be selected twice.
+        if n_sink:
+            pooled[..., :n_sink] = float("-inf")
+        if n_recent:
+            pooled[..., n - n_recent:] = float("-inf")
+        middle = pooled
 
     parts = []
     if n_sink:
