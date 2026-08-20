@@ -17,9 +17,10 @@ from a paper. Reproduce with `scripts/measure/` and `scripts/trim/` (§9).
   CI excludes zero). 12 of 16 RAG categories are bit-identical.
 - **B0's success criterion is now pre-declared:** restore `conflict` abstention to
   ≥93.1% while chat contract fulfilment holds at 1.0000 (§16.4).
-- **B0 needs reconfiguring first.** Its memory characterisation was wrong (§15
-  numbers came from too-short samples; the real run reached 5,090 MiB of a 5,120
-  cap and hung at step 72 with no checkpoint).
+- **B0 is running** on the third configuration, the first measured to an actual
+  plateau: 4×32, peak 4,330 MiB of a 5,120 cap, flat for 100 steps (§17.1).
+- **§15.4 and §15.5 are retracted** — both concluded steady state from 8–12 step
+  samples. The corrections are in place and the error is kept on the record.
 - **Open decision:** B2/B3 at 4k context cannot be both bit-exact and fit on 8 GB.
   Four quantified options in §15.6.
 
@@ -1040,38 +1041,47 @@ tensors.
 > `--max-steps 8` and read `peak_reserved_mib` from `train_log.jsonl`. Two minutes,
 > and authoritative.
 
-### 15.4 Width bucketing: measured, then rejected
+### 15.4 Width bucketing: ~~rejected~~ **UNRESOLVED — the comparison was invalid**
 
-Rounding padded width to a multiple of 64 should have reduced allocator churn and
-tightened the probe. It did tighten the probe, and bought nothing real:
+> **Retracted 2026-08-19.** The numbers below were measured over 8–12 steps, which
+> §16.6 later showed is far short of the plateau. Both arms were sampled before
+> their peaks had settled, so "actual peak is identical" was never established.
+> The conclusion is withdrawn, not reversed: bucketing may or may not help, and
+> the experiment has to be redone at plateau.
 
-| | Padding eff. | Probe | **Actual** | Wall clock |
+Original (invalid) comparison, kept as the record of the error:
+
+| | Padding eff. | Probe | Actual *(8–12 steps)* | Wall clock |
 |---|---:|---:|---:|---:|
-| bucket off | 99.6% | 3,048 MiB | **3,882 MiB** | 2.9–3.2 h |
-| bucket 64 | 81.6% | 3,466 MiB | **3,880 MiB** | 3.24 h |
+| bucket off | 99.6% | 3,048 MiB | 3,882 MiB | 2.9–3.2 h |
+| bucket 64 | 81.6% | 3,466 MiB | 3,880 MiB | 3.24 h |
 
-Actual peak is identical — 3,880 MiB is the real working set, not a function of
-shape diversity. Bucketing cost 22% more padded positions and 12% wall clock to
-narrow an estimate. Kept as a `data.width_bucket` option, defaulted **off**, with
-the measurement recorded in `plan.py` so it is not re-tried on intuition.
+What makes this worth keeping rather than deleting: the same sampling error appears
+three separate times in this document (§14.3, §15.4, §15.5), and each time it
+produced a confident conclusion. Bucketing remains available as
+`data.width_bucket`, defaulted **off** — now on the honest grounds that its value
+is unmeasured rather than disproved.
 
-### 15.5 B0 reconfigured and validated
+**To redo it properly:** two 150-step calibrations at matched config, bucket 1 vs
+bucket 32, comparing plateau peak and wall clock. Cost: about 40 minutes.
 
-Halving the micro-batch and doubling accumulation keeps the effective batch, the
-step count, and the total compute identical while cutting peak memory 19%:
+### 15.5 B0 config: ~~validated~~ **the 8×16 claim was wrong; see §16.6**
 
-| | Before | After |
-|---|---|---|
-| rows × accum | 16 × 8 | **8 × 16** |
-| rows/step, steps | 128, 1,003 | **128, 1,003** (unchanged) |
-| `max_tokens_per_microbatch` | 8,192 | **3,072** |
-| Probe / actual peak | 4,786 / 4,814 MiB | **3,048 / 3,882 MiB** |
-| Real headroom under the 5,120 cap | 306 MiB | **1,238 MiB** |
-| Padding efficiency | 99.2% | **99.6%** |
-| Wall clock | 2.6 h | **~3.2 h** (+12% for the smaller micro-batch) |
+> **Retracted 2026-08-19.** This section declared the 8×16 config "validated" with
+> "1,238 MiB of measured headroom" on the strength of an 8-step sample. That config
+> then reached **5,090 MiB — 30 MiB from the cap — and hung at step 72** with no
+> checkpoint. The 3,882 figure was real but was not the steady state.
 
-**B0 is ready.** 11.3 s/step, 1,003 steps, ~3.2 hours, 1,238 MiB of measured
-headroom, GPU resume proven bit-exact.
+| | 16 × 8 | 8 × 16 *(claimed)* | 8 × 16 *(actual)* |
+|---|---:|---:|---:|
+| probe | 4,786 MiB | 3,048 MiB | 3,048 MiB |
+| peak at ~step 10 | 4,814 | 3,882 | 3,882 |
+| **peak at plateau** | 5,090 | *never measured* | **5,090** |
+| outcome | — | "ready" | **hung at step 72** |
+
+The error was not the probe and not the config. It was concluding steady state from
+a sample, three times in a row, in a document whose own §12.6 warns against exactly
+this class of mistake. The working config and its plateau measurement are in §16.6.
 
 ### 15.6 B2 decision, now quantified
 
@@ -1229,3 +1239,84 @@ Also unresolved: upstream's RAG summary reports `case_count 1504` against a
 752-row set, exactly 2×. Until that is understood their RAG anchor is a per-case
 mean reference, not a row-for-row equivalent. The stock-vs-R2 pairing above is
 unaffected — same 752 rows, same protocol, both sides.
+
+---
+
+## 17. B0: the config that actually holds, and what it cost to find
+
+### 17.1 The plateau measurement
+
+Third configuration, and the first one measured to an actual plateau rather than a
+sample. 150-step calibration, `4 rows × 32 accumulation`, `save_every_steps: 25`:
+
+| step | 1 | 15 | 30 | **50** | 75 | 100 | 125 | 150 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| peak reserved MiB | 2,450 | 2,908 | 3,826 | **4,330** | 4,330 | 4,330 | 4,330 | 4,330 |
+
+**Plateaued at step 50, then flat for 100 steps.** Max 4,330 of a 5,120 cap —
+**790 MiB of real headroom.**
+
+The three configurations side by side, which is the actual lesson:
+
+| | 16 × 8 | 8 × 16 | **4 × 32** |
+|---|---:|---:|---:|
+| longest flat stretch before failing | — | ~9 steps | **100 steps** |
+| plateau reached | never | never | **step 50** |
+| max peak | 5,090 | 5,090 | **4,330** |
+| headroom under cap | 30 MiB | 30 MiB | **790 MiB** |
+| outcome | — | hung at step 72 | **running to completion** |
+
+Identical in every training-relevant respect: 128 rows/step, 1,003 steps, the same
+total compute. The whole difference is micro-batch granularity, and it cost ~12%
+wall clock.
+
+### 17.2 Three process defects fixed under fire
+
+**The orphan problem.** Three consecutive launches left a trainer alive after a
+"successful" stop. One burned **8,029 CPU-seconds over 74 minutes**, competing with
+a user job, and was very likely the true cause of a `CUBLAS_STATUS_INTERNAL_ERROR`
+at step 4 that presented as a clean dose-response curve against `grad_accum`
+(8 fine → 16 hung → 32 crashed) and looked exactly like cuBLAS workspace
+exhaustion. It was contention. `Stop-Process -Force` and `taskkill /F` both failed
+*silently* — taskkill even reported "there is no running instance" about a process
+consuming a full core. Only `Invoke-CimMethod -MethodName Terminate` worked.
+
+Fixed structurally: `heal.py` now holds a heartbeat lock on its run directory and
+refuses to start while another instance is live. No process enumeration and no
+signal probing, because on Windows `os.kill(pid, 0)` *terminates* the target.
+
+**The lock leak.** The mutex's own `--max-steps` exit path did not release the
+lock. Found by checking the filesystem after a clean exit instead of assuming the
+release had happened. Now a `finally` covers every path including OOM.
+
+**`save_every_steps: 200`.** At ~9 s/step that put the first checkpoint 30 minutes
+in, which is why the step-72 hang lost everything. Now 25.
+
+### 17.3 The code-fingerprint guard caught its author
+
+Resuming from the step-150 checkpoint was **refused**: `heal.py: modified`. The
+`finally` fix had landed between the calibration and the resume.
+
+That is the guard working, and it was resolved the way P5 demands rather than by
+flipping the flag:
+
+1. diff the actual change (`dc31a8b..963a41f`) — a `# noqa` comment plus a
+   `finally` block unlinking a JSON heartbeat file;
+2. confirm no other training module differed;
+3. establish inertness on evidence — no tensor, RNG, optimizer or plan touched;
+4. record the justification and the commit range in `configs/heal_b0.yaml`, with
+   an explicit note to return `allow_code_drift` to `false` once B0 completes.
+
+> An override with a recorded justification is a decision. An override because a
+> guard was inconvenient is how a safety mechanism becomes decoration.
+
+### 17.4 Open items
+
+- **`allow_code_drift: true` is live in `configs/heal_b0.yaml`** for this run only.
+  Revert it when B0 finishes.
+- **§15.4's bucketing rejection is withdrawn**, not reversed — it was measured
+  pre-plateau like everything else in §15. Redoing it properly costs ~40 minutes.
+- **M1 (seed variance) is still unrun**, so B0's aggregate deltas will not be
+  interpretable. Its *declared* criterion will be: `conflict` abstention ≥ 93.1%
+  is a discrete count over a 38-case category, a ~24 pp swing, almost certainly
+  above seed noise. Aggregate `mean_quality_score` moves are not.

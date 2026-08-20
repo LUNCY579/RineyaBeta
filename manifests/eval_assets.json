@@ -11,6 +11,11 @@
       "sha256": "dfd00eb0cdc524b89b7480abb12c28c754567d18f096c0cc4a58ff1eea17570f",
       "bytes": 53117
     },
+    "scripts/common/response_control.py": {
+      "upstream": "short-response-model-phase-0-1-2/scripts/common/response_control.py",
+      "sha256": "0214dc6268bfb56dd673de9b57ac613db90937d7560c4bc21ba2d471944335ca",
+      "bytes": 11997
+    },
     "configs/quality_evaluation.json": {
       "upstream": "short-response-model-phase-0-1-2/configs/quality_evaluation.json",
       "sha256": "4d3491fbc091455bfbc0f0054a75ff985ae6357a45ca9be343f278176e87d636",
@@ -55,7 +60,7 @@
     }
   },
   "anchors": {
-    "teacher_dual_sft_v1_baseline": {
+    "chat_dev__teacher_baseline": {
       "upstream": "short-response-model-phase-0-1-2/artifacts/teacher_dual_sft_v1/baseline_chat_dev/summary.json",
       "summary": {
         "case_count": 510,
@@ -1052,7 +1057,7 @@
         }
       }
     },
-    "teacher_dual_sft_v1_post_sft": {
+    "chat_dev__teacher_post_sft": {
       "upstream": "short-response-model-phase-0-1-2/artifacts/teacher_dual_sft_v1/post_sft_chat_dev/summary.json",
       "summary": {
         "case_count": 510,
@@ -2042,6 +2047,1250 @@
           "scene_grounding": 0.0,
           "trust_and_secrets": 0.0,
           "uncertainty": 0.0
+        }
+      }
+    },
+    "rag_dev__teacher_baseline": {
+      "upstream": "short-response-model-phase-0-1-2/artifacts/teacher_dual_sft_v1/baseline_rag_dev/summary.json",
+      "summary": {
+        "quality_evaluation_version": "4.5",
+        "case_count": 1504,
+        "mean_quality_score": 0.38012686051693395,
+        "mean_heuristic_score": 0.38012686051693395,
+        "mean_legacy_heuristic_score": 1.0,
+        "quality_pass_rate": 0.21941489361702127,
+        "quality_pass_rate_is_diagnostic_only": true,
+        "intelligibility_pass_rate": 0.8763297872340425,
+        "hard_failure_case_count": 186,
+        "critical_defect_case_rate": 0.12367021276595745,
+        "severe_issue_case_rate": 0.12367021276595745,
+        "observable_defect_case_rate": 0.7805851063829787,
+        "mechanical_failure_case_rate": 0.12367021276595745,
+        "contract_violation_case_rate": 0.7047872340425532,
+        "review_diagnostic_case_rate": 0.0,
+        "mean_mechanical_integrity_score": 0.8477061170212766,
+        "mean_contract_fulfillment_score": 0.29521276595744683,
+        "mean_issue_cost": 0.33749999999999997,
+        "zero_quality_case_count": 270,
+        "minimum_quality_score": 0.0,
+        "p10_quality_score": 0.0,
+        "worst_decile_mean_quality_score": 0.0,
+        "mean_quality_dimensions": {
+          "brevity_appropriateness": 1.0,
+          "comprehensibility": 0.8477061170212766,
+          "context_consistency": 1.0,
+          "contract_fulfillment": 0.29521276595744683,
+          "conversation_naturalness": 0.9984866767260775,
+          "factual_correctness": 0.29521276595744683,
+          "logic_factual_consistency": 0.29521276595744683,
+          "mechanical_integrity": 0.8477061170212766,
+          "prompt_function_alignment": 0.14789893617021277,
+          "response_completeness": 1.0,
+          "response_mode_fulfillment": 0.14789893617021277,
+          "safety_boundary": 1.0,
+          "task_adequacy": 0.23035239361702126
+        },
+        "quality_dimension_means": {
+          "brevity_appropriateness": 1.0,
+          "comprehensibility": 0.8477061170212766,
+          "context_consistency": 1.0,
+          "contract_fulfillment": 0.29521276595744683,
+          "conversation_naturalness": 0.9984866767260775,
+          "factual_correctness": 0.29521276595744683,
+          "logic_factual_consistency": 0.29521276595744683,
+          "mechanical_integrity": 0.8477061170212766,
+          "prompt_function_alignment": 0.14789893617021277,
+          "response_completeness": 1.0,
+          "response_mode_fulfillment": 0.14789893617021277,
+          "safety_boundary": 1.0,
+          "task_adequacy": 0.23035239361702126
+        },
+        "critical_failure_count": 191,
+        "critical_case_count": 186,
+        "major_issue_count": 1461,
+        "major_case_count": 1174,
+        "minor_issue_count": 0,
+        "review_diagnostic_count": 0,
+        "semantic_warning_count": 0,
+        "observable_quality_pass_rate": 0.21941489361702127,
+        "semantic_pass_rate": 0.21941489361702127,
+        "semantic_pass_rate_is_deprecated_alias": true,
+        "complete_utterance_rate": 1.0,
+        "critical_failure_type_counts": {
+          "compound_decoding_corruption": 186,
+          "repeated_phrase_loop": 2,
+          "repeated_token_loop": 1,
+          "single_token_loop": 2
+        },
+        "major_issue_type_counts": {
+          "broken_clause_sequence": 2,
+          "explicit_required_content_missing": 1060,
+          "mixed_alphanumeric_fragmentation": 15,
+          "numeric_fragment_noise": 272,
+          "punctuation_fragment_sequence": 3,
+          "tokenization_fragmentation": 109
+        },
+        "minor_issue_type_counts": {},
+        "review_diagnostic_type_counts": {},
+        "warning_type_counts": {},
+        "mean_reference_token_f1": null,
+        "mean_reference_alignment_score": null,
+        "category_quality_scores": {
+          "uncategorized": 0.38012686051693395
+        },
+        "category_scores": {
+          "uncategorized": 0.38012686051693395
+        },
+        "category_quality_pass_rates": {
+          "uncategorized": 0.21941489361702127
+        },
+        "category_intelligibility_pass_rates": {
+          "uncategorized": 0.8763297872340425
+        },
+        "category_hard_failure_case_counts": {
+          "uncategorized": 186
+        },
+        "category_quality_dimensions": {
+          "uncategorized": {
+            "brevity_appropriateness": 1.0,
+            "comprehensibility": 0.8477061170212766,
+            "context_consistency": 1.0,
+            "contract_fulfillment": 0.29521276595744683,
+            "conversation_naturalness": 0.9984866767260775,
+            "factual_correctness": 0.29521276595744683,
+            "logic_factual_consistency": 0.29521276595744683,
+            "mechanical_integrity": 0.8477061170212766,
+            "prompt_function_alignment": 0.14789893617021277,
+            "response_completeness": 1.0,
+            "response_mode_fulfillment": 0.14789893617021277,
+            "safety_boundary": 1.0,
+            "task_adequacy": 0.23035239361702126
+          }
+        },
+        "category_observable_quality_pass_rates": {
+          "uncategorized": 0.21941489361702127
+        },
+        "category_semantic_pass_rates": {
+          "uncategorized": 0.21941489361702127
+        },
+        "category_reference_token_f1": {
+          "uncategorized": null
+        },
+        "category_reference_alignment_scores": {
+          "uncategorized": null
+        },
+        "category_complete_utterance_rates": {
+          "uncategorized": 1.0
+        },
+        "category_critical_case_counts": {
+          "uncategorized": 186
+        },
+        "category_major_case_counts": {
+          "uncategorized": 1174
+        },
+        "category_issue_costs": {
+          "uncategorized": 0.33749999999999997
+        },
+        "phase": "9_student_distillation",
+        "schema_version": "1.4",
+        "pipeline_revision": "phase9_large_corrective_curriculum_v1_7_5",
+        "model": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\phase_4_model_soups_phase2c_balanced_training\\accepted_model",
+        "model_tree_sha256": "07519cfa613a4fdfcf23e7d0e86489377f9878b208ca3ced05d39da7b82d4d52",
+        "adapter_tree_sha256": null,
+        "adapter": null,
+        "benchmark": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\data\\phase_9_student_distillation\\rag_reasoning_v3_large\\reviewed_splits\\dev.reviewed.jsonl",
+        "benchmark_sha256": "3ae90d80adb41ae1dd84b8e55780699baca8f399421cd400b40b0a382d3196d3",
+        "conditions": {
+          "oracle_rag": {
+            "quality_evaluation_version": "4.5",
+            "case_count": 752,
+            "mean_quality_score": 0.3372822332366215,
+            "mean_heuristic_score": 0.3372822332366215,
+            "mean_legacy_heuristic_score": 1.0,
+            "quality_pass_rate": 0.15425531914893617,
+            "quality_pass_rate_is_diagnostic_only": true,
+            "intelligibility_pass_rate": 0.8617021276595744,
+            "hard_failure_case_count": 104,
+            "critical_defect_case_rate": 0.13829787234042554,
+            "severe_issue_case_rate": 0.13829787234042554,
+            "observable_defect_case_rate": 0.8457446808510638,
+            "mechanical_failure_case_rate": 0.13829787234042554,
+            "contract_violation_case_rate": 0.738031914893617,
+            "review_diagnostic_case_rate": 0.0,
+            "mean_mechanical_integrity_score": 0.8235372340425531,
+            "mean_contract_fulfillment_score": 0.261968085106383,
+            "mean_issue_cost": 0.3724734042553191,
+            "zero_quality_case_count": 159,
+            "minimum_quality_score": 0.0,
+            "p10_quality_score": 0.0,
+            "worst_decile_mean_quality_score": 0.0,
+            "mean_quality_dimensions": {
+              "brevity_appropriateness": 1.0,
+              "comprehensibility": 0.8235372340425531,
+              "context_consistency": 1.0,
+              "contract_fulfillment": 0.261968085106383,
+              "conversation_naturalness": 0.9985582536114451,
+              "factual_correctness": 0.261968085106383,
+              "logic_factual_consistency": 0.261968085106383,
+              "mechanical_integrity": 0.8235372340425531,
+              "prompt_function_alignment": 0.1745212765957447,
+              "response_completeness": 1.0,
+              "response_mode_fulfillment": 0.1745212765957447,
+              "safety_boundary": 1.0,
+              "task_adequacy": 0.1716755319148936
+            },
+            "quality_dimension_means": {
+              "brevity_appropriateness": 1.0,
+              "comprehensibility": 0.8235372340425531,
+              "context_consistency": 1.0,
+              "contract_fulfillment": 0.261968085106383,
+              "conversation_naturalness": 0.9985582536114451,
+              "factual_correctness": 0.261968085106383,
+              "logic_factual_consistency": 0.261968085106383,
+              "mechanical_integrity": 0.8235372340425531,
+              "prompt_function_alignment": 0.1745212765957447,
+              "response_completeness": 1.0,
+              "response_mode_fulfillment": 0.1745212765957447,
+              "safety_boundary": 1.0,
+              "task_adequacy": 0.1716755319148936
+            },
+            "critical_failure_count": 109,
+            "critical_case_count": 104,
+            "major_issue_count": 786,
+            "major_case_count": 636,
+            "minor_issue_count": 0,
+            "review_diagnostic_count": 0,
+            "semantic_warning_count": 0,
+            "observable_quality_pass_rate": 0.15425531914893617,
+            "semantic_pass_rate": 0.15425531914893617,
+            "semantic_pass_rate_is_deprecated_alias": true,
+            "complete_utterance_rate": 1.0,
+            "critical_failure_type_counts": {
+              "compound_decoding_corruption": 104,
+              "repeated_phrase_loop": 2,
+              "repeated_token_loop": 1,
+              "single_token_loop": 2
+            },
+            "major_issue_type_counts": {
+              "broken_clause_sequence": 1,
+              "explicit_required_content_missing": 555,
+              "mixed_alphanumeric_fragmentation": 10,
+              "numeric_fragment_noise": 171,
+              "punctuation_fragment_sequence": 3,
+              "tokenization_fragmentation": 46
+            },
+            "minor_issue_type_counts": {},
+            "review_diagnostic_type_counts": {},
+            "warning_type_counts": {},
+            "mean_reference_token_f1": null,
+            "mean_reference_alignment_score": null,
+            "category_quality_scores": {
+              "uncategorized": 0.3372822332366215
+            },
+            "category_scores": {
+              "uncategorized": 0.3372822332366215
+            },
+            "category_quality_pass_rates": {
+              "uncategorized": 0.15425531914893617
+            },
+            "category_intelligibility_pass_rates": {
+              "uncategorized": 0.8617021276595744
+            },
+            "category_hard_failure_case_counts": {
+              "uncategorized": 104
+            },
+            "category_quality_dimensions": {
+              "uncategorized": {
+                "brevity_appropriateness": 1.0,
+                "comprehensibility": 0.8235372340425531,
+                "context_consistency": 1.0,
+                "contract_fulfillment": 0.261968085106383,
+                "conversation_naturalness": 0.9985582536114451,
+                "factual_correctness": 0.261968085106383,
+                "logic_factual_consistency": 0.261968085106383,
+                "mechanical_integrity": 0.8235372340425531,
+                "prompt_function_alignment": 0.1745212765957447,
+                "response_completeness": 1.0,
+                "response_mode_fulfillment": 0.1745212765957447,
+                "safety_boundary": 1.0,
+                "task_adequacy": 0.1716755319148936
+              }
+            },
+            "category_observable_quality_pass_rates": {
+              "uncategorized": 0.15425531914893617
+            },
+            "category_semantic_pass_rates": {
+              "uncategorized": 0.15425531914893617
+            },
+            "category_reference_token_f1": {
+              "uncategorized": null
+            },
+            "category_reference_alignment_scores": {
+              "uncategorized": null
+            },
+            "category_complete_utterance_rates": {
+              "uncategorized": 1.0
+            },
+            "category_critical_case_counts": {
+              "uncategorized": 104
+            },
+            "category_major_case_counts": {
+              "uncategorized": 636
+            },
+            "category_issue_costs": {
+              "uncategorized": 0.3724734042553191
+            },
+            "supported_case_count": 530,
+            "unsupported_case_count": 139,
+            "conflict_case_count": 63,
+            "procedure_case_count": 150,
+            "social_case_count": 20,
+            "unknown_case_count": 0,
+            "supported_correct_count": 169,
+            "correct_abstention_count": 0,
+            "unsupported_confident_answer_count": 139,
+            "unnecessary_abstention_count": 0,
+            "conflict_detected_count": 63,
+            "conflict_safe_count": 63,
+            "faithfulness_applicable_count": 593,
+            "faithful_answer_count": 518,
+            "procedure_correct_count": 12,
+            "procedure_answerable_case_count": 150,
+            "evidence_calibration_applicable_count": 76,
+            "evidence_calibration_success_count": 9,
+            "stale_precedence_applicable_count": 38,
+            "stale_precedence_success_count": 22,
+            "prompt_injection_task_applicable_count": 38,
+            "prompt_injection_task_success_count": 12,
+            "social_usable_count": 20,
+            "retrieval_applicable_count": 0,
+            "retrieval_hit_count": 0,
+            "prompt_support_applicable_count": 530,
+            "prompt_support_hit_count": 530,
+            "prompt_integrity_failure_count": 0,
+            "decode_integrity_applicable_count": 689,
+            "decode_integrity_failure_count": 0,
+            "adversarial_applicable_count": 0,
+            "adversarial_success_count": 0,
+            "supported_answer_correctness": 0.31886792452830187,
+            "evidence_faithfulness": 0.8735244519392917,
+            "correct_abstention_rate": 0.0,
+            "unnecessary_abstention_rate": 0.0,
+            "unsupported_confident_answer_rate": 1.0,
+            "conflict_detection_rate": 1.0,
+            "conflict_explicit_acknowledgment_rate": 1.0,
+            "conflict_safe_handling_rate": 1.0,
+            "procedure_correctness": 0.08,
+            "social_usable_rate": 1.0,
+            "evidence_calibration_success_rate": 0.11842105263157894,
+            "stale_precedence_rate": 0.5789473684210527,
+            "prompt_injection_task_success_rate": 0.3157894736842105,
+            "retrieval_recall_at_k": null,
+            "prompt_support_recall_at_k": 1.0,
+            "prompt_integrity_failure_rate": 0.0,
+            "decode_integrity_failure_rate": 0.0,
+            "injection_resistance_rate": null,
+            "median_completion_tokens": 10.0,
+            "p90_completion_tokens": 17,
+            "mean_generation_seconds": 0.38050862752661585,
+            "mean_retrieval_seconds": 5.009228722274008e-05,
+            "stop_reason_counts": {
+              "external_gate": 63,
+              "eos": 687,
+              "max_new_tokens": 2
+            },
+            "external_gate_reason_counts": {
+              "oracle_structured_evidence_conflict": 63,
+              "oracle_or_adversarial_evidence_supplied": 669,
+              "not_applicable": 20
+            },
+            "metric_denominators": {
+              "supported_answer_correctness": 530,
+              "evidence_faithfulness": 593,
+              "correct_abstention_rate": 139,
+              "unsupported_confident_answer_rate": 139,
+              "conflict_detection_rate": 63,
+              "conflict_explicit_acknowledgment_rate": 63,
+              "conflict_safe_handling_rate": 63,
+              "procedure_correctness": 150,
+              "social_usable_rate": 20,
+              "evidence_calibration_success_rate": 76,
+              "stale_precedence_rate": 38,
+              "prompt_injection_task_success_rate": 38,
+              "retrieval_recall_at_k": 0,
+              "prompt_support_recall_at_k": 530,
+              "prompt_integrity_failure_rate": 752,
+              "decode_integrity_failure_rate": 689,
+              "injection_resistance_rate": 0
+            }
+          },
+          "real_rag": {
+            "quality_evaluation_version": "4.5",
+            "case_count": 752,
+            "mean_quality_score": 0.42297148779724647,
+            "mean_heuristic_score": 0.42297148779724647,
+            "mean_legacy_heuristic_score": 1.0,
+            "quality_pass_rate": 0.2845744680851064,
+            "quality_pass_rate_is_diagnostic_only": true,
+            "intelligibility_pass_rate": 0.8909574468085106,
+            "hard_failure_case_count": 82,
+            "critical_defect_case_rate": 0.10904255319148937,
+            "severe_issue_case_rate": 0.10904255319148937,
+            "observable_defect_case_rate": 0.7154255319148937,
+            "mechanical_failure_case_rate": 0.10904255319148937,
+            "contract_violation_case_rate": 0.6715425531914894,
+            "review_diagnostic_case_rate": 0.0,
+            "mean_mechanical_integrity_score": 0.871875,
+            "mean_contract_fulfillment_score": 0.32845744680851063,
+            "mean_issue_cost": 0.3025265957446808,
+            "zero_quality_case_count": 111,
+            "minimum_quality_score": 0.0,
+            "p10_quality_score": 0.0,
+            "worst_decile_mean_quality_score": 0.0,
+            "mean_quality_dimensions": {
+              "brevity_appropriateness": 1.0,
+              "comprehensibility": 0.871875,
+              "context_consistency": 1.0,
+              "contract_fulfillment": 0.32845744680851063,
+              "conversation_naturalness": 0.9984150998407099,
+              "factual_correctness": 0.32845744680851063,
+              "logic_factual_consistency": 0.32845744680851063,
+              "mechanical_integrity": 0.871875,
+              "prompt_function_alignment": 0.12127659574468086,
+              "response_completeness": 1.0,
+              "response_mode_fulfillment": 0.12127659574468086,
+              "safety_boundary": 1.0,
+              "task_adequacy": 0.2890292553191489
+            },
+            "quality_dimension_means": {
+              "brevity_appropriateness": 1.0,
+              "comprehensibility": 0.871875,
+              "context_consistency": 1.0,
+              "contract_fulfillment": 0.32845744680851063,
+              "conversation_naturalness": 0.9984150998407099,
+              "factual_correctness": 0.32845744680851063,
+              "logic_factual_consistency": 0.32845744680851063,
+              "mechanical_integrity": 0.871875,
+              "prompt_function_alignment": 0.12127659574468086,
+              "response_completeness": 1.0,
+              "response_mode_fulfillment": 0.12127659574468086,
+              "safety_boundary": 1.0,
+              "task_adequacy": 0.2890292553191489
+            },
+            "critical_failure_count": 82,
+            "critical_case_count": 82,
+            "major_issue_count": 675,
+            "major_case_count": 538,
+            "minor_issue_count": 0,
+            "review_diagnostic_count": 0,
+            "semantic_warning_count": 0,
+            "observable_quality_pass_rate": 0.2845744680851064,
+            "semantic_pass_rate": 0.2845744680851064,
+            "semantic_pass_rate_is_deprecated_alias": true,
+            "complete_utterance_rate": 1.0,
+            "critical_failure_type_counts": {
+              "compound_decoding_corruption": 82
+            },
+            "major_issue_type_counts": {
+              "broken_clause_sequence": 1,
+              "explicit_required_content_missing": 505,
+              "mixed_alphanumeric_fragmentation": 5,
+              "numeric_fragment_noise": 101,
+              "tokenization_fragmentation": 63
+            },
+            "minor_issue_type_counts": {},
+            "review_diagnostic_type_counts": {},
+            "warning_type_counts": {},
+            "mean_reference_token_f1": null,
+            "mean_reference_alignment_score": null,
+            "category_quality_scores": {
+              "uncategorized": 0.42297148779724647
+            },
+            "category_scores": {
+              "uncategorized": 0.42297148779724647
+            },
+            "category_quality_pass_rates": {
+              "uncategorized": 0.2845744680851064
+            },
+            "category_intelligibility_pass_rates": {
+              "uncategorized": 0.8909574468085106
+            },
+            "category_hard_failure_case_counts": {
+              "uncategorized": 82
+            },
+            "category_quality_dimensions": {
+              "uncategorized": {
+                "brevity_appropriateness": 1.0,
+                "comprehensibility": 0.871875,
+                "context_consistency": 1.0,
+                "contract_fulfillment": 0.32845744680851063,
+                "conversation_naturalness": 0.9984150998407099,
+                "factual_correctness": 0.32845744680851063,
+                "logic_factual_consistency": 0.32845744680851063,
+                "mechanical_integrity": 0.871875,
+                "prompt_function_alignment": 0.12127659574468086,
+                "response_completeness": 1.0,
+                "response_mode_fulfillment": 0.12127659574468086,
+                "safety_boundary": 1.0,
+                "task_adequacy": 0.2890292553191489
+              }
+            },
+            "category_observable_quality_pass_rates": {
+              "uncategorized": 0.2845744680851064
+            },
+            "category_semantic_pass_rates": {
+              "uncategorized": 0.2845744680851064
+            },
+            "category_reference_token_f1": {
+              "uncategorized": null
+            },
+            "category_reference_alignment_scores": {
+              "uncategorized": null
+            },
+            "category_complete_utterance_rates": {
+              "uncategorized": 1.0
+            },
+            "category_critical_case_counts": {
+              "uncategorized": 82
+            },
+            "category_major_case_counts": {
+              "uncategorized": 538
+            },
+            "category_issue_costs": {
+              "uncategorized": 0.3025265957446808
+            },
+            "supported_case_count": 530,
+            "unsupported_case_count": 139,
+            "conflict_case_count": 63,
+            "procedure_case_count": 150,
+            "social_case_count": 20,
+            "unknown_case_count": 0,
+            "supported_correct_count": 94,
+            "correct_abstention_count": 101,
+            "unsupported_confident_answer_count": 38,
+            "unnecessary_abstention_count": 83,
+            "conflict_detected_count": 38,
+            "conflict_safe_count": 63,
+            "faithfulness_applicable_count": 485,
+            "faithful_answer_count": 441,
+            "procedure_correct_count": 10,
+            "procedure_answerable_case_count": 150,
+            "evidence_calibration_applicable_count": 76,
+            "evidence_calibration_success_count": 38,
+            "stale_precedence_applicable_count": 38,
+            "stale_precedence_success_count": 7,
+            "prompt_injection_task_applicable_count": 38,
+            "prompt_injection_task_success_count": 10,
+            "social_usable_count": 20,
+            "retrieval_applicable_count": 530,
+            "retrieval_hit_count": 530,
+            "prompt_support_applicable_count": 530,
+            "prompt_support_hit_count": 530,
+            "prompt_integrity_failure_count": 0,
+            "decode_integrity_applicable_count": 467,
+            "decode_integrity_failure_count": 0,
+            "adversarial_applicable_count": 0,
+            "adversarial_success_count": 0,
+            "supported_answer_correctness": 0.17735849056603772,
+            "evidence_faithfulness": 0.9092783505154639,
+            "correct_abstention_rate": 0.7266187050359713,
+            "unnecessary_abstention_rate": 0.15660377358490565,
+            "unsupported_confident_answer_rate": 0.2733812949640288,
+            "conflict_detection_rate": 0.6031746031746031,
+            "conflict_explicit_acknowledgment_rate": 0.6031746031746031,
+            "conflict_safe_handling_rate": 1.0,
+            "procedure_correctness": 0.06666666666666667,
+            "social_usable_rate": 1.0,
+            "evidence_calibration_success_rate": 0.5,
+            "stale_precedence_rate": 0.18421052631578946,
+            "prompt_injection_task_success_rate": 0.2631578947368421,
+            "retrieval_recall_at_k": 1.0,
+            "prompt_support_recall_at_k": 1.0,
+            "prompt_integrity_failure_rate": 0.0,
+            "decode_integrity_failure_rate": 0.0,
+            "injection_resistance_rate": null,
+            "median_completion_tokens": 10.0,
+            "p90_completion_tokens": 14,
+            "mean_generation_seconds": 0.24273373630321077,
+            "mean_retrieval_seconds": 0.011554441356386808,
+            "stop_reason_counts": {
+              "external_gate": 285,
+              "eos": 466,
+              "max_new_tokens": 1
+            },
+            "external_gate_reason_counts": {
+              "prompt_budget:structured_evidence_conflict": 76,
+              "prompt_budget:retrieval_pre_gate_passed": 447,
+              "not_applicable": 20,
+              "prompt_budget:retrieval_score_below_calibrated_threshold": 209
+            },
+            "metric_denominators": {
+              "supported_answer_correctness": 530,
+              "evidence_faithfulness": 485,
+              "correct_abstention_rate": 139,
+              "unsupported_confident_answer_rate": 139,
+              "conflict_detection_rate": 63,
+              "conflict_explicit_acknowledgment_rate": 63,
+              "conflict_safe_handling_rate": 63,
+              "procedure_correctness": 150,
+              "social_usable_rate": 20,
+              "evidence_calibration_success_rate": 76,
+              "stale_precedence_rate": 38,
+              "prompt_injection_task_success_rate": 38,
+              "retrieval_recall_at_k": 530,
+              "prompt_support_recall_at_k": 530,
+              "prompt_integrity_failure_rate": 752,
+              "decode_integrity_failure_rate": 467,
+              "injection_resistance_rate": 0
+            }
+          }
+        },
+        "primary_quality_conditions": [
+          "oracle_rag",
+          "real_rag"
+        ],
+        "model_weight_bytes": 1829339732,
+        "peak_allocated_vram_bytes": 1929657856,
+        "process_rss_bytes": null,
+        "knowledge_db": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\teacher_dual_sft_v1\\rag_v3.sqlite3",
+        "gate_calibration": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\teacher_dual_sft_v1\\rag_v3_calibration_query_aware_v21.json",
+        "response_control": "eos_only",
+        "retrieval_selection_policy": "query_aware_v21",
+        "max_new_tokens": 32,
+        "max_sequence_length": 1024,
+        "maximum_evidence_tokens": 384,
+        "prompt_truncation_policy": "budget_passages_then_fail_closed; no tokenizer truncation",
+        "benchmark_decision_class_counts": {
+          "conflict": 63,
+          "supported": 530,
+          "social": 20,
+          "unsupported": 139
+        },
+        "evaluation_valid": true,
+        "evaluation_invalidity_reasons": [],
+        "research_ready": true,
+        "research_readiness_reasons": [],
+        "smoke_test": false,
+        "minimum_case_requirements": {
+          "per_condition": 1,
+          "supported": 1,
+          "unsupported": 1,
+          "social": 0
+        }
+      }
+    },
+    "rag_dev__teacher_post_sft": {
+      "upstream": "short-response-model-phase-0-1-2/artifacts/teacher_dual_sft_v1/post_sft_rag_dev/summary.json",
+      "summary": {
+        "quality_evaluation_version": "4.5",
+        "case_count": 1504,
+        "mean_quality_score": 0.6931932854379661,
+        "mean_heuristic_score": 0.6931932854379661,
+        "mean_legacy_heuristic_score": 1.0,
+        "quality_pass_rate": 0.651595744680851,
+        "quality_pass_rate_is_diagnostic_only": true,
+        "intelligibility_pass_rate": 0.9946808510638298,
+        "hard_failure_case_count": 8,
+        "critical_defect_case_rate": 0.005319148936170213,
+        "severe_issue_case_rate": 0.005319148936170213,
+        "observable_defect_case_rate": 0.3484042553191489,
+        "mechanical_failure_case_rate": 0.005319148936170213,
+        "contract_violation_case_rate": 0.25066489361702127,
+        "review_diagnostic_case_rate": 0.0,
+        "mean_mechanical_integrity_score": 0.956283244680851,
+        "mean_contract_fulfillment_score": 0.7493351063829787,
+        "mean_issue_cost": 0.11223404255319148,
+        "zero_quality_case_count": 27,
+        "minimum_quality_score": 0.0,
+        "p10_quality_score": 0.27374999999999994,
+        "worst_decile_mean_quality_score": 0.22477767265846732,
+        "mean_quality_dimensions": {
+          "brevity_appropriateness": 1.0,
+          "comprehensibility": 0.956283244680851,
+          "context_consistency": 1.0,
+          "contract_fulfillment": 0.7493351063829787,
+          "conversation_naturalness": 0.9971875863498204,
+          "factual_correctness": 0.7493351063829787,
+          "logic_factual_consistency": 0.7493351063829787,
+          "mechanical_integrity": 0.956283244680851,
+          "prompt_function_alignment": 0.07476728723404255,
+          "response_completeness": 1.0,
+          "response_mode_fulfillment": 0.07476728723404255,
+          "safety_boundary": 1.0,
+          "task_adequacy": 0.7089428191489362
+        },
+        "quality_dimension_means": {
+          "brevity_appropriateness": 1.0,
+          "comprehensibility": 0.956283244680851,
+          "context_consistency": 1.0,
+          "contract_fulfillment": 0.7493351063829787,
+          "conversation_naturalness": 0.9971875863498204,
+          "factual_correctness": 0.7493351063829787,
+          "logic_factual_consistency": 0.7493351063829787,
+          "mechanical_integrity": 0.956283244680851,
+          "prompt_function_alignment": 0.07476728723404255,
+          "response_completeness": 1.0,
+          "response_mode_fulfillment": 0.07476728723404255,
+          "safety_boundary": 1.0,
+          "task_adequacy": 0.7089428191489362
+        },
+        "critical_failure_count": 8,
+        "critical_case_count": 8,
+        "major_issue_count": 552,
+        "major_case_count": 524,
+        "minor_issue_count": 0,
+        "review_diagnostic_count": 0,
+        "semantic_warning_count": 0,
+        "observable_quality_pass_rate": 0.651595744680851,
+        "semantic_pass_rate": 0.651595744680851,
+        "semantic_pass_rate_is_deprecated_alias": true,
+        "complete_utterance_rate": 1.0,
+        "critical_failure_type_counts": {
+          "compound_decoding_corruption": 8
+        },
+        "major_issue_type_counts": {
+          "explicit_required_content_missing": 377,
+          "mixed_alphanumeric_fragmentation": 1,
+          "numeric_fragment_noise": 122,
+          "tokenization_fragmentation": 52
+        },
+        "minor_issue_type_counts": {},
+        "review_diagnostic_type_counts": {},
+        "warning_type_counts": {},
+        "mean_reference_token_f1": null,
+        "mean_reference_alignment_score": null,
+        "category_quality_scores": {
+          "uncategorized": 0.6931932854379661
+        },
+        "category_scores": {
+          "uncategorized": 0.6931932854379661
+        },
+        "category_quality_pass_rates": {
+          "uncategorized": 0.651595744680851
+        },
+        "category_intelligibility_pass_rates": {
+          "uncategorized": 0.9946808510638298
+        },
+        "category_hard_failure_case_counts": {
+          "uncategorized": 8
+        },
+        "category_quality_dimensions": {
+          "uncategorized": {
+            "brevity_appropriateness": 1.0,
+            "comprehensibility": 0.956283244680851,
+            "context_consistency": 1.0,
+            "contract_fulfillment": 0.7493351063829787,
+            "conversation_naturalness": 0.9971875863498204,
+            "factual_correctness": 0.7493351063829787,
+            "logic_factual_consistency": 0.7493351063829787,
+            "mechanical_integrity": 0.956283244680851,
+            "prompt_function_alignment": 0.07476728723404255,
+            "response_completeness": 1.0,
+            "response_mode_fulfillment": 0.07476728723404255,
+            "safety_boundary": 1.0,
+            "task_adequacy": 0.7089428191489362
+          }
+        },
+        "category_observable_quality_pass_rates": {
+          "uncategorized": 0.651595744680851
+        },
+        "category_semantic_pass_rates": {
+          "uncategorized": 0.651595744680851
+        },
+        "category_reference_token_f1": {
+          "uncategorized": null
+        },
+        "category_reference_alignment_scores": {
+          "uncategorized": null
+        },
+        "category_complete_utterance_rates": {
+          "uncategorized": 1.0
+        },
+        "category_critical_case_counts": {
+          "uncategorized": 8
+        },
+        "category_major_case_counts": {
+          "uncategorized": 524
+        },
+        "category_issue_costs": {
+          "uncategorized": 0.11223404255319148
+        },
+        "phase": "9_student_distillation",
+        "schema_version": "1.4",
+        "pipeline_revision": "phase9_large_corrective_curriculum_v1_7_5",
+        "model": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\phase_4_model_soups_phase2c_balanced_training\\accepted_model",
+        "model_tree_sha256": "07519cfa613a4fdfcf23e7d0e86489377f9878b208ca3ced05d39da7b82d4d52",
+        "adapter_tree_sha256": "89c989413fbe963649876ab5cbd623caa9829fdc399321e92d142e5e3f10cecf",
+        "adapter": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\teacher_dual_sft_v1\\sft_run\\adapter",
+        "benchmark": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\data\\phase_9_student_distillation\\rag_reasoning_v3_large\\reviewed_splits\\dev.reviewed.jsonl",
+        "benchmark_sha256": "3ae90d80adb41ae1dd84b8e55780699baca8f399421cd400b40b0a382d3196d3",
+        "conditions": {
+          "oracle_rag": {
+            "quality_evaluation_version": "4.5",
+            "case_count": 752,
+            "mean_quality_score": 0.7269033918209449,
+            "mean_heuristic_score": 0.7269033918209449,
+            "mean_legacy_heuristic_score": 1.0,
+            "quality_pass_rate": 0.6954787234042553,
+            "quality_pass_rate_is_diagnostic_only": true,
+            "intelligibility_pass_rate": 0.9906914893617021,
+            "hard_failure_case_count": 7,
+            "critical_defect_case_rate": 0.009308510638297872,
+            "severe_issue_case_rate": 0.009308510638297872,
+            "observable_defect_case_rate": 0.3045212765957447,
+            "mechanical_failure_case_rate": 0.009308510638297872,
+            "contract_violation_case_rate": 0.15558510638297873,
+            "review_diagnostic_case_rate": 0.0,
+            "mean_mechanical_integrity_score": 0.9315824468085105,
+            "mean_contract_fulfillment_score": 0.8444148936170213,
+            "mean_issue_cost": 0.10465425531914894,
+            "zero_quality_case_count": 23,
+            "minimum_quality_score": 0.0,
+            "p10_quality_score": 0.27374999999999994,
+            "worst_decile_mean_quality_score": 0.19088110902255634,
+            "mean_quality_dimensions": {
+              "brevity_appropriateness": 1.0,
+              "comprehensibility": 0.9315824468085105,
+              "context_consistency": 1.0,
+              "contract_fulfillment": 0.8444148936170213,
+              "conversation_naturalness": 0.9971875863498204,
+              "factual_correctness": 0.8444148936170213,
+              "logic_factual_consistency": 0.8444148936170213,
+              "mechanical_integrity": 0.9315824468085105,
+              "prompt_function_alignment": 0.07127659574468086,
+              "response_completeness": 1.0,
+              "response_mode_fulfillment": 0.07127659574468086,
+              "safety_boundary": 1.0,
+              "task_adequacy": 0.7852393617021277
+            },
+            "quality_dimension_means": {
+              "brevity_appropriateness": 1.0,
+              "comprehensibility": 0.9315824468085105,
+              "context_consistency": 1.0,
+              "contract_fulfillment": 0.8444148936170213,
+              "conversation_naturalness": 0.9971875863498204,
+              "factual_correctness": 0.8444148936170213,
+              "logic_factual_consistency": 0.8444148936170213,
+              "mechanical_integrity": 0.9315824468085105,
+              "prompt_function_alignment": 0.07127659574468086,
+              "response_completeness": 1.0,
+              "response_mode_fulfillment": 0.07127659574468086,
+              "safety_boundary": 1.0,
+              "task_adequacy": 0.7852393617021277
+            },
+            "critical_failure_count": 7,
+            "critical_case_count": 7,
+            "major_issue_count": 253,
+            "major_case_count": 229,
+            "minor_issue_count": 0,
+            "review_diagnostic_count": 0,
+            "semantic_warning_count": 0,
+            "observable_quality_pass_rate": 0.6954787234042553,
+            "semantic_pass_rate": 0.6954787234042553,
+            "semantic_pass_rate_is_deprecated_alias": true,
+            "complete_utterance_rate": 1.0,
+            "critical_failure_type_counts": {
+              "compound_decoding_corruption": 7
+            },
+            "major_issue_type_counts": {
+              "explicit_required_content_missing": 117,
+              "mixed_alphanumeric_fragmentation": 1,
+              "numeric_fragment_noise": 103,
+              "tokenization_fragmentation": 32
+            },
+            "minor_issue_type_counts": {},
+            "review_diagnostic_type_counts": {},
+            "warning_type_counts": {},
+            "mean_reference_token_f1": null,
+            "mean_reference_alignment_score": null,
+            "category_quality_scores": {
+              "uncategorized": 0.7269033918209449
+            },
+            "category_scores": {
+              "uncategorized": 0.7269033918209449
+            },
+            "category_quality_pass_rates": {
+              "uncategorized": 0.6954787234042553
+            },
+            "category_intelligibility_pass_rates": {
+              "uncategorized": 0.9906914893617021
+            },
+            "category_hard_failure_case_counts": {
+              "uncategorized": 7
+            },
+            "category_quality_dimensions": {
+              "uncategorized": {
+                "brevity_appropriateness": 1.0,
+                "comprehensibility": 0.9315824468085105,
+                "context_consistency": 1.0,
+                "contract_fulfillment": 0.8444148936170213,
+                "conversation_naturalness": 0.9971875863498204,
+                "factual_correctness": 0.8444148936170213,
+                "logic_factual_consistency": 0.8444148936170213,
+                "mechanical_integrity": 0.9315824468085105,
+                "prompt_function_alignment": 0.07127659574468086,
+                "response_completeness": 1.0,
+                "response_mode_fulfillment": 0.07127659574468086,
+                "safety_boundary": 1.0,
+                "task_adequacy": 0.7852393617021277
+              }
+            },
+            "category_observable_quality_pass_rates": {
+              "uncategorized": 0.6954787234042553
+            },
+            "category_semantic_pass_rates": {
+              "uncategorized": 0.6954787234042553
+            },
+            "category_reference_token_f1": {
+              "uncategorized": null
+            },
+            "category_reference_alignment_scores": {
+              "uncategorized": null
+            },
+            "category_complete_utterance_rates": {
+              "uncategorized": 1.0
+            },
+            "category_critical_case_counts": {
+              "uncategorized": 7
+            },
+            "category_major_case_counts": {
+              "uncategorized": 229
+            },
+            "category_issue_costs": {
+              "uncategorized": 0.10465425531914894
+            },
+            "supported_case_count": 530,
+            "unsupported_case_count": 139,
+            "conflict_case_count": 63,
+            "procedure_case_count": 150,
+            "social_case_count": 20,
+            "unknown_case_count": 0,
+            "supported_correct_count": 510,
+            "correct_abstention_count": 105,
+            "unsupported_confident_answer_count": 34,
+            "unnecessary_abstention_count": 0,
+            "conflict_detected_count": 63,
+            "conflict_safe_count": 63,
+            "faithfulness_applicable_count": 593,
+            "faithful_answer_count": 591,
+            "procedure_correct_count": 131,
+            "procedure_answerable_case_count": 150,
+            "evidence_calibration_applicable_count": 76,
+            "evidence_calibration_success_count": 72,
+            "stale_precedence_applicable_count": 38,
+            "stale_precedence_success_count": 38,
+            "prompt_injection_task_applicable_count": 38,
+            "prompt_injection_task_success_count": 38,
+            "social_usable_count": 20,
+            "retrieval_applicable_count": 0,
+            "retrieval_hit_count": 0,
+            "prompt_support_applicable_count": 530,
+            "prompt_support_hit_count": 530,
+            "prompt_integrity_failure_count": 0,
+            "decode_integrity_applicable_count": 689,
+            "decode_integrity_failure_count": 0,
+            "adversarial_applicable_count": 0,
+            "adversarial_success_count": 0,
+            "supported_answer_correctness": 0.9622641509433962,
+            "evidence_faithfulness": 0.9966273187183811,
+            "correct_abstention_rate": 0.7553956834532374,
+            "unnecessary_abstention_rate": 0.0,
+            "unsupported_confident_answer_rate": 0.2446043165467626,
+            "conflict_detection_rate": 1.0,
+            "conflict_explicit_acknowledgment_rate": 1.0,
+            "conflict_safe_handling_rate": 1.0,
+            "procedure_correctness": 0.8733333333333333,
+            "social_usable_rate": 1.0,
+            "evidence_calibration_success_rate": 0.9473684210526315,
+            "stale_precedence_rate": 1.0,
+            "prompt_injection_task_success_rate": 1.0,
+            "retrieval_recall_at_k": null,
+            "prompt_support_recall_at_k": 1.0,
+            "prompt_integrity_failure_rate": 0.0,
+            "decode_integrity_failure_rate": 0.0,
+            "injection_resistance_rate": null,
+            "median_completion_tokens": 8.0,
+            "p90_completion_tokens": 14,
+            "mean_generation_seconds": 0.321104232845731,
+            "mean_retrieval_seconds": 4.72215425274276e-05,
+            "stop_reason_counts": {
+              "external_gate": 63,
+              "eos": 689
+            },
+            "external_gate_reason_counts": {
+              "oracle_structured_evidence_conflict": 63,
+              "oracle_or_adversarial_evidence_supplied": 669,
+              "not_applicable": 20
+            },
+            "metric_denominators": {
+              "supported_answer_correctness": 530,
+              "evidence_faithfulness": 593,
+              "correct_abstention_rate": 139,
+              "unsupported_confident_answer_rate": 139,
+              "conflict_detection_rate": 63,
+              "conflict_explicit_acknowledgment_rate": 63,
+              "conflict_safe_handling_rate": 63,
+              "procedure_correctness": 150,
+              "social_usable_rate": 20,
+              "evidence_calibration_success_rate": 76,
+              "stale_precedence_rate": 38,
+              "prompt_injection_task_success_rate": 38,
+              "retrieval_recall_at_k": 0,
+              "prompt_support_recall_at_k": 530,
+              "prompt_integrity_failure_rate": 752,
+              "decode_integrity_failure_rate": 689,
+              "injection_resistance_rate": 0
+            }
+          },
+          "real_rag": {
+            "quality_evaluation_version": "4.5",
+            "case_count": 752,
+            "mean_quality_score": 0.6594831790549874,
+            "mean_heuristic_score": 0.6594831790549874,
+            "mean_legacy_heuristic_score": 1.0,
+            "quality_pass_rate": 0.6077127659574468,
+            "quality_pass_rate_is_diagnostic_only": true,
+            "intelligibility_pass_rate": 0.9986702127659575,
+            "hard_failure_case_count": 1,
+            "critical_defect_case_rate": 0.0013297872340425532,
+            "severe_issue_case_rate": 0.0013297872340425532,
+            "observable_defect_case_rate": 0.39228723404255317,
+            "mechanical_failure_case_rate": 0.0013297872340425532,
+            "contract_violation_case_rate": 0.34574468085106386,
+            "review_diagnostic_case_rate": 0.0,
+            "mean_mechanical_integrity_score": 0.9809840425531916,
+            "mean_contract_fulfillment_score": 0.6542553191489362,
+            "mean_issue_cost": 0.11981382978723404,
+            "zero_quality_case_count": 4,
+            "minimum_quality_score": 0.0,
+            "p10_quality_score": 0.27374999999999994,
+            "worst_decile_mean_quality_score": 0.2593186090225563,
+            "mean_quality_dimensions": {
+              "brevity_appropriateness": 1.0,
+              "comprehensibility": 0.9809840425531916,
+              "context_consistency": 1.0,
+              "contract_fulfillment": 0.6542553191489362,
+              "conversation_naturalness": 0.9971875863498204,
+              "factual_correctness": 0.6542553191489362,
+              "logic_factual_consistency": 0.6542553191489362,
+              "mechanical_integrity": 0.9809840425531916,
+              "prompt_function_alignment": 0.07825797872340426,
+              "response_completeness": 1.0,
+              "response_mode_fulfillment": 0.07825797872340426,
+              "safety_boundary": 1.0,
+              "task_adequacy": 0.6326462765957447
+            },
+            "quality_dimension_means": {
+              "brevity_appropriateness": 1.0,
+              "comprehensibility": 0.9809840425531916,
+              "context_consistency": 1.0,
+              "contract_fulfillment": 0.6542553191489362,
+              "conversation_naturalness": 0.9971875863498204,
+              "factual_correctness": 0.6542553191489362,
+              "logic_factual_consistency": 0.6542553191489362,
+              "mechanical_integrity": 0.9809840425531916,
+              "prompt_function_alignment": 0.07825797872340426,
+              "response_completeness": 1.0,
+              "response_mode_fulfillment": 0.07825797872340426,
+              "safety_boundary": 1.0,
+              "task_adequacy": 0.6326462765957447
+            },
+            "critical_failure_count": 1,
+            "critical_case_count": 1,
+            "major_issue_count": 299,
+            "major_case_count": 295,
+            "minor_issue_count": 0,
+            "review_diagnostic_count": 0,
+            "semantic_warning_count": 0,
+            "observable_quality_pass_rate": 0.6077127659574468,
+            "semantic_pass_rate": 0.6077127659574468,
+            "semantic_pass_rate_is_deprecated_alias": true,
+            "complete_utterance_rate": 1.0,
+            "critical_failure_type_counts": {
+              "compound_decoding_corruption": 1
+            },
+            "major_issue_type_counts": {
+              "explicit_required_content_missing": 260,
+              "numeric_fragment_noise": 19,
+              "tokenization_fragmentation": 20
+            },
+            "minor_issue_type_counts": {},
+            "review_diagnostic_type_counts": {},
+            "warning_type_counts": {},
+            "mean_reference_token_f1": null,
+            "mean_reference_alignment_score": null,
+            "category_quality_scores": {
+              "uncategorized": 0.6594831790549874
+            },
+            "category_scores": {
+              "uncategorized": 0.6594831790549874
+            },
+            "category_quality_pass_rates": {
+              "uncategorized": 0.6077127659574468
+            },
+            "category_intelligibility_pass_rates": {
+              "uncategorized": 0.9986702127659575
+            },
+            "category_hard_failure_case_counts": {
+              "uncategorized": 1
+            },
+            "category_quality_dimensions": {
+              "uncategorized": {
+                "brevity_appropriateness": 1.0,
+                "comprehensibility": 0.9809840425531916,
+                "context_consistency": 1.0,
+                "contract_fulfillment": 0.6542553191489362,
+                "conversation_naturalness": 0.9971875863498204,
+                "factual_correctness": 0.6542553191489362,
+                "logic_factual_consistency": 0.6542553191489362,
+                "mechanical_integrity": 0.9809840425531916,
+                "prompt_function_alignment": 0.07825797872340426,
+                "response_completeness": 1.0,
+                "response_mode_fulfillment": 0.07825797872340426,
+                "safety_boundary": 1.0,
+                "task_adequacy": 0.6326462765957447
+              }
+            },
+            "category_observable_quality_pass_rates": {
+              "uncategorized": 0.6077127659574468
+            },
+            "category_semantic_pass_rates": {
+              "uncategorized": 0.6077127659574468
+            },
+            "category_reference_token_f1": {
+              "uncategorized": null
+            },
+            "category_reference_alignment_scores": {
+              "uncategorized": null
+            },
+            "category_complete_utterance_rates": {
+              "uncategorized": 1.0
+            },
+            "category_critical_case_counts": {
+              "uncategorized": 1
+            },
+            "category_major_case_counts": {
+              "uncategorized": 295
+            },
+            "category_issue_costs": {
+              "uncategorized": 0.11981382978723404
+            },
+            "supported_case_count": 530,
+            "unsupported_case_count": 139,
+            "conflict_case_count": 63,
+            "procedure_case_count": 150,
+            "social_case_count": 20,
+            "unknown_case_count": 0,
+            "supported_correct_count": 346,
+            "correct_abstention_count": 101,
+            "unsupported_confident_answer_count": 38,
+            "unnecessary_abstention_count": 83,
+            "conflict_detected_count": 38,
+            "conflict_safe_count": 63,
+            "faithfulness_applicable_count": 485,
+            "faithful_answer_count": 484,
+            "procedure_correct_count": 127,
+            "procedure_answerable_case_count": 150,
+            "evidence_calibration_applicable_count": 76,
+            "evidence_calibration_success_count": 39,
+            "stale_precedence_applicable_count": 38,
+            "stale_precedence_success_count": 28,
+            "prompt_injection_task_applicable_count": 38,
+            "prompt_injection_task_success_count": 38,
+            "social_usable_count": 20,
+            "retrieval_applicable_count": 530,
+            "retrieval_hit_count": 530,
+            "prompt_support_applicable_count": 530,
+            "prompt_support_hit_count": 530,
+            "prompt_integrity_failure_count": 0,
+            "decode_integrity_applicable_count": 467,
+            "decode_integrity_failure_count": 0,
+            "adversarial_applicable_count": 0,
+            "adversarial_success_count": 0,
+            "supported_answer_correctness": 0.6528301886792452,
+            "evidence_faithfulness": 0.9979381443298969,
+            "correct_abstention_rate": 0.7266187050359713,
+            "unnecessary_abstention_rate": 0.15660377358490565,
+            "unsupported_confident_answer_rate": 0.2733812949640288,
+            "conflict_detection_rate": 0.6031746031746031,
+            "conflict_explicit_acknowledgment_rate": 0.6031746031746031,
+            "conflict_safe_handling_rate": 1.0,
+            "procedure_correctness": 0.8466666666666667,
+            "social_usable_rate": 1.0,
+            "evidence_calibration_success_rate": 0.5131578947368421,
+            "stale_precedence_rate": 0.7368421052631579,
+            "prompt_injection_task_success_rate": 1.0,
+            "retrieval_recall_at_k": 1.0,
+            "prompt_support_recall_at_k": 1.0,
+            "prompt_integrity_failure_rate": 0.0,
+            "decode_integrity_failure_rate": 0.0,
+            "injection_resistance_rate": null,
+            "median_completion_tokens": 7.5,
+            "p90_completion_tokens": 14,
+            "mean_generation_seconds": 0.18384326994677916,
+            "mean_retrieval_seconds": 0.008723483776632148,
+            "stop_reason_counts": {
+              "external_gate": 285,
+              "eos": 467
+            },
+            "external_gate_reason_counts": {
+              "prompt_budget:structured_evidence_conflict": 76,
+              "prompt_budget:retrieval_pre_gate_passed": 447,
+              "not_applicable": 20,
+              "prompt_budget:retrieval_score_below_calibrated_threshold": 209
+            },
+            "metric_denominators": {
+              "supported_answer_correctness": 530,
+              "evidence_faithfulness": 485,
+              "correct_abstention_rate": 139,
+              "unsupported_confident_answer_rate": 139,
+              "conflict_detection_rate": 63,
+              "conflict_explicit_acknowledgment_rate": 63,
+              "conflict_safe_handling_rate": 63,
+              "procedure_correctness": 150,
+              "social_usable_rate": 20,
+              "evidence_calibration_success_rate": 76,
+              "stale_precedence_rate": 38,
+              "prompt_injection_task_success_rate": 38,
+              "retrieval_recall_at_k": 530,
+              "prompt_support_recall_at_k": 530,
+              "prompt_integrity_failure_rate": 752,
+              "decode_integrity_failure_rate": 467,
+              "injection_resistance_rate": 0
+            }
+          }
+        },
+        "primary_quality_conditions": [
+          "oracle_rag",
+          "real_rag"
+        ],
+        "model_weight_bytes": 1868208683,
+        "peak_allocated_vram_bytes": 1956802048,
+        "process_rss_bytes": null,
+        "knowledge_db": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\teacher_dual_sft_v1\\rag_v3.sqlite3",
+        "gate_calibration": "C:\\Users\\clclc\\BusinessProject\\Chat-Bubble\\short-response-model-phase-0-1-2\\artifacts\\teacher_dual_sft_v1\\rag_v3_calibration_query_aware_v21.json",
+        "response_control": "eos_only",
+        "retrieval_selection_policy": "query_aware_v21",
+        "max_new_tokens": 32,
+        "max_sequence_length": 1024,
+        "maximum_evidence_tokens": 384,
+        "prompt_truncation_policy": "budget_passages_then_fail_closed; no tokenizer truncation",
+        "benchmark_decision_class_counts": {
+          "conflict": 63,
+          "supported": 530,
+          "social": 20,
+          "unsupported": 139
+        },
+        "evaluation_valid": true,
+        "evaluation_invalidity_reasons": [],
+        "research_ready": true,
+        "research_readiness_reasons": [],
+        "smoke_test": false,
+        "minimum_case_requirements": {
+          "per_condition": 1,
+          "supported": 1,
+          "unsupported": 1,
+          "social": 0
         }
       }
     }

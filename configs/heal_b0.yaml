@@ -58,3 +58,12 @@ determinism:
 
 resume:
   allow_env_drift: false     # a new GPU/driver/torch means a different model
+
+  # TEMPORARY, for the B0 run resumed from its step-150 calibration checkpoint.
+  # The code-fingerprint guard correctly refused that resume: heal.py changed
+  # between the calibration and the resume. Verified inert -- the whole diff
+  # (dc31a8b..963a41f) is a `# noqa` comment plus a `finally` block that unlinks
+  # a JSON heartbeat file. It touches no tensor, RNG, optimizer or plan, and no
+  # other training module changed.
+  # Return this to false once B0 completes; the guard should be strict by default.
+  allow_code_drift: true
