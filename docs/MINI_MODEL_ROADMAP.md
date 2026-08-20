@@ -1156,6 +1156,30 @@ information."` and R2 instead begins `"Based on the available information, the
 first launch region for X is…"` and runs to the 32-token cap. Same prefix words,
 opposite decision — a token-level nudge flipped the abstain/answer choice.
 
+**Mechanism tested, and the obvious explanation is wrong.** The first hypothesis
+was that these DEV entity names were never in the keep-set input (the vocabulary
+was built from training corpora, and RAG DEV was not in this repo at the time), so
+they would tokenize worse. Measured, and they do not:
+
+| | stock | R2 |
+|---|---:|---:|
+| all 10 failing entity names (`ThistleEngine`, `IvorySensor`, `BirchInstrument`, …) | 3–4 tok | **identical** |
+| `"I don't know based on the available information."` | 10 tok | **identical** |
+| prompt tokens, the 14 regressed cases | — | 1.0210x |
+| prompt tokens, 112 unchanged cases | — | 1.0015x |
+
+So the vocabulary is not too tight, and the trim did not damage evidence copying.
+What it does is shift positions by ~2% on these particular prompts, and `conflict`
+is the most fragile category there is -- stock's own score on it is 0.5847, second
+worst of sixteen, and stock itself misses 14 of 202 abstentions. These were
+borderline decisions that any small perturbation tips.
+
+> The causal claim is therefore narrower than "the trim cost 9 abstentions". It is:
+> **the trim perturbs token positions slightly, and the most borderline category
+> flips.** An equally benign perturbation would likely flip a comparable number in
+> either direction. What healing has to do is make the decision robust, not restore
+> a lost capability.
+
 Two smaller mechanisms appear in the remaining 5 regressions:
 
 - **Entity corruption from re-tokenization.** `BirchInstrument` → `BIRCHINSTRUMENT`.
