@@ -1,0 +1,40 @@
+{
+  "cases": 6,
+  "keep": 0.5,
+  "tau": 0.93,
+  "samples": 18816,
+  "mean_slots_moved": 27.017857142857142,
+  "mean_err": {
+    "topk": 0.14238540828227997,
+    "rss": 0.1781303733587265,
+    "rss-shuffle": 0.15937606990337372,
+    "rss-mass": 0.16662873327732086,
+    "streaming": 0.2909385561943054
+  },
+  "median_err": {
+    "topk": 0.06284481287002563,
+    "rss": 0.10614586621522903,
+    "rss-shuffle": 0.08568701148033142,
+    "rss-mass": 0.09228295087814331,
+    "streaming": 0.14336629211902618
+  },
+  "mean_rho": {
+    "topk": 1.8611092567443848,
+    "rss": 1.804498314857483,
+    "rss-shuffle": 1.828307867050171,
+    "rss-mass": 1.804498314857483,
+    "streaming": 1.695097804069519
+  },
+  "rss_vs_topk": {
+    "win_frac": 0.29889455782312924,
+    "p": 0.0,
+    "rel_pct": -25.104373931884766
+  },
+  "rss_vs_shuffle": {
+    "win_frac": 0.430484693877551,
+    "p": 4.395842624157551e-81,
+    "rel_pct": -11.767327308654785
+  },
+  "verdict": "KILL-1",
+  "verdict_text": "suppression does not improve the attention output it claims to protect. Stop; report the negative."
+}
