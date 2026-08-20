@@ -92,9 +92,23 @@ def patch_attention() -> bool:
                 if prev is not None and prev.shape[-1] == s.shape[-1]:
                     _SCORES[li] = prev + s          # accumulate
                 elif prev is not None and prev.shape[-1] < s.shape[-1]:
+                    # The cache grew; carry the accumulated history forward onto
+                    # the prefix it covers.
                     pad = s.clone()
                     pad[..., : prev.shape[-1]] += prev
                     _SCORES[li] = pad
+                elif prev is not None:
+                    # prev is LONGER than s. Overwriting would throw away every
+                    # observation accumulated so far and restart the ranking from
+                    # one forward pass, which looks like a policy that simply
+                    # prefers recent tokens. Unreachable today; reachable under
+                    # chunked prefill and after a cache reset without
+                    # reset_scores(). Fail rather than quietly forget.
+                    raise RuntimeError(
+                        f"layer {li}: accumulated scores cover {prev.shape[-1]} "
+                        f"positions but this pass covers {s.shape[-1]}. Silently "
+                        f"replacing them would discard all accumulated history. "
+                        f"Call reset_scores() between sequences.")
                 else:
                     _SCORES[li] = s
         return original(module, query, key, value, attention_mask=attention_mask,
@@ -119,6 +133,16 @@ def set_recording(enabled: bool, window: int | None = None) -> None:
 
 def reset_scores() -> None:
     _SCORES.clear()
+
+
+def heavy_zero_count() -> int:
+    """How many times a policy ran with significance selection disabled."""
+    return _STATE.get("heavy_zero_count", 0)
+
+
+def reset_heavy_zero_count() -> None:
+    _STATE["heavy_zero_count"] = 0
+    _STATE["heavy_zero_warned"] = False
 
 
 def get_scores() -> dict[int, torch.Tensor]:
@@ -178,14 +202,35 @@ class SignificanceLayer(DynamicLayer):
         s = _SCORES.get(self.layer_idx)
 
         if s is None:
-            # No scores yet (can only happen if eviction is triggered before any
-            # attention call). Fall back to sinks + recent, which is StreamingLLM.
-            s = torch.zeros(b, n_kv, n, device=k.device, dtype=torch.float32)
-        elif s.shape[-1] != n:
-            # Scores lag the cache by the tokens added since the last attention
-            # call. Those positions are the newest, so they sit inside the recent
-            # window regardless; give them +inf so they are never the ones dropped.
-            pad = torch.full((b, n_kv, n - s.shape[-1]), float("inf"),
+            # Unreachable: update() only calls _evict once _SCORES has an entry.
+            # It used to fall back to a zero vector, which makes select_keep
+            # return sinks + recent -- a sliding window, silently, which is the
+            # exact failure that invalidated an entire sweep once already.
+            raise RuntimeError(
+                f"layer {self.layer_idx}: _evict with no scores. This degrades to "
+                f"sinks+recent (a sliding window) rather than failing, so it is "
+                f"raised instead. Check the update() guard.")
+
+        if s.shape[-1] != n:
+            lag = n - s.shape[-1]
+            n_recent = pol.n_recent()
+            if lag < 0 or lag > n_recent:
+                # Padding the lag with +inf is only safe while the un-scored
+                # tokens all sit inside the protected recent window. Once the lag
+                # exceeds it -- which is exactly what happens under chunked
+                # prefill, where the lag is a whole chunk rather than one decode
+                # token -- those +inf entries win the heavy top-k unconditionally
+                # and the policy becomes sinks + newest-chunk. A sliding window
+                # again, and again silently.
+                raise RuntimeError(
+                    f"layer {self.layer_idx}: score lag {lag} exceeds the recent "
+                    f"window {n_recent} (cache {n}, scores {s.shape[-1]}). Padding "
+                    f"this with +inf would silently degrade the policy to "
+                    f"sinks+recent. Score the chunk before evicting it.")
+            # Safe lag: the un-scored tokens are the newest and are protected by
+            # the recent window regardless, so +inf only keeps them from being
+            # chosen as victims.
+            pad = torch.full((b, n_kv, lag), float("inf"),
                              device=k.device, dtype=torch.float32)
             s = torch.cat([s.to(k.device).float(), pad], dim=-1)
 
@@ -311,7 +356,28 @@ class Policy:
         return min(self.recent, max(0, self.budget - self.n_sinks()))
 
     def heavy(self) -> int:
-        return max(0, self.budget - self.n_sinks() - self.n_recent())
+        """Slots chosen by significance. Zero means the policy is StreamingLLM.
+
+        Deliberately warns rather than raising: a raise mid-sweep truncates the
+        run and leaves a partial results.jsonl that the summarizer will happily
+        aggregate. The count is exported so a run manifest can record how many
+        items silently had no significance selection at all -- on rag_dev, 20 of
+        752 prompts hit this at every keep fraction.
+        """
+        h = max(0, self.budget - self.n_sinks() - self.n_recent())
+        if h == 0:
+            _STATE["heavy_zero_count"] = _STATE.get("heavy_zero_count", 0) + 1
+            if not _STATE.get("heavy_zero_warned"):
+                _STATE["heavy_zero_warned"] = True
+                import warnings
+                warnings.warn(
+                    f"Policy.heavy() == 0 (budget {self.budget}, sinks "
+                    f"{self.n_sinks()}, recent {self.n_recent()}): significance "
+                    f"selection is disabled and this is plain StreamingLLM. "
+                    f"Budget must exceed sinks + recent. Further occurrences are "
+                    f"counted in significance.heavy_zero_count(), not warned.",
+                    RuntimeWarning, stacklevel=2)
+        return h
 
 
 def compress(cache, policy: Policy, scores: dict[int, torch.Tensor] | None = None) -> dict:
@@ -336,9 +402,13 @@ def compress(cache, policy: Policy, scores: dict[int, torch.Tensor] | None = Non
 
         s = scores[li].to(k.device).float()          # [b, n_kv, n]
         if s.shape[-1] != n:
-            report["after"] += n
-            report["skipped"] += 1
-            continue
+            # Skipping here leaves that layer's cache FULL while the report says
+            # the pass succeeded, so a run reads as "compression applied" with
+            # some layers uncompressed -- an invisible, layer-dependent budget.
+            raise RuntimeError(
+                f"layer {li}: scores cover {s.shape[-1]} positions but the cache "
+                f"holds {n}. compress() used to skip this layer and leave it "
+                f"uncompressed while reporting success.")
 
         idx = select_keep(s, n, policy, k.device)             # [b, n_kv, B]
         gather_idx = idx.unsqueeze(-1).expand(-1, -1, -1, d)
