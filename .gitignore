@@ -82,3 +82,7 @@ artifacts/verify_interrupt/
 # scripts/eval/import_eval_assets.py; manifests/eval_assets.json carries the
 # sha256 for each, including the sealed test set.
 artifacts/eval_sets/*.jsonl
+
+# Exported adapters. Re-derivable from a run checkpoint via
+# scripts/train/export_adapter.py; export_manifest.json carries the provenance.
+artifacts/adapters/**/*.safetensors
