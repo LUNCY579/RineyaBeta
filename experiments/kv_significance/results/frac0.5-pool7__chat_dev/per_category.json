@@ -1,0 +1,126 @@
+{
+  "acknowledgment": {
+    "n": 10,
+    "mean_quality_score": 0.7147000000000001
+  },
+  "acknowledgment_in_character": {
+    "n": 20,
+    "mean_quality_score": 0.7700257142857143
+  },
+  "apology_repair": {
+    "n": 20,
+    "mean_quality_score": 0.9916
+  },
+  "celebration": {
+    "n": 10,
+    "mean_quality_score": 0.8522244444444445
+  },
+  "celebration_in_character": {
+    "n": 20,
+    "mean_quality_score": 0.7408911111111113
+  },
+  "clarification": {
+    "n": 10,
+    "mean_quality_score": 0.8585499999999999
+  },
+  "complex_escalation": {
+    "n": 10,
+    "mean_quality_score": 0.8096
+  },
+  "complex_escalation_in_character": {
+    "n": 20,
+    "mean_quality_score": 0.7326000000000001
+  },
+  "concise_clarification": {
+    "n": 20,
+    "mean_quality_score": 0.8425000000000002
+  },
+  "conflict_deescalation": {
+    "n": 20,
+    "mean_quality_score": 0.9378400000000002
+  },
+  "context_consistency": {
+    "n": 10,
+    "mean_quality_score": 0.7199999999999999
+  },
+  "contextual_follow_up": {
+    "n": 20,
+    "mean_quality_score": 0.8272172727272729
+  },
+  "empathy": {
+    "n": 10,
+    "mean_quality_score": 0.7759090909090908
+  },
+  "empathy_in_character": {
+    "n": 20,
+    "mean_quality_score": 0.8518383333333335
+  },
+  "factual_compression": {
+    "n": 10,
+    "mean_quality_score": 0.8613142857142858
+  },
+  "factual_compression_in_character": {
+    "n": 20,
+    "mean_quality_score": 0.8893999999999999
+  },
+  "follow_up": {
+    "n": 10,
+    "mean_quality_score": 0.7191666666666665
+  },
+  "gentle_disagreement": {
+    "n": 20,
+    "mean_quality_score": 0.8562858333333333
+  },
+  "initiative_without_overreach": {
+    "n": 20,
+    "mean_quality_score": 0.8460000000000001
+  },
+  "knowledge_boundary": {
+    "n": 20,
+    "mean_quality_score": 0.804
+  },
+  "memory_recall": {
+    "n": 20,
+    "mean_quality_score": 0.7200000000000002
+  },
+  "mood_consistency": {
+    "n": 20,
+    "mean_quality_score": 0.9912666666666666
+  },
+  "naturalness": {
+    "n": 10,
+    "mean_quality_score": 0.7645727272727272
+  },
+  "playful_banter": {
+    "n": 20,
+    "mean_quality_score": 0.9157
+  },
+  "relationship_continuity": {
+    "n": 20,
+    "mean_quality_score": 0.8243000000000003
+  },
+  "role_identity_adherence": {
+    "n": 20,
+    "mean_quality_score": 0.8901199999999999
+  },
+  "safety_boundary": {
+    "n": 10,
+    "mean_quality_score": 0.7733000000000001
+  },
+  "safety_boundary_in_character": {
+    "n": 20,
+    "mean_quality_score": 0.7613000000000002
+  },
+  "scene_grounding": {
+    "n": 20,
+    "mean_quality_score": 0.8171250000000002
+  },
+  "trust_and_secrets": {
+    "n": 20,
+    "mean_quality_score": 0.8146400000000001
+  },
+  "uncertainty": {
+    "n": 10,
+    "mean_quality_score": 0.8018428571428571
+  }
+}

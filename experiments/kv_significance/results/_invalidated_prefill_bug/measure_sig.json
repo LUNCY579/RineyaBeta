@@ -1,0 +1,75 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "torch": "2.13.0+cu130",
+  "decode_tokens": 16,
+  "window": 16,
+  "recent": 128,
+  "results": [
+    {
+      "length": 4096,
+      "budget": 0,
+      "stored_kv": 4096,
+      "cache_mib": 448.0,
+      "score_mib": 0.0,
+      "score_pct_of_cache": 0.0,
+      "peak_mib": 1466.3,
+      "prefill_ms": 463.4,
+      "decode_tok_per_s": 17.5
+    },
+    {
+      "length": 4096,
+      "budget": 1024,
+      "stored_kv": 1024,
+      "cache_mib": 112.0,
+      "score_mib": 0.875,
+      "score_pct_of_cache": 0.781,
+      "peak_mib": 1131.2,
+      "prefill_ms": 409.3,
+      "decode_tok_per_s": 11.8
+    },
+    {
+      "length": 4096,
+      "budget": 512,
+      "stored_kv": 512,
+      "cache_mib": 56.0,
+      "score_mib": 0.438,
+      "score_pct_of_cache": 0.781,
+      "peak_mib": 1074.8,
+      "prefill_ms": 392.2,
+      "decode_tok_per_s": 10.8
+    },
+    {
+      "length": 16384,
+      "budget": 0,
+      "stored_kv": 16384,
+      "cache_mib": 1792.0,
+      "score_mib": 0.0,
+      "score_pct_of_cache": 0.0,
+      "peak_mib": 3128.5,
+      "prefill_ms": 4879.9,
+      "decode_tok_per_s": 4.4
+    },
+    {
+      "length": 16384,
+      "budget": 1024,
+      "stored_kv": 1024,
+      "cache_mib": 112.0,
+      "score_mib": 0.875,
+      "score_pct_of_cache": 0.781,
+      "peak_mib": 1449.4,
+      "prefill_ms": 1865.5,
+      "decode_tok_per_s": 11.7
+    },
+    {
+      "length": 16384,
+      "budget": 512,
+      "stored_kv": 512,
+      "cache_mib": 56.0,
+      "score_mib": 0.438,
+      "score_pct_of_cache": 0.781,
+      "peak_mib": 1393.0,
+      "prefill_ms": 1779.7,
+      "decode_tok_per_s": 11.2
+    }
+  ]
+}

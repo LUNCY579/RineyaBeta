@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+"""Quality sweep for significance-gated eviction, protocol-identical to run_gates.py.
+
+Same protocol as the gate baselines and the attention-shape sweep: chat template
+with `enable_thinking=False`, `max_new_tokens=32`, greedy, `eos_only`, visible
+token count passed to the scorer as both `token_count` and `visible_model_tokens`.
+
+`model.generate` is used unmodified -- eviction happens inside the cache, so this
+cannot drift from the reference the way a hand-rolled decode loop would.
+
+Budget can be absolute (`--budget 128`) or a fraction of each prompt's length
+(`--keep-frac 0.5`). The fraction form is usually the meaningful one, because
+these prompts are 41-330 tokens and a fixed budget means very different
+compression ratios across the set.
+
+Run `--budget 0` first: eviction off, which produces the reference every other
+run is compared against.
+
+Usage:
+    python src/run_eval_sig.py --budget 0 --dataset chat_dev
+    python src/run_eval_sig.py --keep-frac 0.5 --dataset chat_dev --compare-to off
+    python src/run_eval_sig.py --keep-frac 0.25 --pool 7 --dataset rag_dev --compare-to off
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+
+import torch
+
+HERE = Path(__file__).resolve().parent
+EXP = HERE.parent
+REPO = HERE.parents[2]
+sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(REPO / "experiments/attention_shape/src"))
+sys.path.insert(0, str(REPO))
+
+import significance as sig  # noqa: E402
+from compat import force_repeat_kv  # noqa: E402
+
+MODEL = "artifacts/rineya-core-en32k-28L"
+DATASETS = {
+    "chat_dev": "artifacts/eval_sets/chat_dev.jsonl",
+    "rag_dev": "artifacts/eval_sets/rag_dev.jsonl",
+}
+
+
+def normalize(record: dict) -> dict:
+    rec = dict(record)
+    msgs = list(rec.get("messages") or [])
+    reference = None
+    if msgs and msgs[-1].get("role") == "assistant":
+        reference = str(msgs[-1].get("content") or "")
+        msgs = msgs[:-1]
+    rec["messages"] = msgs
+    rec["reference"] = rec.get("reference") or reference
+    meta = rec.get("metadata") or {}
+    rec["category"] = (rec.get("category") or meta.get("category")
+                       or meta.get("reply_class") or "uncategorized")
+    return rec
+
+
+def load_records(path: Path, limit: int | None) -> list[dict]:
+    rows = []
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                rows.append(normalize(json.loads(line)))
+            if limit and len(rows) >= limit:
+                break
+    return rows
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--dataset", default="chat_dev", choices=sorted(DATASETS))
+    ap.add_argument("--budget", type=int, default=0, help="0 = eviction off")
+    ap.add_argument("--keep-frac", type=float, default=None,
+                    help="budget as a fraction of each prompt's length")
+    ap.add_argument("--sinks", type=int, default=4)
+    ap.add_argument("--recent", type=int, default=32)
+    ap.add_argument("--recent-frac", type=float, default=None,
+                    help="recent window as a fraction of the budget. With a fixed "
+                         "recent=32 and a small budget the always-kept regions "
+                         "consume nearly the whole allowance -- at keep 0.25 on a "
+                         "150-token prompt only 5%% of the budget was actually "
+                         "significance-selected, making that cell StreamingLLM "
+                         "rather than a test of scoring.")
+    ap.add_argument("--pool", type=int, default=1)
+    ap.add_argument("--window", type=int, default=16)
+    ap.add_argument("--no-sinks", action="store_true", help="disable sink protection")
+    ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--tag", default=None)
+    ap.add_argument("--device", default="cuda:0" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--compare-to", default=None)
+    args = ap.parse_args()
+
+    force_repeat_kv(verbose=False)
+    sig.patch_attention()
+
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from scripts.common.quality_evaluation import (  # noqa: E402
+        aggregate_quality_rows, build_corpus_profile, evaluate_response,
+        load_quality_config)
+
+    path = REPO / MODEL
+    tok = AutoTokenizer.from_pretrained(path)
+    model = AutoModelForCausalLM.from_pretrained(
+        path, dtype=torch.bfloat16 if args.device.startswith("cuda") else torch.float32,
+    ).to(args.device).eval()
+
+    protocol = json.loads(
+        (REPO / "manifests/eval_assets.json").read_text(encoding="utf-8")
+    ).get("generation_protocol", {})
+    max_new = protocol.get("max_new_tokens", 32)
+
+    records = load_records(REPO / DATASETS[args.dataset], args.limit)
+    evicting = bool(args.budget) or args.keep_frac is not None
+    tag = args.tag or ("off" if not evicting else
+                       (f"frac{args.keep_frac}" if args.keep_frac is not None
+                        else f"b{args.budget}")
+                       + (f"-pool{args.pool}" if args.pool > 1 else "")
+                       + (f"-rf{args.recent_frac}" if args.recent_frac is not None else "")
+                       + ("-nosink" if args.no_sinks else ""))
+
+    print(f"variant {tag}   dataset {args.dataset} ({len(records)} cases)   "
+          f"device {args.device}")
+    print(f"eviction {'ON' if evicting else 'OFF'}"
+          + (f"   budget {'frac ' + str(args.keep_frac) if args.keep_frac is not None else args.budget}"
+             f"   sinks {0 if args.no_sinks else args.sinks}   recent {args.recent}"
+             f"   pool {args.pool}   window {args.window}" if evicting else ""))
+
+    config = load_quality_config()
+    corpus_profile = build_corpus_profile(records)
+
+    rows, t0 = [], time.time()
+    kept_ratios = []
+    for i, rec in enumerate(records):
+        prompt = tok.apply_chat_template(rec["messages"], tokenize=False,
+                                         add_generation_prompt=True, enable_thinking=False)
+        enc = tok(prompt, return_tensors="pt").to(args.device)
+        n_prompt = enc["input_ids"].shape[-1]
+
+        policy = None
+        if evicting:
+            budget = (max(1, int(round(args.keep_frac * n_prompt)))
+                      if args.keep_frac is not None else args.budget)
+            recent = (max(1, int(round(args.recent_frac * budget)))
+                      if args.recent_frac is not None else args.recent)
+            policy = sig.Policy(budget=budget, sinks=args.sinks, recent=recent,
+                                protect_sinks=not args.no_sinks, pool=args.pool)
+
+        sig.reset_scores()
+        sig.set_recording(evicting, window=args.window)
+        cache = sig.SignificanceCache(config=model.config, policy=policy)
+        with torch.no_grad():
+            out = model.generate(**enc, max_new_tokens=max_new, do_sample=False,
+                                 pad_token_id=tok.pad_token_id,
+                                 eos_token_id=tok.eos_token_id,
+                                 past_key_values=cache)
+        sig.set_recording(False)
+        stored = cache.stored_lengths()[0]
+        kept_ratios.append(stored / max(n_prompt, 1))
+
+        new_tokens = out[0, n_prompt:]
+        reply = tok.decode(new_tokens, skip_special_tokens=True).strip()
+        visible = len(tok(reply, add_special_tokens=False)["input_ids"])
+        quality = evaluate_response(rec, reply, visible, visible_model_tokens=visible,
+                                    config=config, corpus_profile=corpus_profile)
+        rows.append({"id": rec.get("id"), "category": rec["category"], "reply": reply,
+                     "prompt_tokens": n_prompt, "stored_kv": stored,
+                     "visible_generated_tokens": visible, **quality})
+        if (i + 1) % 100 == 0:
+            print(f"  {i + 1}/{len(records)}  {time.time() - t0:.0f}s", flush=True)
+
+    summary = aggregate_quality_rows(rows)
+    elapsed = time.time() - t0
+    mean_keep = sum(kept_ratios) / len(kept_ratios)
+    print(f"\nmean_quality_score      {summary['mean_quality_score']:.5f}")
+    print(f"quality_pass_rate       {summary['quality_pass_rate']:.5f}")
+    print(f"intelligibility         {summary['intelligibility_pass_rate']:.5f}")
+    print(f"mean kept / prompt      {mean_keep:.3f}")
+    print(f"elapsed                 {elapsed:.1f}s")
+
+    out_dir = EXP / "results" / f"{tag}__{args.dataset}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n",
+                                          encoding="utf-8")
+    per_cat: dict[str, dict] = {}
+    for r in rows:
+        b = per_cat.setdefault(r["category"], {"n": 0, "total": 0.0})
+        b["n"] += 1
+        b["total"] += float(r.get("quality_score") or 0.0)
+    (out_dir / "per_category.json").write_text(json.dumps(
+        {k: {"n": v["n"], "mean_quality_score": v["total"] / v["n"]}
+         for k, v in sorted(per_cat.items())}, indent=2) + "\n", encoding="utf-8")
+    with (out_dir / "results.jsonl").open("w", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    (out_dir / "run_manifest.json").write_text(json.dumps({
+        "tag": tag, "dataset": args.dataset, "eviction": evicting,
+        "budget": args.budget, "keep_frac": args.keep_frac,
+        "sinks": 0 if args.no_sinks else args.sinks, "recent": args.recent,
+        "recent_frac": args.recent_frac,
+        "pool": args.pool, "window": args.window,
+        "mean_kept_ratio": round(mean_keep, 4),
+        "case_count": len(rows), "protocol": protocol,
+        "elapsed_s": round(elapsed, 1),
+    }, indent=2) + "\n", encoding="utf-8")
+    print(f"wrote {out_dir}")
+
+    if args.compare_to:
+        ref_path = EXP / "results" / f"{args.compare_to}__{args.dataset}" / "results.jsonl"
+        if not ref_path.exists():
+            raise SystemExit(f"no reference run at {ref_path}")
+        ref = {json.loads(l)["id"]: json.loads(l)
+               for l in ref_path.read_text(encoding="utf-8").splitlines() if l.strip()}
+        common = [r for r in rows if r["id"] in ref]
+        same = sum(1 for r in common if r["reply"] == ref[r["id"]]["reply"])
+        ref_mean = sum(float(ref[r["id"]].get("quality_score") or 0.0)
+                       for r in common) / max(len(common), 1)
+        print(f"\nvs {args.compare_to}: {same}/{len(common)} byte-identical "
+              f"({100 * same / max(len(common), 1):.1f}%)")
+        print(f"  quality {ref_mean:.5f} -> {summary['mean_quality_score']:.5f}  "
+              f"({summary['mean_quality_score'] - ref_mean:+.5f})")
+
+
+if __name__ == "__main__":
+    main()
