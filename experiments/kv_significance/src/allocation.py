@@ -108,13 +108,39 @@ def main() -> None:
     ap.add_argument("--total", type=int, default=None,
                     help="total tokens across all layers (default: 64 x n_layers)")
     ap.add_argument("--grid", type=int, default=8)
-    ap.add_argument("--floor", type=int, default=8,
-                    help="minimum per layer; below the sink count is meaningless")
+    ap.add_argument("--floor", type=int, default=48,
+                    help="minimum per layer. MUST be >= sinks + recent + min_heavy: "
+                         "Policy.heavy() silently returns 0 when the budget is "
+                         "consumed by sinks+recent, so a layer allocated 16 or 32 "
+                         "runs pure sinks+recent with NO significance selection and "
+                         "no warning. With sinks=4, recent=32, heavy>=12 needs 48.")
+    ap.add_argument("--min-heavy", type=int, default=12)
+    ap.add_argument("--sinks", type=int, default=4)
+    ap.add_argument("--recent", type=int, default=32)
     ap.add_argument("--out", type=Path, default=EXP / "results" / "allocation.json")
     args = ap.parse_args()
 
     ks, rho, meta = load_curves(args.curves)
     L = len(rho)
+
+    # Drop columns that were never measured. concentration.py used to credit
+    # rho = 1.0 whenever the budget exceeded the sequence, which fabricated the
+    # entire k=256 column as exactly 1.0000 on 192-265 token prompts and
+    # flattered every allocation derived from it.
+    keep = [i for i in range(len(ks))
+            if not all(r[i] >= 0.9995 for r in rho)
+            and not all(r[i] <= 1e-9 for r in rho)]
+    dropped = [ks[i] for i in range(len(ks)) if i not in keep]
+    if dropped:
+        print(f"dropping unmeasured/degenerate columns k={dropped} "
+              f"(saturated at 1.0 or never measured)")
+    ks = [ks[i] for i in keep]
+    rho = [[r[i] for i in keep] for r in rho]
+
+    need = args.sinks + args.recent + args.min_heavy
+    if args.floor < need:
+        print(f"WARNING: floor {args.floor} < sinks+recent+min_heavy = {need}; "
+              f"layers below {need} will silently run with heavy()==0")
     total = args.total if args.total is not None else 64 * L
     uniform = total // L
 
@@ -147,10 +173,21 @@ def main() -> None:
         print(f"{l:>6}{alloc[l]:>8}{alloc[l] - uniform:>+12}"
               f"{rho_at(ks, rho[l], alloc[l]):>15.4f}")
 
-    print("\nCAVEAT: the objective is sum(1-rho), which this repository has already")
-    print("measured to be necessary but NOT sufficient -- rho > 0.996 still cost")
-    print("0.199 end-to-end. This allocation is a better-motivated prior than")
-    print("uniform; it is not validated until it is run against a task.")
+    print()
+    print("CAVEATS -- read before quoting this number:")
+    print("  1. sum(1-rho) is a PROXY. This repo measured rho > 0.996 still")
+    print("     costing 0.199 end-to-end: retained mass is necessary, not")
+    print("     sufficient, and errors compose across 28 layers.")
+    print("  2. The gain SHRINKS as the budget grows and vanishes where it")
+    print("     would matter: ~4.2% at mean 64/layer, 0.00% at mean 128/layer.")
+    print("     Mean 64/layer is about keep 0.28 on rag_dev, where measured")
+    print("     end-to-end damage is already 0.23-0.33 of a 0.66939 baseline.")
+    print("     So this helps only in a regime the model is already broken in.")
+    print("  3. A LARGER, ALREADY-MEASURED lever exists at identical memory:")
+    print("     recent = 25% of budget instead of a fixed 32 is worth +0.08069")
+    print("     END-TO-END on rag_dev at keep 0.25 (0.33863 -> 0.41932, kept")
+    print("     ratio 0.2499 both). That is ~2x this proxy gain and it is")
+    print("     measured in the currency that counts. Prefer it first.")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({

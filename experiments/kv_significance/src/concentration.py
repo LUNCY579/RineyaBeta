@@ -88,6 +88,7 @@ def main() -> None:
 
     rho = torch.zeros(n_layers, len(KS))
     rho_ns = torch.zeros(n_layers, len(KS))
+    rho_n = torch.zeros(n_layers, len(KS))          # per-cell valid-sample count
     persist = torch.zeros(n_layers)
     n_obs = 0
     seq_lens = []
@@ -106,16 +107,23 @@ def main() -> None:
             srt, idx = rows.sort(dim=-1, descending=True)
             cum = srt.cumsum(-1)
             for ki, k in enumerate(KS):
-                rho[li, ki] += (cum[..., k - 1].mean().item()
-                                if k <= cum.shape[-1] else 1.0)
+                # Only record a cell when the budget actually fits the sequence.
+                # Crediting rho = 1.0 for k > n does not measure concentration, it
+                # measures "the budget exceeded the context" -- and with sequences
+                # of 192-265 tokens that silently fabricated the entire k=256
+                # column as exactly 1.0000, which then flattered every downstream
+                # allocation computed from these curves.
+                if k <= cum.shape[-1]:
+                    rho[li, ki] += cum[..., k - 1].mean().item()
+                    rho_n[li, ki] += 1
 
             ns = rows.clone()
             ns[..., :SINK] = 0.0
             ns = ns / ns.sum(-1, keepdim=True).clamp_min(1e-9)
             cum_ns = ns.sort(dim=-1, descending=True)[0].cumsum(-1)
             for ki, k in enumerate(KS):
-                rho_ns[li, ki] += (cum_ns[..., k - 1].mean().item()
-                                   if k <= cum_ns.shape[-1] else 1.0)
+                if k <= cum_ns.shape[-1]:
+                    rho_ns[li, ki] += cum_ns[..., k - 1].mean().item()
 
             k = min(32, rows.shape[-1])
             top = idx[..., :k]
@@ -134,9 +142,15 @@ def main() -> None:
         if args.device.startswith("cuda"):
             torch.cuda.empty_cache()
 
-    rho /= n_obs
-    rho_ns /= n_obs
+    valid = rho_n.clamp_min(1)
+    rho /= valid
+    rho_ns /= valid
     persist /= n_obs
+    unmeasured = [KS[ki] for ki in range(len(KS)) if rho_n[:, ki].max() == 0]
+    if unmeasured:
+        print(f"NOTE: k={unmeasured} exceeded every sequence and is UNMEASURED;")
+        print("      those columns read 0 and must not be used downstream.")
+        print()
 
     print(f"R2, {n_obs} rag_dev prompts, seq len {min(seq_lens)}-{max(seq_lens)}, "
           f"scored on the last {args.last_queries} query rows, mean over 16 heads")
