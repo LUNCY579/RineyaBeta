@@ -452,7 +452,7 @@ def main() -> None:
               f"{position.supervised_tokens_seen:,d} supervised tokens")
         print(f"final checkpoint: {final}")
 
-    except torch.cuda.OutOfMemoryError as exc:
+    except torch.cuda.OutOfMemoryError as exc:  # noqa: B902 - re-raised below
         path = do_save(position, {"stopped": "cuda_oom"})
         print("\n" + "=" * 72)
         print("CUDA OOM despite a passing pre-flight probe.")
@@ -467,6 +467,11 @@ def main() -> None:
               "that changes the plan, so it starts a NEW run, not a resume.")
         print("=" * 72)
         raise SystemExit(2) from exc
+    finally:
+        # Every exit path releases the lock: normal completion, --max-steps,
+        # signal, OOM, and any unhandled exception. Patching the individual
+        # returns missed --max-steps and left a stale lock behind.
+        lock.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
