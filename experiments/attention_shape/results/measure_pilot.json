@@ -1,0 +1,112 @@
+{
+  "device": "cuda:0",
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "torch": "2.13.0+cu130",
+  "decode_tokens": 16,
+  "results": [
+    {
+      "length": 1024,
+      "cache_bytes_measured": 117440512,
+      "cache_bytes_analytic": 117440512,
+      "cache_rel_err": 0.0,
+      "cache_mib": 112.0,
+      "peak_alloc_mib": 1222.8,
+      "prefill_ms_median": 177.7,
+      "prefill_ms_min": 158.2,
+      "decode_tok_per_s": 17.9,
+      "variant": "base-8KV",
+      "unhealed_surgery": false
+    },
+    {
+      "length": 4096,
+      "cache_bytes_measured": 469762048,
+      "cache_bytes_analytic": 469762048,
+      "cache_rel_err": 0.0,
+      "cache_mib": 448.0,
+      "peak_alloc_mib": 3930.39,
+      "prefill_ms_median": 1979.09,
+      "prefill_ms_min": 1974.36,
+      "decode_tok_per_s": 17.7,
+      "variant": "base-8KV",
+      "unhealed_surgery": false
+    },
+    {
+      "length": 1024,
+      "cache_bytes_measured": 117342208,
+      "cache_bytes_analytic": 117440512,
+      "cache_rel_err": 0.000837,
+      "cache_mib": 111.91,
+      "peak_alloc_mib": 1127.8,
+      "prefill_ms_median": 77.88,
+      "prefill_ms_min": 74.97,
+      "decode_tok_per_s": 18.2,
+      "variant": "swa-w1024-g4",
+      "unhealed_surgery": false
+    },
+    {
+      "length": 4096,
+      "cache_bytes_measured": 167673856,
+      "cache_bytes_analytic": 167772160,
+      "cache_rel_err": 0.000586,
+      "cache_mib": 159.91,
+      "peak_alloc_mib": 3562.39,
+      "prefill_ms_median": 622.24,
+      "prefill_ms_min": 620.74,
+      "decode_tok_per_s": 22.3,
+      "variant": "swa-w1024-g4",
+      "unhealed_surgery": false
+    },
+    {
+      "length": 1024,
+      "cache_bytes_measured": 41844736,
+      "cache_bytes_analytic": 41943040,
+      "cache_rel_err": 0.002344,
+      "cache_mib": 39.91,
+      "peak_alloc_mib": 1127.8,
+      "prefill_ms_median": 85.08,
+      "prefill_ms_min": 84.67,
+      "decode_tok_per_s": 22.8,
+      "variant": "swa-w256-g4",
+      "unhealed_surgery": false
+    },
+    {
+      "length": 4096,
+      "cache_bytes_measured": 92176384,
+      "cache_bytes_analytic": 92274688,
+      "cache_rel_err": 0.001065,
+      "cache_mib": 87.91,
+      "peak_alloc_mib": 3562.39,
+      "prefill_ms_median": 618.45,
+      "prefill_ms_min": 618.29,
+      "decode_tok_per_s": 20.0,
+      "variant": "swa-w256-g4",
+      "unhealed_surgery": false
+    },
+    {
+      "length": 1024,
+      "cache_bytes_measured": 29360128,
+      "cache_bytes_analytic": 29360128,
+      "cache_rel_err": 0.0,
+      "cache_mib": 28.0,
+      "peak_alloc_mib": 1048.8,
+      "prefill_ms_median": 149.49,
+      "prefill_ms_min": 149.12,
+      "decode_tok_per_s": 25.3,
+      "variant": "gqa-2KV",
+      "unhealed_surgery": true
+    },
+    {
+      "length": 4096,
+      "cache_bytes_measured": 117440512,
+      "cache_bytes_analytic": 117440512,
+      "cache_rel_err": 0.0,
+      "cache_mib": 112.0,
+      "peak_alloc_mib": 3486.39,
+      "prefill_ms_median": 1908.11,
+      "prefill_ms_min": 1907.77,
+      "decode_tok_per_s": 13.1,
+      "variant": "gqa-2KV",
+      "unhealed_surgery": true
+    }
+  ]
+}
