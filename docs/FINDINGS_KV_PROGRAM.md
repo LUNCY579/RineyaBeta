@@ -214,7 +214,8 @@ the condition is visible in the artefact rather than only in a log.
 | SWA prefill speedup | 3.2× faster | ~1.9× **slower** | kernel dispatch, not attention shape |
 | Significance vs StreamingLLM | +0.187/+0.146/+0.204 | **+0.181/+0.137/−0.083** | baseline was a corrupted forward pass; sign wrong at keep 0.25 |
 | MDE at k=3 | 9.6pp | **13.9pp** | `t_crit` multiplicity bug |
-| SWA decode win | 18.1 vs 11.4 tok/s | gqa-1KV does **21.5** at a smaller cache | compared against the wrong baseline |
+| SWA decode win | 18.1 vs 11.4 tok/s | gqa-1KV does **24.1** at 224 MiB resident vs SWA's 1792 | compared against the wrong baseline |
+| SWA cache saving | 5.1× at 16K | **1.00×** resident at end of prefill | counted on a view |
 
 ---
 
@@ -262,9 +263,44 @@ response-mode heuristic in 502/510 cases, weight 0.28 combined with
 cannot outvote it. **Never conclude from a chat_dev aggregate that an
 attention-level intervention is harmless.**
 
+### 9.1 The sliding-window cache saving was counted on a view
+
+Re-measured with de-duplicated storage pointers, immediately after prefill at
+16K (`experiments/attention_shape/results/measure_fixed.json`):
+
+| variant | logical | **resident** | ratio |
+|---|---:|---:|---:|
+| `base-8KV` | 1792.0 MiB | 1792.0 MiB | 1.00 |
+| `swa-w1024-g4` | 351.9 | **1792.0** | **5.09** |
+| `swa-w256-g4` | 279.9 | **1792.0** | **6.40** |
+| `gqa-2KV` | 448.0 | 448.0 | 1.00 |
+| `gqa-1KV` | 224.0 | 224.0 | 1.00 |
+
+**At end of prefill a sliding-window model holds exactly as much KV as the
+baseline.** The saving appears only after the first decode step replaces the
+view. Peak memory is set at end of prefill — which is precisely why SWA never
+improved it. GQA's saving is resident from the moment it exists.
+
+Decode at 16K, same run: `gqa-1KV` **24.1 tok/s at 224 MiB resident** against
+`swa-w256-g4` 20.7 at 1792 MiB and `base-8KV` 7.7. The earlier claim that
+sliding window "wins decode, 18.1 vs 11.4" compared it to the baseline rather
+than to the axis under test, and is withdrawn: **GQA beats every SWA variant on
+decode at a smaller resident cache.**
+
+### 9.2 One audit prediction refuted
+
+The audit held that `base-8KV @ 32768 → OOM` was purely a harness artefact and
+would fit at 5,345 MiB against a 6,144 MiB cap. The harness defect was real and
+is fixed (`peak_alloc_mib` and `peak_timed_mib` now agree in all 12 cells), **but
+the verdict stands** — base-8KV and every SWA variant still OOM at 32K while both
+GQA variants measure. The reconstruction was arithmetic; the measurement
+disagrees. Recorded because an audit finding that does not survive its own test
+should be marked, not quietly dropped.
+
+
 ---
 
-## 9. Killed, with reasons
+## 10. Killed, with reasons
 
 - **Sliding-window schedules.** Raise peak memory, *shorten* reachable context
   (every SWA variant OOMs at 32K where GQA fits), and collapse to empty strings
