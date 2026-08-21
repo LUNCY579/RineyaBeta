@@ -88,6 +88,33 @@ def cla_mean():
     return sum(r["test"] for r in rows) / len(rows)
 
 
+def pk(fname: str, depth: float | None = None):
+    """Passkey accuracy from a committed arm; pooled over depths if depth is None.
+
+    Skips cells whose acc is null -- those are trials that ran out of memory and
+    measured nothing. Averaging a null as zero is the exact mistake the harness
+    itself used to make.
+    """
+    path = KVS / fname
+    if not path.exists():
+        return None
+    d = json.loads(path.read_text(encoding="utf-8"))
+    rows = [r for r in d["results"] if r.get("acc") is not None]
+    if depth is not None:
+        rows = [r for r in rows if r["depth"] == depth]
+    if not rows:
+        return None
+    return sum(r["acc"] for r in rows) / len(rows)
+
+
+def pk_depth_pooled(depth: float):
+    """One depth, pooled across all five decay-exponent arms (n = 30 trials)."""
+    arms = ("0.0", "0.25", "0.5", "0.75", "1.0")
+    vals = [pk(f"pk_128k_e{e}.json", depth) for e in arms]
+    if any(v is None for v in vals):
+        return None
+    return sum(vals) / len(vals)
+
 def concentration(k: int):
     p = KVS / "concentration.json"
     if not p.exists():
@@ -200,6 +227,24 @@ CLAIMS = [
     ("mixed: pure int4 @4K factor", 3.755,
      lambda: probe("mixed_precision.json", "pure_int4@4K", "factor"),
      5e-4, "3.75", "findings,negative"),
+
+    # --- the decay-exponent sweep at 128K -----------------------------------
+    # Pinned in both documents. These are what the withdrawn 0.44 figure was
+    # competing against; see results/_superseded_unmatched/NOTE.md.
+    ("decay: e=0 pooled @128K", 0.2222, lambda: pk("pk_128k_e0.0.json"),
+     5e-4, "0.22", "findings"),
+    ("decay: e=1 pooled @128K", 0.3889, lambda: pk("pk_128k_e1.0.json"),
+     5e-4, "0.39", "findings"),
+    ("decay: e=1 at depth 0.9", 0.8333, lambda: pk("pk_128k_e1.0.json", 0.9),
+     5e-4, "5/6", "findings,negative"),
+    ("decay: e=0 at depth 0.9", 0.1667, lambda: pk("pk_128k_e0.0.json", 0.9),
+     5e-4, "1/6", "findings,negative"),
+    ("depth curve @128K: 0.1", 0.3667, lambda: pk_depth_pooled(0.1),
+     5e-4, "0.367", "findings,negative"),
+    ("depth curve @128K: 0.5", 0.1333, lambda: pk_depth_pooled(0.5),
+     5e-4, "0.133", "findings,negative"),
+    ("depth curve @128K: 0.9", 0.5000, lambda: pk_depth_pooled(0.9),
+     5e-4, "0.500", "findings,negative"),
 ]
 
 
