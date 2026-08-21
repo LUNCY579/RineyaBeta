@@ -1,0 +1,45 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "budget": 2048,
+  "chunk": 4096,
+  "recent": 512,
+  "window": 16,
+  "results": [
+    {
+      "length": 32768,
+      "chunked": true,
+      "budget": 2048,
+      "chunk": 4096,
+      "stored_kv": 6144,
+      "cache_resident_mib": 672.0,
+      "score_mib": 5.25,
+      "peak_mib": 1744.1,
+      "prefill_ms": 7132.5,
+      "heavy_zero": 0
+    },
+    {
+      "length": 65536,
+      "chunked": true,
+      "budget": 2048,
+      "chunk": 4096,
+      "stored_kv": 6144,
+      "cache_resident_mib": 672.0,
+      "score_mib": 5.25,
+      "peak_mib": 1744.4,
+      "prefill_ms": 13264.5,
+      "heavy_zero": 0
+    },
+    {
+      "length": 131072,
+      "chunked": true,
+      "budget": 2048,
+      "chunk": 4096,
+      "stored_kv": 6144,
+      "cache_resident_mib": 672.0,
+      "score_mib": 5.25,
+      "peak_mib": 1744.9,
+      "prefill_ms": 27783.1,
+      "heavy_zero": 0
+    }
+  ]
+}

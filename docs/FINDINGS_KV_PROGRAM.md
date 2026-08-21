@@ -166,6 +166,59 @@ but 42% churns every step, and eviction is irreversible.
 
 ---
 
+## 4a. Chunked prefill — the length variable eliminated, measured
+
+*Procedure:* `python scripts/kv/chunked_prefill.py --gate` (correctness), then
+`experiments/kv_significance/src/measure_chunked.py` (memory), 6 GiB cap,
+B=2048, C=4096, recent=512, window=16.
+
+**Correctness first.** With compression disabled, chunked prefill must reproduce
+single-shot prefill. Compared at **every position**, fp32:
+
+| chunk | max \|Δlogit\| | mean \|Δlogit\| | argmax agreement |
+|---:|---:|---:|---:|
+| 32 | 1.116e-04 | 5.268e-06 | 1.0000 |
+| 64 | 1.185e-04 | 5.225e-06 | 1.0000 |
+| 256 | 9.465e-05 | 2.342e-06 | 1.0000 |
+
+Tolerance 1e-3. fp32 is the honest gate: in bf16 the final-position logit differs
+by mean 0.481 on logits of scale ~39 from summation order alone, so a bf16
+threshold would either pass everything or reject a correct implementation.
+
+**Then the identity.**
+
+| n | stored KV | resident cache | peak | prefill |
+|---:|---:|---:|---:|---:|
+| 32,768 | 6,144 | 672.0 MiB | 1744.1 MiB | 7.1 s |
+| 65,536 | 6,144 | 672.0 MiB | 1744.4 MiB | 13.3 s |
+| 131,072 | 6,144 | 672.0 MiB | **1744.9 MiB** | 27.8 s |
+
+**Peak spread across a 4× length range: 0.0%.** Resident cache is exactly
+`(B + C) × 112 KiB = 672 MiB` at every length, matching the identity to the byte.
+Un-chunked, 128K needs 14,336 MiB of cache alone against 8,188 MiB of VRAM, and
+`base-8KV` OOMs at 32K under this same cap.
+
+**Prefill is linear, not quadratic.** Attention work per chunk is `O(C·(B+C))`
+over `n/C` chunks, so total is `O(n·(B+C))`. Measured: n×4 → prefill ×3.9, where
+quadratic would be ×16.
+
+### What this does and does not establish
+
+It establishes a **memory and compute** result: peak VRAM is now independent of
+prompt length, and 128K is reachable on this card with 4.4 GiB to spare. That
+converts the >32K rungs from arithmetic into something measurable, which was the
+single largest blocker in the program.
+
+It establishes **nothing about quality at those lengths.** R2's
+`max_position_embeddings` is 40,960 with `rope_scaling` null, so positions beyond
+~41K are outside the model's trained range and the text produced at 128K is not
+meaningful. And no quality number anywhere in this program comes from a prompt
+longer than 330 tokens. Chunked prefill removes the memory obstacle to measuring
+long-context quality; it does not measure it.
+
+
+---
+
 ## 5. Every bug found, and how it was caught
 
 Nine defects, all in code written during this program. **Every one produced a
