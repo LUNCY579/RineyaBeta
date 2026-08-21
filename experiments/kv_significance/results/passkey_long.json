@@ -1,0 +1,90 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": null,
+  "chunk": 4096,
+  "recent": 512,
+  "trials": 3,
+  "results": [
+    {
+      "length": 16384,
+      "real_tokens": 15714,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 3008.5,
+      "yarn": null
+    },
+    {
+      "length": 16384,
+      "real_tokens": 15714,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 3008.5,
+      "yarn": null
+    },
+    {
+      "length": 16384,
+      "real_tokens": 15714,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 3008.5,
+      "yarn": null
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 4896.7,
+      "yarn": null
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 4896.7,
+      "yarn": null
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 4896.7,
+      "yarn": null
+    },
+    {
+      "length": 65536,
+      "real_tokens": 62898,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 5034.8,
+      "yarn": null
+    },
+    {
+      "length": 65536,
+      "real_tokens": 62898,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 5034.8,
+      "yarn": null
+    },
+    {
+      "length": 65536,
+      "real_tokens": 62898,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 5034.8,
+      "yarn": null
+    }
+  ]
+}

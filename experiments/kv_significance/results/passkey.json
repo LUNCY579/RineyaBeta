@@ -1,0 +1,117 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": null,
+  "chunk": 4096,
+  "recent": 512,
+  "trials": 3,
+  "results": [
+    {
+      "length": 1024,
+      "real_tokens": 978,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1052.3,
+      "yarn": null
+    },
+    {
+      "length": 1024,
+      "real_tokens": 978,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 1052.3,
+      "yarn": null
+    },
+    {
+      "length": 1024,
+      "real_tokens": 978,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1052.3,
+      "yarn": null
+    },
+    {
+      "length": 2048,
+      "real_tokens": 1962,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1195.3,
+      "yarn": null
+    },
+    {
+      "length": 2048,
+      "real_tokens": 1962,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 1195.3,
+      "yarn": null
+    },
+    {
+      "length": 2048,
+      "real_tokens": 1962,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1195.3,
+      "yarn": null
+    },
+    {
+      "length": 4096,
+      "real_tokens": 3930,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1491.4,
+      "yarn": null
+    },
+    {
+      "length": 4096,
+      "real_tokens": 3930,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 1491.4,
+      "yarn": null
+    },
+    {
+      "length": 4096,
+      "real_tokens": 3930,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1491.4,
+      "yarn": null
+    },
+    {
+      "length": 8192,
+      "real_tokens": 7866,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 2014.8,
+      "yarn": null
+    },
+    {
+      "length": 8192,
+      "real_tokens": 7866,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 2014.8,
+      "yarn": null
+    },
+    {
+      "length": 8192,
+      "real_tokens": 7866,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 2014.8,
+      "yarn": null
+    }
+  ]
+}

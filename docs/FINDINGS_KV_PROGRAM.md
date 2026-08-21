@@ -219,6 +219,87 @@ long-context quality; it does not measure it.
 
 ---
 
+## 4b. Passkey retrieval at length — the first long-context behaviour measured
+
+*Procedure:* `experiments/kv_significance/src/passkey.py`. A 5-digit key hidden
+at a controlled depth in repetitive filler; the model is asked to repeat it.
+Repetitive filler isolates **retrieval** from comprehension. Only runnable
+because chunked prefill removed the memory obstacle.
+
+### The model is good at this, contrary to the prior we inherited
+
+Full cache, no eviction, 3 trials x 3 depths:
+
+| n | 1,024 | 2,048 | 4,096 | 8,192 | 16,384 |
+|---|---:|---:|---:|---:|---:|
+| accuracy | **1.00** | **1.00** | **1.00** | **1.00** | **1.00** |
+
+100% at every length and depth up to 16K. This corrects a pessimism carried
+through the whole program from the frozen demo suite's 0.2031: that suite is
+*reasoning*-hard (multi-hop, `count_with_exclusions` at 0.031), not retrieval.
+On pure retrieval this 0.6B checkpoint is reliable. Above 16K the full cache no
+longer fits, so eviction is **required** to measure at all.
+
+### Depth dominates, not the keep ratio
+
+B=2048 fixed, sweeping n (this is the ratio-vs-absolute test):
+
+| n | depth 0.1 | depth 0.5 | depth 0.9 |
+|---:|---:|---:|---:|
+| 8,192 | 0.00 | **1.00** | **1.00** |
+| 16,384 | 0.00 | 0.00 | **1.00** |
+| 32,768 | 0.00 | 0.00 | **1.00** |
+| 65,536 | 0.00 | 0.00 | 0.00 |
+
+At 8K, B=2048 *is* keep 0.25 — the ratio the rag_dev sweep called catastrophic
+(−0.331) — yet mid and late needles retrieve perfectly. **Damage does not track
+the keep ratio.** It tracks how many compression rounds the needle survived.
+
+### Position and eviction, separated
+
+With YaRN ×4 (training-free, `rope_parameters` → usable range 163,840):
+
+| n=65,536, YaRN | B=2048 | B=8192 |
+|---|---:|---:|
+| depth 0.99 (last chunk, never compressed) | **1.00** | **1.00** |
+| depth 0.90 | 0.00 | 0.00 |
+
+**Position is not the limit at 64K.** With YaRN the model retrieves perfectly
+when the needle escapes compression, at both budgets. And a 4× larger budget does
+not help at depth 0.9 — so it is not a budget limit either.
+
+YaRN also changed the *failure mode* rather than only the score: without it, 64K
+output was digit-garbage (`'643210.
+
+The pass '`); with it, coherent text
+(`'the key that is us'`). Position was broken; now it is not, and the needle is
+simply gone.
+
+### The real limit: prefill-time eviction is query-blind
+
+The question appears only at the end of the prompt. Each chunk is scored against
+**its own last 16 query rows**, which for every chunk but the last are filler. A
+needle therefore earns no score before the question is ever seen, and is evicted
+regardless of budget. That explains the depth pattern exactly: depth 0.99 is in
+the final chunk and never compressed; depth 0.9 survives one or two rounds; depth
+0.1 survives none.
+
+A first probe of this mechanism — repeating the question at the *start* of the
+prompt — moved the outputs in the predicted direction without fixing them
+(key 75526 → `'7526'` rather than `'75'`; 85667 → `'8567'` rather than
+`'85686578568'`, and the degenerate repetition disappeared). It is a weak test:
+the query hint sits at position 0 but the observation window is each chunk's
+*last* rows, so the question never becomes a scoring query. **The proper test is
+to append the question to each chunk's scoring pass without caching it**, which
+is the obvious next step and is not yet done.
+
+**This is the cornerstone finding for long context here.** Memory is solved;
+position is solved to 64K by YaRN; what remains is that you cannot know which
+tokens matter until you have seen the question.
+
+
+---
+
 ## 5. Every bug found, and how it was caught
 
 Nine defects, all in code written during this program. **Every one produced a
