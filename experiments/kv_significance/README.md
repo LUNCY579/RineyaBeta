@@ -363,23 +363,46 @@ regime it was designed for — was correct when written and is no longer true.
    4.9 s clean, from host-memory thrashing).
 2. ~~Chunked prefill~~ — **done**, see above and FINDINGS §4a.
 3. ~~A long-context corpus~~ — **done** for retrieval; a passkey generator with
-   depth x length control now exists (`src/passkey.py`). Position-bucketed
+   depth × length control now exists (`src/passkey.py`). Position-bucketed
    perplexity and long-context multi-hop remain unbuilt.
-4. ~~A decay term between sum and mean ranking~~ — **tested, and the answer is
-   no.** `Policy.count_exponent` ranks on `sum / count**e`; five matched arms at
-   128K (6 trials × 3 depths) show a real monotone gain at depth 0.9
-   (Cochran–Armitage p = 0.0045) and **exactly no trend** at depth 0.5
-   (p = 1.0000). Pooled, the best arm does not beat the worst (7/18 vs 4/18,
-   Fisher p = 0.4705). The knob redistributes accuracy rather than adding it, and
-   mid-context failure is not a ranking problem — eviction is irreversible, so a
-   needle dropped in an early round is unrecoverable by any later statistic.
-   FINDINGS §4c.
-5. **Is the 128K trough eviction's fault or the model's?** Undecidable today: the
-   uncompressed 128K control needs 14,336 MiB of cache against 8,188 MiB total,
-   so every 64K and 128K number here has no baseline. A budget ladder
-   (B ∈ {2048, 8192, 32768} at depth 0.5) bounds it from one side; quantised KV
-   makes the actual control runnable — int8 at 1.94× fits 64K, mixed precision at
-   3.04× fits 128K.
-6. **Multi-hop reasoning at length.** Everything measured at length so far is
+4. ~~A decay term between sum and mean ranking~~ — **tested; direction real,
+   magnitude not established.** `Policy.count_exponent` ranks on `sum / count**e`.
+   Five arms at 128K showed a monotone gain at depth 0.9 and none at depth 0.5.
+   The arms were paired with each other, so the comparison itself is sound, but
+   the stated p-values came from tests that model them as independent groups. A
+   re-run under the paired design is in flight.
+5. ~~Is the 128K trough eviction's fault or the model's?~~ — **wrong question;
+   there is no trough.** It was an artefact of each depth drawing different
+   needles. Re-measured with 12 identical needles per cell, 128K at B=2048 gives
+   0.42 / 0.33 / 0.83 — late beats early, early and middle indistinguishable — and
+   at B=8192 the depth dependence disappears entirely (permutation p = 0.8879).
+6. ~~Does 128K work?~~ — **yes, at the budget that works everywhere else.** 0.92
+   across depths at B=8192 (6.3% keep), peak 2521 MiB. Accuracy is flat in length
+   at constant keep fraction: 0.89 / 0.89 / 0.92 at 32K / 64K / 128K. What was
+   previously read as a 128K weakness was B=2048, which is 1.6% keep at that
+   length. FINDINGS §4c.
+7. **Is 6.3% keep a general operating point or a 128K coincidence?** A budget
+   ladder at 64K (B ∈ {1024, 2048, 4096} = 1.6 / 3.1 / 6.3% keep, 12 needles) is
+   the direct test. In flight.
+8. **A quality reference above 32K.** The uncompressed control fits to 32K only
+   (7,168 MiB of cache at 64K against 8,188 MiB total). int8 KV at 1.94× makes 64K
+   reachable and mixed precision at 3.04× makes 128K reachable — §4d — so the
+   store work is the instrument, not a side quest.
+9. **Multi-hop reasoning at length.** Everything measured at length so far is
    *retrieval*. The frozen demo suite indicates reasoning is where this
-   checkpoint is genuinely weak.
+   checkpoint is genuinely weak. This is now the largest gap in the program.
+
+### How to run a comparison here without repeating our mistakes
+
+Every cell draws the same needle sequence (`--seed`), so cells are paired and
+`scripts/design/paired_passkey.py` can test them properly. Two rules that cost us
+real work to learn:
+
+- **Never compare cells from runs with different `--depths` or `--budgets` lists.**
+  Before the pairing fix one RNG stream ran across the whole nested loop, so the
+  needle set depended on the shape of the run. It no longer does, but a result
+  file predating the fix has no `trials` field and `paired_passkey.py` will refuse
+  it rather than guess.
+- **Use at least 12 trials.** Exact McNemar with every discordant pair pointing
+  one way gives p = 2/2ⁿ, so 6 needles floor at p = 0.0625 and cannot reach
+  significance however clean the effect.

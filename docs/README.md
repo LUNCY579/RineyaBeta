@@ -40,6 +40,7 @@ rather than overwritten.
 | `scripts/design/kv_budget.py` | Feasibility and the iso-memory frontier, from a checkpoint's own config. |
 | `scripts/design/power_analysis.py` | Minimum detectable effect for the two units of replication (item and training run). |
 | `scripts/design/verify_claims.py` | **Run this after editing any doc.** Cross-checks headline numbers against committed data *and* against the prose. Non-zero exit on drift. |
+| `scripts/design/paired_passkey.py` | **Run this instead of computing a p-value by hand.** Exact McNemar on discordant needles, within-needle permutation trend test, and a refusal to compare cells that share no needles. Added because the hand-rolled version was wrong. |
 
 Nothing in `scripts/train/` is touched by this work: `code_fingerprint()` hashes
 every `.py` there and an edit invalidates every checkpoint's resume path.
@@ -55,9 +56,19 @@ python experiments/kv_significance/src/verify_significance.py   # 6 checks
 python experiments/kv_significance/src/measure_chunked.py --lengths 32768 131072
 python experiments/kv_significance/src/store_probe.py           # ~4 min GPU
 python experiments/kv_significance/src/mixed_precision.py       # ~3 min GPU
-python experiments/kv_significance/src/passkey.py --lengths 32768 --budgets 2048 \
-       --yarn 4.0 --query-aware
+python experiments/kv_significance/src/passkey.py --lengths 131072 \
+       --budgets 2048 8192 --depths 0.1 0.5 0.9 --trials 12 \
+       --yarn 4.0 --query-aware --count-exponent 1.0 --cap-mib 7400 \
+       --out results/pk_128k_grid12.json
+python scripts/design/paired_passkey.py \
+       experiments/kv_significance/results/pk_128k_grid12.json --by budget
 ```
+
+Two flags in that command are not decoration. `--cap-mib 7400` overrides a 6144
+default that bounds *reserved* memory and silently blocked every uncompressed
+reference above 16K for most of this program. `--trials 12` is the smallest count
+that can reach p < 0.05 under the paired test at all — see the note in
+[`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4c.
 
 Use the project venv (`.venv/Scripts/python.exe`); the default `python` on PATH
 is a CPU-only torch build and every CUDA measurement taken with it is void.
