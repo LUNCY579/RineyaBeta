@@ -6,7 +6,7 @@ pass, and delete the entries that stop earning their space.
 Self-contained. Nothing outside `experiments/kv_significance/` is written, and
 **`scripts/train/` is not touched** — `code_fingerprint()` hashes every `.py`
 there and an edit would invalidate every checkpoint's resume path. The two
-behaviour changes needed (`src/significance.py`'s attention wrapper and the
+behaviour changes needed (`scripts/kv/significance.py`'s attention wrapper and the
 sibling experiment's `compat.py`) are process-local monkey patches.
 
 ---
@@ -54,14 +54,27 @@ THEORY.md                  the bound, the cost accounting, the predictions
 run_sweep.sh               quality vs budget, on two contrasting datasets
 src/
   concentration.py         Phase 0: is attention concentrated enough? (no GPU cost)
-  significance.py          the implementation: scoring, cache, eviction policy
+  (the implementation itself lives at scripts/kv/significance.py, promoted
+   to the main tree once it worked; chunked prefill is beside it)
   verify_significance.py   six correctness checks — run this before believing anything
   run_eval_sig.py          quality sweep, protocol-identical to run_gates.py
   measure_sig.py           cache bytes, prefill latency, decode throughput
+  measure_chunked.py       peak memory against prompt length, chunked
+  passkey.py               retrieval at depth x length; --yarn, --query-aware,
+                           --count-exponent
+  allocation.py            per-layer budget allocation by water-filling
+  store_probe.py           what to STORE each kept position as, on a calibrated
+                           scale (quantisation, low-rank, cross-layer sharing)
+  mixed_precision.py       significance-gated mixed precision: bf16 sinks,
+                           int8 for the top-p by score, int4 for the rest
   summarize.py             collects results/ into FINDINGS.md
 results/
   concentration.json       measured rho(k), with and without sinks
   measure_sig.json         efficiency after the fix
+  measure_chunked_long.json  peak memory 16K-128K under chunked prefill
+  pk_*.json                passkey runs; the file name states the arm
+  store_probe.json         calibration, quantisation, low-rank, CLA
+  mixed_precision.json     relerr and store factor per precision scheme
   FINDINGS.md              generated summary
   _invalidated_prefill_bug/  artefacts from the buggy run, kept for comparison
 ```
@@ -72,6 +85,8 @@ Run everything with `../../.venv/Scripts/python.exe`.
 python src/concentration.py          # decisive, cheap, can kill the idea
 python src/verify_significance.py    # 6 correctness checks
 python src/measure_sig.py            # cache, prefill, decode
+python src/store_probe.py            # what to store, on a calibrated scale
+python src/mixed_precision.py        # significance-gated mixed precision
 bash run_sweep.sh                    # quality vs budget, ~80 min
 ```
 

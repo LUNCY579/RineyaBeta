@@ -35,6 +35,8 @@ rather than overwritten.
 |---|---|
 | `scripts/kv/significance.py` | The working mechanism. Significance-gated KV eviction: per-position, per-KV-head accumulated attention mass; keep = sinks + recent + top-B. Zero added parameters. |
 | `scripts/kv/chunked_prefill.py` | Chunked prefill with inter-chunk compression, so peak cache is `B + C` with prompt length eliminated. Also `score_with_query`, which makes eviction query-aware. |
+| `experiments/kv_significance/src/store_probe.py` | What to STORE each kept position as — quantisation, low-rank, cross-layer sharing — measured against three eviction settings whose end-to-end cost is known, so the relative errors have a scale. |
+| `experiments/kv_significance/src/mixed_precision.py` | Significance-gated mixed precision: bf16 sinks, int8 for the top-p by score, int4 for the rest. Lower error than pure int8 at 1.6× more compression. |
 | `scripts/design/kv_budget.py` | Feasibility and the iso-memory frontier, from a checkpoint's own config. |
 | `scripts/design/power_analysis.py` | Minimum detectable effect for the two units of replication (item and training run). |
 | `scripts/design/verify_claims.py` | **Run this after editing any doc.** Cross-checks headline numbers against committed data *and* against the prose. Non-zero exit on drift. |
@@ -51,6 +53,8 @@ python scripts/kv/chunked_prefill.py --gate          # correctness, CPU/GPU, ~1 
 python scripts/design/verify_claims.py               # docs vs data, CPU, instant
 python experiments/kv_significance/src/verify_significance.py   # 6 checks
 python experiments/kv_significance/src/measure_chunked.py --lengths 32768 131072
+python experiments/kv_significance/src/store_probe.py           # ~4 min GPU
+python experiments/kv_significance/src/mixed_precision.py       # ~3 min GPU
 python experiments/kv_significance/src/passkey.py --lengths 32768 --budgets 2048 \
        --yarn 4.0 --query-aware
 ```
