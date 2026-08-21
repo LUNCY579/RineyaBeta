@@ -102,6 +102,7 @@ def main() -> None:
 
     force_repeat_kv(verbose=False)
     sig.patch_attention()
+    sig.reset_heavy_zero_count()
 
     from transformers import AutoModelForCausalLM, AutoTokenizer
     from scripts.common.quality_evaluation import (  # noqa: E402
@@ -140,6 +141,7 @@ def main() -> None:
 
     rows, t0 = [], time.time()
     kept_ratios = []
+    recents_used = []
     for i, rec in enumerate(records):
         prompt = tok.apply_chat_template(rec["messages"], tokenize=False,
                                          add_generation_prompt=True, enable_thinking=False)
@@ -154,6 +156,13 @@ def main() -> None:
                       if args.recent_frac is not None else args.recent)
             policy = sig.Policy(budget=budget, sinks=args.sinks, recent=recent,
                                 protect_sinks=not args.no_sinks, pool=args.pool)
+            # Record what the policy ACTUALLY used. Writing args.recent here --
+            # which is what this file used to do -- makes every --recent-frac run
+            # look like a fixed recent=32 run in the manifest, and summarize.py
+            # then reported the significance-selected share as 13%/37% when the
+            # truth is 63.7%/67.4%. The one column whose purpose is to expose
+            # StreamingLLM-in-disguise was reporting the fix for it as a no-op.
+            recents_used.append(policy.n_recent())
 
         sig.reset_scores()
         sig.set_recording(evicting, window=args.window)
@@ -205,8 +214,14 @@ def main() -> None:
     (out_dir / "run_manifest.json").write_text(json.dumps({
         "tag": tag, "dataset": args.dataset, "eviction": evicting,
         "budget": args.budget, "keep_frac": args.keep_frac,
-        "sinks": 0 if args.no_sinks else args.sinks, "recent": args.recent,
+        "sinks": 0 if args.no_sinks else args.sinks,
+        "recent_flag": args.recent,
+        "recent": (round(sum(recents_used) / len(recents_used), 2)
+                   if recents_used else args.recent),
+        "recent_effective_mean": (round(sum(recents_used) / len(recents_used), 2)
+                                  if recents_used else None),
         "recent_frac": args.recent_frac,
+        "heavy_zero_count": sig.heavy_zero_count(),
         "pool": args.pool, "window": args.window,
         "mean_kept_ratio": round(mean_keep, 4),
         "case_count": len(rows), "protocol": protocol,

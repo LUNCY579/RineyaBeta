@@ -27,14 +27,20 @@ def sig_share(man: dict, rows: list[dict]) -> float:
     """Fraction of the kept budget selected by score rather than by position."""
     if not man.get("eviction"):
         return float("nan")
-    sinks, recent = man.get("sinks", 0), man.get("recent", 0)
+    sinks = man.get("sinks", 0)
+    frac = man.get("recent_frac")
+    fixed = man.get("recent_effective_mean") or man.get("recent", 0)
     shares = []
     for r in rows:
         b = r.get("stored_kv") or 0
         if b <= 0:
             continue
+        # When a run used --recent-frac the recent window is a FRACTION of the
+        # per-prompt budget and varies per item; reading one stored scalar
+        # reports those runs as though the flag had never been passed.
+        recent = round(frac * b) if frac is not None else fixed
         s = min(sinks, b)
-        rec = min(recent, max(0, b - s))
+        rec = min(int(recent), max(0, b - s))
         shares.append(max(0, b - s - rec) / b)
     return statistics.mean(shares) if shares else float("nan")
 
