@@ -154,17 +154,32 @@ def reset_scores() -> None:
 def ranked_scores(layer_idx: int, exponent: float = 0.0):
     """Ranking key `sum / count**exponent`.
 
-    The two endpoints were measured and fail in OPPOSITE directions at 128K:
+    The sum ratchets shut: a position that survived T compression rounds was
+    scored T times and a newcomer once, so the heavy set freezes. The mean
+    removes that advantage entirely, including the part of it that is real
+    evidence. The exponent trades one bias against the other with one knob.
 
-      exponent 0.0 (raw sum)   favours long-accumulated EARLY positions.
-                               128K depth 0.1/0.5/0.9 -> 1.00 / 0.33 / 0.00
-      exponent 1.0 (mean)      over-corrects toward LATE arrivals.
-                               128K depth 0.1/0.5/0.9 -> 0.17 / 0.17 / 0.83
+    MEASURED, all five arms matched -- 128K, budget 2048, YaRN x4, query-aware,
+    6 trials per cell, hits out of 6 at depths 0.1 / 0.5 / 0.9:
 
-    The sum ratchets shut because a position that survived T compression rounds
-    was scored T times and a newcomer once; the mean removes that advantage
-    entirely, including the part of it that is real evidence. An exponent between
-    the two trades one bias against the other with a single knob.
+      e = 0.00 (sum)    2 / 1 / 1
+      e = 0.25          3 / 1 / 1
+      e = 0.50          3 / 0 / 4
+      e = 0.75          2 / 1 / 4
+      e = 1.00 (mean)   1 / 1 / 5
+
+    Depth 0.9 rises monotonically with e (Cochran-Armitage z = +2.840,
+    p = 0.0045, surviving Bonferroni over the three depths). Depth 0.5 has
+    EXACTLY no trend (z = 0.000, p = 1.0000). Pooled, the best arm does not beat
+    the worst (7/18 vs 4/18, Fisher p = 0.4705), so this knob redistributes
+    accuracy rather than adding it.
+
+    Read that as a scope limit, not a tuning result. Eviction is irreversible, so
+    a needle dropped in an early round cannot be recovered by any later ranking;
+    a depth-0.5 needle at 128K has been through ~15 rounds and a depth-0.9 needle
+    through ~3. The exponent can only help the ones still present. Mid-context
+    failure at 128K is not a ranking problem -- see docs/FINDINGS_KV_PROGRAM.md
+    section 4c.
     """
     s = _SCORES.get(layer_idx)
     if s is None:

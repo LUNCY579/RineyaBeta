@@ -339,10 +339,10 @@ share only 2 of 5 entries, so the effect is real.
 
 `Policy.normalize` ranks on `sum / observation_count` instead.
 
-| | 32K (6 trials) | 64K (6 trials) | 128K |
+| | 32K (6 trials) | 64K (6 trials) | 128K (6 trials) |
 |---|---:|---:|---:|
-| rank on **sum** | 0.89 | 0.55 | 0.44 (n=3) |
-| rank on **mean** | 0.83 | **0.89** | 0.39 (n=6) |
+| rank on **sum** (e=0) | 0.89 | 0.55 | 0.22 |
+| rank on **mean** (e=1) | 0.83 | **0.89** | **0.39** |
 
 **A correction to an earlier claim in this program.** An initial 3-trial run read
 "normalization hurts, 0.87 → 0.60". At 6 trials the 32K arms are tied within one
@@ -352,19 +352,74 @@ that the ratchet's severity scales with the number of compression rounds `n/C` �
 8 rounds at 32K, 16 at 64K, 32 at 128K — so normalization is a wash where the
 ratchet barely bites and a clear win where it does.
 
-**At 128K neither statistic is uniformly good, and they fail in opposite
-directions:**
+**A second correction, to a figure that appeared in review.** The 128K column
+previously read `0.44 (n=3)` against `0.39 (n=6)` — a 3-trial two-depth run
+compared with a 6-trial three-depth one, which is not a comparison. Both arms have
+since been re-run matched at 6 trials × 3 depths and the sum arm is **0.22**, not
+0.44. The per-depth figures that circulated with it (sum 1.00 / 0.33 / 0.00) were
+noise at n=3 and are withdrawn; the matched values are 0.33 / 0.17 / 0.17.
 
-| depth | sum (n=3) | mean (n=6) |
-|---:|---:|---:|
-| 0.1 | 1.00 | 0.17 |
-| 0.5 | 0.33 | 0.17 |
-| 0.9 | 0.00 | **0.83** |
+### The decay exponent: one real effect, and one thing it cannot touch
 
-Sum over-weights long-accumulated early positions; mean over-corrects toward late
-arrivals. Failures are near-misses rather than noise (75526 → `'7552'`,
-85667 → `'8567'`), so the information is partially retained in both regimes. A
-decay term between the two extremes is the obvious next step and is **not tested**.
+`Policy.count_exponent` generalises the boolean to `sum / count**e`, so e=0 and
+e=1 are the two endpoints above and the interior is reachable. All five arms
+matched — 128K, budget 2048 (1.6% keep), YaRN ×4, query-aware, 6 trials × 3
+depths, same committed code. Hits out of 6:
+
+| e | depth 0.1 | 0.5 | 0.9 | pooled |
+|---:|---:|---:|---:|---:|
+| 0.00 (sum) | 2/6 | 1/6 | 1/6 | 4/18 |
+| 0.25 | 3/6 | 1/6 | 1/6 | 5/18 |
+| 0.50 | 3/6 | 0/6 | 4/6 | 7/18 |
+| 0.75 | 2/6 | 1/6 | 4/6 | 7/18 |
+| 1.00 (mean) | 1/6 | 1/6 | **5/6** | 7/18 |
+
+Bonferroni over the three depth-wise trend tests, α = 0.0167:
+
+| claim | test | result |
+|---|---|---|
+| accuracy rises with e at **depth 0.9** | Cochran–Armitage | z = **+2.840**, p = **0.0045** — survives |
+| accuracy rises with e at depth 0.5 | Cochran–Armitage | z = +0.000, p = 1.0000 |
+| accuracy rises with e at depth 0.1 | Cochran–Armitage | z = −0.804, p = 0.4216 |
+| best arm beats worst overall | Fisher, 7/18 vs 4/18 | p = 0.4705 — **not established** |
+
+**The exponent is a real control on late-context retrieval and does exactly
+nothing for mid-context.** Overall accuracy does not improve significantly; the
+knob redistributes it from early depths to late ones.
+
+That is the mechanism, not a coincidence. A depth-0.9 needle sits in a late chunk,
+has survived few compression rounds, and carries a small accumulated sum purely
+because it was scored fewer times — dividing by `count**e` restores it. A
+depth-0.5 needle has been through roughly fifteen rounds, and **if it was dropped
+in an early one it is gone permanently**: eviction is not reversible, so no
+ranking statistic can recover a position that is no longer in the cache.
+
+So the mid-context failure is not a ranking problem. That is the sweep's real
+result, and it is worth more than a tuned exponent would have been: it removes
+an entire class of fix from consideration.
+
+### The depth curve at 128K, pooled over all five arms (n = 30 per depth)
+
+| depth | accuracy | 95% CI (Clopper–Pearson) |
+|---:|---:|---|
+| 0.1 | 0.367 | [0.199, 0.561] |
+| 0.5 | **0.133** | [0.038, 0.307] |
+| 0.9 | 0.500 | [0.313, 0.687] |
+
+Depth 0.9 against depth 0.5 is p = **0.0048** (Fisher), which survives correction;
+depth 0.1 against 0.5 is p = 0.0716, which does not. A U with a real trough — the
+lost-in-the-middle shape, at 1.6% cache retention on a 0.6B model.
+
+Failures are near-misses rather than noise (75526 → `'7552'`, 85667 → `'8567'`,
+96659 → `'96969696969'`), so the information is partially retained even where the
+answer is wrong.
+
+**Unresolved, and unresolvable on this host as it stands.** Whether the trough
+belongs to eviction or to the model cannot be decided, because the uncompressed
+128K control does not fit: 14,336 MiB of cache against 8,188 MiB total. Every 64K
+and 128K number in this program is measured against no baseline. That is what
+makes §4d's mixed precision load-bearing rather than merely tidy — at 3.04× the
+full 128K cache is 4,716 MiB, and the control becomes runnable.
 
 ### Where this leaves long context
 

@@ -102,22 +102,68 @@ By 64K the mean wins at the two deeper positions and the sum has started to
 collapse toward the end of the context, which is exactly where a frozen heavy set
 predicts it should.
 
-**At 128K neither endpoint is good, and the interior does not rescue them.**
-`Policy.count_exponent` ranks on `sum / count**e`, so e=0 is the sum, e=1 the
-mean, and the interior was measured because the two endpoints fail differently:
+**At 128K the exponent is a real knob — for one depth only.**
+`Policy.count_exponent` ranks on `sum / count**e`, so e=0 is the raw sum and e=1
+the mean. All five arms below are matched: 128K, budget 2048 (1.6% keep),
+YaRN ×4, query-aware, 6 trials × 3 depths, produced by the same committed code.
+Cells are hits out of 6, because at this trial count the raw fraction hides how
+little is being counted.
 
-| e | depth 0.1 | 0.5 | 0.9 | mean |
+| e | depth 0.1 | 0.5 | 0.9 | pooled |
 |---:|---:|---:|---:|---:|
-| 0.25 | 0.50 | 0.17 | 0.17 | 0.28 |
-| 0.50 | 0.50 | 0.00 | 0.67 | 0.39 |
+| 0.00 (sum) | 2/6 | 1/6 | 1/6 | 4/18 |
+| 0.25 | 3/6 | 1/6 | 1/6 | 5/18 |
+| 0.50 | 3/6 | 0/6 | 4/6 | 7/18 |
+| 0.75 | 2/6 | 1/6 | 4/6 | 7/18 |
+| 1.00 (mean) | 1/6 | 1/6 | **5/6** | 7/18 |
 
-Depth 0.5 is at or near zero for every exponent tried. Whatever breaks the middle
-of a 128K context is **not** the accumulation bias, because the knob that controls
-that bias moves depth 0.1 and depth 0.9 around without touching it.
+Three tests, each stated with its multiplicity correction (Bonferroni over the
+three depths, α = 0.0167):
 
-*Matched endpoint runs at 6 trials and these three depths are in flight; the
-existing 128K endpoint files are 3-trial and two-depth, so they are not
-comparable with the rows above and are deliberately not tabulated here.*
+| claim | test | result |
+|---|---|---|
+| accuracy rises with e at **depth 0.9** | Cochran–Armitage trend | z = **+2.840**, p = **0.0045** — survives |
+| accuracy rises with e at depth 0.5 | Cochran–Armitage trend | z = +0.000, p = 1.0000 — exactly no trend |
+| accuracy rises with e at depth 0.1 | Cochran–Armitage trend | z = −0.804, p = 0.4216 |
+| the best arm beats the worst overall | Fisher exact, 7/18 vs 4/18 | p = 0.4705 — **not established** |
+
+So: **the decay exponent is a real control on late-context retrieval and does
+literally nothing for mid-context.** The overall gain is not significant; what the
+knob does is redistribute accuracy from early depths to late ones.
+
+That is what the mechanism predicts. A needle at depth 0.9 sits in a late chunk,
+has survived few compression rounds, and therefore carries a small accumulated
+sum purely because it was scored fewer times; dividing by `count**e` restores it.
+A needle at depth 0.5 has been through roughly fifteen rounds — and if it was
+dropped in an early one it is gone permanently, because eviction is not
+reversible. No ranking statistic recovers a position that is no longer in the
+cache. **The mid-context failure is therefore not a ranking problem, and the
+exponent sweep is what establishes that** rather than leaving it as a guess.
+
+### The depth curve, pooled over all five arms (n = 30 per depth)
+
+| depth | accuracy | 95% CI (Clopper–Pearson) |
+|---:|---:|---|
+| 0.1 | 0.367 | [0.199, 0.561] |
+| 0.5 | **0.133** | [0.038, 0.307] |
+| 0.9 | 0.500 | [0.313, 0.687] |
+
+| contrast | Fisher exact | vs α = 0.0167 |
+|---|---|---|
+| depth 0.9 vs depth 0.5 | p = **0.0048** | survives |
+| depth 0.1 vs depth 0.5 | p = 0.0716 | does not survive |
+| depth 0.1 vs depth 0.9 | p = 0.4348 | — |
+
+A U with a real trough: the middle of a 128K context is retrieved at 13%, and the
+one contrast that survives correction is mid against late. This is the familiar
+lost-in-the-middle shape, measured here at 1.6% cache retention on a 0.6B model.
+
+**What this does NOT establish, and cannot on this host.** Whether the trough
+belongs to eviction or to the model is unresolved, because the uncompressed 128K
+control does not fit: its cache alone is 14,336 MiB against 8,188 MiB total. Every
+128K number here is measured against no baseline. Closing that is what makes
+§5a's mixed precision matter — at 3.04× a full 128K cache is 4,716 MiB and the
+control becomes runnable.
 
 ---
 ## 4. Query-blind eviction during prefill
