@@ -28,6 +28,14 @@ fraction**, not by the context length: at ~6.25% keep the model scores 0.97 at 6
 and 0.92 at 128K, against 0.61 and 0.53 at 1.56% keep. All of it runs on a single
 8 GB laptop GPU, with 128K reached in 2,521 MiB.
 
+Compression also converts into latency, which a memory result does not
+guarantee. Decode is 82.6 ms/token on an uncompressed 16K cache against 46.5 ms
+compressed (**1.78×** measured), and the latency-versus-cache curve is a floor
+with a knee at 4,096 tokens — implying **13.4×** at 128K, where no uncompressed
+baseline fits on the card at all. Because both sit on that floor, moving the
+budget from 2,048 to 4,096 tokens at 128K gains **+0.25 mean accuracy at
+identical decode latency**.
+
 We also report the mechanism's operating range honestly: against a matched
 positional (StreamingLLM) control on short prompts, significance-gated eviction
 wins by +0.18 and +0.14 quality at keep 0.75 and 0.50 and **loses by 0.083 at
@@ -75,6 +83,9 @@ where there is only one round.
    than the context length, replicated at two lengths with matched needles.
 5. **Score reuse for quantisation** (§5.5): the same significance score allocates
    bit width, giving a strict Pareto improvement over uniform int8.
+6. **A measured latency floor** (§5.6) that locates the operating point. Decode
+   latency is flat across a 512× range of cache size and only then rises, so
+   compressing below the knee costs accuracy and buys nothing.
 
 ---
 
@@ -406,6 +417,58 @@ implementation would reach ≈0.0154 and lose its advantage. The mechanism must
 **quantise once and gather**, which is achievable because eviction is a gather on
 the token axis. *Not yet implemented in the live cache path.*
 
+### 5.6 Decode latency, and where the operating point should sit
+
+A smaller cache is a memory result. Whether it is also a latency result depends on
+what the machine is waiting for, which we measure rather than assume.
+
+**Latency against cache size**, everything else fixed, minimum of 2 rounds × 40
+steps:
+
+| cache | ms/token |
+|---:|---:|
+| 8 tokens (0.9 MiB) | 34.53 |
+| 1,024 tokens (112 MiB) | 34.70 |
+| 4,096 tokens (448 MiB) | **34.78** |
+| 8,192 tokens (896 MiB) | 45.25 |
+| 16,384 tokens (1.8 GiB) | 76.36 |
+
+Flat to within 1.04 ms across a **512× range of cache size**, then 3.384 µs per
+additional token. The floor implies 27 GB/s for a 904 MiB weight read and the
+slope 34 GB/s for cache reads — 11% and 13% of this card's ≈256 GB/s. **Neither
+term is bandwidth-saturated**: at batch 1 decode is dominated by per-step overhead
+(kernel launches across 28 layers, framework, Python), which no cache reduction
+can address. The ceiling on compression's latency benefit is therefore a property
+of the runtime, not of memory traffic.
+
+**What the mechanism is worth.** Measured directly at 16K on clean per-process
+runs: 82.57 ms uncompressed against 46.49 ms compressed, **1.78×**. From the
+curve, 3.80× at 32K, 6.99× at 64K, 13.39× at 128K — those three are predictions,
+not measurements, because no uncompressed arm fits above 32K. With eviction on,
+decode is flat in context length: 47.7 / 47.1 / 46.7 / 47.2 / 48.0 ms/token from
+4K to 128K at a constant 118 MiB cache.
+
+**Where the operating point should sit.** 128K, 12 paired needles, *e* = 1:
+
+| budget | keep | cache | 0.1 | 0.5 | 0.9 | mean | decode |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.56% | 224 MiB | 0.42 | 0.33 | 0.83 | 0.53 | 34.7 ms |
+| **4,096** | **3.12%** | **448 MiB** | **0.75** | **0.67** | **0.92** | **0.78** | **34.7 ms** |
+| 8,192 | 6.25% | 896 MiB | 1.00 | 0.83 | 0.92 | 0.92 | 48.6 ms |
+
+Budget 2,048 and 4,096 sit on the same floor and cost the same decode time, so
+the first row is dominated: it gives up 0.25 mean accuracy for nothing. Beyond the
+knee the trade becomes explicit — 8,192 buys a further +0.14 for +40% latency.
+
+Within-needle permutation trend across the three budgets: *p* = 0.0005 (depth
+0.1), 0.0052 (depth 0.5), 0.3363 (depth 0.9, at ceiling), with **zero reversals
+anywhere in the ladder**.
+
+**A caveat on which configuration is timed.** Scoring during decode costs 20–24%,
+but the query-aware configuration behind every accuracy number here does not do
+it: recording is off for the whole run and switched on only between prefill
+chunks. That overhead belongs to the query-blind setting.
+
 ---
 
 ## 6. Limitations and Threats to Validity
@@ -432,8 +495,12 @@ items. Trial counts below 12 cannot reach significance under the paired test at
 all, and several early results in this program were noise at n = 3.
 
 **Single checkpoint, single host.** The 46.3% sink share, the ρ(*k*) curves and
-the sink-pinning rule are properties of *this* checkpoint. No throughput claim
-below 2× is defensible here: the host's own thermal band is 2.17×.
+the sink-pinning rule are properties of *this* checkpoint. The latency floor of
+§5.6 is a property of *this runtime* — batch 1, eager PyTorch, no CUDA graphs —
+and would move under batching or kernel fusion, which is precisely the regime
+where a smaller cache should matter more, not less. Throughput was measured with
+rotated arms and minimum-of-rounds because the host's thermal band is 2.17×;
+single-shot throughput numbers on this machine are not usable.
 
 **Retractions.** We list these because the corrections shaped the method:
 
@@ -444,6 +511,8 @@ below 2× is defensible here: the host's own thermal band is 2.17×.
 | Query-aware "0.20 → 0.87" | 3-depth arm averaged against a 5-depth arm | 0.33 → 0.78, depth-matched |
 | Exponent *p*-values (Cochran–Armitage, Fisher) | independent-groups tests on needle-paired arms at n = 6 | paired re-run reversed two conclusions (§5.4) |
 | "Above 16K the full cache does not fit" | a `--cap-mib 6144` default bounding *reserved* memory | the uncompressed reference reaches 32K |
+| "A 15× smaller cache cannot exceed 2.65× decode" | arithmetic presented as physics; assumed full weight-read bandwidth | measured ceiling 13.4× at 128K (§5.6) |
+| "The fixed cost is a weights read, so decode is bandwidth-bound" | one line fitted through two regimes; the largest points set the intercept | a floor with a knee, at 11–13% of peak bandwidth — overhead-bound |
 
 **Implementation defects.** Nine were found during development; **every one
 produced a plausible wrong number rather than a crash**, and every one was caught
@@ -453,7 +522,7 @@ before masking sinks; cache bytes counted on a view, turning a "5.1× saving" in
 1.00× resident; an OOM trial scored as a wrong answer rather than excluded. All
 silent failure paths were subsequently made loud.
 
-**Verification.** 68 headline numbers are pinned by a checker that recomputes each
+**Verification.** 74 headline numbers are pinned by a checker that recomputes each
 from committed data *and* asserts it appears in the prose of the document that
 states it, so prose and data cannot drift apart. A nine-document audit against
 committed data found 41 further defects, all fixed.
@@ -489,13 +558,15 @@ than reasoning.
 python scripts/kv/chunked_prefill.py --gate                    # identity gate
 python scripts/design/identity_counts.py --check               # identity artifact
 python experiments/kv_significance/src/verify_significance.py  # 6 checks
-python scripts/design/verify_claims.py                         # 61 pinned numbers
+python scripts/design/verify_claims.py                         # 74 pinned numbers
 python experiments/kv_significance/src/passkey.py --lengths 131072 \
        --budgets 2048 8192 --depths 0.1 0.5 0.9 --trials 12 \
        --yarn 4.0 --query-aware --count-exponent 1.0 --cap-mib 7400 \
        --out experiments/kv_significance/results/pk_128k_grid12.json
 python scripts/design/paired_passkey.py \
        experiments/kv_significance/results/pk_128k_grid12.json --by budget
+python experiments/kv_significance/src/probe_decode_floor.py   # ~8 min GPU
+python experiments/kv_significance/src/measure_decode.py --lengths 16384
 ```
 
 ## 9. Data provenance
@@ -509,6 +580,8 @@ python scripts/design/paired_passkey.py \
 | §5.3 64K | `results/pk_64k_ladder.json` |
 | §5.4 exponent | `results/pk_128k_pe{0.0,0.25,0.5,0.75,1.0}.json` |
 | §5.5 storage | `results/{store_probe,mixed_precision}.json` |
+| §5.6 latency | `results/{probe_decode_floor,measure_decode}.json` |
+| §5.6 operating point | `results/{pk_128k_budget_ladder,pk_128k_B4096}.json` |
 | §6 reference ladder | `results/passkey_ceiling.json` |
 | Method | `scripts/kv/{significance,chunked_prefill}.py` |
 

@@ -35,6 +35,8 @@ rather than overwritten.
 |---|---|
 | `scripts/kv/significance.py` | The working mechanism. Significance-gated KV eviction: per-position, per-KV-head accumulated attention mass; keep = sinks + recent + top-B. Zero added parameters. |
 | `scripts/kv/chunked_prefill.py` | Chunked prefill with inter-chunk compression, so peak cache is `B + C` with prompt length eliminated. Also `score_with_query`, which makes eviction query-aware. |
+| `experiments/kv_significance/src/measure_decode.py` | Decode throughput against an uncompressed baseline, three arms, arms rotated per round and minimum-of-rounds reported because this host's thermal band is 2.17×. |
+| `experiments/kv_significance/src/probe_decode_floor.py` | What actually sets decode latency. Sweeps cache size with nothing else varying and fits a hinge; answers whether the runtime or memory traffic is the limit. |
 | `experiments/kv_significance/src/store_probe.py` | What to STORE each kept position as — quantisation, low-rank, cross-layer sharing — measured against three eviction settings whose end-to-end cost is known, so the relative errors have a scale. |
 | `experiments/kv_significance/src/mixed_precision.py` | Significance-gated mixed precision: bf16 sinks, int8 for the top-p by score, int4 for the rest. Lower error than pure int8 at 1.6× more compression. |
 | `scripts/design/kv_budget.py` | Feasibility and the iso-memory frontier, from a checkpoint's own config. |

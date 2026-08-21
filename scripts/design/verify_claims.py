@@ -366,6 +366,27 @@ CLAIMS = [
     ("mem: 64K full cache peak at OOM", 6426.0,
      lambda: measured(KVS / "mem_64k_full.json", "peak_mib", length=65536),
      1.0, "6,426", "findings"),
+
+    # --- decode throughput and the latency floor ----------------------------
+    # The operating point rests on these: B=2048 and B=4096 sit on the same floor,
+    # so if the floor or the knee moves, the recommendation moves with it.
+    ("decode: floor ms", 34.70,
+     lambda: probe("probe_decode_floor.json", "fit", "floor_ms"),
+     5e-3, "34.70", "findings"),
+    ("decode: knee tokens", 4096,
+     lambda: probe("probe_decode_floor.json", "fit", "knee_tokens"),
+     0.5, "4,096 tokens (448 MiB)", "findings"),
+    ("decode: 16K uncompressed", 76.36,
+     lambda: next((r["ms_per_token"] for r in
+                   (probe("probe_decode_floor.json", "results") or [])
+                   if r["cache_tokens"] == 16384), None),
+     5e-3, "76.36", "findings"),
+    ("128K B=4096 mean", 0.7778,
+     lambda: pk("pk_128k_B4096.json"), 5e-4, "0.78", "findings"),
+    ("128K B=4096 depth 0.1", 0.7500,
+     lambda: pk("pk_128k_B4096.json", 0.1), 5e-4, "0.75", "findings"),
+    ("128K B=4096 depth 0.5", 0.6667,
+     lambda: pk("pk_128k_B4096.json", 0.5), 5e-4, "0.67", "findings"),
 ]
 
 

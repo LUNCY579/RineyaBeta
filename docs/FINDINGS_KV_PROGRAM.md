@@ -727,6 +727,91 @@ The calibration makes them interpretable; it does not make them equivalent. See
 
 ---
 
+## 4e. Decode throughput, and the operating point it moves
+
+Cache compression is a memory result until someone times it. Two things were
+measured: what actually sets decode latency (`src/probe_decode_floor.py`), and
+what the mechanism is worth against an uncompressed baseline
+(`src/measure_decode.py`).
+
+#### Decode latency is a floor with a knee, not a line
+
+Cache size swept with everything else fixed, minimum of 2 rounds x 40 steps:
+
+| cache | ms/token |
+|---:|---:|
+| 8 tokens (0.9 MiB) | 34.53 |
+| 1,024 tokens (112 MiB) | 34.70 |
+| 4,096 tokens (448 MiB) | **34.78** |
+| 8,192 tokens (896 MiB) | 45.25 |
+| 16,384 tokens (1.8 GiB) | 76.36 |
+
+Flat to within **1.04 ms across a 512x range of cache size**, then 3.384 us per
+extra token. The floor implies **27 GB/s** for a 904 MiB weight read and the slope
+**34 GB/s** for cache reads -- 11% and 13% of this card's ~256 GB/s. Neither term
+is bandwidth-saturated, so decode at batch 1 is dominated by per-step overhead
+(kernel launches across 28 layers, framework, Python) that no cache reduction can
+touch.
+
+**Two withdrawn claims.** It was first asserted that a 15x smaller cache could not
+exceed a 2.65x speedup because 904 MiB of weights must be read every step. That
+was arithmetic presented as physics, and it assumed full bandwidth. It was then
+asserted, from a single straight-line fit, that the fixed cost *is* a weights read
+and decode *is* bandwidth-bound -- an artifact of fitting one line through two
+regimes, where the two largest points set the intercept. Both are withdrawn. The
+ceiling is real and much higher than 2.65x, and its cause is the runtime.
+
+#### What the mechanism is worth
+
+From the measured curve, against an uncompressed cache at the same length:
+
+| context | full cache | compressed | gain |
+|---:|---:|---:|---:|
+| 16,384 | 76.3 ms | 34.7 ms | **2.20x** |
+| 32,768 | 131.7 ms | 34.7 ms | **3.80x** |
+| 65,536 | 242.6 ms | 34.7 ms | **6.99x** |
+| 131,072 | 464.4 ms | 34.7 ms | **13.39x** |
+
+Directly measured at 16K on clean per-process runs: 82.57 ms uncompressed against
+46.49 ms compressed, **1.78x**. Above 32K no uncompressed arm exists to compare
+against -- it does not fit -- so those rows are the curve's prediction, not a
+measured ratio.
+
+With eviction on, decode is **flat in context length**: 47.7 / 47.1 / 46.7 / 47.2
+/ 48.0 ms/token from 4K to 128K at a constant 118 MiB cache.
+
+#### The operating point was never chosen from a latency curve
+
+There was no latency curve. There is one now, and it changes the recommendation.
+128K, 12 paired needles, `e = 1`:
+
+| budget | keep | cache | depth 0.1 | 0.5 | 0.9 | mean | decode |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.56% | 224 MiB | 0.42 | 0.33 | 0.83 | 0.53 | 34.7 ms |
+| **4,096** | **3.12%** | **448 MiB** | **0.75** | **0.67** | **0.92** | **0.78** | **34.7 ms** |
+| 8,192 | 6.25% | 896 MiB | 1.00 | 0.83 | 0.92 | 0.92 | 48.6 ms |
+
+**B=2048 and B=4096 cost identical decode time**, because both sit on the floor.
+Moving from one to the other is **+0.25 mean accuracy for nothing**. Compressing
+below the knee trades accuracy away and buys no latency at all.
+
+Within-needle permutation trend across the three budgets: p = 0.0005 at depth 0.1,
+p = 0.0052 at depth 0.5, p = 0.3363 at depth 0.9 (already at ceiling). The
+2048 -> 8192 contrast is +7/-0 at depth 0.1 (p = 0.0156) and +6/-0 at depth 0.5
+(p = 0.0312), with **zero reversals anywhere in the ladder**.
+
+Beyond the knee the trade becomes explicit rather than free: B=8192 buys a further
++0.14 mean accuracy for +40% decode latency.
+
+**A note on which configuration is being timed.** Scoring during decode costs
+20-24%, but the query-aware configuration behind every headline accuracy number
+does not do it: `passkey.py` leaves recording off for the whole run, switching it
+on only inside `score_with_query` between prefill chunks. That overhead belongs to
+the query-blind setting, and an earlier plan to optimise it was optimising
+something already avoided.
+
+---
+
 ## 5. Every bug found, and how it was caught
 
 Nine defects, all in code written during this program. **Every one produced a
@@ -809,7 +894,10 @@ What is genuinely not established:
   it is not measured.
 - **Whether an interior decay exponent helps at 128K.** Under measurement; the
   two endpoints are known and neither is uniformly good (§4c).
-- **No throughput claim below 2×**, per the thermal band.
+- **No throughput claim below 2× from a single unpaired run**, per the thermal
+  band. §4e measures throughput with rotated arms and minimum-of-rounds, which
+  is what makes its 2.20×–13.39× figures usable; the older single-shot numbers
+  elsewhere in this document are not.
 - **Generality.** The 46.3% sink share, the per-layer ρ curves and the
   sink-pinning rule are properties of *this* checkpoint, measured on 8 prompts.
 
