@@ -376,32 +376,46 @@ with the budget matters at aggressive settings**: at keep 0.25 it is worth
 +0.081 on rag_dev, because a fixed `recent=32` consumes almost the entire
 allowance and leaves nothing for scoring.
 
-> ## ⚠ RETRACTED — the StreamingLLM comparison below is invalid
+> ## ⚠ The earlier StreamingLLM comparison was retracted; this is the real one
 >
-> The "StreamingLLM" column was read from `results/_invalidated_prefill_bug/`,
-> the run both this document and the README declare invalid. Characterising it
-> as "an exact StreamingLLM baseline produced by accident" was wrong on three
-> counts, all verified:
+> The original figures (+0.18670 / +0.14562 / +0.20362) were read from
+> `results/_invalidated_prefill_bug/` and are **withdrawn**. That run was not a
+> sliding window (replaying the pre-fix `select_keep` with zero scores keeps
+> positions 0–141 plus 200–231 — a *prefix* plus recent), its forward pass was
+> acausal (eviction fired inside prefill with `attention_mask=None`, so SDPA ran
+> `is_causal=True` with L≠S and an upper-left mask), and it did not respond to
+> its own variable (keep 0.75 vs 0.50 gave 731/752 identical replies, Δ 0.0017).
 >
-> 1. **It is not a sliding window.** Replaying the pre-fix `select_keep` with
->    all-zero scores at n=232, budget=174 keeps positions **0–141 plus 200–231** —
->    a *prefix* plus recent, close to the opposite of a window.
-> 2. **The forward pass was corrupted, not merely differently-policied.** Eviction
->    fired inside prefill with `attention_mask=None`, so SDPA ran `is_causal=True`
->    with L≠S and an upper-left mask: query row 0 saw one key, and rows past the
->    budget saw end-of-prompt RoPE positions. Acausal and position-misaligned.
-> 3. **It does not respond to its own variable.** In that run, keep 0.75 vs keep
->    0.50 gives **731/752 byte-identical replies** (Δ 0.0017), where the fixed
->    policy moves 609/752 and Δ 0.0428. A control insensitive to the quantity it
->    controls is not a control.
->
-> The advantage figures (+0.18670 / +0.14562 / +0.20362) and the S5 verdict are
-> withdrawn. A real control — `Policy(budget=B, sinks=4, recent=B−4)`, heavy=0,
-> full prefill, current code — is being run; until it lands, **no matched-budget
-> comparison against a positional policy has been made.**
->
-> The absolute numbers are unaffected: keep 0.75 costing 0.01262 with 711/752
-> byte-identical replies is measured against no eviction and stands.
+> A real control has now been run: `Policy(budget=B, sinks=4, recent=B−4)`, so
+> `heavy()==0` and the policy is exactly sinks+recent. Identical budget,
+> identical protocol, current code, full prefill.
+
+### Significance vs a real positional control, matched budget
+
+| keep | StreamingLLM | Significance | advantage | paired p | sig wins |
+|---:|---:|---:|---:|---:|---:|
+| 0.75 | 0.47545 | **0.65677** | **+0.18132** | 1.3e-34 | 231/263 |
+| 0.50 | 0.47682 | **0.61401** | **+0.13719** | 3.9e-08 | 208/318 |
+| 0.25 | **0.42208** | 0.33863 | **−0.08345** | 1.5e-02 | 178/405 |
+
+**There is a crossover, and the corrupted baseline hid it.** At keep 0.75 and
+0.50 significance selection is worth +0.181 and +0.137 — close to the withdrawn
+figures, and now supported by a control that actually responds to its budget. At
+keep 0.25 the sign **reverses**: a plain sinks+recent policy beats significance
+selection by 0.083 (p = 0.015). The withdrawn number there was +0.204, i.e. the
+wrong sign on the most aggressive setting.
+
+The mechanism is consistent with what was already measured. At keep 0.25 on
+232-token prompts the budget is ~58, so after 4 sinks and a recent window the
+heavy set is small; top-32 importance churns 42% between consecutive query
+positions, and eviction is irreversible. A small heavy set chosen from stale
+scores is worse than simply keeping recent tokens. Significance selection needs
+enough budget to be worth the risk of committing to it.
+
+Practical reading: **use significance selection at keep ≥ 0.5, and plain
+sinks+recent below it.** At keep 0.25 the three configurations rank
+StreamingLLM 0.42208, recent=25%-of-budget 0.41932, significance 0.33863 — the
+first two are within noise of each other and both beat the third.
 
 ### The comparison that matters: significance vs position, at matched budget
 
