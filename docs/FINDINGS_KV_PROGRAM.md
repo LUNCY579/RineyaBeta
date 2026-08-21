@@ -300,6 +300,92 @@ tokens matter until you have seen the question.
 
 ---
 
+## 4c. Query-aware scoring — the fix for the cornerstone limit
+
+§4b established that prefill-time eviction is query-blind: each chunk is scored
+against its own trailing rows, which are filler, so a needle earns no score
+before the question is seen. `scripts/kv/chunked_prefill.py:score_with_query`
+runs the question through the model as *queries* against the current cache
+between chunks, records the attention mass, then truncates the cache back so the
+question is never itself cached.
+
+**Exactness is verified, not assumed.** `verify=True` checks byte-equality of
+every layer's keys and values before and after the pass. Leaving the question
+cached would make every later chunk attend to a question it has not reached,
+shift positions, and still produce plausible output.
+
+Cost: one forward over ~10 question tokens per chunk boundary.
+
+### The effect, 32K, budget 2048 (keep 0.0625), YaRN ×4, 3 trials
+
+| depth | blind | query-aware |
+|---:|---:|---:|
+| 0.1 | 0.00 | **1.00** |
+| 0.3 | 0.00 | 0.67 |
+| 0.5 | 0.00 | 0.67 |
+| 0.7 | 0.00 | **1.00** |
+| 0.9 | 1.00 | 1.00 |
+| **mean** | **0.20** | **0.87** |
+
+**0.20 → 0.87 at a 16× compression ratio.** This is the single largest quality
+effect measured anywhere in the program.
+
+### Sum vs mean: a ranking bug, a wrong fix, and a corrected finding
+
+Scores are a running **sum**, so a position that survived T compression rounds
+was scored T times and a newcomer once — the heavy set ratchets shut. Measured
+observation counts after 4 chunks: min 1, max 3, and sum-vs-mean top-5 rankings
+share only 2 of 5 entries, so the effect is real.
+
+`Policy.normalize` ranks on `sum / observation_count` instead.
+
+| | 32K (6 trials) | 64K (6 trials) | 128K |
+|---|---:|---:|---:|
+| rank on **sum** | 0.89 | 0.55 | 0.44 (n=3) |
+| rank on **mean** | 0.83 | **0.89** | 0.39 (n=6) |
+
+**A correction to an earlier claim in this program.** An initial 3-trial run read
+"normalization hurts, 0.87 → 0.60". At 6 trials the 32K arms are tied within one
+trial out of 18 (0.89 vs 0.83) and 64K clearly favours the mean (0.89 vs 0.55).
+The original claim was noise at n=3 and is withdrawn. The coherent reading is
+that the ratchet's severity scales with the number of compression rounds `n/C` —
+8 rounds at 32K, 16 at 64K, 32 at 128K — so normalization is a wash where the
+ratchet barely bites and a clear win where it does.
+
+**At 128K neither statistic is uniformly good, and they fail in opposite
+directions:**
+
+| depth | sum (n=3) | mean (n=6) |
+|---:|---:|---:|
+| 0.1 | 1.00 | 0.17 |
+| 0.5 | 0.33 | 0.17 |
+| 0.9 | 0.00 | **0.83** |
+
+Sum over-weights long-accumulated early positions; mean over-corrects toward late
+arrivals. Failures are near-misses rather than noise (75526 → `'7552'`,
+85667 → `'8567'`), so the information is partially retained in both regimes. A
+decay term between the two extremes is the obvious next step and is **not tested**.
+
+### Where this leaves long context
+
+| n | budget | keep | best accuracy | peak |
+|---:|---:|---:|---:|---:|
+| 32,768 | 2048 | 0.0625 | **0.89** | 1744 MiB |
+| 65,536 | 2048 | 0.031 | **0.89** | 1742 MiB |
+| 131,072 | 2048 | 0.0156 | ~0.4, depth-biased | 1743 MiB |
+
+**64K retrieval works at a 32× compression ratio on an 8 GiB card.** 128K is
+partial and depth-dependent. All of it is *retrieval*; multi-hop reasoning at
+length remains untested, and the frozen demo suite indicates that is where this
+checkpoint is genuinely weak.
+
+Trial counts are small (3–6 per cell). The 32K sum/mean comparison moved by one
+trial in 18 between runs, which is the noise floor to keep in mind for every
+number in this section.
+
+
+---
+
 ## 5. Every bug found, and how it was caught
 
 Nine defects, all in code written during this program. **Every one produced a

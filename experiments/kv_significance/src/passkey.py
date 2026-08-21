@@ -49,7 +49,7 @@ sys.path.insert(0, str(REPO / "experiments/attention_shape/src"))
 
 from scripts.kv import significance as sig  # noqa: E402
 from scripts.kv.chunked_prefill import (causal_lower_right, chunked_prefill,  # noqa: E402
-                                        stored_length)
+                                        score_with_query, stored_length)
 
 MODEL = "artifacts/rineya-core-en32k-28L"
 FILLER = ("The grass is green. The sky is blue. The sun is yellow. "
@@ -57,6 +57,7 @@ FILLER = ("The grass is green. The sky is blue. The sun is yellow. "
 PREAMBLE = ("There is an important piece of information hidden inside a lot of "
             "irrelevant text. Find it and memorise it. I will quiz you about it.\n\n")
 SUFFIX = "\n\nWhat is the pass key? The pass key is"
+QUESTION = "What is the pass key? The pass key is"
 QUERY_HINT = ("What is the pass key? Watch for it as you read." + chr(10)*2)
 
 
@@ -87,13 +88,25 @@ def build_prompt(tok, target_tokens: int, depth: float, key: int,
 
 @torch.no_grad()
 def answer(model, tok, ids, cache, chunk: int, policy, window: int,
-           max_new: int = 12) -> str:
-    """Chunked prefill, then greedy decode with explicit true positions."""
+           max_new: int = 12, query_ids=None) -> str:
+    """Chunked prefill, then greedy decode with explicit true positions.
+
+    `query_ids` switches scoring from query-BLIND to query-AWARE. Blind scoring
+    ranks each chunk by its own trailing query rows, which for every chunk but
+    the last are filler, so a needle earns no score before the question is seen.
+    Aware scoring runs the question against the cache between chunks and undoes
+    the pass, so ranking reflects what was actually asked.
+    """
     n = ids.shape[-1]
     sig.reset_scores()
-    sig.set_recording(policy is not None, window=window)
+    # With query-aware scoring the chunk's own rows must NOT contribute, or the
+    # filler signal is simply added back on top of the question signal.
+    sig.set_recording(policy is not None and query_ids is None, window=window)
 
     def compress_fn(c, ci):
+        if query_ids is not None:
+            score_with_query(model, c, query_ids,
+                             position_base=c.layers[0].true_length, sig=sig)
         sig.compress(c, policy)
 
     out = chunked_prefill(model, ids, cache, chunk=chunk, logits_to_keep=1,
@@ -127,6 +140,12 @@ def main() -> None:
     ap.add_argument("--chunk", type=int, default=4096)
     ap.add_argument("--recent", type=int, default=512)
     ap.add_argument("--window", type=int, default=16)
+    ap.add_argument("--normalize", action="store_true",
+                    help="rank on MEAN score (sum / observations) rather than the "
+                         "running sum, which otherwise freezes the heavy set")
+    ap.add_argument("--query-aware", action="store_true",
+                    help="score each chunk against the QUESTION instead of its "
+                         "own trailing rows; the question is never cached")
     ap.add_argument("--query-first", action="store_true",
                     help="also state the question at the start of the prompt")
     ap.add_argument("--yarn", type=float, default=None,
@@ -184,12 +203,16 @@ def main() -> None:
                     ids = tok(text, return_tensors="pt").to(args.device)["input_ids"]
                     torch.cuda.empty_cache()
                     torch.cuda.reset_peak_memory_stats()
-                    policy = (sig.Policy(budget=budget, sinks=4, recent=args.recent)
+                    policy = (sig.Policy(budget=budget, sinks=4, recent=args.recent,
+                                         normalize=args.normalize)
                               if budget else None)
                     cache = sig.SignificanceCache(config=model.config, policy=None)
                     try:
+                        qids = (tok(QUESTION, return_tensors="pt")
+                                .to(args.device)["input_ids"]
+                                if args.query_aware else None)
                         got = answer(model, tok, ids, cache, args.chunk, policy,
-                                     args.window)
+                                     args.window, query_ids=qids)
                     except torch.cuda.OutOfMemoryError:
                         got = "<OOM>"
                     peak = max(peak, torch.cuda.max_memory_allocated() / 2 ** 20)

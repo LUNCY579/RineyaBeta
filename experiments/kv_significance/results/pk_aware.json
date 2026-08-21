@@ -1,0 +1,36 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 512,
+  "trials": 3,
+  "results": [
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 2048,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1740.4,
+      "yarn": 4.0
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 2048,
+      "depth": 0.5,
+      "acc": 0.3333333333333333,
+      "peak_mib": 1740.4,
+      "yarn": 4.0
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 2048,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1740.4,
+      "yarn": 4.0
+    }
+  ]
+}

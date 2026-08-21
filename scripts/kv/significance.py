@@ -38,6 +38,13 @@ from transformers.cache_utils import Cache, DynamicLayer
 
 # layer_idx -> [batch, n_kv_heads, n_positions] accumulated significance
 _SCORES: dict[int, torch.Tensor] = {}
+# Matching observation counts. Scores are a running SUM, so a position that
+# survived T compression rounds has been scored T times and a newcomer once.
+# Ranking on the sum freezes the heavy set: whatever got in early stays in,
+# regardless of merit. Measured with query-aware scoring at 32K, budget 2048: a
+# needle in chunk 0 retrieved at 1.00 while one in chunk 4 retrieved at 0.33 --
+# backwards, since the later needle is no less relevant, only less observed.
+_COUNTS: dict[int, torch.Tensor] = {}
 _STATE = {"enabled": False, "window": 16, "patched": False}
 
 
@@ -89,14 +96,21 @@ def patch_attention() -> bool:
             li = getattr(module, "layer_idx", None)
             if li is not None:
                 prev = _SCORES.get(li)
+                pc = _COUNTS.get(li)
+                ones = torch.ones_like(s)
                 if prev is not None and prev.shape[-1] == s.shape[-1]:
                     _SCORES[li] = prev + s          # accumulate
+                    _COUNTS[li] = (pc + ones) if (pc is not None and pc.shape == ones.shape) else ones
                 elif prev is not None and prev.shape[-1] < s.shape[-1]:
                     # The cache grew; carry the accumulated history forward onto
                     # the prefix it covers.
                     pad = s.clone()
                     pad[..., : prev.shape[-1]] += prev
                     _SCORES[li] = pad
+                    cpad = ones.clone()
+                    if pc is not None:
+                        cpad[..., : pc.shape[-1]] += pc
+                    _COUNTS[li] = cpad
                 elif prev is not None:
                     # prev is LONGER than s. Overwriting would throw away every
                     # observation accumulated so far and restart the ranking from
@@ -111,6 +125,7 @@ def patch_attention() -> bool:
                         f"Call reset_scores() between sequences.")
                 else:
                     _SCORES[li] = s
+                    _COUNTS[li] = ones
         return original(module, query, key, value, attention_mask=attention_mask,
                         dropout=dropout, scaling=scaling, is_causal=is_causal, **kwargs)
 
@@ -133,6 +148,18 @@ def set_recording(enabled: bool, window: int | None = None) -> None:
 
 def reset_scores() -> None:
     _SCORES.clear()
+    _COUNTS.clear()
+
+
+def mean_scores(layer_idx: int):
+    """Accumulated score divided by observation count, or None if unscored."""
+    s = _SCORES.get(layer_idx)
+    if s is None:
+        return None
+    c = _COUNTS.get(layer_idx)
+    if c is None or c.shape != s.shape:
+        return s
+    return s / c.clamp_min(1.0)
 
 
 def heavy_zero_count() -> int:
@@ -199,7 +226,7 @@ class SignificanceLayer(DynamicLayer):
         pol = self.policy
         k, v = self.keys, self.values
         b, n_kv, n, d = k.shape
-        s = _SCORES.get(self.layer_idx)
+        s = mean_scores(self.layer_idx) if pol.normalize else _SCORES.get(self.layer_idx)
 
         if s is None:
             # Unreachable: update() only calls _evict once _SCORES has an entry.
@@ -240,9 +267,20 @@ class SignificanceLayer(DynamicLayer):
         self.values = v.gather(2, gather_idx).contiguous()
         # Keep the score vector aligned with the surviving positions, and drop the
         # +inf placeholders so they do not dominate the next selection.
-        kept = s.gather(2, idx)
+        # Gather the RAW accumulated score, not the ranking key -- writing the
+        # mean back would compound the division on every subsequent round.
+        raw = _SCORES.get(self.layer_idx)
+        if raw is not None and raw.shape[-1] == n:
+            kept = raw.gather(2, idx)
+        else:
+            kept = s.gather(2, idx)
         _SCORES[self.layer_idx] = torch.where(
             torch.isfinite(kept), kept, torch.zeros_like(kept)).contiguous()
+        cnt = _COUNTS.get(self.layer_idx)
+        if cnt is not None and cnt.shape[-1] == n:
+            _COUNTS[self.layer_idx] = cnt.gather(2, idx).contiguous()
+        else:
+            _COUNTS.pop(self.layer_idx, None)
         self.evictions += 1
 
     def get_seq_length(self) -> int:
@@ -345,6 +383,7 @@ class Policy:
     protect_sinks: bool = True
     slack: int = 0             # evict only once stored exceeds budget + slack
     pool: int = 1              # max-pool width over scores before top-k (SnapKV)
+    normalize: bool = False    # rank on MEAN score (sum / observation count)
     stats: dict = field(default_factory=dict)
 
     def n_sinks(self) -> int:
@@ -401,6 +440,10 @@ def compress(cache, policy: Policy, scores: dict[int, torch.Tensor] | None = Non
             continue
 
         s = scores[li].to(k.device).float()          # [b, n_kv, n]
+        if policy.normalize:
+            m = mean_scores(li)
+            if m is not None and m.shape == s.shape:
+                s = m.to(k.device).float()
         if s.shape[-1] != n:
             # Skipping here leaves that layer's cache FULL while the report says
             # the pass succeeded, so a run reads as "compression applied" with
@@ -414,7 +457,14 @@ def compress(cache, policy: Policy, scores: dict[int, torch.Tensor] | None = Non
         gather_idx = idx.unsqueeze(-1).expand(-1, -1, -1, d)
         layer.keys = k.gather(2, gather_idx).contiguous()
         layer.values = v.gather(2, gather_idx).contiguous()
-        scores[li] = s.gather(2, idx).contiguous()
+        raw = _SCORES.get(li)
+        scores[li] = ((raw if raw is not None and raw.shape[-1] == n else s)
+                      .gather(2, idx).contiguous())
+        cnt = _COUNTS.get(li)
+        if cnt is not None and cnt.shape[-1] == n:
+            _COUNTS[li] = cnt.gather(2, idx).contiguous()
+        else:
+            _COUNTS.pop(li, None)
 
         report["layers"] += 1
         report["after"] += idx.shape[-1]

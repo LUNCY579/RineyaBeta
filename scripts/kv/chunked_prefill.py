@@ -125,6 +125,92 @@ def chunked_prefill(model, input_ids: torch.Tensor, cache, chunk: int,
 
 
 # --------------------------------------------------------------------------- #
+# query-aware scoring
+# --------------------------------------------------------------------------- #
+
+def _snapshot(cache):
+    return [(l.keys.shape[-2] if getattr(l, "keys", None) is not None else 0,
+             getattr(l, "true_length", 0)) for l in getattr(cache, "layers", [])]
+
+
+def _restore(cache, snap):
+    """Truncate the cache back to a snapshot. Must be exact -- see score_with_query."""
+    for layer, (n_keys, true_len) in zip(cache.layers, snap):
+        if getattr(layer, "keys", None) is not None:
+            layer.keys = layer.keys[:, :, :n_keys, :].contiguous()
+            layer.values = layer.values[:, :, :n_keys, :].contiguous()
+        if hasattr(layer, "true_length"):
+            layer.true_length = true_len
+
+
+@torch.no_grad()
+def score_with_query(model, cache, query_ids, position_base: int, sig,
+                     verify: bool = False):
+    """Score the cached positions against the QUESTION, then undo the pass.
+
+    Prefill-time eviction is query-blind: each chunk is scored against its own
+    last query rows, which for every chunk but the last are filler, so a needle
+    earns no score before anyone asks for it. Measured consequence: at 64K a
+    passkey at depth 0.99 is retrieved at 1.00 and at depth 0.90 at 0.00, and a
+    4x larger budget does not change it.
+
+    This runs the question through the model as QUERIES against the current
+    cache, records the resulting attention mass, and then truncates the cache
+    back so the question is never itself cached. Cost is one forward over
+    `len(query)` tokens per chunk -- at 16 question tokens against a 2048-token
+    cache that is negligible beside the chunk itself.
+
+    The truncation must be EXACT. If it leaves the question in the cache, every
+    later chunk attends to a question it should not see yet, positions shift, and
+    the run still produces plausible output -- the failure mode this codebase has
+    hit repeatedly. `verify=True` checks byte-equality of every layer before and
+    after, and is used by the self-test.
+    """
+    layers = getattr(cache, "layers", [])
+    if not layers or getattr(layers[0], "keys", None) is None:
+        return
+    snap = _snapshot(cache)
+    stored = snap[0][0]
+    q = query_ids.shape[-1]
+    device = query_ids.device
+    dtype = next(model.parameters()).dtype
+
+    before = None
+    if verify:
+        before = [(l.keys.clone(), l.values.clone()) for l in layers]
+
+    mask = causal_lower_right(q, stored + q, device, dtype)
+    pos = torch.arange(position_base, position_base + q, device=device).unsqueeze(0)
+    # Score against EVERY question row, not a trailing window -- the whole point
+    # is that the question is short and entirely informative.
+    sig.set_recording(True, window=q)
+    model(query_ids, past_key_values=cache, position_ids=pos,
+          attention_mask={"full_attention": mask}, use_cache=True,
+          logits_to_keep=1)
+    sig.set_recording(False)
+
+    _restore(cache, snap)
+    # The scores now cover stored + q positions; the trailing q belong to the
+    # question, which is about to be removed from the cache.
+    scores = sig.get_scores()
+    counts = getattr(sig, "_COUNTS", {})
+    for li in list(scores):
+        if scores[li].shape[-1] > stored:
+            scores[li] = scores[li][..., :stored].contiguous()
+    for li in list(counts):
+        if counts[li].shape[-1] > stored:
+            counts[li] = counts[li][..., :stored].contiguous()
+
+    if verify:
+        for i, (l, (k0, v0)) in enumerate(zip(layers, before)):
+            if not torch.equal(l.keys, k0) or not torch.equal(l.values, v0):
+                raise RuntimeError(
+                    f"layer {i}: cache not restored after query scoring. Leaving "
+                    f"the question cached makes every later chunk attend to it "
+                    f"and still produces plausible output.")
+
+
+# --------------------------------------------------------------------------- #
 # no-op gate
 # --------------------------------------------------------------------------- #
 
