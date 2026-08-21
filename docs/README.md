@@ -40,6 +40,7 @@ rather than overwritten.
 | `scripts/design/kv_budget.py` | Feasibility and the iso-memory frontier, from a checkpoint's own config. |
 | `scripts/design/power_analysis.py` | Minimum detectable effect for the two units of replication (item and training run). |
 | `scripts/design/verify_claims.py` | **Run this after editing any doc.** Cross-checks headline numbers against committed data *and* against the prose. Non-zero exit on drift. |
+| `scripts/design/identity_counts.py` | Derives byte-identical reply counts into a small **committed** artifact, because the per-case `results.jsonl` files are gitignored (132 MB) and every `N/752` figure otherwise reproduces only on the machine that made it. `--check` re-derives and reports drift. |
 | `scripts/design/paired_passkey.py` | **Run this instead of computing a p-value by hand.** Exact McNemar on discordant needles, within-needle permutation trend test, and a refusal to compare cells that share no needles. Added because the hand-rolled version was wrong. |
 
 Nothing in `scripts/train/` is touched by this work: `code_fingerprint()` hashes
@@ -52,6 +53,7 @@ every `.py` there and an edit invalidates every checkpoint's resume path.
 ```bash
 python scripts/kv/chunked_prefill.py --gate          # correctness, CPU/GPU, ~1 min
 python scripts/design/verify_claims.py               # docs vs data, CPU, instant
+python scripts/design/identity_counts.py --check     # identity artifact vs raw records
 python experiments/kv_significance/src/verify_significance.py   # 6 checks
 python experiments/kv_significance/src/measure_chunked.py --lengths 32768 131072
 python experiments/kv_significance/src/store_probe.py           # ~4 min GPU
@@ -67,8 +69,8 @@ python scripts/design/paired_passkey.py \
 Two flags in that command are not decoration. `--cap-mib 7400` overrides a 6144
 default that bounds *reserved* memory and silently blocked every uncompressed
 reference above 16K for most of this program. `--trials 12` is a power choice, not
-a minimum: exact McNemar gives p = 2/2ⁿ on n discordant needles, so reaching 0.05
-needs at least six discordant pairs and a 6-trial cell floors at 0.0625 — see
+a minimum: exact McNemar gives p = 2/2^d on d discordant needles, so reaching 0.05
+needs d ≥ 6, and a 6-needle cell only gets there if every needle flips — see
 [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4c.
 
 Use the project venv (`.venv/Scripts/python.exe`); the default `python` on PATH
@@ -91,12 +93,12 @@ the keep *fraction*, not the length:
 
 | n | budget | keep | accuracy | peak |
 |---:|---:|---:|---:|---:|
-| 32,768 | 2048 | 6.3% | 0.89 | 1744 MiB |
-| 65,536 | 2048 | 3.1% | 0.81 | 1742 MiB |
-| 131,072 | 2048 | 1.6% | 0.53 | 1743 MiB |
-| 131,072 | 8192 | 6.3% | **0.92** | 2521 MiB |
+| 32,768 | 2048 | 6.25% | 0.89 | 1744 MiB |
+| 65,536 | 2048 | 3.12% | 0.81 | 1742 MiB |
+| 131,072 | 2048 | 1.56% | 0.53 | 1743 MiB |
+| 131,072 | 8192 | 6.25% | **0.92** | 2521 MiB |
 
-At a constant 6.3% keep the accuracy is flat from 32K to 128K. The "128K is weak"
+At a constant 6.25% keep the accuracy is flat from 32K to 128K. The "128K is weak"
 reading that ran through this program for a while was about B=2048, which is 1.6%
 keep at that length — a different experiment wearing the same label.
 

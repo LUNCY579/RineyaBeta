@@ -24,8 +24,8 @@ needles at depth 0.9 while mean ranking retrieves **10 of 12** (exact McNemar,
 +10/−0, *p* = 0.0020; within-needle permutation trend *p* < 0.0001).
 
 With the corrected ranking, retrieval accuracy is governed by the **keep
-fraction**, not by the context length: at ~6.5% keep the model scores 0.97 at 64K
-and 0.92 at 128K, against 0.61 and 0.53 at 1.6% keep. All of it runs on a single
+fraction**, not by the context length: at ~6.25% keep the model scores 0.97 at 64K
+and 0.92 at 128K, against 0.61 and 0.53 at 1.56% keep. All of it runs on a single
 8 GB laptop GPU, with 128K reached in 2,521 MiB.
 
 We also report the mechanism's operating range honestly: against a matched
@@ -256,9 +256,10 @@ within-needle permutation trend (200,000 draws) for ordered conditions. Analysis
 is in a committed tool that *refuses* to compare cells sharing no needles.
 
 **Power.** Exact McNemar with all discordant pairs in one direction gives
-*p* = 2/2ⁿ, so **six paired needles cannot reach *p* < 0.05 regardless of effect
-size** — a perfect 5-of-6 flip is already at the floor of 0.0625. Cells are
-therefore 12 needles. Short-context quality sweeps use 752 rag_dev items.
+*p* = 2/2^d on *d* discordant pairs, so **p < 0.05 requires *d* ≥ 6** (*d* = 6 →
+0.03125, *d* = 5 → 0.0625). A 6-needle cell has at most six discordant pairs and
+so reaches significance only when *every* needle flips; the 5-of-6 flips we
+actually observed sit at 0.0625. Cells are therefore 12 needles. Short-context quality sweeps use 752 rag_dev items.
 
 ---
 
@@ -313,8 +314,8 @@ we report the operating range as part of the method.
 
 | budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
 |---:|---:|---:|---:|---:|---:|---:|
-| 2,048 | 1.6% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB |
-| 8,192 | 6.5% | **1.00** | **0.83** | **0.92** | **0.92** | 2,521 MiB |
+| 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB |
+| 8,192 | 6.25% | **1.00** | **0.83** | **0.92** | **0.92** | 2,521 MiB |
 
 Budget contrast by exact McNemar: depth 0.1 +7/−0, *p* = 0.0156; depth 0.5 +6/−0,
 *p* = 0.0312; depth 0.9 +1/−0 (at ceiling). Under Bonferroni across three depths
@@ -325,9 +326,9 @@ across the three depths, all 14 favouring the larger budget, zero reversals.**
 
 | budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
 |---:|---:|---:|---:|---:|---:|---:|
-| 1,024 | 1.6% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB |
-| 2,048 | 3.3% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB |
-| 4,096 | 6.5% | **1.00** | **1.00** | **0.92** | **0.97** | 2,002 MiB |
+| 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB |
+| 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB |
+| 4,096 | 6.25% | **1.00** | **1.00** | **0.92** | **0.97** | 2,002 MiB |
 
 Within-needle permutation trend across budgets: *p* = 0.0015 (depth 0.1),
 0.0168 (depth 0.9), 0.0369 (depth 0.5). The 1,024 → 4,096 contrast moves 13
@@ -337,8 +338,12 @@ needles with **zero reversals**.
 
 | keep | 64K | 128K |
 |---:|---:|---:|
-| 1.6% | 0.61 | 0.53 |
-| 6.5% | **0.97** | **0.92** |
+| 1.56% | 0.61 | 0.53 |
+| 6.25% | **0.97** | **0.92** |
+
+Keep fractions are budget ÷ nominal length, so 64K/B=4096 and 128K/B=8192 are
+both exactly 6.25% — the two rows are matched by construction rather than by
+rounding. Against real token counts (62,898 and 125,826) both are 6.51%.
 
 **Doubling the context costs ≈ 0.05. Quadrupling the keep fraction gains ≈ 0.36.**
 The keep fraction is the controlling variable and the length is nearly a free
@@ -448,7 +453,7 @@ before masking sinks; cache bytes counted on a view, turning a "5.1× saving" in
 1.00× resident; an OOM trial scored as a wrong answer rather than excluded. All
 silent failure paths were subsequently made loud.
 
-**Verification.** 61 headline numbers are pinned by a checker that recomputes each
+**Verification.** 68 headline numbers are pinned by a checker that recomputes each
 from committed data *and* asserts it appears in the prose of the document that
 states it, so prose and data cannot drift apart. A nine-document audit against
 committed data found 41 further defects, all fixed.
@@ -470,7 +475,7 @@ deepest position. Normalising by observation count corrects it with one exponent
 and no tuning.
 
 With that correction the empirical picture is simple: **retrieval accuracy is a
-function of the keep fraction, not of the context length.** At ~6.5% keep a 0.6B
+function of the keep fraction, not of the context length.** At ~6.25% keep a 0.6B
 model retrieves at 0.97 (64K) and 0.92 (128K) on an 8 GB laptop GPU, in 2.5 GiB.
 The method's limits are equally clear — it loses to a positional baseline below
 keep 0.25 on short prompts, and everything measured at length is retrieval rather
@@ -482,6 +487,7 @@ than reasoning.
 
 ```bash
 python scripts/kv/chunked_prefill.py --gate                    # identity gate
+python scripts/design/identity_counts.py --check               # identity artifact
 python experiments/kv_significance/src/verify_significance.py  # 6 checks
 python scripts/design/verify_claims.py                         # 61 pinned numbers
 python experiments/kv_significance/src/passkey.py --lengths 131072 \

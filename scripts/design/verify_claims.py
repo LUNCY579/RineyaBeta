@@ -122,29 +122,21 @@ def pk_depth_pooled(depth: float):  # currently unused -- see the note in CLAIMS
         return None
     return sum(vals) / len(vals)
 
-def identical_replies(a: str, b: str, ds: str = "chat_dev"):
-    """Byte-identical reply count between two committed runs.
+def identical_replies(group: str, tag: str):
+    """Byte-identical reply count, read from the COMMITTED artifact.
 
-    Recomputed rather than quoted. Two documents carried hand-written identity
-    counts that matched no committed run at all -- one at the wrong scale
-    entirely (60 cases against a 510-case set).
+    The per-case results.jsonl files are gitignored -- 132 MB of them -- so a
+    check that read them would pass on the machine that produced them and fail in
+    a fresh clone. scripts/design/identity_counts.py derives the counts into a few
+    kB of committed JSON; run it with --check to confirm the artifact still
+    matches the raw records when those are present.
     """
-    def load(path: Path):
-        f = path / "results.jsonl"
-        if not f.exists():
-            return None
-        out = {}
-        for line in f.read_text(encoding="utf-8").splitlines():
-            if line.strip():
-                d = json.loads(line)
-                out[d["id"]] = d["reply"]
-        return out
-    x = load(ROOT / a if "/" in a else KVS / f"{a}__{ds}")
-    y = load(ROOT / b if "/" in b else KVS / f"{b}__{ds}")
-    if not x or not y:
+    path = ROOT / f"experiments/{group}/results/identity_counts.json"
+    if not path.exists():
         return None
-    keys = [k for k in x if k in y]
-    return sum(1 for k in keys if x[k] == y[k]) if keys else None
+    d = json.loads(path.read_text(encoding="utf-8"))
+    row = d.get("counts", {}).get(tag)
+    return row["identical"] if row else None
 
 def concentration(k: int):
     p = KVS / "concentration.json"
@@ -342,12 +334,17 @@ CLAIMS = [
     # The attention_shape README claimed "60/60 byte-identical ... with it, 51/60"
     # for a 510-case set. Recomputed here so the scale cannot drift again.
     ("compat: identical vs gate baseline", 393,
-     lambda: identical_replies("artifacts/gate_runs/r2_base_chat_dev",
-                               "experiments/attention_shape/results/base-8KV__chat_dev"),
+     lambda: identical_replies("attention_shape", "base-8KV__chat_dev"),
      0.5, "393/510", "attention_shape"),
     ("pooling: identical replies", 631,
-     lambda: identical_replies("off", "frac0.5-pool7-fixed", "rag_dev"),
+     lambda: identical_replies("kv_significance", "frac0.5-pool7-fixed__rag_dev"),
      0.5, "631/752", "kv_readme"),
+    ("quality: identical at keep 0.75", 711,
+     lambda: identical_replies("kv_significance", "frac0.75__rag_dev"),
+     0.5, "711/752", "findings"),
+    ("quality: identical at keep 0.25", 159,
+     lambda: identical_replies("kv_significance", "frac0.25__rag_dev"),
+     0.5, "159/752", "findings"),
 
     # --- the cap-vs-chunk grid, which decides where the reference ladder stops -
     # These four cells were run from scratch files that were then deleted, so the

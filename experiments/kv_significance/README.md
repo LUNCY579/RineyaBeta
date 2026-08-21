@@ -358,7 +358,7 @@ their results live in **[docs/FINDINGS_KV_PROGRAM.md](../../docs/FINDINGS_KV_PRO
   statement of `0.20 → 0.87` averaged a 3-depth blind arm against a 5-depth
   query-aware one and is withdrawn.)
 - **Retrieval works at ~15x compression at both long lengths**, and what controls
-  it is the keep *fraction*, not the length: 6.5% keep gives **0.97 at 64K**
+  it is the keep *fraction*, not the length: 6.25% keep gives **0.97 at 64K**
   (B=4096, peak 2002 MiB) and **0.92 at 128K** (B=8192, peak 2521 MiB), while
   1.6% keep gives 0.61 and 0.53. All 12 paired needles. No depth law is
   established — the ordering at 128K/B=2048 does not replicate at 64K.
@@ -387,12 +387,12 @@ regime it was designed for — was correct when written and is no longer true.
    0.42 / 0.33 / 0.83 — late beats early, early and middle indistinguishable — and
    at B=8192 the depth dependence disappears entirely (permutation p = 0.8879).
 6. ~~Does 128K work?~~ — **yes, at the budget that works everywhere else.** 0.92
-   across depths at B=8192 (6.3% keep), peak 2521 MiB. Accuracy is flat in length
-   at constant keep fraction: at **6.5% keep**, 0.97 at 64K against 0.92 at 128K,
+   across depths at B=8192 (6.25% keep), peak 2521 MiB. Accuracy is flat in length
+   at constant keep fraction: at **6.25% keep**, 0.97 at 64K against 0.92 at 128K,
    both 12 paired needles. What was previously read as a 128K weakness was B=2048,
    which is 1.6% keep at that length. FINDINGS §4c.
-7. ~~Is 6.5% keep a general operating point or a 128K coincidence?~~ — **general.**
-   The 64K ladder (B ∈ {1024, 2048, 4096} = 1.6 / 3.3 / 6.5% keep, 12 paired
+7. ~~Is 6.25% keep a general operating point or a 128K coincidence?~~ — **general.**
+   The 64K ladder (B ∈ {1024, 2048, 4096} = 1.6 / 3.3 / 6.25% keep, 12 paired
    needles) gives 0.61 / 0.81 / 0.97, with a within-needle trend of p = 0.0015 at
    depth 0.1 and 13 discordant needles across depths moving one way with zero
    reversals. `results/pk_64k_ladder.json`, FINDINGS §4c.
@@ -416,5 +416,6 @@ real work to learn:
   file predating the fix has no `trials` field and `paired_passkey.py` will refuse
   it rather than guess.
 - **Use at least 12 trials.** Exact McNemar with every discordant pair pointing
-  one way gives p = 2/2ⁿ, so 6 needles floor at p = 0.0625 and cannot reach
-  significance however clean the effect.
+  one way gives p = 2/2^d on d discordant pairs, so p < 0.05 needs d ≥ 6. A
+  6-needle cell has at most 6, so it only reaches significance if every needle
+  flips; a 5-of-6 flip sits at 0.0625.

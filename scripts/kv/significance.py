@@ -159,27 +159,29 @@ def ranked_scores(layer_idx: int, exponent: float = 0.0):
     removes that advantage entirely, including the part of it that is real
     evidence. The exponent trades one bias against the other with one knob.
 
-    MEASURED, all five arms matched -- 128K, budget 2048, YaRN x4, query-aware,
-    6 trials per cell, hits out of 6 at depths 0.1 / 0.5 / 0.9:
+    MEASURED, 12 needles identical in every cell -- 128K, budget 2048, YaRN x4,
+    query-aware, results/pk_128k_pe*.json. Accuracy at depths 0.1 / 0.5 / 0.9:
 
-      e = 0.00 (sum)    2 / 1 / 1
-      e = 0.25          3 / 1 / 1
-      e = 0.50          3 / 0 / 4
-      e = 0.75          2 / 1 / 4
-      e = 1.00 (mean)   1 / 1 / 5
+      e = 0.00 (sum)    0.58  0.08  0.00     mean 0.22
+      e = 0.25          0.67  0.08  0.08     mean 0.28
+      e = 0.50          0.67  0.00  0.33     mean 0.33
+      e = 0.75          0.58  0.17  0.67     mean 0.47
+      e = 1.00 (mean)   0.42  0.33  0.83     mean 0.53
 
-    Depth 0.9 rises monotonically with e (Cochran-Armitage z = +2.840,
-    p = 0.0045, surviving Bonferroni over the three depths). Depth 0.5 has
-    EXACTLY no trend (z = 0.000, p = 1.0000). Pooled, the best arm does not beat
-    the worst (7/18 vs 4/18, Fisher p = 0.4705), so this knob redistributes
-    accuracy rather than adding it.
+    At depth 0.9 the raw sum retrieves NOTHING (0 of 12) and the mean retrieves
+    10 of 12: exact McNemar +10/-0, p = 0.0020; within-needle permutation trend
+    p < 0.0001. Pooled over all 36 needle-positions, 0.22 -> 0.53, p = 0.0074.
 
-    Read that as a scope limit, not a tuning result. Eviction is irreversible, so
-    a needle dropped in an early round cannot be recovered by any later ranking;
-    a depth-0.5 needle at 128K has been through ~15 rounds and a depth-0.9 needle
-    through ~3. The exponent can only help the ones still present. Mid-context
-    failure at 128K is not a ranking problem -- see docs/FINDINGS_KV_PROGRAM.md
-    section 4c.
+    e = 1 is the default and the interior is not worth tuning -- the mean column
+    is monotone with no interior optimum. The cost is at the other end: at depth
+    0.1 the mean is worse (0.58 -> 0.42), because long-accumulated early
+    positions carry real evidence that normalising discards.
+
+    An earlier version of this docstring reported a 6-trial version of this sweep
+    with Cochran-Armitage and Fisher p-values. Those arms are paired on needles
+    and both tests model independent groups, so the p-values were wrong and are
+    withdrawn; two of their conclusions reversed under the paired re-run. See
+    docs/FINDINGS_KV_PROGRAM.md section 4c.
     """
     s = _SCORES.get(layer_idx)
     if s is None:

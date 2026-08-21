@@ -1,0 +1,21 @@
+{
+  "baseline": "artifacts/gate_runs/r2_base_chat_dev",
+  "counts": {
+    "base-8KV__chat_dev": {
+      "identical": 393,
+      "compared": 510
+    },
+    "gqa-2KV__chat_dev": {
+      "identical": 0,
+      "compared": 510
+    },
+    "gqa-1KV__chat_dev": {
+      "identical": 0,
+      "compared": 510
+    },
+    "swa-w512-g4__chat_dev": {
+      "identical": 393,
+      "compared": 510
+    }
+  }
+}

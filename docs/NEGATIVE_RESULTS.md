@@ -123,7 +123,8 @@ over all 36 needle-positions, 0.22 → 0.53 at p = 0.0074.
 p-values** (Cochran–Armitage z = +2.840 / p = 0.0045 at depth 0.9, p = 1.0000 at
 depth 0.5, p = 0.4216 at depth 0.1, Fisher p = 0.4705 overall). Those are
 independent-groups tests and the arms are paired on needles, so the model was
-wrong; and at six trials p = 2/2ⁿ cannot fall below 0.0625 regardless. Two of its
+wrong; and at six trials significance needs all six needles to be discordant
+(p = 2/2^d < 0.05 requires d ≥ 6), which the data did not give. Two of its
 conclusions reversed under the paired re-run: mean ranking *does* beat sum
 ranking overall (0.31, p = 0.0074), and depth 0.5 *does* have a trend
 (p = 0.0125). Full table and tests in
@@ -339,7 +340,8 @@ Not ideas, but methods — each cost real time.
 - **Counting cache bytes with `numel()`** credits a saving the allocator has not
   made whenever a layer holds a view. Sum de-duplicated `untyped_storage()`.
 - **Any throughput claim below 2× is indefensible here.** The host's own thermal
-  band is 2.17× (33.8 ms cool against 71.6–73.2 ms at 84 °C).
+  band is 2.17× (33.8 ms cool against 71.6–73.2 ms at 84 °C) — *an observation from run
+logs, not a committed artefact; the tree has no timing or temperature instrument*.
 - **A memory cap is not a memory measurement, and neither is a peak.**
   `set_per_process_memory_fraction` bounds *reserved* bytes while
   `max_memory_allocated` reports *allocated* ones. A 32K uncompressed run dies at
@@ -361,10 +363,12 @@ Not ideas, but methods — each cost real time.
   contrast built on them was invalid — and because each depth drew a *different*
   six, the axis under test was confounded with subject difficulty. The fix is a
   paired design plus per-trial records, not a wider interval.
-- **Six paired subjects cannot reach p < 0.05.** Exact McNemar with all
-  discordant pairs one way gives p = 2/2ⁿ, so n = 6 floors at 0.0625 — a perfect
-  5-of-6 flip is already at the floor. Reaching 0.05 needs six discordant pairs.
-  Every 6-trial cell here was structurally incapable of significance.
+- **Miscounting the power floor of a paired test.** This document previously said
+  six paired subjects "cannot reach p < 0.05". They can: exact McNemar with all
+  *d* discordant pairs one way gives p = 2/2^d, and d = 6 gives 0.03125. What is
+  true is that d ≥ 6 is required (d = 5 gives 0.0625), so a 6-needle cell
+  succeeds only if *every* needle flips. Fragile, not impossible — and the
+  observed 5-of-6 flip did sit at 0.0625. Correct conclusion, wrong reason.
 - **Trial counts below ~6 mislead.** A 3-trial run produced "normalization hurts,
   0.87 → 0.60"; at 6 trials the arms were tied within one trial in 18 and the
   claim was withdrawn.

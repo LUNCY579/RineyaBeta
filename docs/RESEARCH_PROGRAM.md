@@ -246,7 +246,7 @@ tokens.
 > in corrected form: the *uncompressed* 8KV control reaches 32K on this card, not
 > 16K as later believed and not 64K (7,168 MiB of cache against 8,188 MiB total).
 > Compressed, both 64K and 128K run in under 2.6 GiB. What controls accuracy is
-> the keep fraction rather than the length: ~6.5% keep gives 0.97 at 64K and 0.92
+> the keep fraction rather than the length: 6.25% keep gives 0.97 at 64K and 0.92
 > at 128K. See [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4b–§4c.
 
 ### A5. Small-scale MoE **[P]** — define the metric before attempting

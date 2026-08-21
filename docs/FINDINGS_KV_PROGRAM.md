@@ -205,7 +205,9 @@ quadratic would be ×16.
 ### What this does and does not establish
 
 It establishes a **memory and compute** result: peak VRAM is now independent of
-prompt length, and 128K is reachable on this card with 4.4 GiB to spare. That
+prompt length, and 128K is reachable on this card with **4,399 MiB of headroom
+under the 6,144 MiB cap that run used** (6,144 − 1,745), or 6,443 MiB against the
+8,188 MiB card. That
 converts the >32K rungs from arithmetic into something measurable, which was the
 single largest blocker in the program.
 
@@ -290,7 +292,9 @@ as it was before — the baseline exists but is not yet comparable.
 
 **64K remains out of reach, and now for a stated reason rather than a guess.**
 Its cache alone is exactly 7,168 MiB (28 × 8 × 128 × 2 × 2 bytes × 65,536)
-against 8,188 MiB total with ~430 MiB already resident and 904 MiB of weights.
+against 8,188 MiB total, with 904 MiB of weights and a few hundred MiB held by
+the desktop compositor and other processes — observed between ~430 and ~1,340 MiB
+across this session, so the available figure below is approximate and moves.
 That is 8,072 MiB required against ~7,758 available **before a single byte of
 activation or fragmentation**, so no allocator setting reaches it — a run at cap
 8100 OOMs at peak 6,426 MiB. Eviction really is required from 64K up, which is
@@ -446,7 +450,8 @@ contrast (p = 0.4705, "not established") over five 6-trial arms. **Those four
 p-values are withdrawn.** Cochran–Armitage and Fisher are independent-groups
 tests, and the arms are paired on needles — this document says so two sections
 below. The counts were fine; the inference used the wrong model, and at 6 trials
-could not have reached significance anyway (p = 2/2ⁿ floors at 0.0625).
+was fragile regardless: p = 2/2^d needs d ≥ 6 discordant pairs to fall below
+0.05, and a 6-needle cell has at most 6.
 
 Re-run with **12 needles identical in every cell**, 128K, B=2048, YaRN ×4,
 query-aware. `results/pk_128k_pe{0.0,0.25,0.5,0.75,1.0}.json`:
@@ -523,8 +528,8 @@ Re-measured under the paired design. **12 needles, identical in every cell**,
 
 | budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
 |---:|---:|---:|---:|---:|---:|---:|
-| 2,048 | 1.6% | 0.42 | 0.33 | 0.83 | 0.53 | 1743 MiB |
-| 8,192 | 6.5% | **1.00** | **0.83** | **0.92** | **0.92** | 2521 MiB |
+| 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1743 MiB |
+| 8,192 | 6.25% | **1.00** | **0.83** | **0.92** | **0.92** | 2521 MiB |
 
 The budget contrast, per depth, exact McNemar on the needles that disagreed:
 
@@ -539,7 +544,7 @@ does not. What is not a matter of thresholds: **14 discordant needles across the
 three depths, all 14 favouring the larger budget, zero reversals.**
 
 **So the 128K story this program has been telling was about B=2048, not about
-128K.** At 6.5% keep the checkpoint retrieves at 0.92 across depths in 2,521 MiB —
+128K.** At 6.25% keep the checkpoint retrieves at 0.92 across depths in 2,521 MiB —
 matching its own 32K and 64K numbers. The length wall was a budget wall.
 
 #### What the depth axis actually does
@@ -569,14 +574,20 @@ which is significant at both lengths and never reverses.
 
 #### A power limit worth stating once
 
-Exact McNemar with all discordant pairs in one direction gives p = 2/2ⁿ, so **six
-needles cannot produce a p below 0.0625 no matter how clean the effect** — a
-perfect 5-of-6 flip is already at the floor. Anything below 0.05 needs at least
-six discordant pairs. Every 6-trial cell in this program is therefore incapable of
-reaching significance on its own, which is the real reason the trial count moved
-to 12 rather than any particular result.
+Exact McNemar with all *d* discordant pairs in one direction gives
+p = 2/2^d, so **p < 0.05 requires d ≥ 6** (d=6 → 0.03125; d=5 → 0.0625).
+A 6-needle cell has at most 6 discordant pairs, so it reaches significance
+only in the single perfect case where *every* needle flips — the 5-of-6 flip
+we actually observed sits at 0.0625. Six needles are therefore fragile rather
+than impossible, which is why cells moved to 12.
 
-#### 6.5% keep is an operating point, not a 128K coincidence
+> **Corrected.** An earlier version of this note said six needles "cannot produce
+> a p below 0.0625 no matter how clean the effect". That is wrong: six needles
+> *can* reach 0.03125, when all six are discordant. 0.0625 is the floor for five
+> discordant pairs, which is what the observed 5-of-6 flip gave. The practical
+> conclusion — move to 12 — is unchanged; the stated reason was not right.
+
+#### 6.25% keep is an operating point, not a 128K coincidence
 
 The 128K result says accuracy tracks the keep *fraction*. That is only worth
 anything if it holds at another length. 64K, 12 paired needles, e=1.0, YaRN ×4,
@@ -584,9 +595,9 @@ query-aware — `results/pk_64k_ladder.json`:
 
 | budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
 |---:|---:|---:|---:|---:|---:|---:|
-| 1,024 | 1.6% | 0.50 | 0.75 | 0.58 | 0.61 | 1621 MiB |
-| 2,048 | 3.3% | 0.83 | 0.92 | 0.67 | 0.81 | 1742 MiB |
-| 4,096 | 6.5% | **1.00** | **1.00** | **0.92** | **0.97** | 2002 MiB |
+| 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1621 MiB |
+| 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1742 MiB |
+| 4,096 | 6.25% | **1.00** | **1.00** | **0.92** | **0.97** | 2002 MiB |
 
 Within-needle permutation trend across the three budgets: p = 0.0015 at depth 0.1,
 0.0168 at depth 0.9, 0.0369 at depth 0.5. The 1024 → 4096 contrast moves 13
@@ -596,8 +607,12 @@ Put the two lengths on the same axis and length nearly drops out:
 
 | keep | 64K | 128K |
 |---:|---:|---:|
-| 1.6% | 0.61 | 0.53 |
-| 6.5% | **0.97** | **0.92** |
+| 1.56% | 0.61 | 0.53 |
+| 6.25% | **0.97** | **0.92** |
+
+Keep fractions are budget ÷ *nominal* length, so 64K/B=4096 and 128K/B=8192 are
+both exactly 6.25% and the two rows are matched by construction. Against real
+token counts (62,898 and 125,826) they are 6.51%.
 
 **Doubling the context costs about 0.05. Quadrupling the keep fraction gains about
 0.36.** The keep fraction is the controlling variable and the length is nearly a
@@ -613,12 +628,12 @@ these rows.
 | n | budget | keep | accuracy | peak | needles |
 |---:|---:|---:|---:|---:|---:|
 | 32,768 | 0 (full cache) | 100% | **1.00** | 4699 MiB | 3, unpaired, **no YaRN** |
-| 32,768 | 2048 | 6.3% | 0.89 | 1744 MiB | 6, unpaired, YaRN ×4 |
-| 65,536 | 1024 | 1.6% | 0.61 | 1621 MiB | **12, paired** |
-| 65,536 | 2048 | 3.3% | 0.81 | 1742 MiB | **12, paired** |
-| 65,536 | 4096 | 6.5% | **0.97** | 2002 MiB | **12, paired** |
-| 131,072 | 2048 | 1.6% | 0.53 | 1743 MiB | **12, paired** |
-| 131,072 | 8192 | 6.5% | **0.92** | 2521 MiB | **12, paired** |
+| 32,768 | 2048 | 6.25% | 0.89 | 1744 MiB | 6, unpaired, YaRN ×4 |
+| 65,536 | 1024 | 1.56% | 0.61 | 1621 MiB | **12, paired** |
+| 65,536 | 2048 | 3.12% | 0.81 | 1742 MiB | **12, paired** |
+| 65,536 | 4096 | 6.25% | **0.97** | 2002 MiB | **12, paired** |
+| 131,072 | 2048 | 1.56% | 0.53 | 1743 MiB | **12, paired** |
+| 131,072 | 8192 | 6.25% | **0.92** | 2521 MiB | **12, paired** |
 
 **Retrieval at 64K and 128K works at a ~15× compression ratio on an 8 GiB card,**
 and at matched keep fraction the two lengths differ by 0.05 while the keep
