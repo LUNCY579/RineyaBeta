@@ -106,12 +106,18 @@ does not merely mask attention.
 
 | variant | cache 16K | peak 16K | prefill 16K | decode 16K | 32K |
 |---|---:|---:|---:|---:|---|
-| `base-8KV` | 1792 MiB | 3128 MiB | 2368 ms | 11.4 tok/s | **OOM** |
-| `swa-w1024-g4` | 352 MiB | 3832 MiB | 4510 ms | 18.1 tok/s | **OOM** |
-| `swa-w256-g4` | 280 MiB | 3832 MiB | 4670 ms | 18.1 tok/s | **OOM** |
-| `swa-w1024-g2` | 232 MiB | 3832 MiB | 4851 ms | 19.2 tok/s | **OOM** |
-| `gqa-2KV` | 448 MiB | 1700 MiB | 2553 ms | 15.7 tok/s | OK (2573 MiB) |
-| `gqa-1KV` | 224 MiB | 1462 MiB | 2510 ms | 21.5 tok/s | OK (2111 MiB) |
+| `base-8KV` | 1792 MiB | 3128 MiB | 3410 ms | 7.7 tok/s | **OOM** |
+| `swa-w1024-g4` | 352 MiB | 3832 MiB | 6480 ms | 15.2 tok/s | **OOM** |
+| `swa-w256-g4` | 280 MiB | 3832 MiB | 4399 ms | 20.7 tok/s | **OOM** |
+| `gqa-2KV` | 448 MiB | 1700 MiB | 2402 ms | 16.9 tok/s | OK (2573 MiB) |
+| `gqa-1KV` | 224 MiB | 1462 MiB | 2383 ms | 24.1 tok/s | OK (2111 MiB) |
+
+Every column is from `results/measure_fixed.json`, the post-fix re-run. An
+earlier version of this table carried pre-fix prefill and decode figures
+(base-8KV 2368 ms / 11.4 tok/s, and so on) next to cache and peak values the
+re-run did not change — so the two halves of each row came from different runs.
+`swa-w1024-g2` was not part of the 12-cell re-run and is dropped rather than
+left carrying stale timings.
 
 ### Correction: the SWA cache saving is logical, not resident
 
@@ -175,8 +181,11 @@ swa-w1024-g4  create_sliding_window_causal_mask  -> [1,1,16384,16384] bool, 256 
 A sliding window is expressed as a dense `[1,1,n,n]` mask that scales with
 **context, not window** — which is why `w=256` and `w=1024` have different caches
 and *byte-identical* peaks (3832.5 MiB). The explicit mask also blocks SDPA's
-`is_causal` fast path, so prefill is ~1.9× slower rather than the ~1.75× faster
-the FLOP model predicts.
+`is_causal` fast path, so prefill is ~1.9× **slower** where a naive FLOP count
+over the sliding layers predicts it should be faster. The specific multiplier
+this sentence used to quote for that prediction (~1.75×) appears in no committed
+file and is withdrawn; the measured 1.9× slowdown is the point, and its sign is
+the opposite of what shape-only reasoning gives.
 
 **So on this stack the honest answer to "which axis extends context" is the KV-head
 count, not the window schedule.** Sliding window still wins decode throughput
@@ -211,7 +220,11 @@ wrong kernel ran". **Any long-context work on this host is affected**, and the
 
 **2. Switching SDPA kernels changes 23% of greedy replies while moving aggregate
 quality by +0.00138.** Measured on chat_dev: without the compat patch this
-harness is **60/60 byte-identical** to the stored gate baseline; with it, 51/60.
+harness is byte-identical to the stored gate baseline; with it, **393/510** —
+117 replies changed, 22.9%, which is where the 23% above comes from
+(`artifacts/gate_runs/r2_base_chat_dev` against
+`results/base-8KV__chat_dev`). An earlier version of this sentence said 60/60
+and 51/60; chat_dev has 510 cases and those counts appear in no committed run.
 The two kernels are mathematically equivalent and numerically are not, and one
 flipped token cascades through greedy decoding. This is a textbook case for the
 program's P8 — the aggregate says "no effect" while a quarter of the outputs
@@ -235,7 +248,7 @@ cases**. Comparability proved before comparing (P4).
 **A sliding window is either exactly free or catastrophic, with nothing in
 between.** At `w=512`, wider than every chat_dev prompt, it is provably the
 identity — 510/510 byte-identical, delta exactly zero. At `w=128`, narrower than
-99% of rag_dev prompts, the model emits empty strings.
+97.3% of rag_dev prompts (732 of 752), the model emits empty strings.
 
 And the damage does not scale with how much context is lost:
 

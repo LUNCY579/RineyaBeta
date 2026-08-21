@@ -20,8 +20,8 @@ the work that produced `MINI_MODEL_ROADMAP.md`, and the citation is the scar.
 
 | # | Principle | Why |
 |---|---|---|
-| **P1** | **Measure to a plateau, never to a sample.** | Four consecutive memory predictions were wrong (14–67%) because 12–14-step samples were treated as steady state. The run that "was flat at 3,892 through step 14" reached 5,090 by step 40. |
-| **P2** | **Gate per category. Never conclude from an aggregate.** | The trim's RAG cost read as diffuse noise at −0.0127 aggregate. Per category it was one thing: `conflict` −0.1898, nine lost abstentions, 12 of 16 categories bit-identical. |
+| **P1** | **Measure to a plateau, never to a sample.** | Four consecutive memory predictions were wrong (14–67%) because 12–14-step samples were treated as steady state. The 8x16 run that read a flat **3,882 MiB at ~step 10** kept climbing to **5,090 MiB** — 30 MiB from the cap — and hung at **step 72** with no checkpoint. |
+| **P2** | **Gate per category. Never conclude from an aggregate.** | The trim's RAG cost read as diffuse noise at −0.0127 aggregate. Per category it was one thing: `conflict` −0.1898, nine lost abstentions, 11 of 16 categories bit-identical. |
 | **P3** | **Verify supervisory signals against system state.** | Three orphaned trainers survived "successful" stops. `Stop-Process -Force` and `taskkill /F` both failed *silently*; one orphan burned 8,029 CPU-seconds and probably caused a `CUBLAS_STATUS_INTERNAL_ERROR` I nearly attributed to a kernel bug. |
 | **P4** | **Prove comparability before comparing.** | The vendored v4.5 scorer only became trustworthy once it reproduced upstream at max |Δ| = 0.000e+00 on 510 stored replies. Two subtle invocation details were worth 3e-3 on a fifth of rows. |
 | **P5** | **Pre-declare thresholds.** | A floor chosen after seeing the number is a rationalisation, not a gate. Inherited from `READINESS_ASSESSMENT.md`. |
@@ -57,8 +57,8 @@ Tagging this honestly is what keeps the program executable rather than aspiratio
 
 ## 2. Workstream I — infrastructure (unblocks everything)
 
-From the audit of the current tree: 4,092 LOC of project code, 26 files, and seven
-gaps. Ordered by how much each unblocks.
+From the audit of the current tree: 4,092 LOC of project code, 26 files, and eight
+gaps (I1–I8 below). Ordered by how much each unblocks.
 
 ### I1. Reproducible environment **[blocking]**
 `.venv` cannot be rebuilt from the repo — no lockfile, no requirements. Every

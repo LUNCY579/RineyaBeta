@@ -42,6 +42,8 @@ ATS = ROOT / "experiments/attention_shape/results"
 DOCS = {
     "findings": ROOT / "docs/FINDINGS_KV_PROGRAM.md",
     "negative": ROOT / "docs/NEGATIVE_RESULTS.md",
+    "attention_shape": ROOT / "experiments/attention_shape/README.md",
+    "kv_readme": ROOT / "experiments/kv_significance/README.md",
 }
 
 
@@ -119,6 +121,30 @@ def pk_depth_pooled(depth: float):  # currently unused -- see the note in CLAIMS
     if any(v is None for v in vals):
         return None
     return sum(vals) / len(vals)
+
+def identical_replies(a: str, b: str, ds: str = "chat_dev"):
+    """Byte-identical reply count between two committed runs.
+
+    Recomputed rather than quoted. Two documents carried hand-written identity
+    counts that matched no committed run at all -- one at the wrong scale
+    entirely (60 cases against a 510-case set).
+    """
+    def load(path: Path):
+        f = path / "results.jsonl"
+        if not f.exists():
+            return None
+        out = {}
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                d = json.loads(line)
+                out[d["id"]] = d["reply"]
+        return out
+    x = load(ROOT / a if "/" in a else KVS / f"{a}__{ds}")
+    y = load(ROOT / b if "/" in b else KVS / f"{b}__{ds}")
+    if not x or not y:
+        return None
+    keys = [k for k in x if k in y]
+    return sum(1 for k in keys if x[k] == y[k]) if keys else None
 
 def concentration(k: int):
     p = KVS / "concentration.json"
@@ -311,6 +337,17 @@ CLAIMS = [
      lambda: pk("pk_64k_ladder.json", 0.9, 4096), 5e-4, "0.92", "findings"),
     ("64K B=1024 depth 0.9", 0.5833,
      lambda: pk("pk_64k_ladder.json", 0.9, 1024), 5e-4, "0.58", "findings"),
+
+    # --- counts that were hand-written and wrong -----------------------------
+    # The attention_shape README claimed "60/60 byte-identical ... with it, 51/60"
+    # for a 510-case set. Recomputed here so the scale cannot drift again.
+    ("compat: identical vs gate baseline", 393,
+     lambda: identical_replies("artifacts/gate_runs/r2_base_chat_dev",
+                               "experiments/attention_shape/results/base-8KV__chat_dev"),
+     0.5, "393/510", "attention_shape"),
+    ("pooling: identical replies", 631,
+     lambda: identical_replies("off", "frac0.5-pool7-fixed", "rag_dev"),
+     0.5, "631/752", "kv_readme"),
 ]
 
 

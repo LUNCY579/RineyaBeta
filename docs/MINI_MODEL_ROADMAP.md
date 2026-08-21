@@ -14,7 +14,7 @@ from a paper. Reproduce with `scripts/measure/` and `scripts/trim/` (§9).
 - **Gate baselines measured (§16).** Against stock Qwen3-0.6B on identical cases:
   the trim is **free on chat DEV** (paired delta +0.0002, CI spans zero) and costs
   **exactly 9 abstentions in the RAG `conflict` category** (paired delta −0.0127,
-  CI excludes zero). 12 of 16 RAG categories are bit-identical.
+  CI excludes zero). 11 of 16 RAG categories are bit-identical.
 - **B0's success criterion is now pre-declared:** restore `conflict` abstention to
   ≥93.1% while chat contract fulfilment holds at 1.0000 (§16.4).
 - **B0 is running** on the third configuration, the first measured to an actual
@@ -1141,7 +1141,7 @@ Zero cases improved and 14 regressed. That asymmetry is what distinguishes this
 from the chat result: it is a small, one-directional, real degradation.
 
 **And the per-category view shows it is a single failure mode, not a broad decay.**
-Twelve of sixteen categories are bit-identical:
+Eleven of sixteen categories are bit-identical — five moved, listed here:
 
 | Category | n | stock | R2 | Delta | Regressed |
 |---|---:|---:|---:|---:|---:|
