@@ -1,0 +1,280 @@
+# KV-compression program — consolidated findings
+
+Single authoritative record of the long-context / KV-compression work on R2.
+Every number here is reproducible from a committed file by the procedure stated
+beside it. Where a figure was published and later withdrawn, both the wrong and
+the right value appear, because a record that quietly overwrites its own mistakes
+is not a record.
+
+**Model under test.** `artifacts/rineya-core-en32k-28L` ("R2"): Qwen3-0.6B
+derivative, 28 layers, hidden 1024, 16 query heads / 8 KV heads, head_dim 128,
+vocab 32,768, tied embeddings, `rope_theta` 1e6, `max_position_embeddings`
+40,960, `rope_scaling` null, 474,021,888 parameters. KV cache costs
+`2 × 28 × 8 × 128 × 2 = 114,688` bytes/token = **112 KiB/token**.
+
+**Host.** RTX 4070 Laptop, 8,188 MiB VRAM (~6 GiB usable), 15.2 GB system RAM
+with 2–3 GB free, torch 2.13.0+cu130, transformers 5.15.0. Windows/WDDM does not
+OOM when VRAM runs out — it spills to host RAM and the run goes silent at 0% GPU.
+A per-process allocator cap converts that into a catchable error.
+
+---
+
+## 1. The working mechanism
+
+`scripts/kv/significance.py` — significance-gated KV eviction. Promoted to the
+main tree; self-contained (imports only `torch` and `transformers.cache_utils`).
+
+**How it works.** Each cached position carries one scalar per KV head per layer:
+the accumulated softmax attention mass it has received. Scores come from an
+observation window of the last `w = 16` query rows during prefill, and from the
+single query row during decode (free — that product is computed anyway). At
+eviction each KV head independently keeps
+
+```
+keep = sinks(first 4)  ∪  recent(last r)  ∪  top-B by accumulated score
+```
+
+Each head keeps its *own* top-B, so the cache stays rectangular
+`[batch, n_kv, B, head_dim]` and no ragged bookkeeping is needed. Cached keys
+already carry their RoPE rotation, so dropping and reordering positions is safe.
+`get_seq_length()` returns the **true** position count rather than the stored
+length — reporting the stored length would silently re-index RoPE for every token
+generated after a compression.
+
+**Why it never asks the kernel for attention weights.** SDPA and FlashAttention
+never materialise the `n × n` score matrix; forcing eager to recover it costs
+`n_q × n² × 2` bytes per layer — **8.6 GB per layer at 16K**, measured. Scores are
+instead computed by an explicit small matmul alongside the fast kernel:
+`[heads, w, n]` at prefill instead of `[heads, n, n]` (a 1024× reduction at 16K
+with w=16), and `[heads, 1, n]` at decode.
+
+**Ordering contract.** `update()` runs *before* the attention call that produces
+the scores, so eviction only fires once real scores exist. Full prefill attention
+→ scores recorded → the first decode step compresses. Violating this is the bug
+in §5.1.
+
+**Cost.** One fp32 scalar per position, per KV head, per layer:
+`28 × 8 × n × 4` bytes against a cache of `114,688 × n` bytes = **0.78%**,
+length-independent, **measured at 0.78% at every length and budget tested**.
+0.39% in fp16. **Zero added parameters** — a runtime statistic, never multiplied
+into an output, so the parameter frontier in `RESEARCH_PROGRAM.md` is untouched.
+
+---
+
+## 2. Quality — measured
+
+**Protocol.** rag_dev, 752 paired cases, greedy, `max_new_tokens=32`,
+`eos_only`, v4.5 scorer, chat template with `enable_thinking=False`. Identical to
+`scripts/eval/run_gates.py`; the harness reproduces the stored gate baseline
+**exactly (|Δ| = 0.00e+00 over 510 chat_dev cases)** in `--no-compat` mode.
+
+*Procedure:* `python src/run_eval_sig.py --keep-frac F --dataset rag_dev --compare-to off`
+
+| arm | cache | mean quality | vs no eviction | byte-identical |
+|---|---:|---:|---:|---:|
+| no eviction | 1.00× | 0.66939 | — | — |
+| keep 0.75 | 1.33× | 0.65677 | **−0.01262** | 711/752 (94.5%) |
+| keep 0.50 + pool 7 | 2.00× | 0.63371 | −0.03568 | 631/752 |
+| keep 0.50 | 2.00× | 0.61401 | −0.05538 | 605/752 |
+| keep 0.25, recent 25% | 4.00× | 0.41932 | −0.25007 | 172/752 |
+| keep 0.25 | 4.00× | 0.33863 | −0.33076 | 159/752 |
+
+**A 1.33× cache reduction costs 0.013 and leaves 94.5% of replies byte-identical.**
+
+### 2.1 Against a real positional control — and a crossover
+
+*Procedure:* `--recent-frac 1.0` gives `recent = B − 4`, so `heavy() == 0` and the
+policy is exactly sinks+recent (StreamingLLM). Identical budget and protocol.
+
+| keep | StreamingLLM | Significance | advantage | paired p | sig wins |
+|---:|---:|---:|---:|---:|---:|
+| 0.75 | 0.47545 | **0.65677** | **+0.18132** | 1.3e-34 | 231/263 |
+| 0.50 | 0.47682 | **0.61401** | **+0.13719** | 3.9e-08 | 208/318 |
+| 0.25 | **0.42208** | 0.33863 | **−0.08345** | 1.5e-02 | 178/405 |
+
+**The sign reverses at keep 0.25.** Significance selection is worth +0.18 and
++0.14 at keep 0.75 and 0.50, and is *worse than doing nothing clever* at keep
+0.25. Mechanism: at keep 0.25 on 232-token prompts the budget is ~58, so after 4
+sinks and a recent window the heavy set is small; top-32 importance churns 42%
+between consecutive query positions and eviction is irreversible, so a small
+heavy set chosen from stale scores loses to simply keeping recent tokens.
+
+**Operating rule:** significance selection at keep ≥ 0.5; plain sinks+recent
+below it.
+
+### 2.2 Two policy refinements, both measured
+
+- **SnapKV pooling** (max-pool width 7 over scores before top-k): +0.01970 at
+  keep 0.50 on rag_dev (0.61401 → 0.63371); −0.005 on chat_dev. Evidence spans
+  are worth keeping whole; conversation is not.
+- **`recent` scaled with the budget** instead of fixed at 32: +0.08069 at keep
+  0.25 at *identical* memory (`mean_kept_ratio` 0.2499 in both), 0.33863 →
+  0.41932. This is the largest single-hyperparameter effect measured.
+
+---
+
+## 3. Attention structure — measured
+
+*Procedure:* `experiments/kv_significance/src/concentration.py --cases 8`,
+8 rag_dev prompts, 192–265 tokens, last 16 query rows, 28 layers × 16 heads.
+
+| budget k | ρ(k) | ρ(k), sinks removed | error bound 2(1−ρ)·V |
+|---:|---:|---:|---:|
+| 1 | 0.591 | 0.362 | 0.817 |
+| 32 | 0.951 | 0.898 | 0.099 |
+| 64 | 0.980 | 0.957 | 0.041 |
+| 128 | 0.996 | 0.992 | 0.008 |
+
+**The bound.** Attention output is a convex combination `o = Σ aᵢvᵢ`. Evict and
+renormalise with retained mass ρ:
+
+```
+‖o − ô‖  ≤  2(1 − ρ)·max‖vᵢ‖
+```
+
+**Measured to be necessary but NOT sufficient:** ρ > 0.996 still cost 0.199
+end-to-end under a positional policy. The bound controls one attention output;
+errors compose across 28 layers and iterate across decode steps.
+
+**Attention sinks.** R2 sends **46.3%** of its attention mass to the first 4
+tokens; 14 of 28 layers exceed 50%; layer 27 sends 80.5%; layers 0–2 send under
+3%. *Procedure:* `experiments/attention_shape/src/sink_audit.py`.
+
+**Persistence.** Top-32 overlap between consecutive query positions is **0.584**
+(chance 0.138 at these lengths). Importance is 4.2× more persistent than random,
+but 42% churns every step, and eviction is irreversible.
+
+---
+
+## 4. Efficiency — measured
+
+*Procedure:* `experiments/kv_significance/src/measure_sig.py`, 6 GiB allocator cap.
+
+| length | budget | cache | reduction | peak | decode |
+|---:|---:|---:|---:|---:|---:|
+| 16,384 | off | 1799 MiB | — | 3128 MiB | 9.8 tok/s |
+| 16,384 | 1024 | 118.9 MiB | **15.1×** | 3142 MiB (1.00×) | 17.1 tok/s (**1.74×**) |
+
+- **Memory: strong.** 15.1× smaller cache; the significance matrix is 0.78% of it.
+- **Peak: unchanged (1.00×).** The full prompt cache is resident before anything
+  can be compressed. A peak win requires chunked prefill (§7).
+- **Speed: modest.** 15× less cache buys 1.74× decode, because per-step top-k and
+  gather across 28 layers eat most of the bandwidth saving. At 4K, eviction is a
+  net **slowdown** (0.68×) — the overhead is fixed while the saving scales.
+- **Thermal caveat:** this host's own band is 2.17× (33.8 ms cool vs 71.6–73.2 ms
+  at 84 °C). **No throughput claim below 2× is defensible here.**
+
+---
+
+## 5. Every bug found, and how it was caught
+
+Nine defects, all in code written during this program. **Every one produced a
+plausible wrong number rather than a crash, and every one was caught by a control
+rather than by reading the code.**
+
+| # | Defect | Detection | Wrong number it produced |
+|---|---|---|---|
+| 1 | Eviction fired during prefill before scores existed | prefill timing was impossibly **fast** (2.6×) | an entire quality sweep measured a positional policy |
+| 2 | `select_keep` pooled before masking sinks | synthetic probe with dominant sinks | 3 of 8 heavy slots spent on positions 4–6; 1 of 4 content tokens kept |
+| 3 | `_evict` fell back to zeros with no scores | code audit + contract check | silent sliding window |
+| 4 | `_evict` `+inf` lag padding unbounded | audit; safe at 1-token lag, fatal at chunk lag | sinks + newest-chunk |
+| 5 | `compress()` skipped layers on shape mismatch | audit | layers left uncompressed while reporting success |
+| 6 | `Policy.heavy()` returned 0 silently | audit; live on 20/752 prompts | plain StreamingLLM reported as significance |
+| 7 | Score accumulation discarded history | audit | ranking restarted from one forward pass |
+| 8 | `t_crit` scaled a t value by a normal-quantile ratio | 400k null simulations | FWER 0.0985 vs 0.05; every training MDE 7–43% too small |
+| 9 | Cache bytes summed over a **view** | audit + storage-pointer check | SWA cache saving credited before it happens |
+
+Two harness defects with the same character: `measure.py` held two caches during
+timing (producing a false OOM verdict), and `run_eval_sig.py` wrote the unused
+`recent` flag into the manifest (reporting every `--recent-frac` run as if the
+flag had never been passed — 13%/37% significance-selected where the truth is
+63.7%/67.4%).
+
+### The systemic weakness
+
+These are not nine unrelated mistakes. They share one property: **the code has
+many paths that produce a valid-looking output from an invalid state.** A missing
+score becomes a zero vector; a shape mismatch becomes a skipped layer; an
+exhausted budget becomes an empty heavy set; a view becomes a byte count. In each
+case the failure is representable as a normal result, so nothing downstream can
+tell.
+
+The structural fix is the one applied in §5 rows 3–7: **make the invalid state
+unrepresentable, or make it raise.** Where raising would truncate a sweep and
+leave partial data (row 6), warn once and export a count into the run manifest so
+the condition is visible in the artefact rather than only in a log.
+
+---
+
+## 6. Retractions
+
+| Claim | Published | Correct | Why |
+|---|---|---|---|
+| Allocation gain | 7.4% | **4.2%**, and 0.00% at mean 128/layer | fabricated ρ(256) column; floor below `heavy()>0` |
+| SWA prefill speedup | 3.2× faster | ~1.9× **slower** | kernel dispatch, not attention shape |
+| Significance vs StreamingLLM | +0.187/+0.146/+0.204 | **+0.181/+0.137/−0.083** | baseline was a corrupted forward pass; sign wrong at keep 0.25 |
+| MDE at k=3 | 9.6pp | **13.9pp** | `t_crit` multiplicity bug |
+| SWA decode win | 18.1 vs 11.4 tok/s | gqa-1KV does **21.5** at a smaller cache | compared against the wrong baseline |
+
+---
+
+## 7. What is not established
+
+- **Nothing above 32K.** No uncompressed reference fits on this host (64K needs
+  8,072 MiB, 128K needs 15,240 MiB against 8,188 MiB total). All 64K/128K
+  statements in this program are memory arithmetic, not behaviour.
+- **Nothing at long context, full stop.** Every quality number comes from prompts
+  of 41–330 tokens. The regime eviction exists for — tens of thousands of tokens
+  with real redundancy — is unreachable: nothing in this repository exceeds
+  ~2.7K tokens.
+- **No throughput claim below 2×**, per the thermal band.
+- **Peak memory is unimproved** and cannot be claimed without chunked prefill.
+- **Generality.** The 46.3% sink share, the per-layer ρ curves and the
+  sink-pinning rule are properties of *this* checkpoint, measured on 8 prompts.
+
+---
+
+## 8. Stack-level findings that transfer
+
+**`enable_gqa=True` silently falls back to the SDPA math kernel** on this stack
+(sm_89, torch 2.13.0+cu130). At 16 Q / 8 KV / head_dim 128 / seq 16384, bf16:
+
+```
+enable_gqa=True, is_causal=True   ->  allocates 16.00 GiB  ->  OOM
+repeat_kv to 16 heads, is_causal  ->  peak 224 MiB
+```
+
+16 GiB is exactly `16 × 16384² × 4` bytes — the score matrix in fp32.
+`transformers` opts in whenever `attention_mask is None`. It surfaces as an OOM
+at a plausible length, so it reads as "the card is too small" rather than "the
+wrong kernel ran". **Any long-context work on this host is affected.** Workaround:
+`experiments/attention_shape/src/compat.py`.
+
+**Switching SDPA kernels changes 23% of greedy replies** while moving mean
+quality by +0.00138. Mathematically equivalent, numerically not; one flipped
+token cascades through greedy decoding.
+
+**chat_dev cannot detect attention-level damage and reports it backwards.** Its
+aggregate *rose* (+0.00247 at keep 0.75) while only 361/510 replies stayed
+identical. Damage lengthens replies, and `prompt_function_alignment` (a
+response-mode heuristic in 502/510 cases, weight 0.28 combined with
+`task_adequacy`) rewards length, while `brevity` (0.01) and `completeness` (0.02)
+cannot outvote it. **Never conclude from a chat_dev aggregate that an
+attention-level intervention is harmless.**
+
+---
+
+## 9. Killed, with reasons
+
+- **Sliding-window schedules.** Raise peak memory, *shorten* reachable context
+  (every SWA variant OOMs at 32K where GQA fits), and collapse to empty strings
+  below the window because they evict the sinks. Damage is a cliff: one token
+  past the edge costs as much as two hundred.
+- **Geometry-aware eviction.** In centred key space top-k already keeps 60.4 of
+  64 slots distinct against 61.9 for random. In attention-profile space —
+  where the similarity field *is* heavy-tailed — suppressing near-duplicates
+  makes attention error monotonically worse (+33.7% at τ=0.90 to +3.2% at
+  τ=0.99) and worse than a matched-random shuffle at every τ. Similar attention
+  profiles mean **corroboration**, not duplication.
+- **Unhealed GQA head merging** as a quality point: 0.83498 → 0.11384 at 2KV.
+  Needs a healing run per rung.
