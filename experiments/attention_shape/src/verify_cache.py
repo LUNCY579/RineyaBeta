@@ -50,13 +50,33 @@ def cache_layers(past) -> list[tuple[int, int]]:
 
 
 def measured_bytes(past) -> int:
+    """Logical cache bytes.
+
+    NOTE: for sliding-window layers this is NOT the resident footprint.
+    `DynamicSlidingWindowLayer.update` keeps `full[:, :, -w+1:, :]`, a view onto
+    the full prefill allocation, so immediately after prefill the allocator still
+    holds all n tokens while numel() reports only the window. This function is
+    the right one for checking the ANALYTIC MODEL (which predicts logical
+    occupancy); `measure.py:cache_bytes_pair()` reports both and is the right one
+    for any memory claim.
+    """
     total = 0
-    layers = getattr(past, "layers", None) or []
-    for layer in layers:
+    for layer in getattr(past, "layers", None) or []:
         for t in (layer.keys, layer.values):
             if t is not None:
                 total += t.numel() * t.element_size()
     return total
+
+
+def resident_bytes(past) -> int:
+    """Bytes actually held by the allocator, de-duplicated by storage pointer."""
+    seen: dict[int, int] = {}
+    for layer in getattr(past, "layers", None) or []:
+        for t in (layer.keys, layer.values):
+            if t is not None:
+                st = t.untyped_storage()
+                seen[st.data_ptr()] = st.nbytes()
+    return sum(seen.values())
 
 
 def build_tiny(window: int | None, n_global: int, n_layers: int = 8,
@@ -112,13 +132,17 @@ def check(model, shape: Shape, length: int, label: str, device: str = "cpu") -> 
               f"(expected {want[:4]}{'...' if len(want) > 4 else ''})")
 
     meas = measured_bytes(past)
+    resident = resident_bytes(past)
     pred = shape.cache_bytes(length)
     rel = abs(meas - pred) / max(pred, 1)
     verdict = "OK" if rel < 0.01 else "FAIL"
     if rel >= 0.01:
         ok = False
-    print(f"  bytes {verdict}: measured {meas / 2**20:8.2f} MiB   "
+    print(f"  bytes {verdict}: logical {meas / 2**20:8.2f} MiB   "
           f"analytic {pred / 2**20:8.2f} MiB   rel err {rel:.4f}")
+    print(f"        resident {resident / 2**20:8.2f} MiB "
+          f"({resident / max(meas, 1):.2f}x logical) -- a sliding-window layer "
+          f"holds a view onto the full prefill allocation until the first decode step")
     print(f"  -> {label}: {'PASS' if ok else 'FAIL'}\n")
     return ok
 

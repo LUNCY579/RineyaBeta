@@ -53,13 +53,36 @@ def surgery_dir_for(v: Variant) -> str | None:
     return None if not v.needs_surgery else f"{SURGERY_ROOT}/r2-gqa{v.surgery_kv_heads}kv"
 
 
-def exact_cache_bytes(past) -> int:
-    total = 0
+def cache_bytes_pair(past) -> tuple[int, int]:
+    """(logical, resident) cache bytes.
+
+    These differ, and the difference is the whole sliding-window saving.
+    `DynamicSlidingWindowLayer.update` does `self.keys = full[:, :, -w+1:, :]` --
+    a VIEW. `numel() * element_size()` reports the window while the allocator
+    still holds the full prefill storage the view points into, so a
+    logical-only reading credits a saving that has not happened yet. Measured on
+    R2: after prefill, logical 1,831,936 B against 4,194,304 B resident (2.29x,
+    byte-identical to full attention); after one decode step the view is
+    replaced by a fresh tensor and the two agree.
+
+    Resident bytes are summed over DE-DUPLICATED storage pointers, because two
+    views into one allocation must not be counted twice.
+    """
+    logical = 0
+    seen: dict[int, int] = {}
     for layer in getattr(past, "layers", []) or []:
         for t in (layer.keys, layer.values):
-            if t is not None:
-                total += t.numel() * t.element_size()
-    return total
+            if t is None:
+                continue
+            logical += t.numel() * t.element_size()
+            st = t.untyped_storage()
+            seen[st.data_ptr()] = st.nbytes()
+    return logical, sum(seen.values())
+
+
+def exact_cache_bytes(past) -> int:
+    """Logical bytes only. Prefer cache_bytes_pair(); see its docstring."""
+    return cache_bytes_pair(past)[0]
 
 
 def timed(fn, repeats: int, warmup: int, device: str) -> list[float]:
@@ -103,14 +126,31 @@ def measure_one(model, shape: Shape, length: int, device: str, decode_tokens: in
     # the KV cache under study.
     out = model(ids, use_cache=True, logits_to_keep=1)
     past = out.past_key_values
-    cache_b = exact_cache_bytes(past)
+    cache_b, cache_resident = cache_bytes_pair(past)
     peak = torch.cuda.max_memory_allocated() if device.startswith("cuda") else 0
 
     predicted = shape.cache_bytes(length)
     rel_err = abs(cache_b - predicted) / max(predicted, 1)
 
+    # Release the measured cache BEFORE timing. Holding `past` and `out` while
+    # timed() re-runs prefill keeps two full caches alive at once, which is what
+    # produced the published "base-8KV @ 32768 -> OOM": a single prefill
+    # reconstructs to 904 + 3584 + 857 = 5345 MiB against a 6144 MiB cap and
+    # should have measured, while the double-cache path reaches 8929 MiB. The
+    # peak above was also captured before the timing loop, so the reported peak
+    # and the OOM verdict for the same cell came from different memory states.
+    del past, out
+    if device.startswith("cuda"):
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats()
+
     prefill_ms = timed(lambda: model(ids, use_cache=True, logits_to_keep=1),
                        repeats, warmup, device)
+    peak_timed = torch.cuda.max_memory_allocated() if device.startswith("cuda") else 0
+
+    # Rebuild a cache for the decode phase, now that nothing else is resident.
+    out = model(ids, use_cache=True, logits_to_keep=1)
+    past = out.past_key_values
 
     # --- decode from a filled cache ----------------------------------------
     # Time ONLY the decode loop. An earlier version timed prefill+decode and
@@ -141,10 +181,13 @@ def measure_one(model, shape: Shape, length: int, device: str, decode_tokens: in
     return {
         "length": length,
         "cache_bytes_measured": cache_b,
+        "cache_bytes_resident": cache_resident,
         "cache_bytes_analytic": predicted,
         "cache_rel_err": round(rel_err, 6),
         "cache_mib": round(cache_b / 2 ** 20, 2),
+        "cache_resident_mib": round(cache_resident / 2 ** 20, 2),
         "peak_alloc_mib": round(peak / 2 ** 20, 2),
+        "peak_timed_mib": round(peak_timed / 2 ** 20, 2),
         "prefill_ms_median": round(statistics.median(prefill_ms), 2),
         "prefill_ms_min": round(min(prefill_ms), 2),
         "decode_tok_per_s": round(statistics.median(tps), 1),

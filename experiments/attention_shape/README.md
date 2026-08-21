@@ -113,6 +113,53 @@ does not merely mask attention.
 | `gqa-2KV` | 448 MiB | 1700 MiB | 2553 ms | 15.7 tok/s | OK (2573 MiB) |
 | `gqa-1KV` | 224 MiB | 1462 MiB | 2510 ms | 21.5 tok/s | OK (2111 MiB) |
 
+### Correction: the SWA cache saving is logical, not resident
+
+The cache figures above were counted with `numel() * element_size()`.
+`DynamicSlidingWindowLayer.update` keeps `full[:, :, -w+1:, :]` — a **view** onto
+the full prefill allocation — so that count credits a saving the allocator has
+not made. Measured with de-duplicated storage pointers
+(`measure.py:cache_bytes_pair`, `results/measure_fixed.json`), immediately after
+prefill at 16K:
+
+| variant | logical | **resident** | ratio |
+|---|---:|---:|---:|
+| `base-8KV` | 1792.0 MiB | 1792.0 MiB | 1.00 |
+| `swa-w1024-g4` | 351.9 MiB | **1792.0 MiB** | **5.09** |
+| `swa-w256-g4` | 279.9 MiB | **1792.0 MiB** | **6.40** |
+| `gqa-2KV` | 448.0 MiB | 448.0 MiB | 1.00 |
+| `gqa-1KV` | 224.0 MiB | 224.0 MiB | 1.00 |
+
+**At the end of prefill a sliding-window model holds exactly as much KV as the
+full-attention baseline.** The window saving only materialises once the first
+decode step replaces the view with a fresh tensor. GQA's saving, by contrast, is
+resident from the moment it exists.
+
+This completes the §4a mechanism rather than replacing it. The byte-identical
+peaks for `w=256` and `w=1024` (3832.5 MiB both) now have two causes, not one:
+the `[1,1,n,n]` mask *and* a resident cache that is identical between them
+because both are views onto the same full allocation. It also explains directly
+why SWA never improved peak memory — peak is set at end of prefill, which is
+exactly the moment the saving does not exist.
+
+The reduction figures quoted elsewhere in this document as "cache" are
+**logical** occupancy. They are the right quantity for checking the analytic
+model in `shapes.py`, which predicts logical occupancy, and the wrong quantity
+for any memory claim.
+
+### One audit prediction refuted
+
+The audit also held that `base-8KV @ 32768 -> OOM` was purely a harness artifact
+— `measure.py` held two caches during timing — and that a single prefill would
+fit (reconstructed at 5,345 MiB against a 6,144 MiB cap). The harness defect was
+real and is fixed (`peak_alloc_mib` and `peak_timed_mib` now agree in all 12
+cells), **but the verdict stands: base-8KV and every SWA variant still OOM at
+32K, while both GQA variants measure.** The reconstruction was arithmetic, not a
+measurement, and the measurement disagrees.
+
+
+---
+
 ### The headline: the cache-only analysis predicts the wrong winner
 
 Sliding window has the **smallest caches and the largest peaks**. At 32K under a
