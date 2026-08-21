@@ -245,6 +245,21 @@ CLAIMS = [
      5e-4, "0.133", "findings,negative"),
     ("depth curve @128K: 0.9", 0.5000, lambda: pk_depth_pooled(0.9),
      5e-4, "0.500", "findings,negative"),
+
+    # --- how a quantised cache degrades under repeated compression ----------
+    # These two arms used to print and not serialise, so they could not be
+    # checked. They constrain the implementation: round-tripping per compression
+    # round is what makes int8 lose the advantage it starts with.
+    ("requant: int8 after 1 round", 0.00276,
+     lambda: probe("store_probe.json", "requant", "int8")[0], 5e-6, "0.00276", "negative"),
+    ("requant: int8 after 5 rounds", 0.00637,
+     lambda: probe("store_probe.json", "requant", "int8")[4], 5e-6, "0.00637", "negative"),
+    ("requant: int4 after 5 rounds", 0.10396,
+     lambda: probe("store_probe.json", "requant", "int4")[4], 5e-6, "0.10396", "negative"),
+    ("scale tail: min int8 K scale @4K", 1.156e-04,
+     lambda: next((r["min"] for r in probe("store_probe.json", "scale_tail") or []
+                   if r["n"] == 4096 and r["tensor"] == "K" and r["bits"] == 8), None),
+     5e-7, "1.156e-04", "negative"),
 ]
 
 

@@ -333,6 +333,9 @@ print("test relerr: mean %.4f  min %.4f (%s)  max %.4f"
       % (t.mean(), t.min(), cla[int(t.argmin())]["pair"], t.max()))
 print("  " + "  ".join("%s:%.3f" % (c["pair"], c["test"]) for c in cla))
 
+# These two arms were print-only, so their numbers could not be cross-checked
+# against a committed file the way every other figure in this program is.
+scale_tail = []
 print("\n=== scale tail vs context length (fp16 min normal 6.104e-05) ===")
 for npos in (512, 1024, 2048, 4096):
     for name, bits, axis, group in (("K", 8, "chan", 128), ("K", 4, "chan", 32),
@@ -345,9 +348,13 @@ for npos in (512, 1024, 2048, 4096):
             mins.append(s.min().item())
             q1.append(s.flatten().quantile(0.0001).item())
             cnt += s.numel()
+        scale_tail.append(dict(n=npos, tensor=name, bits=bits, axis=axis,
+                               group=group, min=min(mins),
+                               q0001=sum(q1) / len(q1), n_scales=cnt))
         print("  n=%5d %s int%d %-5s g%-4s  min %.3e  0.01%%-quantile %.3e  scales stored %d"
               % (npos, name, bits, axis, group, min(mins), sum(q1) / len(q1), cnt))
 
+requant = {}
 print("\n=== requantisation compounding: dequant -> drop half -> requant, 5 rounds ===")
 for bits in (8, 4):
     seqs = []
@@ -364,9 +371,11 @@ for bits in (8, 4):
             ref = ref[:, :, sel, :].contiguous()
         seqs.append(row)
     t = torch.tensor(seqs).mean(0)
+    requant["int%d" % bits] = t.tolist()
     print("  int%d K per-channel g128: %s" % (bits, "  ".join("%.5f" % x for x in t.tolist())))
 
-json.dump({"calibration": cal, "cla": cla}, open(
+json.dump({"calibration": cal, "cla": cla, "scale_tail": scale_tail,
+           "requant": requant}, open(
     os.path.join(ROOT, "experiments", "kv_significance", "results",
                              "store_probe.json"), "w"), indent=1)
 print("\npeak %.0f MiB" % (torch.cuda.max_memory_allocated() / 2 ** 20))

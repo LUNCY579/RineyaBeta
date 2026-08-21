@@ -297,6 +297,29 @@ Lower error than pure int8 at 1.6× more compression, using a score that costs
 nothing because eviction computes it anyway. This is a Pareto improvement over
 both uniform schemes and it is the strongest unexploited result in the program.
 
+**One constraint on how it must be implemented.** The same probe measures what
+happens when a quantised cache is round-tripped — dequantise, evict half,
+requantise — once per compression round. Mean K relative error, per round:
+
+| rounds | 1 | 2 | 3 | 4 | 5 | growth |
+|---|---:|---:|---:|---:|---:|---:|
+| int8, K per-channel g=128 | 0.00276 | 0.00391 | 0.00484 | 0.00565 | 0.00637 | 2.30× |
+| int4, K per-channel g=128 | 0.04583 | 0.06409 | 0.07911 | 0.09217 | 0.10396 | 2.27× |
+
+Both track √rounds closely (√5 = 2.236). At 128K with chunk 4096 there are ~31
+rounds, so a naive dequantise-evict-requantise loop lands int8 near 0.0154 —
+past the keep-0.75 reference (0.00937) that single-shot int8 comfortably beats.
+
+So the mechanism has to **quantise once and gather**, never round-trip per
+compression. Eviction is a gather on the token axis and quantisation groups are
+per-channel over 128 tokens or per-token, so a gather can be done on the quantised
+representation directly — the round trip is avoidable, not inherent. Worth knowing
+before implementation rather than after.
+
+A related worry is settled rather than open: the smallest int8 group scale at 4K
+is 1.156e-04, comfortably above fp16's minimum normal 6.104e-05, so storing scales
+in fp16 does not hit subnormals at any length measured.
+
 
 ---
 
