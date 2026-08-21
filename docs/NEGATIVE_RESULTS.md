@@ -102,44 +102,38 @@ By 64K the mean wins at the two deeper positions and the sum has started to
 collapse toward the end of the context, which is exactly where a frozen heavy set
 predicts it should.
 
-**At 128K the exponent is a real knob — for one depth only.**
+**At 128K the exponent is a large effect, and e = 1 is the right default.**
 `Policy.count_exponent` ranks on `sum / count**e`, so e=0 is the raw sum and e=1
-the mean. All five arms below are matched: 128K, budget 2048 (1.6% keep),
-YaRN ×4, query-aware, 6 trials × 3 depths, produced by the same committed code.
-Cells are hits out of 6, because at this trial count the raw fraction hides how
-little is being counted.
+the mean. Measured with **12 needles identical in every cell** — 128K, B=2048
+(1.6% keep), YaRN ×4, query-aware:
 
-| e | depth 0.1 | 0.5 | 0.9 | pooled |
+| e | depth 0.1 | 0.5 | 0.9 | mean |
 |---:|---:|---:|---:|---:|
-| 0.00 (sum) | 2/6 | 1/6 | 1/6 | 4/18 |
-| 0.25 | 3/6 | 1/6 | 1/6 | 5/18 |
-| 0.50 | 3/6 | 0/6 | 4/6 | 7/18 |
-| 0.75 | 2/6 | 1/6 | 4/6 | 7/18 |
-| 1.00 (mean) | 1/6 | 1/6 | **5/6** | 7/18 |
+| 0.00 (sum) | 0.58 | 0.08 | **0.00** | 0.22 |
+| 0.25 | 0.67 | 0.08 | 0.08 | 0.28 |
+| 0.50 | 0.67 | 0.00 | 0.33 | 0.33 |
+| 0.75 | 0.58 | 0.17 | 0.67 | 0.47 |
+| 1.00 (mean) | 0.42 | 0.33 | **0.83** | **0.53** |
 
-Three tests, each stated with its multiplicity correction (Bonferroni over the
-three depths, α = 0.0167):
+At depth 0.9 raw-sum ranking scores **zero of twelve** and mean ranking ten of
+twelve — exact McNemar +10/−0, p = 0.0020, within-needle trend p < 0.0001. Pooled
+over all 36 needle-positions, 0.22 → 0.53 at p = 0.0074.
 
-| claim | test | result |
-|---|---|---|
-| accuracy rises with e at **depth 0.9** | Cochran–Armitage trend | z = **+2.840**, p = **0.0045** — survives |
-| accuracy rises with e at depth 0.5 | Cochran–Armitage trend | z = +0.000, p = 1.0000 — exactly no trend |
-| accuracy rises with e at depth 0.1 | Cochran–Armitage trend | z = −0.804, p = 0.4216 |
-| the best arm beats the worst overall | Fisher exact, 7/18 vs 4/18 | p = 0.4705 — **not established** |
+**An earlier 6-trial version of this table is withdrawn along with its four
+p-values** (Cochran–Armitage z = +2.840 / p = 0.0045 at depth 0.9, p = 1.0000 at
+depth 0.5, p = 0.4216 at depth 0.1, Fisher p = 0.4705 overall). Those are
+independent-groups tests and the arms are paired on needles, so the model was
+wrong; and at six trials p = 2/2ⁿ cannot fall below 0.0625 regardless. Two of its
+conclusions reversed under the paired re-run: mean ranking *does* beat sum
+ranking overall (0.31, p = 0.0074), and depth 0.5 *does* have a trend
+(p = 0.0125). Full table and tests in
+[`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4c.
 
-So: **the decay exponent is a real control on late-context retrieval and does
-literally nothing for mid-context.** The overall gain is not significant; what the
-knob does is redistribute accuracy from early depths to late ones.
-
-That is what the mechanism predicts. A needle at depth 0.9 sits in a late chunk,
-has survived few compression rounds, and therefore carries a small accumulated
-sum purely because it was scored fewer times; dividing by `count**e` restores it.
-A needle at depth 0.5 has been through roughly fifteen rounds — and if it was
-dropped in an early one it is gone permanently, because eviction is not
-reversible. No ranking statistic recovers a position that is no longer in the
-cache. **The mid-context failure is therefore not a ranking problem, and the
-exponent sweep is what establishes that** rather than leaving it as a guess.
-
+The mechanism is the one the ratchet predicts. A late-arriving needle carries a
+small accumulated sum only because it was scored fewer times; dividing by
+`count**e` removes exactly that artefact. The cost is at the other end — at depth
+0.1 the mean is worse (0.58 → 0.42), because long-accumulated early positions do
+carry real evidence that normalising discards.
 ### RETRACTED — the depth curve at 128K was confounded with needle identity
 
 A pooled depth curve of 0.367 / 0.133 / 0.500 over "n = 30 per depth" was
@@ -152,9 +146,11 @@ from 0.17 to 0.50.
 
 **And the shape was wrong, not just the interval.** Re-measured with 12 needles
 identical in every cell (`results/pk_128k_grid12.json`), 128K at B=2048 gives
-0.42 / 0.33 / 0.83: late needles beat early ones (+6/−0, p = 0.0312), and early
-versus middle is a coin flip (+2/−3, p = 1.0000). There is no trough. The
-advantage sits in the last chunks that escape compression.
+0.42 / 0.33 / 0.83. The only contrast that separates is **late versus middle**
+(depth 0.9 over depth 0.5, +6/−0, p = 0.0312); late versus early falls short
+(+6/−1, p = 0.1250) and early versus middle is a coin flip (+2/−3, p = 1.0000).
+There is no trough. And the ordering does not replicate at 64K, so no depth law is
+established — see [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4c.
 
 **And the premise was wrong too.** At B=8192 the same 12 needles give
 1.00 / 0.83 / 0.92 — mean 0.92, peak 2521 MiB — with no depth dependence left
@@ -381,12 +377,12 @@ rather than overwritten.
 
 | Section | Data | Code |
 |---|---|---|
-| 1. sliding window | `experiments/attention_shape/results/measure_fixed.json`, `.../swa-*__{chat,rag}_dev/` | `experiments/attention_shape/src/measure.py`, `sweep.py` |
+| 1. sliding window | `experiments/attention_shape/results/measure_fixed.json`, `.../swa-*__{chat,rag}_dev/` | `experiments/attention_shape/src/measure.py`, `src/run_eval.py` (driven by `run_quality_sweep.sh`) |
 | 2. geometry-aware eviction | `experiments/geometric_significance/results/{redundancy,rss_probe*}.json` *(branch `exp/geometric-significance`)* | `.../src/{redundancy,rss_probe}.py` |
-| 3. sum vs mean ranking | `experiments/kv_significance/results/pk_128k_{sum,mean}.json`, `pk_128k_e*.json` | `.../src/passkey.py --count-exponent` |
+| 3. sum vs mean ranking | `experiments/kv_significance/results/pk_{32k,64k}_{sum,mean}.json`, `pk_128k_pe*.json`, `pk_128k_grid12.json`; the withdrawn 3-trial pair sits in `.../results/_superseded_unmatched/` with a `NOTE.md` | `.../src/passkey.py --count-exponent` |
 | 4. query-blind eviction | `experiments/kv_significance/results/{pk_blind,pk_aware,pk_long_aware}.json` | `scripts/kv/chunked_prefill.py` |
 | 5, 5a. store and precision | `experiments/kv_significance/results/{store_probe,mixed_precision}.json` | `.../src/{store_probe,mixed_precision}.py` |
-| calibration references | `experiments/kv_significance/results/{off,frac0.75,frac0.5,frac0.25}__rag_dev/summary.json` | `.../src/sweep.py` |
+| calibration references | `experiments/kv_significance/results/{off,frac0.75,frac0.5,frac0.25}__rag_dev/summary.json` | `.../src/run_eval_sig.py` (driven by `run_sweep.sh`) |
 | 6. measurement failures | see §5 and §6 of [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) | `scripts/design/verify_claims.py` |
 
 ```bash

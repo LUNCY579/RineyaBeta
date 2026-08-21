@@ -59,15 +59,16 @@ python experiments/kv_significance/src/mixed_precision.py       # ~3 min GPU
 python experiments/kv_significance/src/passkey.py --lengths 131072 \
        --budgets 2048 8192 --depths 0.1 0.5 0.9 --trials 12 \
        --yarn 4.0 --query-aware --count-exponent 1.0 --cap-mib 7400 \
-       --out results/pk_128k_grid12.json
+       --out experiments/kv_significance/results/pk_128k_grid12.json
 python scripts/design/paired_passkey.py \
        experiments/kv_significance/results/pk_128k_grid12.json --by budget
 ```
 
 Two flags in that command are not decoration. `--cap-mib 7400` overrides a 6144
 default that bounds *reserved* memory and silently blocked every uncompressed
-reference above 16K for most of this program. `--trials 12` is the smallest count
-that can reach p < 0.05 under the paired test at all — see the note in
+reference above 16K for most of this program. `--trials 12` is a power choice, not
+a minimum: exact McNemar gives p = 2/2ⁿ on n discordant needles, so reaching 0.05
+needs at least six discordant pairs and a 6-trial cell floors at 0.0625 — see
 [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4c.
 
 Use the project venv (`.venv/Scripts/python.exe`); the default `python` on PATH
@@ -84,13 +85,14 @@ checkpoint is genuinely weak.
 
 **"Works at 128K" needs a budget attached.** Uncompressed, this checkpoint is
 1.00 at every depth to **32K** — the largest reference this card can hold, since
-64K needs 8,072 MiB of cache against 8,188 MiB total. Compressed, what matters is
+the 64K cache alone is 7,168 MiB, putting the run at 8,072 MiB required against
+~7,758 MiB available on an 8,188 MiB card. Compressed, what matters is
 the keep *fraction*, not the length:
 
 | n | budget | keep | accuracy | peak |
 |---:|---:|---:|---:|---:|
 | 32,768 | 2048 | 6.3% | 0.89 | 1744 MiB |
-| 65,536 | 2048 | 3.1% | 0.89 | 1742 MiB |
+| 65,536 | 2048 | 3.1% | 0.81 | 1742 MiB |
 | 131,072 | 2048 | 1.6% | 0.53 | 1743 MiB |
 | 131,072 | 8192 | 6.3% | **0.92** | 2521 MiB |
 
