@@ -1,0 +1,61 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "steps": 40,
+  "rounds": 2,
+  "kib_per_token": 112.0,
+  "weights_mib": 904.0,
+  "fit": {
+    "floor_ms": 34.696,
+    "knee_tokens": 4096,
+    "slope_ms_per_token_above_knee": 0.00338428,
+    "flat_spread_ms": 1.043,
+    "floor_implied_bw_gb_s": 27.3,
+    "slope_implied_bw_gb_s": 33.9,
+    "peak_bw_gb_s": 256.0
+  },
+  "results": [
+    {
+      "cache_tokens": 8,
+      "cache_mib": 0.9,
+      "ms_per_token": 34.532,
+      "tok_per_s": 28.96
+    },
+    {
+      "cache_tokens": 256,
+      "cache_mib": 28.0,
+      "ms_per_token": 33.817,
+      "tok_per_s": 29.57
+    },
+    {
+      "cache_tokens": 1024,
+      "cache_mib": 112.0,
+      "ms_per_token": 34.696,
+      "tok_per_s": 28.82
+    },
+    {
+      "cache_tokens": 2048,
+      "cache_mib": 224.0,
+      "ms_per_token": 34.86,
+      "tok_per_s": 28.69
+    },
+    {
+      "cache_tokens": 4096,
+      "cache_mib": 448.0,
+      "ms_per_token": 34.779,
+      "tok_per_s": 28.75
+    },
+    {
+      "cache_tokens": 8192,
+      "cache_mib": 896.0,
+      "ms_per_token": 45.252,
+      "tok_per_s": 22.1
+    },
+    {
+      "cache_tokens": 16384,
+      "cache_mib": 1792.0,
+      "ms_per_token": 76.365,
+      "tok_per_s": 13.1
+    }
+  ]
+}

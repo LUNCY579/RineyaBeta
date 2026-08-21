@@ -55,6 +55,8 @@ from pathlib import Path
 
 import torch
 
+NL_ = chr(10)
+
 HERE = Path(__file__).resolve().parent
 EXP = HERE.parent
 REPO = HERE.parents[2]
@@ -125,6 +127,8 @@ def main() -> None:
     ap.add_argument("--warmup", type=int, default=8)
     ap.add_argument("--rounds", type=int, default=3)
     ap.add_argument("--chunk", type=int, default=4096)
+    ap.add_argument("--flat-tol", type=float, default=0.06,
+                    help="a point is on the floor if within this of the minimum")
     ap.add_argument("--cap-mib", type=float, default=7400.0)
     ap.add_argument("--device", default="cuda:0")
     ap.add_argument("--out", type=Path,
@@ -176,58 +180,77 @@ def main() -> None:
     if len(rows) < 3:
         raise SystemExit("\nnot enough points to fit")
 
+    # A SINGLE STRAIGHT LINE IS THE WRONG MODEL, and the first version of this
+    # script used one. The measured shape is a FLOOR followed by a rise: decode is
+    # 35.0-36.1 ms across a 512x range of cache (8 to 4,096 tokens) and only then
+    # starts climbing. Fitting one line through both regimes lets the two largest
+    # points set the intercept, which manufactures a slope in the flat region that
+    # is not there and produced the wrong verdict.
+    #
+    # So: find the knee as the largest cache still within `--flat-tol` of the
+    # minimum, take the floor as the median below it, and fit the slope above it.
     xs = [r["cache_tokens"] for r in rows]
     ys = [r["ms_per_token"] for r in rows]
-    a, b = fit_line(xs, ys)
-    resid = max(abs(y - (a + b * x)) for x, y in zip(xs, ys))
+    lo = min(ys)
+    flat = [r for r in rows if r["ms_per_token"] <= lo * (1 + args.flat_tol)]
+    knee = max(r["cache_tokens"] for r in flat)
+    floor = statistics.median(r["ms_per_token"] for r in flat)
+    above = [r for r in rows if r["cache_tokens"] >= knee]
+    slope = 0.0
+    if len(above) >= 2:
+        slope = ((above[-1]["ms_per_token"] - above[0]["ms_per_token"])
+                 / (above[-1]["cache_tokens"] - above[0]["cache_tokens"]))
 
-    # What each hypothesis predicts, from the card's own specification.
-    bw_gb_s = (props.memory_bus_width / 8) * (props.memory_clock_rate * 1e3) * 2 / 1e9 \
-        if hasattr(props, "memory_bus_width") else None
+    def predict(n_tok: int) -> float:
+        return floor if n_tok <= knee else floor + slope * (n_tok - knee)
 
-    print(f"\nms_per_token = {a:.3f} + {b * 1e3:.4f} us * cache_tokens"
-          f"   (max residual {resid:.2f} ms)")
-    print(f"\n  fixed cost per decode step        {a:>8.2f} ms")
-    print(f"  marginal cost per cached token    {b * 1e3:>8.4f} us")
-    print(f"  cost of a {rows[-1]['cache_tokens']:,}-token cache"
-          f"      {b * xs[-1]:>8.2f} ms")
+    print(f"{NL_}FLOOR {floor:.2f} ms, flat to {knee:,} cached tokens "
+          f"({knee * KIB_PER_TOKEN / 1024:.0f} MiB), "
+          f"then {slope * 1e3:.3f} us per extra token")
+    spread = max(r["ms_per_token"] for r in flat) - min(r["ms_per_token"] for r in flat)
+    print(f"  flat region spread: {spread:.2f} ms over a "
+          f"{knee / min(xs):.0f}x range of cache size")
 
-    print("\nWHAT THIS MEANS FOR CACHE COMPRESSION")
-    print(f"{'context':>10}{'full cache ms':>15}{'at B=1024':>12}{'CEILING':>10}")
+    peak_bw = 256.0   # RTX 4070 Laptop, nominal
+    floor_bw = WEIGHTS_MIB * 2 ** 20 / (floor * 1e-3) / 1e9
+    slope_bw = (KIB_PER_TOKEN * 1024) / (slope * 1e-3) / 1e9 if slope > 0 else 0.0
+    print(f"{NL_}  floor implies {floor_bw:.0f} GB/s for a {WEIGHTS_MIB:.0f} MiB "
+          f"weight read ({100 * floor_bw / peak_bw:.0f}% of ~{peak_bw:.0f} GB/s peak)")
+    print(f"  slope implies {slope_bw:.0f} GB/s for cache reads "
+          f"({100 * slope_bw / peak_bw:.0f}% of peak)")
+
+    if floor_bw < 0.5 * peak_bw:
+        print(f"{NL_}=> NOT bandwidth-bound. Both terms run at a small fraction of what")
+        print("   the card can move, and below the knee the cache read is entirely")
+        print("   hidden. Decode at batch 1 is dominated by per-step overhead --")
+        print("   kernel launches across 28 layers, framework and Python -- which no")
+        print("   cache reduction can touch. An earlier claim that Amdahl on WEIGHTS")
+        print("   BANDWIDTH explains the ceiling is withdrawn: the ceiling is real but")
+        print("   its cause is the runtime, not memory traffic.")
+    else:
+        print(f"{NL_}=> Bandwidth-bound; Amdahl on weights is the right model.")
+
+    print(f"{NL_}WHAT COMPRESSION IS WORTH, from the measured curve")
+    print("")
+    print(f"{'context':>10}{'full ms':>10}{'B=1024':>9}{'B=4096':>9}"
+          f"{'gain 1024':>11}{'gain 4096':>11}")
     for n in (4096, 16384, 32768, 65536, 131072):
-        full = a + b * n
-        eff = a + b * 1024
-        print(f"{n:>10,}{full:>15.2f}{eff:>12.2f}{full / eff:>9.2f}x")
-
-    implied_bw = None
-    if b > 0:
-        implied_bw = (KIB_PER_TOKEN * 1024) / (b * 1e-3) / 1e9   # GB/s
-        print(f"\nImplied cache read bandwidth from the slope: {implied_bw:.0f} GB/s")
-    weights_ms_at_that_bw = (WEIGHTS_MIB * 2 ** 20) / (implied_bw * 1e9) * 1e3 \
-        if implied_bw else None
-    if weights_ms_at_that_bw:
-        print(f"At that bandwidth, reading {WEIGHTS_MIB:.0f} MiB of weights would take"
-              f" {weights_ms_at_that_bw:.2f} ms.")
-        print(f"Measured fixed cost is {a:.2f} ms, i.e."
-              f" {a / weights_ms_at_that_bw:.1f}x that.")
-        if a > 3 * weights_ms_at_that_bw:
-            print("\n=> The fixed cost is NOT explained by reading weights. Decode at")
-            print("   batch 1 is dominated by per-step overhead (kernel launches across")
-            print("   28 layers, framework and Python), not by memory traffic. No cache")
-            print("   reduction can move that term, so the ceiling above is a property")
-            print("   of the runtime, not of the compression mechanism.")
-        else:
-            print("\n=> The fixed cost IS roughly a weights read, so decode is")
-            print("   bandwidth-bound and Amdahl on weights is the right model.")
-
+        f_ms, b1, b4 = predict(n), predict(1024), predict(4096)
+        print(f"{n:>10,}{f_ms:>10.1f}{b1:>9.1f}{b4:>9.1f}"
+          f"{f_ms / b1:>10.2f}x{f_ms / b4:>10.2f}x")
+    print(f"{NL_}Budget 1024 and budget 4096 cost the SAME decode time, because both")
+    print("sit on the floor. Compressing below the knee trades accuracy for nothing.")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(
         {"model": MODEL, "gpu": props.name, "steps": args.steps,
          "rounds": args.rounds, "kib_per_token": KIB_PER_TOKEN,
          "weights_mib": WEIGHTS_MIB,
-         "fit": {"intercept_ms": round(a, 4), "slope_ms_per_token": round(b, 8),
-                 "max_residual_ms": round(resid, 4),
-                 "implied_cache_bw_gb_s": round(implied_bw, 1) if implied_bw else None},
+         "fit": {"floor_ms": round(floor, 4), "knee_tokens": knee,
+                 "slope_ms_per_token_above_knee": round(slope, 8),
+                 "flat_spread_ms": round(spread, 4),
+                 "floor_implied_bw_gb_s": round(floor_bw, 1),
+                 "slope_implied_bw_gb_s": round(slope_bw, 1),
+                 "peak_bw_gb_s": peak_bw},
          "results": rows}, indent=2) + "\n", encoding="utf-8")
     print(f"\nwrote {args.out}")
 

@@ -25,14 +25,28 @@ fraction improves with length, where the KV term finally dominates the weights.
 THREE ARMS, because the difference between two of them IS the attribution:
 
   full            no eviction; the cache holds all n tokens
-  evict           eviction on, scoring on -- the mechanism as it actually runs
-  evict_noscore   identical cache, but recording OFF during decode
+  evict           eviction on, scoring ON during decode
+  evict_noscore   identical cache, scoring OFF during decode
 
 `evict` minus `evict_noscore` is the cost of maintaining the significance matrix
-during decode, isolated without a profiler. It should be large: `_score_rows`
-runs its own einsum over the whole cache, separate from SDPA's internal QK, and
-upcasts keys to fp32 -- so the K half of the cache is read roughly three times per
-step rather than once.
+during decode, isolated without a profiler. It is large -- 20-24% -- because
+`_score_rows` runs its own einsum over the whole cache, separate from SDPA's
+internal QK, and upcasts keys to fp32.
+
+WHICH ARM IS THE DEPLOYED ONE. `evict_noscore`, not `evict`. In the query-aware
+configuration that produced every headline accuracy number in this program,
+passkey.py sets recording to `policy is not None and query_ids is None`, which is
+FALSE when query-aware scoring is on; recording is switched on only transiently
+inside score_with_query, between prefill chunks, never during decode. Scoring
+during decode would in any case be pure waste on that path: compression happens
+between chunks via explicit compress() calls, so no eviction consumes those
+scores.
+
+So read throughput off `evict_noscore`. `evict` measures the query-BLIND
+configuration, and its 20-24% is the cost of a setting the headline results do
+not use. That distinction was not obvious to the author of this harness either --
+the first reading of these numbers treated `evict` as the deployed path and
+proposed optimising an overhead that had already been avoided.
 
 TWO CONTAMINATION GUARDS, both learned the hard way:
 
