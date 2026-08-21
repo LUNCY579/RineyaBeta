@@ -15,8 +15,9 @@ could drift apart with nothing comparing them. This compares them.
 
 Each claim states BOTH the documented value and how to recompute it from a
 committed result file, and additionally asserts that the documented value still
-literally appears in the prose. So editing the doc without the data fails, and
-regenerating the data without the doc fails too.
+literally appears in the prose of the document that is supposed to state it. So
+editing the doc without the data fails, regenerating the data without the doc
+fails, and moving a number to a different document fails too.
 
 Exit code is non-zero on any mismatch, so this is usable as a pre-commit check.
 
@@ -34,7 +35,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 KVS = ROOT / "experiments/kv_significance/results"
 ATS = ROOT / "experiments/attention_shape/results"
-DOC = ROOT / "docs/FINDINGS_KV_PROGRAM.md"
+
+# Each claim names the document that is supposed to state it. Searching all prose
+# instead would let a number pass while the document that actually quotes it
+# drifts, so the mapping is explicit.
+DOCS = {
+    "findings": ROOT / "docs/FINDINGS_KV_PROGRAM.md",
+    "negative": ROOT / "docs/NEGATIVE_RESULTS.md",
+}
 
 
 def summary(base: Path, tag: str, ds: str = "rag_dev"):
@@ -54,6 +62,32 @@ def measured(path: Path, key: str, **match):
     return None
 
 
+def probe(fname: str, *keys):
+    """Value at a nested key path inside a committed probe result."""
+    path = KVS / fname
+    if not path.exists():
+        return None
+    d = json.loads(path.read_text(encoding="utf-8"))
+    for k in keys:
+        if not isinstance(d, dict) or k not in d:
+            return None
+        d = d[k]
+    return d
+
+
+def cla_mean():
+    """Mean HELD-OUT relative error of the cross-layer KV adapter.
+
+    Held-out, not train: the adapter is a 2048x2048 ridge fit whose train error is
+    roughly half its test error, so quoting the fit would make cross-layer sharing
+    look twice as viable as it is.
+    """
+    rows = probe("store_probe.json", "cla")
+    if not rows:
+        return None
+    return sum(r["test"] for r in rows) / len(rows)
+
+
 def concentration(k: int):
     p = KVS / "concentration.json"
     if not p.exists():
@@ -62,43 +96,110 @@ def concentration(k: int):
     return d["rho_mean"][d["ks"].index(k)]
 
 
-# (label, documented value, how to recompute, tolerance, text that must appear)
+# (label, documented value, how to recompute, tolerance, text that must appear,
+#  which document is supposed to state it)
 CLAIMS = [
-    ("quality: no eviction", 0.66939, lambda: summary(KVS, "off"), 5e-6, "0.66939"),
-    ("quality: keep 0.75", 0.65677, lambda: summary(KVS, "frac0.75"), 5e-6, "0.65677"),
+    ("quality: no eviction", 0.66939,
+     lambda: summary(KVS, "off"), 5e-6, "0.66939", "findings"),
+    ("quality: keep 0.75", 0.65677,
+     lambda: summary(KVS, "frac0.75"), 5e-6, "0.65677", "findings"),
     ("quality: keep 0.50 pooled", 0.63371,
-     lambda: summary(KVS, "frac0.5-pool7-fixed"), 5e-6, "0.63371"),
-    ("quality: keep 0.50", 0.61401, lambda: summary(KVS, "frac0.5"), 5e-6, "0.61401"),
+     lambda: summary(KVS, "frac0.5-pool7-fixed"), 5e-6, "0.63371", "findings"),
+    ("quality: keep 0.50", 0.61401,
+     lambda: summary(KVS, "frac0.5"), 5e-6, "0.61401", "findings"),
     ("quality: keep 0.25 recent-frac", 0.41932,
-     lambda: summary(KVS, "frac0.25-rf0.25"), 5e-6, "0.41932"),
-    ("quality: keep 0.25", 0.33863, lambda: summary(KVS, "frac0.25"), 5e-6, "0.33863"),
+     lambda: summary(KVS, "frac0.25-rf0.25"), 5e-6, "0.41932", "findings"),
+    ("quality: keep 0.25", 0.33863,
+     lambda: summary(KVS, "frac0.25"), 5e-6, "0.33863", "findings"),
 
     ("control: StreamingLLM keep 0.75", 0.47545,
-     lambda: summary(KVS, "frac0.75-rf1.0"), 5e-6, "0.47545"),
+     lambda: summary(KVS, "frac0.75-rf1.0"), 5e-6, "0.47545", "findings"),
     ("control: StreamingLLM keep 0.50", 0.47682,
-     lambda: summary(KVS, "frac0.5-rf1.0"), 5e-6, "0.47682"),
+     lambda: summary(KVS, "frac0.5-rf1.0"), 5e-6, "0.47682", "findings"),
     ("control: StreamingLLM keep 0.25", 0.42208,
-     lambda: summary(KVS, "frac0.25-rf1.0"), 5e-6, "0.42208"),
+     lambda: summary(KVS, "frac0.25-rf1.0"), 5e-6, "0.42208", "findings"),
 
     ("chunked: peak 32K", 1744.1,
      lambda: measured(KVS / "measure_chunked_long.json", "peak_mib", length=32768),
-     0.05, "1744.1"),
+     0.05, "1744.1", "findings"),
     ("chunked: peak 128K", 1744.9,
      lambda: measured(KVS / "measure_chunked_long.json", "peak_mib", length=131072),
-     0.05, "1744.9"),
+     0.05, "1744.9", "findings"),
     ("chunked: resident cache 128K", 672.0,
      lambda: measured(KVS / "measure_chunked_long.json", "cache_resident_mib",
-                      length=131072), 0.05, "672"),
+                      length=131072), 0.05, "672", "findings"),
 
     ("resident: swa-w1024-g4 @16K", 1792.0,
      lambda: measured(ATS / "measure_fixed.json", "cache_resident_mib",
-                      variant="swa-w1024-g4", length=16384), 0.05, "1792.0"),
+                      variant="swa-w1024-g4", length=16384), 0.05, "1792.0", "findings"),
     ("resident: gqa-1KV @16K", 224.0,
      lambda: measured(ATS / "measure_fixed.json", "cache_resident_mib",
-                      variant="gqa-1KV", length=16384), 0.05, "224.0"),
+                      variant="gqa-1KV", length=16384), 0.05, "224.0", "findings"),
 
-    ("concentration: rho(32)", 0.951, lambda: concentration(32), 1e-3, "0.951"),
-    ("concentration: rho(64)", 0.980, lambda: concentration(64), 1e-3, "0.980"),
+    ("concentration: rho(32)", 0.951,
+     lambda: concentration(32), 1e-3, "0.951", "findings"),
+    ("concentration: rho(64)", 0.980,
+     lambda: concentration(64), 1e-3, "0.980", "findings"),
+
+    # --- store: what to keep each retained position AS ----------------------
+    # The first three are the calibration points that give attention relerr a
+    # scale. They are quoted in NEGATIVE_RESULTS.md beside the candidates they
+    # judge, so an edit that moves a candidate without its reference fails here.
+    ("calib: keep 0.75 relerr", 0.00937,
+     lambda: probe("store_probe.json", "calibration", "keep0.75", "mean"),
+     5e-6, "0.00937", "negative"),
+    ("calib: keep 0.50 relerr", 0.03729,
+     lambda: probe("store_probe.json", "calibration", "keep0.50", "mean"),
+     5e-6, "0.03729", "negative"),
+    ("calib: keep 0.25 relerr", 0.11381,
+     lambda: probe("store_probe.json", "calibration", "keep0.25", "mean"),
+     5e-6, "0.11381", "negative"),
+
+    ("store: int8 K per-channel", 0.00774,
+     lambda: probe("store_probe.json", "calibration", "int8", "mean"),
+     5e-6, "0.00774", "negative"),
+    ("store: int8 both per-token", 0.04134,
+     lambda: probe("store_probe.json", "calibration", "int8_tokenwise", "mean"),
+     5e-6, "0.04134", "negative"),
+    ("store: int4 sinks quantised too", 0.12804,
+     lambda: probe("store_probe.json", "calibration", "int4_notsink", "mean"),
+     5e-6, "0.12804", "negative"),
+    ("store: low-rank 512 (oracle)", 0.00147,
+     lambda: probe("store_probe.json", "calibration", "lowrank512", "mean"),
+     5e-6, "0.00147", "negative"),
+    ("store: low-rank 256 (oracle)", 0.01236,
+     lambda: probe("store_probe.json", "calibration", "lowrank256", "mean"),
+     5e-6, "0.01236", "negative"),
+    ("store: rank-128 K only", 0.08326,
+     lambda: probe("store_probe.json", "calibration", "lowrank256_Konly", "mean"),
+     5e-6, "0.08326", "negative"),
+    ("store: rank-128 V only", 0.19383,
+     lambda: probe("store_probe.json", "calibration", "lowrank256_Vonly", "mean"),
+     5e-6, "0.19383", "negative"),
+    ("store: unhealed 8->2 KV merge", 1.0206,
+     lambda: probe("store_probe.json", "calibration", "gqa2kv_merge", "mean"),
+     5e-5, "1.0206", "negative"),
+    ("store: CLA held-out relerr", 0.1720, cla_mean, 5e-5, "0.1720", "negative"),
+
+    # --- significance-gated mixed precision (the survivor) ------------------
+    ("mixed: pure int8 @4K relerr", 0.00762,
+     lambda: probe("mixed_precision.json", "pure_int8@4K", "relerr"),
+     5e-6, "0.00762", "negative"),
+    ("mixed: pure int4 @4K relerr", 0.11179,
+     lambda: probe("mixed_precision.json", "pure_int4@4K", "relerr"),
+     5e-6, "0.11179", "negative"),
+    ("mixed: top-25% @4K relerr", 0.00693,
+     lambda: probe("mixed_precision.json", "mix_p0.25@4K", "relerr"),
+     5e-6, "0.00693", "negative"),
+    ("mixed: top-25% @4K factor", 3.041,
+     lambda: probe("mixed_precision.json", "mix_p0.25@4K", "factor"),
+     5e-4, "3.04", "negative"),
+    ("mixed: pure int8 @4K factor", 1.936,
+     lambda: probe("mixed_precision.json", "pure_int8@4K", "factor"),
+     5e-4, "1.94", "negative"),
+    ("mixed: pure int4 @4K factor", 3.755,
+     lambda: probe("mixed_precision.json", "pure_int4@4K", "factor"),
+     5e-4, "3.75", "negative"),
 ]
 
 
@@ -108,20 +209,22 @@ def main() -> None:
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
-    text = DOC.read_text(encoding="utf-8") if DOC.exists() else ""
-    if not text:
-        raise SystemExit(f"missing {DOC}")
+    text = {}
+    for name, path in DOCS.items():
+        if not path.exists():
+            raise SystemExit(f"missing {path}")
+        text[name] = path.read_text(encoding="utf-8")
 
     print(f"{'claim':<34}{'documented':>12}{'committed':>12}  {'in doc':>7}  verdict")
     bad = 0
-    for label, doc_val, fn, tol, needle in CLAIMS:
+    for label, doc_val, fn, tol, needle, which in CLAIMS:
         try:
             got = fn()
         except Exception as e:  # noqa: BLE001
             got = None
             if args.verbose:
                 print(f"  {label}: {type(e).__name__}: {e}")
-        in_doc = needle in text
+        in_doc = needle in text[which]
         ok = got is not None and abs(doc_val - got) <= tol and in_doc
         bad += not ok
         shown = f"{got:>12.5f}" if isinstance(got, (int, float)) else f"{'MISSING':>12}"
