@@ -107,7 +107,7 @@ def pk(fname: str, depth: float | None = None):
     return sum(r["acc"] for r in rows) / len(rows)
 
 
-def pk_depth_pooled(depth: float):
+def pk_depth_pooled(depth: float):  # currently unused -- see the note in CLAIMS
     """One depth, pooled across all five decay-exponent arms (n = 30 trials)."""
     arms = ("0.0", "0.25", "0.5", "0.75", "1.0")
     vals = [pk(f"pk_128k_e{e}.json", depth) for e in arms]
@@ -239,12 +239,11 @@ CLAIMS = [
      5e-4, "5/6", "findings,negative"),
     ("decay: e=0 at depth 0.9", 0.1667, lambda: pk("pk_128k_e0.0.json", 0.9),
      5e-4, "1/6", "findings,negative"),
-    ("depth curve @128K: 0.1", 0.3667, lambda: pk_depth_pooled(0.1),
-     5e-4, "0.367", "findings,negative"),
-    ("depth curve @128K: 0.5", 0.1333, lambda: pk_depth_pooled(0.5),
-     5e-4, "0.133", "findings,negative"),
-    ("depth curve @128K: 0.9", 0.5000, lambda: pk_depth_pooled(0.9),
-     5e-4, "0.500", "findings,negative"),
+    # The pooled depth curve that used to be checked here is WITHDRAWN: the five
+    # arms share one key sequence, so "n = 30 per depth" was five repetitions of
+    # six needles, and depth was confounded with needle identity. A withdrawn
+    # figure must not sit in a list of numbers that "reproduce". The retraction
+    # still quotes 0.367 / 0.133 / 0.500 as history; it is not a claim.
 
     # --- how a quantised cache degrades under repeated compression ----------
     # These two arms used to print and not serialise, so they could not be

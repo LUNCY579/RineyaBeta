@@ -161,6 +161,10 @@ def main() -> None:
                          "this default hid the 32K uncompressed reference for the "
                          "whole program. The cap exists at all because Windows/WDDM "
                          "spills to host RAM instead of failing.")
+    ap.add_argument("--seed", type=int, default=20260820,
+                    help="key sequence; identical in every cell, so depths and "
+                         "budgets are paired on needles. Change it for a second "
+                         "independent replicate.")
     ap.add_argument("--device", default="cuda:0")
     ap.add_argument("--out", type=Path, default=EXP / "results" / "passkey.json")
     args = ap.parse_args()
@@ -200,12 +204,20 @@ def main() -> None:
           f"{args.trials} trials x {len(args.depths)} depths\n")
     print(f"{'n':>8}{'budget':>8}{'depth':>7}{'acc':>7}{'peak MiB':>10}  examples")
 
-    rng = random.Random(20260820)
     rows = []
     for n in args.lengths:
         for budget in args.budgets:
             for depth in args.depths:
-                hits, seen, ooms, peak, ex = 0, 0, 0, 0.0, []
+                # RESET PER CELL, so every cell draws the SAME key sequence and
+                # the depths are PAIRED on needles. Running one stream across the
+                # whole nested loop gave each cell a different 6 keys, which put
+                # key difficulty and depth in the same column: an identical
+                # configuration scored 0.17 at depth 0.5 when it drew keys 7-12
+                # inside a three-depth sweep and 0.50 when it drew keys 1-6 in a
+                # single-depth run. Pairing removes that variance instead of
+                # averaging over it.
+                rng = random.Random(args.seed)
+                hits, seen, ooms, peak, ex, trials = 0, 0, 0, 0.0, [], []
                 for _ in range(args.trials):
                     key = rng.randint(10000, 99999)
                     text, real_n = build_prompt(tok, n, depth, key,
@@ -238,8 +250,11 @@ def main() -> None:
                         continue
                     peak = max(peak, torch.cuda.max_memory_allocated() / 2 ** 20)
                     seen += 1
-                    if str(key) in got:
-                        hits += 1
+                    hit = str(key) in got
+                    hits += hit
+                    # Per-trial records, so a paired analysis is possible after the
+                    # fact. Cell-level accuracy alone cannot support one.
+                    trials.append({"key": key, "got": got.strip()[:32], "hit": hit})
                     if len(ex) < 2:
                         ex.append(f"{key}->{got.strip()[:18]!r}")
                     del cache, ids
@@ -256,7 +271,8 @@ def main() -> None:
                              "depth": depth, "acc": acc, "peak_mib": round(peak, 1),
                              "yarn": args.yarn, "trials_ok": seen, "ooms": ooms,
                              "rank_exponent": (policy.rank_exponent() if policy
-                                               else None)})
+                                               else None),
+                             "trials": trials})
                 shown = f"{acc:>7.2f}" if acc is not None else f"{chr(45)*2:>7}"
                 warn = f"  [{ooms}/{args.trials} OOM]" if ooms else ""
                 print(f"{n:>8,}{budget:>8}{depth:>7.1f}{shown}{peak:>10.0f}{warn}  "
@@ -267,7 +283,8 @@ def main() -> None:
         {"model": MODEL, "yarn": args.yarn, "chunk": args.chunk,
          "recent": args.recent, "trials": args.trials,
          "count_exponent": args.count_exponent, "normalize": args.normalize,
-         "query_aware": args.query_aware, "results": rows},
+         "query_aware": args.query_aware, "seed": args.seed,
+         "results": rows},
         indent=2) + "\n", encoding="utf-8")
     print(f"\nwrote {args.out}")
 

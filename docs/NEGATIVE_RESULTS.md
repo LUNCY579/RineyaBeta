@@ -140,31 +140,57 @@ reversible. No ranking statistic recovers a position that is no longer in the
 cache. **The mid-context failure is therefore not a ranking problem, and the
 exponent sweep is what establishes that** rather than leaving it as a guess.
 
-### The depth curve, pooled over all five arms (n = 30 per depth)
+### RETRACTED — the depth curve at 128K was confounded with needle identity
 
-| depth | accuracy | 95% CI (Clopper–Pearson) |
-|---:|---:|---|
-| 0.1 | 0.367 | [0.199, 0.561] |
-| 0.5 | **0.133** | [0.038, 0.307] |
-| 0.9 | 0.500 | [0.313, 0.687] |
+This section reported a pooled depth curve of 0.367 / 0.133 / 0.500 over "n = 30
+per depth", with Clopper–Pearson intervals and Fisher contrasts between depths.
+**All of it is withdrawn.** The design does not support it.
 
-| contrast | Fisher exact | vs α = 0.0167 |
-|---|---|---|
-| depth 0.9 vs depth 0.5 | p = **0.0048** | survives |
-| depth 0.1 vs depth 0.5 | p = 0.0716 | does not survive |
-| depth 0.1 vs depth 0.9 | p = 0.4348 | — |
+`passkey.py` ran one RNG stream across the whole nested loop, so each cell drew a
+different block of keys. With one length, one budget and three depths at 6 trials:
 
-A U with a real trough: the middle of a 128K context is retrieved at 13%, and the
-one contrast that survives correction is mid against late. This is the familiar
-lost-in-the-middle shape, measured here at 1.6% cache retention on a 0.6B model.
+```
+depth 0.1 -> keys  1-6      depth 0.5 -> keys 7-12      depth 0.9 -> keys 13-18
+```
 
-**What this does NOT establish, and cannot on this host.** Whether the trough
-belongs to eviction or to the model is unresolved, because the uncompressed 128K
-control does not fit: its cache alone is 14,336 MiB against 8,188 MiB total. Every
-128K number here is measured against no baseline. Closing that is what makes
-§5a's mixed precision matter — at 3.04× a full 128K cache is 4,716 MiB and the
-control becomes runnable.
+Every arm is a separate process with the same seed and the same loop shape, so the
+five arms draw the *same* eighteen keys. That makes the design **paired across
+arms** — which is what the exponent comparison needs — and **confounded across
+depths**, because depth and needle identity are the same column. The "30 trials"
+at each depth are five repetitions of six needles, so the intervals were computed
+on an n that does not exist and the between-depth Fisher tests assumed an
+independence the data does not have.
 
+The budget ladder then produced the counter-example directly. It runs depth 0.5
+*alone*, so depth 0.5 draws keys 1–6 instead of 7–12; everything else is identical
+(128K, B=2048, YaRN ×4, query-aware, e=1.0, 6 trials):
+
+| depth 0.5, same configuration | accuracy |
+|---|---:|
+| keys 7–12 (inside the three-depth sweep) | 0.17 |
+| keys 1–6 (single-depth run) | **0.50** |
+
+Three times the accuracy from the choice of needles alone. So the trough may be
+needle difficulty rather than position, and **the lost-in-the-middle reading is
+not supported by this data**.
+
+**What survives.** The exponent comparison, because it *is* paired: all five arms
+saw the same six needles at each depth, and at depth 0.9 the hit counts run
+1, 1, 4, 4, 5 out of 6 monotonically in e. The stated p = 0.0045 came from a
+Cochran–Armitage test that treats the arms as independent groups, which is the
+wrong model for paired data — the direction and monotonicity stand, the exact
+p-value does not. The claim that the exponent does nothing at depth 0.5 (1, 1, 0,
+1, 1) also stands, since it is the same six needles throughout.
+
+**The fix, in the harness rather than in the analysis.** The RNG is now reset per
+cell, so every cell draws the same key sequence and depths, budgets and lengths
+are all paired on needles; `--seed` selects a different replicate. Each cell also
+records per-trial `{key, got, hit}`, because cell-level accuracy cannot support a
+paired analysis after the fact — which is why this had to be diagnosed from the
+two-example preview column instead of from the data.
+
+A re-measurement under the paired design is required before any depth claim at
+128K is restated.
 ---
 ## 4. Query-blind eviction during prefill
 

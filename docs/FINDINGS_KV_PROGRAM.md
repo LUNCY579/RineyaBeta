@@ -269,11 +269,20 @@ Two consequences.
 scores 0.89 there, so its cost is 0.11 *against a measurement* rather than against
 an assumption. Every earlier statement of eviction cost at 32K was uncontrolled.
 
-**64K remains out of reach, and now for a stated reason.** Its cache alone is
-7,168 MiB against 8,188 MiB total with ~430 MiB already resident, before any
-allocator fragmentation. A run at cap 8100 OOMs at peak 6,426 MiB. So eviction is
-still **required** to measure at 64K and beyond — which is the correct version of
-the claim this paragraph used to make about 16K.
+**64K remains out of reach, and now for a stated reason rather than a guess.**
+Its cache alone is exactly 7,168 MiB (28 × 8 × 128 × 2 × 2 bytes × 65,536)
+against 8,188 MiB total with ~430 MiB already resident and 904 MiB of weights.
+That is 8,072 MiB required against ~7,758 available **before a single byte of
+activation or fragmentation**, so no allocator setting reaches it — a run at cap
+8100 OOMs at peak 6,426 MiB. Eviction really is required from 64K up, which is
+the correct version of the claim this paragraph used to make about 16K.
+
+Two routes to a 64K reference exist and neither needs a bigger card. **Quantised
+KV** puts the cache at 3,695 MiB (int8, 1.94×) or 2,358 MiB (mixed, 3.04×), both
+comfortable — §4d. **CPU-offloaded KV**, streamed per layer, is exact rather than
+approximate and needs no quality argument at all; it is simply slow, and at 18
+trials × 64K that cost has not been estimated. The first is cheaper and already
+measured; the second is the fallback if the quantised reference is ever disputed.
 
 *Data:* `results/passkey_ceiling.json` (chunk 1024, cap 7800),
 `results/passkey_long.json` (chunk 4096, cap 6144 — the OOM record).
@@ -436,28 +445,57 @@ So the mid-context failure is not a ranking problem. That is the sweep's real
 result, and it is worth more than a tuned exponent would have been: it removes
 an entire class of fix from consideration.
 
-### The depth curve at 128K, pooled over all five arms (n = 30 per depth)
+### RETRACTED — the depth curve at 128K was confounded with needle identity
 
-| depth | accuracy | 95% CI (Clopper–Pearson) |
-|---:|---:|---|
-| 0.1 | 0.367 | [0.199, 0.561] |
-| 0.5 | **0.133** | [0.038, 0.307] |
-| 0.9 | 0.500 | [0.313, 0.687] |
+This section reported a pooled depth curve of 0.367 / 0.133 / 0.500 over "n = 30
+per depth", with Clopper–Pearson intervals and Fisher contrasts between depths.
+**All of it is withdrawn.** The design does not support it.
 
-Depth 0.9 against depth 0.5 is p = **0.0048** (Fisher), which survives correction;
-depth 0.1 against 0.5 is p = 0.0716, which does not. A U with a real trough — the
-lost-in-the-middle shape, at 1.6% cache retention on a 0.6B model.
+`passkey.py` ran one RNG stream across the whole nested loop, so each cell drew a
+different block of keys. With one length, one budget and three depths at 6 trials:
 
-Failures are near-misses rather than noise (75526 → `'7552'`, 85667 → `'8567'`,
-96659 → `'96969696969'`), so the information is partially retained even where the
-answer is wrong.
+```
+depth 0.1 -> keys  1-6      depth 0.5 -> keys 7-12      depth 0.9 -> keys 13-18
+```
 
-**Unresolved, and unresolvable on this host as it stands.** Whether the trough
-belongs to eviction or to the model cannot be decided, because the uncompressed
-128K control does not fit: 14,336 MiB of cache against 8,188 MiB total. Every 64K
-and 128K number in this program is measured against no baseline. That is what
-makes §4d's mixed precision load-bearing rather than merely tidy — at 3.04× the
-full 128K cache is 4,716 MiB, and the control becomes runnable.
+Every arm is a separate process with the same seed and the same loop shape, so the
+five arms draw the *same* eighteen keys. That makes the design **paired across
+arms** — which is what the exponent comparison needs — and **confounded across
+depths**, because depth and needle identity are the same column. The "30 trials"
+at each depth are five repetitions of six needles, so the intervals were computed
+on an n that does not exist and the between-depth Fisher tests assumed an
+independence the data does not have.
+
+The budget ladder then produced the counter-example directly. It runs depth 0.5
+*alone*, so depth 0.5 draws keys 1–6 instead of 7–12; everything else is identical
+(128K, B=2048, YaRN ×4, query-aware, e=1.0, 6 trials):
+
+| depth 0.5, same configuration | accuracy |
+|---|---:|
+| keys 7–12 (inside the three-depth sweep) | 0.17 |
+| keys 1–6 (single-depth run) | **0.50** |
+
+Three times the accuracy from the choice of needles alone. So the trough may be
+needle difficulty rather than position, and **the lost-in-the-middle reading is
+not supported by this data**.
+
+**What survives.** The exponent comparison, because it *is* paired: all five arms
+saw the same six needles at each depth, and at depth 0.9 the hit counts run
+1, 1, 4, 4, 5 out of 6 monotonically in e. The stated p = 0.0045 came from a
+Cochran–Armitage test that treats the arms as independent groups, which is the
+wrong model for paired data — the direction and monotonicity stand, the exact
+p-value does not. The claim that the exponent does nothing at depth 0.5 (1, 1, 0,
+1, 1) also stands, since it is the same six needles throughout.
+
+**The fix, in the harness rather than in the analysis.** The RNG is now reset per
+cell, so every cell draws the same key sequence and depths, budgets and lengths
+are all paired on needles; `--seed` selects a different replicate. Each cell also
+records per-trial `{key, got, hit}`, because cell-level accuracy cannot support a
+paired analysis after the fact — which is why this had to be diagnosed from the
+two-example preview column instead of from the data.
+
+A re-measurement under the paired design is required before any depth claim at
+128K is restated.
 
 ### Where this leaves long context
 
