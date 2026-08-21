@@ -151,15 +151,35 @@ def reset_scores() -> None:
     _COUNTS.clear()
 
 
-def mean_scores(layer_idx: int):
-    """Accumulated score divided by observation count, or None if unscored."""
+def ranked_scores(layer_idx: int, exponent: float = 0.0):
+    """Ranking key `sum / count**exponent`.
+
+    The two endpoints were measured and fail in OPPOSITE directions at 128K:
+
+      exponent 0.0 (raw sum)   favours long-accumulated EARLY positions.
+                               128K depth 0.1/0.5/0.9 -> 1.00 / 0.33 / 0.00
+      exponent 1.0 (mean)      over-corrects toward LATE arrivals.
+                               128K depth 0.1/0.5/0.9 -> 0.17 / 0.17 / 0.83
+
+    The sum ratchets shut because a position that survived T compression rounds
+    was scored T times and a newcomer once; the mean removes that advantage
+    entirely, including the part of it that is real evidence. An exponent between
+    the two trades one bias against the other with a single knob.
+    """
     s = _SCORES.get(layer_idx)
     if s is None:
         return None
+    if exponent == 0.0:
+        return s
     c = _COUNTS.get(layer_idx)
     if c is None or c.shape != s.shape:
         return s
-    return s / c.clamp_min(1.0)
+    return s / c.clamp_min(1.0).pow(exponent)
+
+
+def mean_scores(layer_idx: int):
+    """Backwards-compatible alias for the exponent=1 endpoint."""
+    return ranked_scores(layer_idx, 1.0)
 
 
 def heavy_zero_count() -> int:
@@ -226,7 +246,7 @@ class SignificanceLayer(DynamicLayer):
         pol = self.policy
         k, v = self.keys, self.values
         b, n_kv, n, d = k.shape
-        s = mean_scores(self.layer_idx) if pol.normalize else _SCORES.get(self.layer_idx)
+        s = ranked_scores(self.layer_idx, pol.rank_exponent())
 
         if s is None:
             # Unreachable: update() only calls _evict once _SCORES has an entry.
@@ -383,8 +403,15 @@ class Policy:
     protect_sinks: bool = True
     slack: int = 0             # evict only once stored exceeds budget + slack
     pool: int = 1              # max-pool width over scores before top-k (SnapKV)
-    normalize: bool = False    # rank on MEAN score (sum / observation count)
+    normalize: bool = False    # shorthand for count_exponent = 1.0
+    count_exponent: float | None = None   # rank on sum / count**e; 0 = sum, 1 = mean
     stats: dict = field(default_factory=dict)
+
+    def rank_exponent(self) -> float:
+        """Exponent actually used for ranking. `normalize` is the e=1 shorthand."""
+        if self.count_exponent is not None:
+            return float(self.count_exponent)
+        return 1.0 if self.normalize else 0.0
 
     def n_sinks(self) -> int:
         return min(self.sinks if self.protect_sinks else 0, self.budget)
@@ -440,8 +467,9 @@ def compress(cache, policy: Policy, scores: dict[int, torch.Tensor] | None = Non
             continue
 
         s = scores[li].to(k.device).float()          # [b, n_kv, n]
-        if policy.normalize:
-            m = mean_scores(li)
+        e = policy.rank_exponent()
+        if e != 0.0:
+            m = ranked_scores(li, e)
             if m is not None and m.shape == s.shape:
                 s = m.to(k.device).float()
         if s.shape[-1] != n:

@@ -140,6 +140,8 @@ def main() -> None:
     ap.add_argument("--chunk", type=int, default=4096)
     ap.add_argument("--recent", type=int, default=512)
     ap.add_argument("--window", type=int, default=16)
+    ap.add_argument("--count-exponent", type=float, default=None,
+                    help="rank on sum/count**e; 0 = raw sum, 1 = mean, between = decay")
     ap.add_argument("--normalize", action="store_true",
                     help="rank on MEAN score (sum / observations) rather than the "
                          "running sum, which otherwise freezes the heavy set")
@@ -204,7 +206,8 @@ def main() -> None:
                     torch.cuda.empty_cache()
                     torch.cuda.reset_peak_memory_stats()
                     policy = (sig.Policy(budget=budget, sinks=4, recent=args.recent,
-                                         normalize=args.normalize)
+                                         normalize=args.normalize,
+                                         count_exponent=args.count_exponent)
                               if budget else None)
                     cache = sig.SignificanceCache(config=model.config, policy=None)
                     try:
@@ -224,16 +227,25 @@ def main() -> None:
                     del cache, ids
                     torch.cuda.empty_cache()
                 acc = hits / max(seen, 1)
+                # Record the EFFECTIVE exponent, not the flag: `--normalize` and
+                # `--count-exponent 1.0` are the same run and must not be
+                # distinguishable in the results file. (A manifest that stored the
+                # raw argument instead of the effective value has already caused
+                # one wrong published number in this program.)
                 rows.append({"length": n, "real_tokens": real_n, "budget": budget,
                              "depth": depth, "acc": acc, "peak_mib": round(peak, 1),
-                             "yarn": args.yarn})
+                             "yarn": args.yarn,
+                             "rank_exponent": (policy.rank_exponent() if policy
+                                               else None)})
                 print(f"{n:>8,}{budget:>8}{depth:>7.1f}{acc:>7.2f}{peak:>10.0f}  "
                       + "  ".join(ex))
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(
         {"model": MODEL, "yarn": args.yarn, "chunk": args.chunk,
-         "recent": args.recent, "trials": args.trials, "results": rows},
+         "recent": args.recent, "trials": args.trials,
+         "count_exponent": args.count_exponent, "normalize": args.normalize,
+         "query_aware": args.query_aware, "results": rows},
         indent=2) + "\n", encoding="utf-8")
     print(f"\nwrote {args.out}")
 
