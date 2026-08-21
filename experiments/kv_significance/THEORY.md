@@ -482,3 +482,29 @@ The honest ordering of remaining work:
 3. **A long-context corpus** — without it, the central claim cannot be tested at
    the lengths it is designed for. This is the same blocker as everywhere else in
    the program, and it is now blocking three separate lines of work.
+
+
+---
+
+## 12. Superseded in part — read FINDINGS §4a–4c next
+
+§11 concludes that the regime this method exists for is unreachable. That was
+true when written. `scripts/kv/chunked_prefill.py` removed the memory obstacle
+(peak 1744 MiB flat from 16K to 128K), a passkey battery made long-context
+behaviour measurable, and query-aware scoring
+(`chunked_prefill.score_with_query`) addressed the limitation this document could
+not see: scoring each chunk against its own trailing rows makes eviction
+query-blind, so a needle earns no score before the question is asked.
+
+Headline changes, all in `docs/FINDINGS_KV_PROGRAM.md`:
+
+| | this document | after |
+|---|---|---|
+| peak memory | unchanged (1.00×) | flat 1744 MiB, 16K → 128K |
+| longest measured | 330-token prompts | 128K |
+| 32K retrieval | not measurable | 0.20 blind → **0.87** query-aware |
+| 64K retrieval | not measurable | **0.89** at keep 0.031 |
+
+The efficiency and quality numbers in §§9–10 stand as measured; they are simply
+about short prompts and single-shot prefill, which is no longer the only
+configuration available.

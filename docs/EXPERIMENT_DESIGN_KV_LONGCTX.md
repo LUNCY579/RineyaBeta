@@ -106,6 +106,14 @@ to be stated before the measurement plan, because it changes its size:
 > one — none at all. No passkey items, no needle-in-a-haystack items, and
 > nothing whose context approaches the lengths under study.
 
+> **SUPERSEDED (2026-08-20).** This was true when written and is no longer. A
+> passkey generator with depth × length control now exists at
+> `experiments/kv_significance/src/passkey.py`, and retrieval has been measured
+> to 128K. What remains unbuilt is the *other* half of the battery: position-
+> bucketed perplexity on genuinely held-out text, and long-context multi-hop.
+> The reasoning about contamination and floor effects below still applies to
+> those. See `docs/FINDINGS_KV_PROGRAM.md` §4b–4c for what was measured.
+
 | Asset | Rows | Actual context length |
 |---|---:|---|
 | `Rineya_Long_Context_Demo_v1` (frozen) | 256 | **1,130–1,504 tokens** |

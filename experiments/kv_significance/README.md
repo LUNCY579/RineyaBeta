@@ -316,13 +316,43 @@ from 41–330-token prompts, where there is almost no redundancy to exploit. Tha
 1.33× reduction is nearly free *at the worst possible length* is encouraging but
 is an extrapolation, not a measurement.
 
+## What happened next — this experiment is not the end of the story
+
+Everything above is measured on prompts of 41-330 tokens, because at the time
+nothing longer could be run. Two later pieces of work removed that limit, and
+their results live in **[docs/FINDINGS_KV_PROGRAM.md](../../docs/FINDINGS_KV_PROGRAM.md)**
+(§4a-4c). In short:
+
+- **Chunked prefill** (`scripts/kv/chunked_prefill.py`) bounds the resident cache
+  at `B + C` tokens with the prompt length eliminated. Measured peak is
+  **1744 MiB, flat from 16K to 128K (0.0% spread)**, against 14,336 MiB of cache
+  alone for an un-chunked 128K prompt. Gated as a proven no-op first: max
+  |Δlogit| 1.19e-04 at every position, argmax agreement 1.0000.
+- **Passkey retrieval** is measurable now, and the model is *good* at it — 1.00 at
+  every depth to 16K on a full cache.
+- **Query-aware scoring** (`score_with_query`) fixes the limitation this
+  experiment could not see: prefill-time eviction scores each chunk against its
+  own trailing rows, which are filler, so a needle earns no score before the
+  question is asked. Making scoring query-aware moved 32K retrieval from
+  **0.20 to 0.87** at keep 0.0625.
+- **64K retrieval works at a 32x compression ratio** (0.89 accuracy, budget 2048,
+  peak 1742 MiB). 128K is partial and depth-biased.
+
+The conclusion this README reaches — that eviction cannot be evaluated in the
+regime it was designed for — was correct when written and is no longer true.
+
 ## Open
 
 1. **`slack` re-measured on an unloaded host** — decides whether the decode win is
    real. The one measurement taken was contaminated (baseline prefill 362 s vs
    4.9 s clean, from host-memory thrashing).
-2. **Chunked prefill** — the only route to a peak-memory win, and the only way
-   this helps the 8 GB ceiling rather than just steady state.
-3. **A long-context corpus** — without it the central claim cannot be tested at
-   the lengths it is designed for. Same blocker as the rest of the program, now
-   gating three separate lines of work.
+2. ~~Chunked prefill~~ — **done**, see above and FINDINGS §4a.
+3. ~~A long-context corpus~~ — **done** for retrieval; a passkey generator with
+   depth x length control now exists (`src/passkey.py`). Position-bucketed
+   perplexity and long-context multi-hop remain unbuilt.
+4. **A decay term between sum and mean ranking.** At 128K the two fail in
+   opposite directions (sum favours early positions, mean favours late); neither
+   is uniformly good. Untested.
+5. **Multi-hop reasoning at length.** Everything measured at length so far is
+   *retrieval*. The frozen demo suite indicates reasoning is where this
+   checkpoint is genuinely weak.
