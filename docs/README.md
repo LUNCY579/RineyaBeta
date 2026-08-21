@@ -71,13 +71,21 @@ deliberately isolates retrieval from comprehension. Multi-hop reasoning at lengt
 has never been measured, and the frozen demo suite indicates that is where this
 checkpoint is genuinely weak.
 
-**"Works at 128K" needs a number attached.** Uncompressed, this checkpoint is
-1.00 at every depth to **32K** — that is the largest reference this card can hold
-(64K needs 8,072 MiB of cache against 8,188 MiB total). Compressed to a 2048-token
-budget it is 0.89 at 32K and 64K, and **0.39 at 128K**, with a depth-0.5 trough of
-0.13. So 128K runs, and runs in 1743 MiB — but it does not work well, and whether
-the 128K trough belongs to eviction or to the model is undecided, because the
-uncompressed 128K control does not fit on this card.
+**"Works at 128K" needs a budget attached.** Uncompressed, this checkpoint is
+1.00 at every depth to **32K** — the largest reference this card can hold, since
+64K needs 8,072 MiB of cache against 8,188 MiB total. Compressed, what matters is
+the keep *fraction*, not the length:
+
+| n | budget | keep | accuracy | peak |
+|---:|---:|---:|---:|---:|
+| 32,768 | 2048 | 6.3% | 0.89 | 1744 MiB |
+| 65,536 | 2048 | 3.1% | 0.89 | 1742 MiB |
+| 131,072 | 2048 | 1.6% | 0.53 | 1743 MiB |
+| 131,072 | 8192 | 6.3% | **0.92** | 2521 MiB |
+
+At a constant 6.3% keep the accuracy is flat from 32K to 128K. The "128K is weak"
+reading that ran through this program for a while was about B=2048, which is 1.6%
+keep at that length — a different experiment wearing the same label.
 
 **This host fails silently in four specific ways**, all of which have produced
 wrong published numbers at least once:

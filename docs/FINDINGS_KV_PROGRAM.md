@@ -448,72 +448,98 @@ an entire class of fix from consideration.
 ### RETRACTED — the depth curve at 128K was confounded with needle identity
 
 This section reported a pooled depth curve of 0.367 / 0.133 / 0.500 over "n = 30
-per depth", with Clopper–Pearson intervals and Fisher contrasts between depths.
-**All of it is withdrawn.** The design does not support it.
+per depth", with Clopper–Pearson intervals and Fisher contrasts, read as a
+lost-in-the-middle trough. **All of it is withdrawn.**
 
 `passkey.py` ran one RNG stream across the whole nested loop, so each cell drew a
-different block of keys. With one length, one budget and three depths at 6 trials:
-
-```
-depth 0.1 -> keys  1-6      depth 0.5 -> keys 7-12      depth 0.9 -> keys 13-18
-```
-
-Every arm is a separate process with the same seed and the same loop shape, so the
-five arms draw the *same* eighteen keys. That makes the design **paired across
-arms** — which is what the exponent comparison needs — and **confounded across
+different block of keys — depth 0.1 got keys 1–6, depth 0.5 keys 7–12, depth 0.9
+keys 13–18. Every arm is a separate process with the same seed and loop shape, so
+the five arms draw the *same* eighteen keys. That makes the design **paired across
+arms**, which is what the exponent comparison needs, and **confounded across
 depths**, because depth and needle identity are the same column. The "30 trials"
-at each depth are five repetitions of six needles, so the intervals were computed
-on an n that does not exist and the between-depth Fisher tests assumed an
-independence the data does not have.
+per depth were five repetitions of six needles.
 
-The budget ladder then produced the counter-example directly. It runs depth 0.5
-*alone*, so depth 0.5 draws keys 1–6 instead of 7–12; everything else is identical
-(128K, B=2048, YaRN ×4, query-aware, e=1.0, 6 trials):
+The budget ladder exposed it by accident: run depth 0.5 *alone* and it draws keys
+1–6 instead of 7–12, and the same configuration scores 0.50 instead of 0.17.
 
-| depth 0.5, same configuration | accuracy |
-|---|---:|
-| keys 7–12 (inside the three-depth sweep) | 0.17 |
-| keys 1–6 (single-depth run) | **0.50** |
+Fixed in the harness — the RNG resets per cell, so every cell sees the same
+needles; `--seed` selects an independent replicate; each cell records per-trial
+`{key, got, hit}`. Analysis moved into `scripts/design/paired_passkey.py`, which
+runs exact McNemar on discordant pairs and a within-needle permutation trend test,
+and refuses to compare cells that share no needles.
 
-Three times the accuracy from the choice of needles alone. So the trough may be
-needle difficulty rather than position, and **the lost-in-the-middle reading is
-not supported by this data**.
+### 128K was a budget choice, not a length wall
 
-**What survives.** The exponent comparison, because it *is* paired: all five arms
-saw the same six needles at each depth, and at depth 0.9 the hit counts run
-1, 1, 4, 4, 5 out of 6 monotonically in e. The stated p = 0.0045 came from a
-Cochran–Armitage test that treats the arms as independent groups, which is the
-wrong model for paired data — the direction and monotonicity stand, the exact
-p-value does not. The claim that the exponent does nothing at depth 0.5 (1, 1, 0,
-1, 1) also stands, since it is the same six needles throughout.
+Re-measured under the paired design. **12 needles, identical in every cell**,
+128K, YaRN ×4, query-aware, e=1.0. `results/pk_128k_grid12.json`.
 
-**The fix, in the harness rather than in the analysis.** The RNG is now reset per
-cell, so every cell draws the same key sequence and depths, budgets and lengths
-are all paired on needles; `--seed` selects a different replicate. Each cell also
-records per-trial `{key, got, hit}`, because cell-level accuracy cannot support a
-paired analysis after the fact — which is why this had to be diagnosed from the
-two-example preview column instead of from the data.
+| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
+|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.6% | 0.42 | 0.33 | 0.83 | 0.53 | 1743 MiB |
+| 8,192 | 6.3% | **1.00** | **0.83** | **0.92** | **0.92** | 2521 MiB |
 
-A re-measurement under the paired design is required before any depth claim at
-128K is restated.
+The budget contrast, per depth, exact McNemar on the needles that disagreed:
+
+| depth | 2048 → 8192 | discordant | p |
+|---:|---|---|---:|
+| 0.1 | 0.42 → 1.00 | +7 / −0 | **0.0156** |
+| 0.5 | 0.33 → 0.83 | +6 / −0 | 0.0312 |
+| 0.9 | 0.83 → 0.92 | +1 / −0 | 1.0000 (at ceiling) |
+
+Against Bonferroni over three depths (α = 0.0167) depth 0.1 survives and depth 0.5
+does not. What is not a matter of thresholds: **14 discordant needles across the
+three depths, all 14 favouring the larger budget, zero reversals.**
+
+**So the 128K story this program has been telling was about B=2048, not about
+128K.** At 6.3% keep the checkpoint retrieves at 0.92 across depths in 2,521 MiB —
+matching its own 32K and 64K numbers. The length wall was a budget wall.
+
+#### What the depth axis actually does
+
+| budget | trend across depth | reading |
+|---:|---|---|
+| 2,048 | permutation p = 0.0315 | depth 0.9 beats depth 0.5 (+6/−0, p = 0.0312); depths 0.1 and 0.5 are **indistinguishable** (+2/−3, p = 1.0000) |
+| 8,192 | permutation p = 0.8879 | no depth dependence left |
+
+Late needles do better, and the advantage is concentrated in the last chunks that
+escape compression rather than spread as a gradient. An earlier 6-needle run of
+this same grid read 0.17 / 0.50 / 0.83 and looked cleanly monotone; at 12 needles
+it is 0.42 / 0.33 / 0.83. The monotone reading was noise. The surviving claim is
+the weaker and more robust one: **late beats early, and early versus middle is not
+resolved at this trial count.**
+
+#### A power limit worth stating once
+
+Exact McNemar with all discordant pairs in one direction gives p = 2/2ⁿ, so **six
+needles cannot produce a p below 0.0625 no matter how clean the effect** — a
+perfect 5-of-6 flip is already at the floor. Anything below 0.05 needs at least
+six discordant pairs. Every 6-trial cell in this program is therefore incapable of
+reaching significance on its own, which is the real reason the trial count moved
+to 12 rather than any particular result.
 
 ### Where this leaves long context
 
-| n | budget | keep | best accuracy | peak |
+| n | budget | keep | accuracy | peak |
 |---:|---:|---:|---:|---:|
+| 32,768 | 0 (full cache) | 1.0 | **1.00** | 4699 MiB |
 | 32,768 | 2048 | 0.0625 | **0.89** | 1744 MiB |
 | 65,536 | 2048 | 0.031 | **0.89** | 1742 MiB |
-| 131,072 | 2048 | 0.0156 | ~0.4, depth-biased | 1743 MiB |
+| 131,072 | 2048 | 0.0156 | 0.53 | 1743 MiB |
+| 131,072 | 8192 | 0.0625 | **0.92** | 2521 MiB |
 
-**64K retrieval works at a 32× compression ratio on an 8 GiB card.** 128K is
-partial and depth-dependent. All of it is *retrieval*; multi-hop reasoning at
-length remains untested, and the frozen demo suite indicates that is where this
-checkpoint is genuinely weak.
+**128K retrieval works at a 16× compression ratio on an 8 GiB card**, at the same
+keep fraction that works at 32K. Read the 32K rows together: full cache 1.00
+against 0.89 at keep 0.0625 is the cost of eviction *against a measured control*.
 
-Trial counts are small (3–6 per cell). The 32K sum/mean comparison moved by one
-trial in 18 between runs, which is the noise floor to keep in mind for every
-number in this section.
+All of it is *retrieval*; multi-hop reasoning at length remains untested, and the
+frozen demo suite indicates that is where this checkpoint is genuinely weak.
 
+Cells are 12 needles unless stated. Every comparison in this section is paired on
+needles and was run through `scripts/design/paired_passkey.py`; unpaired figures
+elsewhere in this document predate that tool and should be read as descriptive.
+
+
+---
 
 ## 4d. What to STORE, not just what to keep
 

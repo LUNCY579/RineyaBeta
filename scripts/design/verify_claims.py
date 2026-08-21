@@ -88,7 +88,8 @@ def cla_mean():
     return sum(r["test"] for r in rows) / len(rows)
 
 
-def pk(fname: str, depth: float | None = None):
+def pk(fname: str, depth: float | None = None, budget: int | None = None,
+       length: int | None = None):
     """Passkey accuracy from a committed arm; pooled over depths if depth is None.
 
     Skips cells whose acc is null -- those are trials that ran out of memory and
@@ -102,6 +103,10 @@ def pk(fname: str, depth: float | None = None):
     rows = [r for r in d["results"] if r.get("acc") is not None]
     if depth is not None:
         rows = [r for r in rows if r["depth"] == depth]
+    if budget is not None:
+        rows = [r for r in rows if r["budget"] == budget]
+    if length is not None:
+        rows = [r for r in rows if r["length"] == length]
     if not rows:
         return None
     return sum(r["acc"] for r in rows) / len(rows)
@@ -259,6 +264,29 @@ CLAIMS = [
      lambda: next((r["min"] for r in probe("store_probe.json", "scale_tail") or []
                    if r["n"] == 4096 and r["tensor"] == "K" and r["bits"] == 8), None),
      5e-7, "1.156e-04", "negative"),
+
+    # --- 128K under the PAIRED design (12 needles, identical in every cell) --
+    # The headline of the program: at a constant keep fraction, accuracy does not
+    # fall with length. Everything before pk_128k_grid12.json compared cells that
+    # saw different needles.
+    ("128K B=2048 depth 0.1", 0.4167, lambda: pk("pk_128k_grid12.json", 0.1, 2048),
+     5e-4, "0.42", "findings,negative"),
+    ("128K B=8192 depth 0.1", 1.0000, lambda: pk("pk_128k_grid12.json", 0.1, 8192),
+     5e-4, "1.00", "findings"),
+    ("128K B=2048 depth 0.5", 0.3333, lambda: pk("pk_128k_grid12.json", 0.5, 2048),
+     5e-4, "0.33", "findings,negative"),
+    ("128K B=8192 depth 0.5", 0.8333, lambda: pk("pk_128k_grid12.json", 0.5, 8192),
+     5e-4, "0.83", "findings,negative"),
+    ("128K B=2048 depth 0.9", 0.8333, lambda: pk("pk_128k_grid12.json", 0.9, 2048),
+     5e-4, "0.83", "findings,negative"),
+    ("128K B=8192 depth 0.9", 0.9167, lambda: pk("pk_128k_grid12.json", 0.9, 8192),
+     5e-4, "0.92", "findings,negative"),
+    ("128K B=8192 mean over depths", 0.9167,
+     lambda: pk("pk_128k_grid12.json", None, 8192), 5e-4, "0.92", "findings"),
+    ("128K B=2048 mean over depths", 0.5278,
+     lambda: pk("pk_128k_grid12.json", None, 2048), 5e-4, "0.53", "findings"),
+    ("32K uncompressed reference", 1.0000,
+     lambda: pk("passkey_ceiling.json", None, 0, 32768), 5e-4, "1.00", "findings"),
 ]
 
 
