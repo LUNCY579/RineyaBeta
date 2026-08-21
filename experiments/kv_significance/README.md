@@ -365,9 +365,21 @@ regime it was designed for — was correct when written and is no longer true.
 3. ~~A long-context corpus~~ — **done** for retrieval; a passkey generator with
    depth x length control now exists (`src/passkey.py`). Position-bucketed
    perplexity and long-context multi-hop remain unbuilt.
-4. **A decay term between sum and mean ranking.** At 128K the two fail in
-   opposite directions (sum favours early positions, mean favours late); neither
-   is uniformly good. Untested.
-5. **Multi-hop reasoning at length.** Everything measured at length so far is
+4. ~~A decay term between sum and mean ranking~~ — **tested, and the answer is
+   no.** `Policy.count_exponent` ranks on `sum / count**e`; five matched arms at
+   128K (6 trials × 3 depths) show a real monotone gain at depth 0.9
+   (Cochran–Armitage p = 0.0045) and **exactly no trend** at depth 0.5
+   (p = 1.0000). Pooled, the best arm does not beat the worst (7/18 vs 4/18,
+   Fisher p = 0.4705). The knob redistributes accuracy rather than adding it, and
+   mid-context failure is not a ranking problem — eviction is irreversible, so a
+   needle dropped in an early round is unrecoverable by any later statistic.
+   FINDINGS §4c.
+5. **Is the 128K trough eviction's fault or the model's?** Undecidable today: the
+   uncompressed 128K control needs 14,336 MiB of cache against 8,188 MiB total,
+   so every 64K and 128K number here has no baseline. A budget ladder
+   (B ∈ {2048, 8192, 32768} at depth 0.5) bounds it from one side; quantised KV
+   makes the actual control runnable — int8 at 1.94× fits 64K, mixed precision at
+   3.04× fits 128K.
+6. **Multi-hop reasoning at length.** Everything measured at length so far is
    *retrieval*. The frozen demo suite indicates reasoning is where this
    checkpoint is genuinely weak.
