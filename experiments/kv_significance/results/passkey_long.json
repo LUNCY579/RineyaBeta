@@ -4,6 +4,9 @@
   "chunk": 4096,
   "recent": 512,
   "trials": 3,
+  "count_exponent": null,
+  "normalize": false,
+  "query_aware": false,
   "results": [
     {
       "length": 16384,
@@ -12,7 +15,10 @@
       "depth": 0.1,
       "acc": 1.0,
       "peak_mib": 3008.5,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 3,
+      "ooms": 0,
+      "rank_exponent": null
     },
     {
       "length": 16384,
@@ -21,7 +27,10 @@
       "depth": 0.5,
       "acc": 1.0,
       "peak_mib": 3008.5,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 3,
+      "ooms": 0,
+      "rank_exponent": null
     },
     {
       "length": 16384,
@@ -30,61 +39,82 @@
       "depth": 0.9,
       "acc": 1.0,
       "peak_mib": 3008.5,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 3,
+      "ooms": 0,
+      "rank_exponent": null
     },
     {
       "length": 32768,
       "real_tokens": 31458,
       "budget": 0,
       "depth": 0.1,
-      "acc": 0.0,
+      "acc": null,
       "peak_mib": 4896.7,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 0,
+      "ooms": 3,
+      "rank_exponent": null
     },
     {
       "length": 32768,
       "real_tokens": 31458,
       "budget": 0,
       "depth": 0.5,
-      "acc": 0.0,
+      "acc": null,
       "peak_mib": 4896.7,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 0,
+      "ooms": 3,
+      "rank_exponent": null
     },
     {
       "length": 32768,
       "real_tokens": 31458,
       "budget": 0,
       "depth": 0.9,
-      "acc": 0.0,
+      "acc": null,
       "peak_mib": 4896.7,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 0,
+      "ooms": 3,
+      "rank_exponent": null
     },
     {
       "length": 65536,
       "real_tokens": 62898,
       "budget": 0,
       "depth": 0.1,
-      "acc": 0.0,
+      "acc": null,
       "peak_mib": 5034.8,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 0,
+      "ooms": 3,
+      "rank_exponent": null
     },
     {
       "length": 65536,
       "real_tokens": 62898,
       "budget": 0,
       "depth": 0.5,
-      "acc": 0.0,
+      "acc": null,
       "peak_mib": 5034.8,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 0,
+      "ooms": 3,
+      "rank_exponent": null
     },
     {
       "length": 65536,
       "real_tokens": 62898,
       "budget": 0,
       "depth": 0.9,
-      "acc": 0.0,
+      "acc": null,
       "peak_mib": 5034.8,
-      "yarn": null
+      "yarn": null,
+      "trials_ok": 0,
+      "ooms": 3,
+      "rank_exponent": null
     }
   ]
 }

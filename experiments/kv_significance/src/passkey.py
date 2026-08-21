@@ -197,7 +197,7 @@ def main() -> None:
     for n in args.lengths:
         for budget in args.budgets:
             for depth in args.depths:
-                hits, seen, peak, ex = 0, 0, 0.0, []
+                hits, seen, ooms, peak, ex = 0, 0, 0, 0.0, []
                 for _ in range(args.trials):
                     key = rng.randint(10000, 99999)
                     text, real_n = build_prompt(tok, n, depth, key,
@@ -217,7 +217,17 @@ def main() -> None:
                         got = answer(model, tok, ids, cache, args.chunk, policy,
                                      args.window, query_ids=qids)
                     except torch.cuda.OutOfMemoryError:
-                        got = "<OOM>"
+                        # A trial that ran out of memory measured NOTHING. Scoring
+                        # it as a miss is the difference between "the model could
+                        # not find the key" and "the run did not happen", and this
+                        # host makes that mistake easy: a full-cache 64K reference
+                        # needs 8,072 MiB against 8,188 MiB total, so it OOMs at a
+                        # plausible length and the table still looks like a result.
+                        ooms += 1
+                        peak = max(peak, torch.cuda.max_memory_allocated() / 2 ** 20)
+                        del cache, ids
+                        torch.cuda.empty_cache()
+                        continue
                     peak = max(peak, torch.cuda.max_memory_allocated() / 2 ** 20)
                     seen += 1
                     if str(key) in got:
@@ -226,7 +236,9 @@ def main() -> None:
                         ex.append(f"{key}->{got.strip()[:18]!r}")
                     del cache, ids
                     torch.cuda.empty_cache()
-                acc = hits / max(seen, 1)
+                # None, not 0.0, when every trial died: an empty cell must not be
+                # readable as a measured failure.
+                acc = hits / seen if seen else None
                 # Record the EFFECTIVE exponent, not the flag: `--normalize` and
                 # `--count-exponent 1.0` are the same run and must not be
                 # distinguishable in the results file. (A manifest that stored the
@@ -234,10 +246,12 @@ def main() -> None:
                 # one wrong published number in this program.)
                 rows.append({"length": n, "real_tokens": real_n, "budget": budget,
                              "depth": depth, "acc": acc, "peak_mib": round(peak, 1),
-                             "yarn": args.yarn,
+                             "yarn": args.yarn, "trials_ok": seen, "ooms": ooms,
                              "rank_exponent": (policy.rank_exponent() if policy
                                                else None)})
-                print(f"{n:>8,}{budget:>8}{depth:>7.1f}{acc:>7.2f}{peak:>10.0f}  "
+                shown = f"{acc:>7.2f}" if acc is not None else f"{chr(45)*2:>7}"
+                warn = f"  [{ooms}/{args.trials} OOM]" if ooms else ""
+                print(f"{n:>8,}{budget:>8}{depth:>7.1f}{shown}{peak:>10.0f}{warn}  "
                       + "  ".join(ex))
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -249,7 +263,15 @@ def main() -> None:
         indent=2) + "\n", encoding="utf-8")
     print(f"\nwrote {args.out}")
 
-    full = [r for r in rows if r["budget"] == 0]
+    n_oom = sum(r["ooms"] for r in rows)
+    if n_oom:
+        print(f"\n{n_oom} trial(s) ran out of memory and were EXCLUDED, not scored.")
+        print("Cells shown as -- measured nothing. Re-run them with a smaller")
+        print("budget, a smaller chunk, or a higher --cap-mib. Do NOT read an")
+        print("empty cell as a failure: that is how a 64K full-cache reference,")
+        print("which needs 8,072 MiB against 8,188 MiB total, becomes a result.")
+
+    full = [r for r in rows if r["budget"] == 0 and r["acc"] is not None]
     if full:
         print("\npositional ceiling (full cache) by length:")
         for n in sorted({r['length'] for r in full}):
