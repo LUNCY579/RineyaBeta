@@ -230,15 +230,53 @@ because chunked prefill removed the memory obstacle.
 
 Full cache, no eviction, 3 trials x 3 depths:
 
-| n | 1,024 | 2,048 | 4,096 | 8,192 | 16,384 |
-|---|---:|---:|---:|---:|---:|
-| accuracy | **1.00** | **1.00** | **1.00** | **1.00** | **1.00** |
+| n | 1,024 | 2,048 | 4,096 | 8,192 | 16,384 | 32,768 |
+|---|---:|---:|---:|---:|---:|---:|
+| accuracy | **1.00** | **1.00** | **1.00** | **1.00** | **1.00** | **1.00** |
 
-100% at every length and depth up to 16K. This corrects a pessimism carried
+100% at every length and depth up to 32K. This corrects a pessimism carried
 through the whole program from the frozen demo suite's 0.2031: that suite is
 *reasoning*-hard (multi-hop, `count_with_exclusions` at 0.031), not retrieval.
-On pure retrieval this 0.6B checkpoint is reliable. Above 16K the full cache no
-longer fits, so eviction is **required** to measure at all.
+On pure retrieval this 0.6B checkpoint is reliable.
+
+#### The 32K column is new, and the reason it was missing is a defect
+
+This section previously stopped at 16K and said "above 16K the full cache no
+longer fits". That was wrong, and wrong in the way this program keeps having to
+catch: **the binding constraint was a default in the harness, not the card.**
+
+`passkey.py --cap-mib` defaults to 6144, and
+`torch.cuda.set_per_process_memory_fraction` bounds **reserved** memory while
+`max_memory_allocated` reports **allocated**. The gap between them is the caching
+allocator's fragmentation, which is large here because `DynamicLayer.update`
+grows the cache with `torch.cat` — old and new buffers are live at once. So a run
+can die with a reported peak far below its own cap:
+
+| | cap 6144 | cap 7800 |
+|---|---|---|
+| chunk 1024 | **OOM** at peak 4571 MiB | 1.00, peak 4699 MiB |
+| chunk 4096 | **OOM** at peak 4897 MiB | 1.00, peak 4973 MiB |
+
+One variable at a time (P6), and the answer is unambiguous: **the cap decides
+feasibility and the chunk size does not.** Chunk moves the allocated peak by 274
+MiB — 5.5% — and moves the verdict not at all. An earlier reading of this table
+that credited chunk size was made from the diagonal only, changing both variables
+at once, and is withdrawn.
+
+Two consequences.
+
+**There is now a measured baseline at 32K.** Eviction to a 2048-token budget
+scores 0.89 there, so its cost is 0.11 *against a measurement* rather than against
+an assumption. Every earlier statement of eviction cost at 32K was uncontrolled.
+
+**64K remains out of reach, and now for a stated reason.** Its cache alone is
+7,168 MiB against 8,188 MiB total with ~430 MiB already resident, before any
+allocator fragmentation. A run at cap 8100 OOMs at peak 6,426 MiB. So eviction is
+still **required** to measure at 64K and beyond — which is the correct version of
+the claim this paragraph used to make about 16K.
+
+*Data:* `results/passkey_ceiling.json` (chunk 1024, cap 7800),
+`results/passkey_long.json` (chunk 4096, cap 6144 — the OOM record).
 
 ### Depth dominates, not the keep ratio
 

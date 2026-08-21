@@ -64,13 +64,22 @@ is a CPU-only torch build and every CUDA measurement taken with it is void.
 
 ---
 
-## Two things a newcomer should know before trusting any number here
+## Three things a newcomer should know before trusting any number here
 
-**Everything at length is retrieval.** Passkey works to 128K. Multi-hop reasoning
-at length has never been measured, and the frozen demo suite indicates that is
-where this checkpoint is genuinely weak.
+**Everything at length is retrieval.** A 5-digit key in repetitive filler, which
+deliberately isolates retrieval from comprehension. Multi-hop reasoning at length
+has never been measured, and the frozen demo suite indicates that is where this
+checkpoint is genuinely weak.
 
-**This host fails silently in three specific ways**, all of which have produced
+**"Works at 128K" needs a number attached.** Uncompressed, this checkpoint is
+1.00 at every depth to **32K** — that is the largest reference this card can hold
+(64K needs 8,072 MiB of cache against 8,188 MiB total). Compressed to a 2048-token
+budget it is 0.89 at 32K and 64K, and **0.39 at 128K**, with a depth-0.5 trough of
+0.13. So 128K runs, and runs in 1743 MiB — but it does not work well, and whether
+the 128K trough belongs to eviction or to the model is undecided, because the
+uncompressed 128K control does not fit on this card.
+
+**This host fails silently in four specific ways**, all of which have produced
 wrong published numbers at least once:
 
 - `enable_gqa=True` falls back to the SDPA math kernel — 16 GiB against 224 MiB
@@ -81,3 +90,9 @@ wrong published numbers at least once:
 - Processes that hit CUDA OOM may not exit. One pair held 2.3 GiB of GPU and a
   full core for 27 minutes after its run had finished. Verify a kill against
   system state, not against its return code (P3).
+- `set_per_process_memory_fraction` caps **reserved** memory; `max_memory_allocated`
+  reports **allocated**. A run OOMs with a peak far below its own cap — 4571 MiB
+  against a 6144 MiB cap — because the caching allocator holds fragmentation the
+  peak figure never shows. Growing a KV cache with `torch.cat` makes that gap
+  large. This kept the 32K uncompressed reference out of reach for the whole
+  program until it was tested directly.

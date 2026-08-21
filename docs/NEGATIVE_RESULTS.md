@@ -318,6 +318,21 @@ Not ideas, but methods — each cost real time.
   made whenever a layer holds a view. Sum de-duplicated `untyped_storage()`.
 - **Any throughput claim below 2× is indefensible here.** The host's own thermal
   band is 2.17× (33.8 ms cool against 71.6–73.2 ms at 84 °C).
+- **A memory cap is not a memory measurement, and neither is a peak.**
+  `set_per_process_memory_fraction` bounds *reserved* bytes while
+  `max_memory_allocated` reports *allocated* ones. A 32K uncompressed run dies at
+  a reported peak of 4571 MiB against its own 6144 MiB cap, because the caching
+  allocator is holding fragmentation the peak never shows — `torch.cat` on a
+  growing KV cache keeps two buffers live. Raising the cap to 7800 makes the same
+  run succeed at 1.00. The harness default of 6144 was therefore the ceiling on
+  the whole program's uncompressed references, and it read as "the card is too
+  small".
+- **Changing two variables and attributing the result to one.** The same finding
+  was first read as a chunk-size effect, because the failing run used chunk 4096
+  at cap 6144 and the succeeding one chunk 1024 at cap 7800. Filling in the other
+  two cells settles it: at cap 6144 both chunk sizes OOM, at cap 7800 both reach
+  1.00, and chunk moves the allocated peak by 5.5% and the verdict not at all.
+  Two runs on a diagonal are not a comparison (P6).
 - **Trial counts below ~6 mislead.** A 3-trial run produced "normalization hurts,
   0.87 → 0.60"; at 6 trials the arms were tied within one trial in 18 and the
   claim was withdrawn.

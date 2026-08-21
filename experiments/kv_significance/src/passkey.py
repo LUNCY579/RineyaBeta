@@ -152,7 +152,15 @@ def main() -> None:
                     help="also state the question at the start of the prompt")
     ap.add_argument("--yarn", type=float, default=None,
                     help="YaRN factor; extends usable range to 40960*F, training-free")
-    ap.add_argument("--cap-mib", type=float, default=6144.0)
+    ap.add_argument("--cap-mib", type=float, default=6144.0,
+                    help="bounds RESERVED memory, not allocated. A run can OOM "
+                         "with a reported peak well below this: the caching "
+                         "allocator holds fragmentation the peak never shows, and "
+                         "torch.cat on a growing cache keeps two buffers live. If "
+                         "a cell OOMs at a peak under the cap, raise the cap -- "
+                         "this default hid the 32K uncompressed reference for the "
+                         "whole program. The cap exists at all because Windows/WDDM "
+                         "spills to host RAM instead of failing.")
     ap.add_argument("--device", default="cuda:0")
     ap.add_argument("--out", type=Path, default=EXP / "results" / "passkey.json")
     args = ap.parse_args()
