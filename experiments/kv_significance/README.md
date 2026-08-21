@@ -243,16 +243,16 @@ almost none of it converts into speed.**
 |---:|---:|---:|---|
 | off | 0.66939 | — | — |
 | 0.75 | 0.65677 | **−0.01262** | 711/752 (95%) |
-| 0.50 + pooling | 0.63228 | −0.03711 | 630/752 (84%) |
+| 0.50 + pooling | 0.63371 | −0.03568 | 631/752 (84%) |
 | 0.50 | 0.61401 | −0.05538 | 605/752 (80%) |
 | 0.25, recent scaled | 0.41932 | −0.25007 | 172/752 (23%) |
 | 0.25 | 0.33863 | −0.33076 | 159/752 (21%) |
 
 **A 1.33× cache reduction costs 0.013 and leaves 95% of replies byte-identical.**
-2× with pooling costs 0.037. Below half the prompt it breaks down — expected for
+2× with pooling costs 0.036. Below half the prompt it breaks down — expected for
 232-token prompts where nearly every token is evidence.
 
-Pooling helps where designed (+0.018 on rag_dev at keep 0.50, −0.005 on chat_dev).
+Pooling helps where designed (+0.020 on rag_dev at keep 0.50, −0.005 on chat_dev).
 Scaling the recent window with the budget is worth +0.081 at keep 0.25, confirming
 that a fixed `recent=32` was starving the scoring component.
 
@@ -297,26 +297,29 @@ sinks+recent below it.** At keep 0.25 the three configurations rank
 StreamingLLM 0.42208, recent=25%-of-budget 0.41932, significance 0.33863 — the
 first two are within noise of each other and both beat the third.
 
-### The comparison that matters: significance vs position, matched budget
+### WITHDRAWN — "significance vs position at matched budget", +0.15 to +0.20
 
-The invalidated run turned out to be a gift — its fallback selected `sinks +
-recent`, making it **exactly StreamingLLM at an identical budget and protocol**:
+A section here reported StreamingLLM at 0.47007 / 0.46839 / 0.13501 against
+significance at 0.65677 / 0.61401 / 0.33863, concluded a +0.15 to +0.20 advantage
+**at every budget**, and called it the result the experiment was built to obtain.
+It is withdrawn, and it contradicted the corrected section immediately above it.
 
-| keep | StreamingLLM | Significance | advantage |
+Those StreamingLLM numbers came from the *invalidated* prefill-bug run, whose
+fallback was described as "exactly StreamingLLM, produced by accident". It was
+not: the fallback kept positions 0–141 plus 200–231 and its forward pass was
+acausal, and the control did not respond to its own variable (731/752 replies
+identical across settings). A real positional control was then run.
+
+Against that real control the conclusion **reverses at the tightest budget**:
+
+| keep | StreamingLLM (real control) | Significance | advantage |
 |---:|---:|---:|---:|
-| 0.75 | 0.47007 | 0.65677 | **+0.18670** |
-| 0.50 | 0.46839 | 0.61401 | **+0.14562** |
-| 0.25 | 0.13501 | 0.33863 | **+0.20362** |
+| 0.75 | 0.47545 | 0.65677 | **+0.18132** |
+| 0.50 | 0.47682 | 0.61401 | **+0.13719** |
+| 0.25 | **0.42208** | 0.33863 | **−0.08345** |
 
-**Choosing *what* to keep by attention beats choosing *where* to keep by position,
-by 0.15–0.20 at every budget.** Both retain the sink; the positional rule throws
-out the evidence with the filler, the significance rule keeps the evidence. This
-is the result the experiment was built to obtain.
-
-(On chat_dev the comparison appears to favour StreamingLLM by 0.003–0.034. That is
-the scorer artefact above — more damage makes replies longer and the alignment
-heuristic rewards length. The chat_dev column carries no valid signal here.)
-
+So significance beats position at keep ≥ 0.5 and **loses to it at keep 0.25**.
+That crossover is the finding; "+0.15 to +0.20 at every budget" is not.
 ## Verdict
 
 **The selection mechanism is validated.** It beats positional eviction decisively,
@@ -344,14 +347,19 @@ their results live in **[docs/FINDINGS_KV_PROGRAM.md](../../docs/FINDINGS_KV_PRO
   alone for an un-chunked 128K prompt. Gated as a proven no-op first: max
   |Δlogit| 1.19e-04 at every position, argmax agreement 1.0000.
 - **Passkey retrieval** is measurable now, and the model is *good* at it — 1.00 at
-  every depth to 16K on a full cache.
+  every depth and every length to **32K** on a full cache
+  (`results/passkey_ceiling.json`). The old "16K" ceiling was `--cap-mib 6144`,
+  a default in our own harness, not the card.
 - **Query-aware scoring** (`score_with_query`) fixes the limitation this
   experiment could not see: prefill-time eviction scores each chunk against its
   own trailing rows, which are filler, so a needle earns no score before the
   question is asked. Making scoring query-aware moved 32K retrieval from
   **0.20 to 0.87** at keep 0.0625.
-- **64K retrieval works at a 32x compression ratio** (0.89 accuracy, budget 2048,
-  peak 1742 MiB). 128K is partial and depth-biased.
+- **Retrieval works at ~15x compression at both long lengths**, and what controls
+  it is the keep *fraction*, not the length: 6.5% keep gives **0.97 at 64K**
+  (B=4096, peak 2002 MiB) and **0.92 at 128K** (B=8192, peak 2521 MiB), while
+  1.6% keep gives 0.61 and 0.53. All 12 paired needles. No depth law is
+  established — the ordering at 128K/B=2048 does not replicate at 64K.
 
 The conclusion this README reaches — that eviction cannot be evaluated in the
 regime it was designed for — was correct when written and is no longer true.
@@ -378,12 +386,14 @@ regime it was designed for — was correct when written and is no longer true.
    at B=8192 the depth dependence disappears entirely (permutation p = 0.8879).
 6. ~~Does 128K work?~~ — **yes, at the budget that works everywhere else.** 0.92
    across depths at B=8192 (6.3% keep), peak 2521 MiB. Accuracy is flat in length
-   at constant keep fraction: 0.89 / 0.89 / 0.92 at 32K / 64K / 128K. What was
-   previously read as a 128K weakness was B=2048, which is 1.6% keep at that
-   length. FINDINGS §4c.
-7. **Is 6.3% keep a general operating point or a 128K coincidence?** A budget
-   ladder at 64K (B ∈ {1024, 2048, 4096} = 1.6 / 3.1 / 6.3% keep, 12 needles) is
-   the direct test. In flight.
+   at constant keep fraction: at **6.5% keep**, 0.97 at 64K against 0.92 at 128K,
+   both 12 paired needles. What was previously read as a 128K weakness was B=2048,
+   which is 1.6% keep at that length. FINDINGS §4c.
+7. ~~Is 6.5% keep a general operating point or a 128K coincidence?~~ — **general.**
+   The 64K ladder (B ∈ {1024, 2048, 4096} = 1.6 / 3.3 / 6.5% keep, 12 paired
+   needles) gives 0.61 / 0.81 / 0.97, with a within-needle trend of p = 0.0015 at
+   depth 0.1 and 13 discordant needles across depths moving one way with zero
+   reversals. `results/pk_64k_ladder.json`, FINDINGS §4c.
 8. **A quality reference above 32K.** The uncompressed control fits to 32K only
    (7,168 MiB of cache at 64K against 8,188 MiB total). int8 KV at 1.94× makes 64K
    reachable and mixed precision at 3.04× makes 128K reachable — §4d — so the

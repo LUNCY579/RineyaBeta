@@ -360,17 +360,17 @@ be regenerated.
 | off | 0.66939 | — | — |
 | 0.75 | 0.65677 | **−0.01262** | 711/752 (95%) |
 | 0.50 | 0.61401 | −0.05538 | 605/752 (80%) |
-| 0.50 + pooling | 0.63228 | −0.03711 | 630/752 (84%) |
+| 0.50 + pooling | 0.63371 | −0.03568 | 631/752 (84%) |
 | 0.25 | 0.33863 | −0.33076 | 159/752 (21%) |
 | 0.25, recent scaled | 0.41932 | −0.25007 | 172/752 (23%) |
 
 **A 1.33x cache reduction costs 0.013 and leaves 95% of replies byte-identical.
-A 2x reduction with pooling costs 0.037.** Below half the prompt it falls apart,
+A 2x reduction with pooling costs 0.036.** Below half the prompt it falls apart,
 which is unsurprising for 232-token prompts in which nearly every token is
 evidence.
 
 Two policy details earn their place. **Pooling helps where it was designed to**
-(+0.018 on rag_dev at keep 0.50) and slightly hurts on conversation (−0.005 on
+(+0.020 on rag_dev at keep 0.50) and slightly hurts on conversation (−0.005 on
 chat_dev) — evidence spans are worth keeping whole. **Scaling the recent window
 with the budget matters at aggressive settings**: at keep 0.25 it is worth
 +0.081 on rag_dev, because a fixed `recent=32` consumes almost the entire
@@ -417,32 +417,29 @@ sinks+recent below it.** At keep 0.25 the three configurations rank
 StreamingLLM 0.42208, recent=25%-of-budget 0.41932, significance 0.33863 — the
 first two are within noise of each other and both beat the third.
 
-### The comparison that matters: significance vs position, at matched budget
+### WITHDRAWN — "significance vs position at matched budget", +0.15 to +0.20
 
-The invalidated run turned out to be a gift. Because its fallback selected
-`sinks + recent`, it is exactly **StreamingLLM at an identical cache budget**,
-evaluated under an identical protocol. That is the baseline this method has to
-beat, and it was produced by accident:
+A section here reported StreamingLLM at 0.47007 / 0.46839 / 0.13501 against
+significance at 0.65677 / 0.61401 / 0.33863, concluded a +0.15 to +0.20 advantage
+**at every budget**, and called it the result the experiment was built to obtain.
+It is withdrawn, and it contradicted the corrected section immediately above it.
 
-| keep | StreamingLLM | Significance | advantage |
+Those StreamingLLM numbers came from the *invalidated* prefill-bug run, whose
+fallback was described as "exactly StreamingLLM, produced by accident". It was
+not: the fallback kept positions 0–141 plus 200–231 and its forward pass was
+acausal, and the control did not respond to its own variable (731/752 replies
+identical across settings). A real positional control was then run.
+
+Against that real control the conclusion **reverses at the tightest budget**:
+
+| keep | StreamingLLM (real control) | Significance | advantage |
 |---:|---:|---:|---:|
-| 0.75 | 0.47007 | 0.65677 | **+0.18670** |
-| 0.50 | 0.46839 | 0.61401 | **+0.14562** |
-| 0.25 | 0.13501 | 0.33863 | **+0.20362** |
+| 0.75 | 0.47545 | 0.65677 | **+0.18132** |
+| 0.50 | 0.47682 | 0.61401 | **+0.13719** |
+| 0.25 | **0.42208** | 0.33863 | **−0.08345** |
 
-**S5 confirmed against the window schedule.** At every budget, choosing *what* to
-keep by accumulated attention beats choosing *where* to keep by position, by
-0.15–0.20 quality. The idea works, and it works for the reason predicted in §1:
-the sink is retained either way, but a positional rule throws away the evidence
-along with the filler, while a significance rule keeps the evidence and throws
-away the filler.
-
-On chat_dev the same comparison appears to favour StreamingLLM by 0.003–0.034.
-That is the §8 artefact, not a real preference: StreamingLLM does more damage,
-damage makes replies longer, and chat_dev's alignment heuristic rewards length.
-The chat_dev column carries no valid signal about eviction and should not be read
-as one.
-
+So significance beats position at keep ≥ 0.5 and **loses to it at keep 0.25**.
+That crossover is the finding; "+0.15 to +0.20 at every budget" is not.
 ### Predictions, settled
 
 | | prediction | outcome |
@@ -451,7 +448,7 @@ as one.
 | **S2** | eviction without sink protection collapses the model | **REFUTED** — scores protect the sink unaided |
 | **S3** | decode improves in proportion to cache reduction | **largely refuted** — 16x cache buys 1.15x, or ~1.74x with `slack` (provisional, §9) |
 | **S4** | peak prefill memory is NOT improved | **CONFIRMED** — 1.00x |
-| **S5** | beats the window schedule at matched cache | **CONFIRMED** — +0.15 to +0.20 on rag_dev |
+| **S5** | beats the window schedule at matched cache | **CONFIRMED at keep ≥ 0.5, REFUTED at keep 0.25** — +0.18132 / +0.13719, but −0.08345 at keep 0.25 against the real control |
 
 ---
 
