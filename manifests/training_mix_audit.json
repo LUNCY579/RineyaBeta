@@ -1,0 +1,305 @@
+{
+  "tokenizer": "artifacts\\rineya-core-en32k-28L\\tokenizer.json",
+  "length_sample_rows": 3000,
+  "inventory": {
+    "v1 short-response combined": {
+      "path": "Rineya_Short_Response_Behavior_Corpus_v1.0/data/sft/rineya_short_response_combined_train.jsonl",
+      "role": "train",
+      "rows": 12000,
+      "chat_form": 12000,
+      "raw_form": 0,
+      "splits": {
+        "-": 12000
+      }
+    },
+    "v1 preservation slice": {
+      "path": "Rineya_Short_Response_Behavior_Corpus_v1.0/data/sft/rineya_short_response_preservation_slice.jsonl",
+      "role": "train",
+      "rows": 2000,
+      "chat_form": 2000,
+      "raw_form": 0,
+      "splits": {
+        "-": 2000
+      }
+    },
+    "v2 recommended combined 40k": {
+      "path": "Rineya_General_Reasoning_and_Natural_Communication_Corpus_v2.0/data/sft/rineya_v2_recommended_combined_40000.jsonl",
+      "role": "train",
+      "rows": 40000,
+      "chat_form": 40000,
+      "raw_form": 0,
+      "splits": {
+        "-": 40000
+      }
+    },
+    "v2 new-all": {
+      "path": "Rineya_General_Reasoning_and_Natural_Communication_Corpus_v2.0/data/sft/rineya_v2_new_all_train.jsonl",
+      "role": "train",
+      "rows": 32000,
+      "chat_form": 32000,
+      "raw_form": 0,
+      "splits": {
+        "-": 32000
+      }
+    },
+    "v2 carries v1 slice 8k": {
+      "path": "Rineya_General_Reasoning_and_Natural_Communication_Corpus_v2.0/data/sft/rineya_v1_preservation_slice_8000.jsonl",
+      "role": "train",
+      "rows": 8000,
+      "chat_form": 8000,
+      "raw_form": 0,
+      "splits": {
+        "-": 8000
+      }
+    },
+    "v3 recommended combined 124k": {
+      "path": "Rineya_General_Reasoning_and_Natural_Communication_Corpus_v3.0/data/sft/rineya_v3_recommended_combined_124000.jsonl",
+      "role": "train",
+      "rows": 124000,
+      "chat_form": 124000,
+      "raw_form": 0,
+      "splits": {
+        "-": 124000
+      }
+    },
+    "v3 new-all 110k": {
+      "path": "Rineya_General_Reasoning_and_Natural_Communication_Corpus_v3.0/data/sft/rineya_v3_new_all_train_110000.jsonl",
+      "role": "train",
+      "rows": 110000,
+      "chat_form": 110000,
+      "raw_form": 0,
+      "splits": {
+        "-": 110000
+      }
+    },
+    "v3 carries v1+v2 slice 14k": {
+      "path": "Rineya_General_Reasoning_and_Natural_Communication_Corpus_v3.0/data/sft/rineya_v1_v2_preservation_slice_14000.jsonl",
+      "role": "train",
+      "rows": 14000,
+      "chat_form": 14000,
+      "raw_form": 0,
+      "splits": {
+        "-": 14000
+      }
+    },
+    "RAG v3 train 4,410": {
+      "path": "Aegis_RAG_v3_train_4410/rag_v3_train.sft.jsonl",
+      "role": "train",
+      "rows": 4410,
+      "chat_form": 4410,
+      "raw_form": 0,
+      "splits": {
+        "-": 4410
+      }
+    },
+    "LCR-SFT v1 (all splits)": {
+      "path": "Rineya_LCR_SFT_v1/Rineya_LCR_SFT_v1/data/lcr_sft_v1.jsonl",
+      "role": "train",
+      "rows": 8000,
+      "chat_form": 8000,
+      "raw_form": 0,
+      "splits": {
+        "train": 7200,
+        "dev": 800
+      }
+    },
+    "Puzzle-51k train": {
+      "path": "Rineya-Puzzle-Reasoning-51k/data/train.jsonl",
+      "role": "train",
+      "rows": 40800,
+      "chat_form": 0,
+      "raw_form": 40800,
+      "splits": {
+        "train": 40800
+      }
+    },
+    "Puzzle-51k validation": {
+      "path": "Rineya-Puzzle-Reasoning-51k/data/validation.jsonl",
+      "role": "eval",
+      "rows": 4080,
+      "chat_form": 0,
+      "raw_form": 4080,
+      "splits": {
+        "validation": 4080
+      }
+    },
+    "Puzzle-51k test": {
+      "path": "Rineya-Puzzle-Reasoning-51k/data/test.jsonl",
+      "role": "eval",
+      "rows": 4080,
+      "chat_form": 0,
+      "raw_form": 4080,
+      "splits": {
+        "test": 4080
+      }
+    },
+    "Puzzle-51k challenge": {
+      "path": "Rineya-Puzzle-Reasoning-51k/data/challenge.jsonl",
+      "role": "eval",
+      "rows": 2040,
+      "chat_form": 0,
+      "raw_form": 2040,
+      "splits": {
+        "challenge": 2040
+      }
+    },
+    "LongContextDemo (FROZEN EVAL)": {
+      "path": "Rineya_Long_Context_Demo_v1/data/rineya_long_context_demo_full.jsonl",
+      "role": "eval",
+      "rows": 256,
+      "chat_form": 256,
+      "raw_form": 0,
+      "splits": {
+        "showcase": 64,
+        "stability_test": 192
+      }
+    }
+  },
+  "chain_overlap_prompt_hashes": {
+    "v1 short-response combined & v2 recommended combined 40k": 7872,
+    "v1 short-response combined & v3 recommended combined 124k": 3955,
+    "v2 recommended combined 40k & v3 recommended combined 124k": 12647,
+    "v2 new-all & v3 recommended combined 124k": 10000,
+    "v3 carries v1+v2 slice 14k & v1 short-response combined": 3955,
+    "v3 carries v1+v2 slice 14k & v2 recommended combined 40k": 12647,
+    "v2 carries v1 slice 8k & v1 short-response combined": 7872
+  },
+  "contamination": {},
+  "sequence_budget": {
+    "v1 short-response combined": {
+      "prompt_p50": 61,
+      "prompt_p99": 164,
+      "prompt_max": 179,
+      "target_p50": 8,
+      "target_p99": 15,
+      "total_p99": 174,
+      "total_max": 194
+    },
+    "v1 preservation slice": {
+      "prompt_p50": 152,
+      "prompt_p99": 177,
+      "prompt_max": 180,
+      "target_p50": 9,
+      "target_p99": 17,
+      "total_p99": 189,
+      "total_max": 198
+    },
+    "v2 recommended combined 40k": {
+      "prompt_p50": 60,
+      "prompt_p99": 155,
+      "prompt_max": 179,
+      "target_p50": 6,
+      "target_p99": 15,
+      "total_p99": 164,
+      "total_max": 197
+    },
+    "v2 new-all": {
+      "prompt_p50": 60,
+      "prompt_p99": 119,
+      "prompt_max": 130,
+      "target_p50": 6,
+      "target_p99": 15,
+      "total_p99": 126,
+      "total_max": 138
+    },
+    "v2 carries v1 slice 8k": {
+      "prompt_p50": 60,
+      "prompt_p99": 162,
+      "prompt_max": 180,
+      "target_p50": 8,
+      "target_p99": 15,
+      "total_p99": 173,
+      "total_max": 198
+    },
+    "v3 recommended combined 124k": {
+      "prompt_p50": 89,
+      "prompt_p99": 159,
+      "prompt_max": 197,
+      "target_p50": 7,
+      "target_p99": 16,
+      "total_p99": 165,
+      "total_max": 200
+    },
+    "v3 new-all 110k": {
+      "prompt_p50": 92,
+      "prompt_p99": 158,
+      "prompt_max": 197,
+      "target_p50": 7,
+      "target_p99": 16,
+      "total_p99": 165,
+      "total_max": 200
+    },
+    "v3 carries v1+v2 slice 14k": {
+      "prompt_p50": 60,
+      "prompt_p99": 146,
+      "prompt_max": 160,
+      "target_p50": 6,
+      "target_p99": 15,
+      "total_p99": 154,
+      "total_max": 167
+    },
+    "RAG v3 train 4,410": {
+      "prompt_p50": 224,
+      "prompt_p99": 305,
+      "prompt_max": 313,
+      "target_p50": 8,
+      "target_p99": 14,
+      "total_p99": 311,
+      "total_max": 316
+    },
+    "LCR-SFT v1 (all splits)": {
+      "prompt_p50": 2384,
+      "prompt_p99": 3749,
+      "prompt_max": 3923,
+      "target_p50": 28,
+      "target_p99": 44,
+      "total_p99": 3776,
+      "total_max": 3946
+    },
+    "Puzzle-51k train": {
+      "prompt_p50": 105,
+      "prompt_p99": 243,
+      "prompt_max": 310,
+      "target_p50": 3,
+      "target_p99": 10,
+      "total_p99": 246,
+      "total_max": 313
+    },
+    "Puzzle-51k validation": {
+      "prompt_p50": 106,
+      "prompt_p99": 242,
+      "prompt_max": 288,
+      "target_p50": 3,
+      "target_p99": 10,
+      "total_p99": 245,
+      "total_max": 292
+    },
+    "Puzzle-51k test": {
+      "prompt_p50": 107,
+      "prompt_p99": 247,
+      "prompt_max": 292,
+      "target_p50": 3,
+      "target_p99": 10,
+      "total_p99": 250,
+      "total_max": 295
+    },
+    "Puzzle-51k challenge": {
+      "prompt_p50": 140,
+      "prompt_p99": 263,
+      "prompt_max": 307,
+      "target_p50": 3,
+      "target_p99": 12,
+      "total_p99": 266,
+      "total_max": 310
+    },
+    "LongContextDemo (FROZEN EVAL)": {
+      "prompt_p50": 1399,
+      "prompt_p99": 1624,
+      "prompt_max": 1634,
+      "target_p50": 3,
+      "target_p99": 11,
+      "total_p99": 1625,
+      "total_max": 1636
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "baseline": "experiments/kv_significance/results/off__rag_dev",
+  "counts": {
+    "frac0.75__rag_dev": {
+      "identical": 711,
+      "compared": 752
+    },
+    "frac0.5-pool7-fixed__rag_dev": {
+      "identical": 631,
+      "compared": 752
+    },
+    "frac0.5__rag_dev": {
+      "identical": 605,
+      "compared": 752
+    },
+    "frac0.25-rf0.25__rag_dev": {
+      "identical": 172,
+      "compared": 752
+    },
+    "frac0.25__rag_dev": {
+      "identical": 159,
+      "compared": 752
+    },
+    "frac0.75-rf1.0__rag_dev": {
+      "identical": 456,
+      "compared": 752
+    },
+    "frac0.5-rf1.0__rag_dev": {
+      "identical": 412,
+      "compared": 752
+    },
+    "frac0.25-rf1.0__rag_dev": {
+      "identical": 334,
+      "compared": 752
+    }
+  }
+}

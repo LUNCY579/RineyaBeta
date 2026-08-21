@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 860" width="1180" height="860" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <style>
+    .ttl   { font-size: 25px; font-weight: 700; fill: #10151c; }
+    .sub   { font-size: 14.5px; fill: #4a5568; }
+    .ph    { font-size: 18px; font-weight: 700; }
+    .lbl   { font-size: 13px; fill: #1a202c; }
+    .sm    { font-size: 11.5px; fill: #5a6472; }
+    .mono  { font-family: Consolas, "SF Mono", Menlo, monospace; font-size: 12.5px; fill: #10151c; }
+    .monos { font-family: Consolas, "SF Mono", Menlo, monospace; font-size: 11px; fill: #4a5568; }
+    .cachetag { font-size: 11px; font-weight: 700; fill: #fff; letter-spacing: .6px; }
+    .flow  { stroke: #7c8798; stroke-width: 1.7; fill: none; marker-end: url(#ah); }
+    .flowc { stroke: #c2410c; stroke-width: 2.4; fill: none; marker-end: url(#ahc); }
+    .drop  { stroke: #a0aab8; stroke-width: 1.6; fill: none; stroke-dasharray: 5 4; marker-end: url(#ahg); }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+      <path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#7c8798"/></marker>
+    <marker id="ahc" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+      <path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#c2410c"/></marker>
+    <marker id="ahg" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+      <path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#a0aab8"/></marker>
+  </defs>
+
+  <rect width="1180" height="860" fill="#fbfcfd"/>
+  <text class="ttl" x="34" y="44">What actually lands in the KV cache</text>
+  <text class="sub" x="34" y="70">Qwen3-0.6B grouped-query attention vs. multi-head latent attention — one layer, one token</text>
+
+  <!-- ============================= LEFT: Qwen3 GQA ============================= -->
+  <rect x="30" y="94" width="540" height="620" rx="12" fill="#f2f6fc" stroke="#c7d7ee" stroke-width="1.5"/>
+  <text class="ph" x="52" y="126" fill="#1c4e8a">Qwen3-0.6B — GQA (16Q / 8KV)</text>
+  <text class="sm" x="52" y="147">what the checkpoint does today</text>
+
+  <rect x="228" y="165" width="146" height="34" rx="7" fill="#fff" stroke="#8fa9cc" stroke-width="1.5"/>
+  <text class="lbl" x="301" y="187" text-anchor="middle">hidden  h  (1024)</text>
+
+  <path class="flow" d="M262,199 L155,232"/>
+  <path class="flow" d="M301,199 L301,232"/>
+  <path class="flow" d="M340,199 L447,232"/>
+
+  <rect x="86" y="234" width="138" height="32" rx="6" fill="#dce9fa" stroke="#8fa9cc"/>
+  <text class="mono" x="155" y="255" text-anchor="middle">W_Q  1024→2048</text>
+  <rect x="232" y="234" width="138" height="32" rx="6" fill="#dce9fa" stroke="#8fa9cc"/>
+  <text class="mono" x="301" y="255" text-anchor="middle">W_K  1024→1024</text>
+  <rect x="378" y="234" width="138" height="32" rx="6" fill="#dce9fa" stroke="#8fa9cc"/>
+  <text class="mono" x="447" y="255" text-anchor="middle">W_V  1024→1024</text>
+
+  <path class="flow" d="M155,266 L155,296"/>
+  <path class="flow" d="M301,266 L301,296"/>
+  <path class="flow" d="M447,266 L447,340"/>
+
+  <rect x="106" y="298" width="98" height="28" rx="6" fill="#fde9d4" stroke="#e0a068"/>
+  <text class="mono" x="155" y="317" text-anchor="middle">RoPE</text>
+  <rect x="252" y="298" width="98" height="28" rx="6" fill="#fde9d4" stroke="#e0a068"/>
+  <text class="mono" x="301" y="317" text-anchor="middle">RoPE</text>
+
+  <path class="flow" d="M155,326 L155,392"/>
+  <path class="flowc" d="M301,326 L301,340"/>
+
+  <!-- cached K and V -->
+  <rect x="238" y="342" width="272" height="74" rx="9" fill="#fff2e8" stroke="#c2410c" stroke-width="2.2"/>
+  <rect x="238" y="342" width="272" height="21" rx="9" fill="#c2410c"/>
+  <rect x="238" y="352" width="272" height="11" fill="#c2410c"/>
+  <text class="cachetag" x="374" y="357" text-anchor="middle">CACHED EVERY TOKEN</text>
+  <text class="mono" x="374" y="384" text-anchor="middle">K  8 heads × 128 = 1024</text>
+  <text class="mono" x="374" y="404" text-anchor="middle">V  8 heads × 128 = 1024</text>
+
+  <path class="flow" d="M374,416 L374,446"/>
+  <path class="flow" d="M155,392 L155,446"/>
+
+  <rect x="106" y="448" width="404" height="52" rx="8" fill="#fff" stroke="#8fa9cc" stroke-width="1.5"/>
+  <text class="lbl" x="308" y="470" text-anchor="middle">attention — each KV head serves 2 query heads</text>
+  <text class="sm" x="308" y="490" text-anchor="middle">K,V expanded 8→16 (repeat_kv) before the kernel</text>
+
+  <rect x="86" y="524" width="440" height="76" rx="9" fill="#fdeaea" stroke="#d98b8b" stroke-width="1.5"/>
+  <text class="lbl" x="306" y="548" text-anchor="middle" font-weight="700">cache cost: 2048 dims/token/layer</text>
+  <text class="mono" x="306" y="571" text-anchor="middle">2 × 28 layers × 8 heads × 128 × 2 B = 112 KiB/token</text>
+  <text class="sm" x="306" y="590" text-anchor="middle">128K context → 14.0 GiB — does not fit in 8 GiB</text>
+
+  <text class="sm" x="52" y="631">To shrink this you must remove KV <tspan font-weight="700">heads</tspan> — the only free dial.</text>
+  <text class="sm" x="52" y="651">Every head removed is capacity removed: at 1KV all 16 query</text>
+  <text class="sm" x="52" y="671">heads read one shared key subspace. Requires healing.</text>
+
+  <!-- ============================= RIGHT: MLA ============================= -->
+  <rect x="610" y="94" width="540" height="620" rx="12" fill="#eef8f4" stroke="#a9d8c6" stroke-width="1.5"/>
+  <text class="ph" x="632" y="126" fill="#186a4e">MLA — multi-head latent attention</text>
+  <text class="sm" x="632" y="147">DeepSeek-V2/V3 — not implemented here; projected</text>
+
+  <rect x="806" y="165" width="146" height="34" rx="7" fill="#fff" stroke="#7fc0a5" stroke-width="1.5"/>
+  <text class="lbl" x="879" y="187" text-anchor="middle">hidden  h  (1024)</text>
+
+  <path class="flow" d="M840,199 L742,232"/>
+  <path class="flow" d="M920,199 L1018,232"/>
+
+  <rect x="664" y="234" width="156" height="32" rx="6" fill="#d6efe4" stroke="#7fc0a5"/>
+  <text class="mono" x="742" y="255" text-anchor="middle">W_DKV 1024→256</text>
+  <rect x="940" y="234" width="156" height="32" rx="6" fill="#d6efe4" stroke="#7fc0a5"/>
+  <text class="mono" x="1018" y="255" text-anchor="middle">W_KR 1024→64</text>
+
+  <path class="flowc" d="M742,266 L742,300"/>
+  <path class="flow" d="M1018,266 L1018,290"/>
+  <rect x="969" y="292" width="98" height="28" rx="6" fill="#fde9d4" stroke="#e0a068"/>
+  <text class="mono" x="1018" y="311" text-anchor="middle">RoPE</text>
+  <path class="flowc" d="M1018,320 L1018,342"/>
+
+  <!-- cached latent -->
+  <rect x="664" y="302" width="182" height="70" rx="9" fill="#fff2e8" stroke="#c2410c" stroke-width="2.2"/>
+  <rect x="664" y="302" width="182" height="21" rx="9" fill="#c2410c"/>
+  <rect x="664" y="312" width="182" height="11" fill="#c2410c"/>
+  <text class="cachetag" x="755" y="317" text-anchor="middle">CACHED</text>
+  <text class="mono" x="755" y="342" text-anchor="middle">latent c (256)</text>
+  <text class="monos" x="755" y="361" text-anchor="middle">shared by all 16 heads</text>
+
+  <rect x="928" y="344" width="182" height="56" rx="9" fill="#fff2e8" stroke="#c2410c" stroke-width="2.2"/>
+  <rect x="928" y="344" width="182" height="21" rx="9" fill="#c2410c"/>
+  <rect x="928" y="354" width="182" height="11" fill="#c2410c"/>
+  <text class="cachetag" x="1019" y="359" text-anchor="middle">CACHED</text>
+  <text class="mono" x="1019" y="384" text-anchor="middle">k_R (64), shared</text>
+
+  <!-- never materialised -->
+  <path class="drop" d="M755,372 L755,410"/>
+  <rect x="640" y="412" width="230" height="62" rx="8" fill="#f4f6f8" stroke="#b9c2cd" stroke-dasharray="5 4"/>
+  <text class="lbl" x="755" y="433" text-anchor="middle" fill="#6b7684">K, V per head</text>
+  <text class="sm" x="755" y="452" text-anchor="middle">never materialised at</text>
+  <text class="sm" x="755" y="467" text-anchor="middle">inference — see below</text>
+
+  <path class="flow" d="M755,474 L755,500"/>
+  <path class="flow" d="M1019,400 L1019,500"/>
+
+  <rect x="640" y="502" width="470" height="46" rx="8" fill="#fff" stroke="#7fc0a5" stroke-width="1.5"/>
+  <text class="lbl" x="875" y="530" text-anchor="middle">attention over [compressed ‖ RoPE] keys</text>
+
+  <rect x="632" y="566" width="496" height="90" rx="9" fill="#e4f4ec" stroke="#7fc0a5" stroke-width="1.5"/>
+  <text class="lbl" x="880" y="590" text-anchor="middle" font-weight="700">cache cost: 256 + 64 = 320 dims/token/layer</text>
+  <text class="mono" x="880" y="613" text-anchor="middle">28 layers × 320 × 2 B = 17.5 KiB/token</text>
+  <text class="sm" x="880" y="632" text-anchor="middle">6.4× smaller than GQA-8KV · 128K context → 2.2 GiB</text>
+  <text class="sm" x="880" y="649" text-anchor="middle">all 16 heads keep distinct behaviour</text>
+
+  <text class="sm" x="632" y="682">Capacity is reduced by <tspan font-weight="700">rank</tspan>, not by head count. Nothing is</text>
+  <text class="sm" x="632" y="702">shared away — every head still has its own up-projection.</text>
+
+  <!-- ============================= absorption box ============================= -->
+  <rect x="30" y="732" width="1120" height="104" rx="11" fill="#fffbe9" stroke="#e0c060" stroke-width="1.6"/>
+  <text class="lbl" x="52" y="756" font-weight="700">Why K and V never need to exist — and why RoPE has to be split off</text>
+  <text class="mono" x="52" y="781">q·k  =  (W_UQ c_t)ᵀ (W_UK c_s)  =  c_tᵀ (W_UQᵀ W_UK) c_s   ← one position-independent matrix, precomputable</text>
+  <text class="mono" x="52" y="802">o    =  Σ a_s W_UV c_s  =  W_UV (Σ a_s c_s)               ← so W_O·W_UV folds in too; V never materialised</text>
+  <text class="mono" x="52" y="823">with RoPE:  c_tᵀ W_UQᵀ <tspan fill="#c2410c" font-weight="700">R(t−s)</tspan> W_UK c_s  — R depends on the pair (t,s), so the product cannot be precomputed → decoupled k_R</text>
+</svg>

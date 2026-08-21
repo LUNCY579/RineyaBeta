@@ -1,0 +1,51 @@
+# Smoke config: exercises the whole pipeline fast enough to run on CPU.
+# Purpose is verifying determinism, resume and checkpoint machinery -- not
+# producing a usable adapter. Used by scripts/verify/verify_resume.py.
+
+seed: 20260819
+device: cpu
+
+run:
+  dir: artifacts/heal_runs/smoke
+  save_every_steps: 1        # checkpoint every step so the resume test is tight
+  log_every_steps: 1
+  keep_last_checkpoints: 8
+
+model:
+  path: artifacts/rineya-core-en32k-28L
+  dtype: float32
+  attn_implementation: eager
+
+data:
+  mix: artifacts/heal_mixes/SMOKE/heal_mix_smoke.jsonl
+  max_len: 128
+  megabatch_rows: 64
+
+lora:
+  r: 8
+  alpha: 16
+  dropout: 0.0
+  target_modules: [q_proj, v_proj]
+
+train:
+  epochs: 1
+  lr: 1.0e-4
+  schedule: cosine
+  min_lr_ratio: 0.0
+  warmup_steps: 2
+  weight_decay: 0.0
+  grad_clip: 1.0
+  grad_accum: 2
+  gradient_checkpointing: false
+
+memory:
+  cap_mib: null              # no CUDA in the smoke path
+  margin_mib: 128
+  max_tokens_per_microbatch: 512
+  max_rows_per_microbatch: 4
+
+determinism:
+  strict: true
+
+resume:
+  allow_env_drift: false

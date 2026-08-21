@@ -1,0 +1,277 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 512,
+  "trials": 6,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 2048,
+      "depth": 0.1,
+      "acc": 0.16666666666666666,
+      "peak_mib": 1742.9,
+      "yarn": 4.0,
+      "trials_ok": 6,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "7552. Remember it.\n\nThe grass is",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "8567. Remember it.\n\nThe grass is",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "99999999999",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "4264. Remember it.\n\nThe grass is",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "9010. Remember it. 90",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 2048,
+      "depth": 0.5,
+      "acc": 0.5,
+      "peak_mib": 1742.9,
+      "yarn": 4.0,
+      "trials_ok": 6,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526.\n\nThe grass is green.",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "856. \n\nThe grass is green. The",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "99999999999",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "4264. Remember it. 42",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it. 9",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 2048,
+      "depth": 0.9,
+      "acc": 0.8333333333333334,
+      "peak_mib": 1742.9,
+      "yarn": 4.0,
+      "trials_ok": 6,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526.\n\n**Final Answer**\nThe",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99999999999",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "42649. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "901901. \n\nSo, the",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 8192,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 2521.3,
+      "yarn": 4.0,
+      "trials_ok": 6,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember it. 7",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember it. 8",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. Remember it. 4",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "901901. Remember it.",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 8192,
+      "depth": 0.5,
+      "acc": 0.8333333333333334,
+      "peak_mib": 2521.3,
+      "yarn": 4.0,
+      "trials_ok": 6,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember it. 7",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember it. 8",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99999999999",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "42649. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it. 9",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 8192,
+      "depth": 0.9,
+      "acc": 0.8333333333333334,
+      "peak_mib": 2521.3,
+      "yarn": 4.0,
+      "trials_ok": 6,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526.\n\n**Final Answer**\nThe",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667.\n\n**Final Answer**\nThe",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99999999999",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "42649. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365.\n\n**Final Answer**\nThe",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. \n\nSo, the answer",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}

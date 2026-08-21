@@ -6,9 +6,23 @@ eventually improving, reasoning and evidence-grounded retrieval.
 Every number below is measured on this checkpoint and this corpus, not taken
 from a paper. Reproduce with `scripts/measure/` and `scripts/trim/` (§9).
 
-**Status (2026-08-19):** rung R2 is built and verified — **474,021,888 params,
-−20.47%, bitwise-equivalent logits, zero pre-heal damage** (§11). R3 onward is
-blocked on Phase 0 (a CUDA torch build).
+**Status (2026-08-19):**
+- Rung **R2 built and verified** — 474,021,888 params, −20.47%, bitwise-equivalent
+  logits, zero pre-heal damage (§11).
+- **Phase 0 closed.** Project `.venv` with torch 2.13.0+cu130; CUDA live (§14.1).
+- Healing harness validated on the real card; GPU resume proven bit-exact (§14.3).
+- **Gate baselines measured (§16).** Against stock Qwen3-0.6B on identical cases:
+  the trim is **free on chat DEV** (paired delta +0.0002, CI spans zero) and costs
+  **exactly 9 abstentions in the RAG `conflict` category** (paired delta −0.0127,
+  CI excludes zero). 11 of 16 RAG categories are bit-identical.
+- **B0's success criterion is now pre-declared:** restore `conflict` abstention to
+  ≥93.1% while chat contract fulfilment holds at 1.0000 (§16.4).
+- **B0 is running** on the third configuration, the first measured to an actual
+  plateau: 4×32, peak 4,330 MiB of a 5,120 cap, flat for 100 steps (§17.1).
+- **§15.4 and §15.5 are retracted** — both concluded steady state from 8–12 step
+  samples. The corrections are in place and the error is kept on the record.
+- **Open decision:** B2/B3 at 4k context cannot be both bit-exact and fit on 8 GB.
+  Four quantified options in §15.6.
 
 ---
 
@@ -57,10 +71,11 @@ Two defects in the stock checkpoint, both free to fix:
 
 | | |
 |---|---|
-| GPU | **NVIDIA RTX 4070 Laptop, 8,188 MiB**, driver CUDA 13.3 |
+| GPU | **NVIDIA RTX 4070 Laptop, 8,187 MiB**, capability 8.9, driver CUDA 13.3 |
 | System RAM / CPU | 15.2 GB / Ryzen 9 7940HX |
-| Installed torch | **`2.13.0+cpu` — CUDA unavailable** |
-| Missing | `bitsandbytes`, `datasets`, `trl` |
+| torch, as first found | `2.13.0+cpu` — CUDA unavailable |
+| torch, now | **`2.13.0+cu130` in `.venv/`** — resolved in Phase 0 (§14.1) |
+| Desktop VRAM use | observed 360–4,800 MiB, fluctuating — the reason for a hard cap |
 
 > **This supersedes `rineya_state_sufficiency_lab/docs/READINESS_ASSESSMENT.md`
 > §7c for this host.** That section concluded "no GPU is available, so the
@@ -589,3 +604,719 @@ bitwise-equivalent on unchanged tokenizations.** It is not yet "as good on DEV".
 on R2 rather than inherited from stock, per §5 Phase 3. It is essentially
 unchanged: most prunable `[25, 26, 24, 23, 13, 12, …]`, best 2-block `25..26` at
 d=0.1203 (stock: 0.1198). **R3 target confirmed: delete layers 25 and 26.**
+
+---
+
+## 12. Healing-corpus audit (2026-08-19)
+
+`scripts/data/audit_training_mix.py` → `manifests/training_mix_audit.json`.
+Lengths measured with the **R2 32k tokenizer**, since that is what will train.
+
+### 12.1 Inventory
+
+| Corpus | Rows | Form | Splits | Role |
+|---|---:|---|---|---|
+| v1 short-response combined | 12,000 | chat | — | superseded, see 12.2 |
+| v2 recommended combined | 40,000 | chat | — | superseded, see 12.2 |
+| **v3 recommended combined** | **124,000** | chat | — | **chat/reasoning half** |
+| **RAG v3 train** | **4,410** | chat | — | **grounding half** |
+| **Puzzle-51k train** | **40,800** | **raw** | train | **needs conversion** |
+| Puzzle-51k validation / test / challenge | 4,080 / 4,080 / 2,040 | raw | held out | eval |
+| **LCR-SFT v1** | 8,000 | chat | **train 7,200 / dev 800** | **long-context, see 12.4** |
+| **LongContextDemo v1** | **256** | chat | showcase 64 / stability 192 | **FROZEN EVAL — never train** |
+
+Puzzle-51k is balanced at 15 families × 2,720. `Rineya_Long_Context_Demo_v1`'s own
+card lists "training on the exact suite and then reporting test performance" as
+out of scope; it is the long-context gate, not training data.
+
+### 12.2 The v1→v3 chain double-counts, as suspected
+
+Overlap by normalized prompt hash — measured, not read off the READMEs:
+
+| Pair | Shared prompts |
+|---|---:|
+| v2 carries-v1-slice ∩ v1 combined | 7,872 (99.9% of the slice) |
+| v2 combined ∩ v1 combined | 7,872 |
+| v3 carries-v1+v2-slice ∩ v2 combined | 12,647 (90.6% of the slice) |
+| v3 combined ∩ v2 combined | 12,647 |
+| v3 combined ∩ v1 combined | 3,955 |
+
+Concatenating v1 + v2 + v3 gives 176,000 rows containing **~24,474 duplicate
+prompt pairs**, and the duplication lands on the *oldest* rows — the v1
+short-response set, which is the most brevity-biased material in the collection.
+Naive concatenation therefore over-weights terseness in exactly the run meant to
+add reasoning breadth.
+
+> **Use `rineya_v3_recommended_combined_124000.jsonl` alone for the chat half.**
+> It already carries the intended 14,000-row preservation slice. The v3 README
+> already says not to append v1 or v2 again; this measurement confirms it.
+
+### 12.3 Contamination: clean
+
+No training corpus shares a normalized prompt with any evaluation set. Both
+claims that mattered check out: LCR-SFT (`LCR-*`) is disjoint from
+LongContextDemo (`RLC-*`), and Puzzle-51k train is disjoint from its own
+validation, test and challenge splits.
+
+### 12.4 Sequence budget — LCR-SFT dominates the epoch
+
+| Corpus | Rows | Mean tokens | Max | Epoch tokens | % rows | % tokens |
+|---|---:|---:|---:|---:|---:|---:|
+| v3 combined 124k | 124,000 | 99.4 | 204 | 12.32 M | 70.3% | 33.8% |
+| Puzzle-51k `short_sft` | 40,800 | 111.6 | 313 | 4.55 M | 23.1% | 12.5% |
+| RAG v3 | 4,410 | 224.9 | 316 | 0.99 M | 2.5% | 2.7% |
+| **LCR-SFT train** | **7,200** | **2,576.7** | **3,946** | **18.55 M** | **4.1%** | **50.9%** |
+
+**LCR-SFT is 4% of the rows and 51% of the cost.** Two consequences:
+
+1. **Length-grouped batching is mandatory.** One uniform `max_length=4096` over
+   the blended mix yields **5.0% efficiency — a 19.8× compute waste**, because
+   99-token chat rows get padded to 4,096. Use `group_by_length=True`, or train
+   long context as its own phase.
+2. **Its targets break the brevity contract.** LCR-SFT targets are p50 **28** /
+   p99 **44** tokens against the Rineya 24-proxy-token limit. That is deliberate
+   — LCR is correctness-first and explicitly does not score length — but blending
+   it at full weight will lengthen the model's answers everywhere.
+
+### 12.5 Puzzle-51k needs a contract decision before conversion
+
+It ships raw, with `prompt`, `reasoning_steps`, `reasoning_summary`,
+`compact_state`, `final_answer`. Two conversions are demonstrated in `examples/`:
+
+| Conversion | Target | Mean tokens | Epoch tokens | Contract |
+|---|---|---:|---:|---|
+| `short_sft` | `"Orange."` | 111.6 | 4.55 M | **compatible** |
+| `think_sft` | `<think>…</think>` + answer | 211.0 | 8.61 M | **conflicts** |
+
+`think_sft` collides with three established decisions at once: the no-CoT-in-
+targets rule, the 24-token target limit, and `enable_thinking=false` pinned
+across the whole eval harness. Adopting it means re-baselining every evaluation.
+
+> **Use `short_sft` for healing.** Chain-of-thought supervision is a separate
+> research question, not a variable to change during a compression heal.
+
+Separately: `compact_state` + `reasoning_steps` is precisely the `(problem, state)
+→ transition` representation the state-sufficiency lab's SPLIT arm consumes.
+Puzzle-51k is a better-matched source for that experiment than for this one.
+
+### 12.6 R2 unlocked long-context training on this card
+
+Logits tensor at batch 1, fp32 cross-entropy:
+
+| Sequence | Stock vocab | R2 vocab |
+|---:|---:|---:|
+| 384 | 0.47 GB | 0.10 GB |
+| **4,096** | **4.98 GB → OOM on 8 GB** | **1.07 GB → fits** |
+
+At the stock 151,936-token vocabulary the logits tensor alone would exhaust the
+card before any weights, gradients or activations were counted. The vocabulary
+trim was justified on parameters and throughput; making 4k-context training
+feasible at all on this hardware was not a planned benefit.
+
+### 12.7 Recommended staging
+
+One variable per run, in the repository's existing ablation style. `max_len 384`
+covers B0 and B1 exactly — the same budget the harness is already configured for.
+
+| Run | Mix | Rows | Tokens | max_len | Question |
+|---|---|---:|---:|---:|---|
+| **B0** | v3 124k + RAG 4,410 | 128,410 | 13.3 M | 384 | Does R2 train as well as stock did? *Control.* |
+| **B1** | B0 + Puzzle `short_sft` | 169,210 | 17.9 M | 384 | What does puzzle reasoning add? |
+| **B2** | B0 + LCR-SFT, length-grouped | 135,610 | 31.9 M | 4,096 | What does long context add, and what does it cost brevity? |
+| **B3** | everything | 176,410 | 36.4 M | 4,096 | Interaction. Only if B1 and B2 both pass. |
+
+Gates per run: C5 (chat DEV), C6 (RAG per-category incl. abstain precision), C7
+(degeneration). B2 and B3 add the LCR-SFT 800-row dev split, with
+LongContextDemo's 256 rows held frozen for the final report only.
+
+DPO stays untouched. The v1/v2/v3 preference sets (12k/16k) are explicitly
+post-SFT material in their own cards, and no SFT checkpoint has been accepted yet.
+
+---
+
+## 13. Healing harness (2026-08-19)
+
+Built to a stricter contract than "it trains": **an interrupted run must produce
+byte-identical weights to an uninterrupted one, and must not be able to OOM.**
+
+### 13.1 The one tension, resolved explicitly
+
+Bit-exact results and "recover from OOM by shrinking the batch" cannot both hold.
+Shrinking changes the computation, so a recovered run is a *different* run wearing
+the same checkpoint's name. The harness therefore does not recover from OOM. It
+makes OOM structurally unreachable instead:
+
+1. `memory.apply_cap` installs a hard allocator ceiling via
+   `set_per_process_memory_fraction`. The process cannot exceed it even on an idle
+   card, so behaviour does not depend on what else is running — and a run cannot
+   starve the desktop.
+2. `memory.probe` takes **the widest micro-batch the plan will ever produce** and
+   runs a real forward and backward at exactly that shape, under the cap, before
+   step 0. Peak allocation is measured, not estimated. Since that micro-batch
+   bounds every other, a passing probe means no later step allocates more.
+3. A budget that does not fit aborts in seconds with the exact
+   `max_tokens_per_microbatch` to use instead — not at hour six.
+4. If OOM happens anyway (another process took VRAM, fragmentation), it is caught,
+   state is checkpointed, and the process exits 2 with a diagnosis. Resuming
+   replays that step bit-exactly.
+
+> Changing the memory budget changes the plan, which starts a **new run**, not a
+> resume. The harness enforces this by hash rather than trusting the operator.
+
+### 13.2 What makes it deterministic
+
+| Concern | Mechanism |
+|---|---|
+| Kernel nondeterminism | `use_deterministic_algorithms(True)` — raises rather than warns |
+| Attention backward | flash and mem-efficient SDPA disabled; `eager`/`math` only |
+| cuBLAS reductions | `CUBLAS_WORKSPACE_CONFIG=:4096:8`, **checked at startup** and refused if absent (it cannot be fixed after CUDA initialises) |
+| TF32 / reduced-precision reductions | disabled |
+| Data order | a plan that is a pure function of (mix, seed, epoch, budgets) — regenerated on resume and hash-compared, never trusted from disk |
+| Learning rate | a pure function of `global_step`, so there is no scheduler state to drift |
+| Loss normalisation | summed token loss ÷ the step's exact supervised-token count, so the result is independent of how rows were packed |
+| RNG | Python, NumPy, torch CPU and every CUDA device captured and restored |
+| Environment change | fingerprinted; a different GPU/driver/torch aborts unless explicitly allowed |
+
+The speed cost — deterministic kernels plus `eager` attention — is the deliberate
+trade requested.
+
+### 13.3 Verified, not asserted
+
+```
+scripts/verify/verify_resume.py    --steps 6 --break-at 3
+scripts/verify/verify_interrupt.py --steps 8 --signal-after 3
+```
+
+Both run the real entrypoint in real subprocesses, then compare every LoRA tensor
+and every Adam moment with `torch.equal`.
+
+| Test | Result |
+|---|---|
+| Clean stop at step 3, resumed to 6 | **PASS** — 112 LoRA + 336 Adam tensors identical, 0 differing |
+| Live `CTRL_BREAK` mid-run (landed at step 4), resumed to 8 | **PASS** — 112 LoRA + 336 Adam tensors identical, exit code 0 |
+
+Per-step losses match across the interruption boundary exactly (4.0515 / 4.2664 /
+3.3743 in both arms). Adam moments are compared as well as weights because
+optimizer state is where resume bugs hide: weights can agree for a step or two
+while `exp_avg` has already diverged.
+
+Guard rails, each tested to actually fire:
+
+| Condition | Behaviour |
+|---|---|
+| Plan hash mismatch (config changed under a run) | refuse, exit 1, prints both hashes |
+| Training mix changed | refuse, exit 1 |
+| `CUBLAS_WORKSPACE_CONFIG` absent | refuse **before loading the model**, exit 1 |
+| Plan vs tokenised data disagree on supervised tokens | refuse mid-step rather than train on a wrong normaliser |
+| Second signal during shutdown | immediate exit 130, no checkpoint |
+| Checkpoint write interrupted | previous checkpoint intact — temp file + `os.replace`, pointer written only after the payload is durable |
+
+### 13.4 Token-budgeted batching earns its complexity
+
+Budgeting on `rows × longest_row_in_batch` rather than a fixed batch size:
+
+| Run | Rows | Steps | Padded positions | Padding efficiency | vs uniform padding |
+|---|---:|---:|---:|---:|---:|
+| B0 | 128,365 | 1,003 | 17.32 M | **99.2%** | 2.8× cheaper |
+| B2 | 135,565 | 1,455 | 35.93 M | **99.8%** | **15.5× cheaper** |
+
+The planner automatically degrades to **1 row × 3,969 tokens** for long-context
+rows while packing 16 short rows together — the same mechanism that bounds memory
+also removes the 19.8× padding waste identified in §12.4.
+
+### 13.5 Files
+
+| Path | Role |
+|---|---|
+| `scripts/data/build_heal_mix.py` | Deterministic mix builder; refuses to read the frozen eval pack |
+| `scripts/train/determinism.py` | Seeding, RNG capture/restore, env preconditions, fingerprinting |
+| `scripts/train/plan.py` | Token-budgeted length-grouped plan + stable hash |
+| `scripts/train/memory.py` | Hard VRAM cap, pre-flight probe, budget suggestion |
+| `scripts/train/dataset.py` | Cached pre-tokenisation; exact prompt/target boundary |
+| `scripts/train/checkpoint.py` | Atomic save, complete state, load-time refusals |
+| `scripts/train/heal.py` | Training loop |
+| `scripts/train/run_heal.ps1` / `.sh` | Launchers that set the required env vars |
+| `scripts/verify/verify_resume.py` | Clean-stop bit-exactness test |
+| `scripts/verify/verify_interrupt.py` | Real-signal bit-exactness test |
+| `configs/heal_b{0,1,2,3}.yaml` | The four staged runs |
+| `configs/heal_smoke.yaml` | CPU-sized config for the verifiers |
+
+### 13.6 Config summary
+
+| Run | Rows | max_len | Token budget | Rows/µbatch | Accum | Cap | Steps |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| B0 | 128,365 | 384 | 8,192 | 16 | 8 | 5,120 MiB | 1,003 |
+| B1 | 169,165 | 384 | 8,192 | 16 | 8 | 5,120 MiB | — |
+| B2 | 135,565 | 4,096 | 4,096 | 8 | 16 | 6,144 MiB | 1,455 |
+| B3 | 176,365 | 4,096 | 4,096 | 8 | 16 | 6,144 MiB | — |
+
+LoRA r=16 on all seven projections, lr 1e-4 cosine with 40 warmup steps, one
+epoch, gradient checkpointing on. Caps leave headroom on the 8,188 MiB card;
+check `nvidia-smi` first, since desktop applications commonly hold 4–5 GiB.
+
+### 13.7 Still unverified
+
+The probe, the cap, and OOM handling have **only been exercised on the CPU path**,
+where they correctly no-op. They are untested against real CUDA because torch here
+is still `2.13.0+cpu` (Phase 0). The determinism, planning, checkpointing and
+resume logic *is* fully tested, and is device-independent.
+
+First action once CUDA is live:
+
+```bash
+./scripts/train/run_heal.sh configs/heal_b0.yaml --dry-run
+```
+
+That runs the probe against the real card and reports whether the budget fits
+before committing any training time.
+
+---
+
+## 14. Phase 0 closed; harness validated on the real card (2026-08-19)
+
+Executed against pre-declared predictions. Two were falsified, and chasing them
+found a real bug and a real hardware limit.
+
+### 14.1 Environment
+
+Phase 0 is **done**. A project-local `.venv` now carries **torch 2.13.0+cu130** —
+the same version as the CPU build, so only the CUDA runtime differs. The shared
+`hermes-agent` venv and the state-sufficiency lab were left untouched.
+
+`torch.cuda.is_available() = True`, RTX 4070 Laptop, 8,187 MiB, capability 8.9.
+
+Note: only `cu126` and `cu130` carry a 2.13.0 wheel — `cu128`/`cu129` stop at
+2.11.0/2.9.0. CUDA 13.0 runs on the installed 13.3 driver.
+
+### 14.2 Phase A — all pass (CPU)
+
+| Test | Result |
+|---|---|
+| **A1** code-fingerprint guard (new, §14.5) | **PASS** — editing `plan.py` blocks resume, exit 1, names the module |
+| **A2** resume across the **epoch boundary** | **PASS** — 112 LoRA + 336 Adam identical; log confirms `epoch 1, step_in_epoch 0` |
+| **A3** two fresh runs, same seed | **PASS** — 112 + 336 identical |
+
+A2 mattered: every earlier verification stopped mid-epoch, so the epoch-transition
+path had never executed.
+
+### 14.3 Phase C — the probe found a bug in itself
+
+| Test | Predicted | Measured | Verdict |
+|---|---|---|---|
+| **C1** B0 probe | 3,600–4,100 MiB reserved | **5,094** then **4,120** | falsified, then vindicated |
+| **C2** B2 probe | 3,500–4,000 MiB, *lower* than B0 | **6,032**, 46% *higher* than B0 | **falsified** |
+| **C3** GPU bit-exact resume, real B0 config | PASS | **PASS** — 392 LoRA + 1,176 Adam identical | confirmed |
+
+**C1, first run: 5,094 MiB — over budget, refused.** Cause was not the model but
+the harness: `mem.probe` ran before `model.train()`, and **gradient checkpointing
+is a no-op in eval mode**. The probe was measuring the un-checkpointed forward and
+would have rejected budgets that fit comfortably. Fixed by moving `model.train()`
+above the probe.
+
+**After the fix: 3,290 MiB allocated / 4,120 MiB reserved** — against a predicted
+3,600–4,100. The component estimate (3,306 MiB allocated) was within **0.5%** of
+measurement. The memory model was right all along; the instrument was wrong.
+
+**C2 falsified the reasoning, not just the number.** The prediction that B0 would
+peak higher than B2 came from comparing *total positions* (B0 5,344 vs B2 3,969),
+which is the right scaling for the logits term — linear in positions × vocab. But
+at seq 3,969 the **eager attention score matrix dominates, and it is O(seq²)**:
+one layer alone is 481 MiB before autograd's copies. The correct statement:
+
+> The logits term dominates at short sequence; the attention term dominates at
+> long sequence. Comparing total positions is only valid on the short side of that
+> crossover.
+
+Neither prepared contingency rescues B2. Chunking the cross-entropy attacks the
+logits term, which is not the binding one here; bf16 adapters do not help either.
+
+### 14.4 The real limit: bit-exactness and 4k context are mutually exclusive on 8 GB
+
+Bit-exact replay requires `eager`/`math` attention, because the flash and
+mem-efficient backward passes accumulate nondeterministically. That is precisely
+what makes attention O(seq²) in memory. B2 needs 6,032 MiB against 5,632 usable —
+**400 MiB short.** Three ways out, and they trade against each other:
+
+| Option | Keeps bit-exact? | Keeps the data? | Risk |
+|---|---|---|---|
+| Raise `cap_mib` 6,144 → 6,656 | yes | yes | leaves ~1,530 MiB for the desktop; observed desktop use ranges 360–4,800 MiB |
+| Lower `data.max_len` to ~2,560 | yes | **no** — LCR is p50 2,577 / p99 3,749, so about half the rows get left-trimmed | weakens the capability B2 exists to add |
+| Mem-efficient SDPA for B2/B3 only | **no** | yes | forfeits the guarantee you asked for, on those runs only |
+
+**This is a genuine conflict between two of your stated requirements**, so it is
+yours to resolve rather than mine. B0 and B1 are unaffected.
+
+### 14.5 Windows changes what "OOM safety" means
+
+An uncapped diagnostic reported **10,440 MiB reserved on an 8,187 MiB card.** That
+is not an error: on Windows/WDDM the driver silently spills past VRAM into system
+RAM over PCIe. Exceeding VRAM does not crash — it becomes roughly two orders of
+magnitude slower, and the run appears to hang rather than fail.
+
+So the hard cap earns its place for a stronger reason than originally argued:
+**it converts a silent, un-diagnosable slowdown into a clean failure in seconds.**
+Without it, an over-budget config on this machine would look like a hung job.
+
+(`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` is not supported on Windows
+and warns harmlessly; it still helps on the Linux CUDA host.)
+
+### 14.6 New guard: code fingerprint
+
+The plan hash covers *what* the optimizer sees, not the code consuming it. Editing
+the loss and resuming would have satisfied every other guard while silently
+changing the numerics — which is exactly what contingency C1 would have done.
+`determinism.code_fingerprint()` now hashes all six training modules into every
+checkpoint and refuses on drift, overridable via `resume.allow_code_drift`.
+
+Byte-level hashing means comment-only edits also trip it. That is the conservative
+direction: a hash cannot distinguish a docstring from a reduction order.
+
+### 14.7 Where B0 stands
+
+**Ready to run.** Probe 3,290 / 4,120 MiB against a 4,608 MiB budget (488 MiB
+headroom), 1,003 steps, 128,365 rows, 99.2% padding efficiency, GPU resume proven
+bit-exact. Reproducible to the MiB across invocations.
+
+```bash
+./scripts/train/run_heal.sh configs/heal_b0.yaml
+```
+
+Not yet measured: wall clock, and the loss trajectory over a full epoch.
+
+---
+
+## 15. Lightweight diagnostics before committing GPU hours (2026-08-19)
+
+Run before starting B0, on the principle that two minutes of measurement beats
+three hours of a run built on an assumption. Four findings, three of them defects
+in the harness itself.
+
+### 15.1 The code fingerprint was too strict to survive git
+
+`.gitattributes` declares `*.py text eol=lf`, so a checkout rewrites CRLF to LF in
+the working copy. A byte-level fingerprint would then refuse a valid resume — the
+guard firing on git hygiene rather than on a real change. Newlines are now
+normalised before hashing: LF and CRLF copies hash identically, while appending a
+statement to `plan.py` is still caught.
+
+### 15.2 The nondeterministic-attention claim was correct, and now measured
+
+`determinism.py` disables flash and mem-efficient SDPA on the standard caveat that
+their backward passes accumulate via atomics. That was inherited, not tested.
+Tested now — 3 repeats of an identical forward/backward at 1×3969, gradients
+compared with `torch.equal`:
+
+| Backend | Peak reserved | Bit-exact across repeats? |
+|---|---:|---|
+| `math` / eager (current) | **OOM** at a 6,144 MiB cap | — |
+| `mem_efficient` | 3,750 MiB | **no**, max\|Δ\| 1.46e-11 |
+| `flash` | 3,136 MiB | **no**, max\|Δ\| 4.66e-10 |
+
+So the claim holds. The new information is the memory: **flash halves B2's
+worst-shape footprint**, which is exactly what would make B2 fit — at the price of
+the guarantee. The divergence is float noise per step, but over 1,455 steps it
+compounds, so byte-identical resume is genuinely lost, not merely strained.
+
+Also measured: **eager at 1×2048 = 3,000 MiB and bit-exact.** So a bit-exact
+long-context run is possible at reduced `max_len`, just not at 4,096.
+
+### 15.3 The probe was measuring the wrong thing (twice)
+
+**Defect 1 — eval mode.** `mem.probe` ran before `model.train()`, and gradient
+checkpointing is a no-op in eval mode. Fixed in §14.3.
+
+**Defect 2 — one micro-batch instead of one step.** The probe measured a single
+micro-batch while a real step runs `grad_accum` of differing widths, and Adam's
+moments are created lazily on the first `optimizer.step()` so a forward/backward
+probe never counted them. Measured shortfall on B0: **4,120 MiB predicted vs 4,814
+actual.** The probe now replays the heaviest step in full, including the optimizer
+step, snapshotting and restoring weights so it still cannot perturb training —
+re-verified: two independent GPU runs agree on 392/392 LoRA and 784/784 Adam
+tensors.
+
+**The honest limit.** Even the full-step probe under-predicts, by between 0.6% and
+27% depending on config. It is a fast **lower bound**, not a predictor.
+
+> Operational rule: probe to catch gross misconfiguration, then validate with
+> `--max-steps 8` and read `peak_reserved_mib` from `train_log.jsonl`. Two minutes,
+> and authoritative.
+
+### 15.4 Width bucketing: ~~rejected~~ **UNRESOLVED — the comparison was invalid**
+
+> **Retracted 2026-08-19.** The numbers below were measured over 8–12 steps, which
+> §16.6 later showed is far short of the plateau. Both arms were sampled before
+> their peaks had settled, so "actual peak is identical" was never established.
+> The conclusion is withdrawn, not reversed: bucketing may or may not help, and
+> the experiment has to be redone at plateau.
+
+Original (invalid) comparison, kept as the record of the error:
+
+| | Padding eff. | Probe | Actual *(8–12 steps)* | Wall clock |
+|---|---:|---:|---:|---:|
+| bucket off | 99.6% | 3,048 MiB | 3,882 MiB | 2.9–3.2 h |
+| bucket 64 | 81.6% | 3,466 MiB | 3,880 MiB | 3.24 h |
+
+What makes this worth keeping rather than deleting: the same sampling error appears
+three separate times in this document (§14.3, §15.4, §15.5), and each time it
+produced a confident conclusion. Bucketing remains available as
+`data.width_bucket`, defaulted **off** — now on the honest grounds that its value
+is unmeasured rather than disproved.
+
+**To redo it properly:** two 150-step calibrations at matched config, bucket 1 vs
+bucket 32, comparing plateau peak and wall clock. Cost: about 40 minutes.
+
+### 15.5 B0 config: ~~validated~~ **the 8×16 claim was wrong; see §16.6**
+
+> **Retracted 2026-08-19.** This section declared the 8×16 config "validated" with
+> "1,238 MiB of measured headroom" on the strength of an 8-step sample. That config
+> then reached **5,090 MiB — 30 MiB from the cap — and hung at step 72** with no
+> checkpoint. The 3,882 figure was real but was not the steady state.
+
+| | 16 × 8 | 8 × 16 *(claimed)* | 8 × 16 *(actual)* |
+|---|---:|---:|---:|
+| probe | 4,786 MiB | 3,048 MiB | 3,048 MiB |
+| peak at ~step 10 | 4,814 | 3,882 | 3,882 |
+| **peak at plateau** | 5,090 | *never measured* | **5,090** |
+| outcome | — | "ready" | **hung at step 72** |
+
+The error was not the probe and not the config. It was concluding steady state from
+a sample, three times in a row, in a document whose own §12.6 warns against exactly
+this class of mistake. The working config and its plateau measurement are in §16.6.
+
+### 15.6 B2 decision, now quantified
+
+The conflict in §14.4 stands, with numbers attached:
+
+| Option | Bit-exact | Data intact | Peak at worst shape |
+|---|---|---|---:|
+| eager @ `max_len` 4,096 | yes | yes | **does not fit** |
+| eager @ `max_len` 2,048 | **yes** | no — LCR p50 is 2,577, so most rows trim | 3,000 MiB |
+| `flash` @ 4,096 | **no** (4.7e-10/step) | yes | 3,136 MiB |
+| `mem_efficient` @ 4,096 | **no** (1.5e-11/step) | yes | 3,750 MiB |
+
+Still yours to resolve: it trades the byte-identical guarantee against the
+long-context capability B2 exists to add. B0 and B1 are unaffected either way.
+
+---
+
+## 16. Gate baselines: what the vocabulary trim actually cost (2026-08-19)
+
+First real gate measurement of R2, against stock Qwen3-0.6B on identical cases
+with the identical vendored v4.5 scorer. `scripts/eval/run_gates.py`.
+
+### 16.1 chat DEV — the trim is free
+
+510 paired cases:
+
+| Metric | stock 596M | **R2 474M** | Delta |
+|---|---:|---:|---:|
+| mean_quality_score | 0.8334 | **0.8336** | +0.0002 |
+| quality_pass_rate | 0.9941 | 0.9961 | +0.0020 |
+| intelligibility_pass_rate | 1.0000 | 1.0000 | 0.0000 |
+| contract_fulfillment | 1.0000 | 1.0000 | 0.0000 |
+| worst_decile quality | 0.6987 | 0.7045 | +0.0058 |
+
+```
+paired mean delta  +0.00019    95% CI [-0.00806, +0.00844]    t = +0.045
+identical 417/510    R2 better 45    stock better 48
+byte-identical replies 308/510 (60.4%)    visible tokens +3.31%
+```
+
+Indistinguishable from zero, effect bounded inside ±0.008. Win/loss 45–48 is
+symmetric noise. **C7 passes outright on both**: zero critical defects, zero
+contract violations, 100% intelligibility — the `imony`-loop pathology that
+retired the 19L soup does not appear.
+
+### 16.2 RAG DEV — the trim costs exactly one thing
+
+752 paired cases. Here the trim **is** detectable, and significantly so:
+
+```
+paired mean delta  -0.01273    95% CI [-0.01955, -0.00592]    t = -3.660
+identical 738/752    R2 better 0    stock better 14
+byte-identical replies 729/752 (96.9%)
+```
+
+Zero cases improved and 14 regressed. That asymmetry is what distinguishes this
+from the chat result: it is a small, one-directional, real degradation.
+
+**And the per-category view shows it is a single failure mode, not a broad decay.**
+Eleven of sixteen categories are bit-identical — five moved, listed here:
+
+| Category | n | stock | R2 | Delta | Regressed |
+|---|---:|---:|---:|---:|---:|
+| **conflict** | 38 | 0.5847 | **0.3948** | **−0.1898** | **9** |
+| stale_evidence | 38 | 0.5135 | 0.4875 | −0.0260 | 2 |
+| procedure_with_distractor | 25 | 0.3843 | 0.3600 | −0.0243 | 1 |
+| prompt_injection | 38 | 0.6434 | 0.6304 | −0.0130 | 1 |
+| qualified_answer | 38 | 0.2737 | 0.2665 | −0.0072 | 1 |
+| *the other 11 categories* | 615 | — | — | **0.0000** | **0** |
+
+The `conflict` category alone accounts for essentially all of the aggregate loss.
+
+### 16.3 The mechanism: lost abstentions
+
+| | Stock | R2 |
+|---|---:|---:|
+| Correct abstentions (gold = "I don't know…"), 202 cases | 188 (93.1%) | 179 (88.6%) |
+
+**R2 lost exactly 9 abstentions, and they are exactly the 9 `conflict`
+regressions.** In each one, stock answers `"I don't know based on the available
+information."` and R2 instead begins `"Based on the available information, the
+first launch region for X is…"` and runs to the 32-token cap. Same prefix words,
+opposite decision — a token-level nudge flipped the abstain/answer choice.
+
+**Mechanism tested, and the obvious explanation is wrong.** The first hypothesis
+was that these DEV entity names were never in the keep-set input (the vocabulary
+was built from training corpora, and RAG DEV was not in this repo at the time), so
+they would tokenize worse. Measured, and they do not:
+
+| | stock | R2 |
+|---|---:|---:|
+| all 10 failing entity names (`ThistleEngine`, `IvorySensor`, `BirchInstrument`, …) | 3–4 tok | **identical** |
+| `"I don't know based on the available information."` | 10 tok | **identical** |
+| prompt tokens, the 14 regressed cases | — | 1.0210x |
+| prompt tokens, 112 unchanged cases | — | 1.0015x |
+
+So the vocabulary is not too tight, and the trim did not damage evidence copying.
+What it does is shift positions by ~2% on these particular prompts, and `conflict`
+is the most fragile category there is -- stock's own score on it is 0.5847, second
+worst of sixteen, and stock itself misses 14 of 202 abstentions. These were
+borderline decisions that any small perturbation tips.
+
+> The causal claim is therefore narrower than "the trim cost 9 abstentions". It is:
+> **the trim perturbs token positions slightly, and the most borderline category
+> flips.** An equally benign perturbation would likely flip a comparable number in
+> either direction. What healing has to do is make the decision robust, not restore
+> a lost capability.
+
+Two smaller mechanisms appear in the remaining 5 regressions:
+
+- **Entity corruption from re-tokenization.** `BirchInstrument` → `BIRCHINSTRUMENT`.
+  The mixed-case token was trimmed, so the model rebuilt the name from pieces and
+  lost the casing.
+- **Token inflation tripping the brevity contract on identical text.** 10 of the
+  729 byte-identical replies cost more tokens under the 32k tokenizer, and two of
+  them scored lower for that reason alone despite being the same answer.
+
+> **§12.6 predicted this, and named the category.** "Compression breaks
+> *calibration* before it breaks accuracy: a pruned model becomes confidently
+> wrong rather than obviously broken… Aggregate quality can hold while `conflict`,
+> `stale_evidence`, `prompt_injection` and `missing_answer` collapse into confident
+> answers. Gate on the categories, not the mean." Three of the four named
+> categories regressed; `conflict` dominates. The aggregate −0.0127 would have read
+> as diffuse noise. Only the per-category gate localised it.
+
+### 16.4 What this changes
+
+The trim is **free on conversation and free on 11 of 16 grounding categories**, and
+costs **9 abstentions in `conflict`** — about 1.3 quality points in aggregate for
+−20.47% parameters and −14.72% compute.
+
+Crucially, this is the failure mode the healing data is built to fix: the RAG
+corpus carries **1,600 abstain decisions across 300 `conflict` rows**, and the
+prior teacher's dual SFT moved RAG by **+0.313** with abstention rising from 87.6%
+to 99.5% intelligibility. So B0 gets a concrete, pre-declared success criterion
+rather than a vague one:
+
+> **Gate C6 for B0: restore `conflict`-category abstention to ≥ 93.1%** (stock's
+> rate) while chat DEV `contract_fulfillment` stays at 1.0000. Declared before B0
+> is trained.
+
+Secondary target, also now quantified: RAG `contract_violation_case_rate` is
+**19.7%** on R2-base against **0.0%** on chat DEV. That gap is the grounding work
+B0 exists to do.
+
+### 16.5 Cross-architecture note, not a claim
+
+Both R2 and stock land at ~0.833 on chat DEV, matching the prior
+`phase_4_model_soups` teacher's *post-SFT* score (0.8332) with no adapter at all,
+and both beat its baseline (0.7984). On RAG both (~0.67–0.68) sit just under that
+teacher's post-SFT 0.6932 and far above its 0.3801 baseline. Interesting, but a
+different checkpoint — recorded as context, not as a result.
+
+Also unresolved: upstream's RAG summary reports `case_count 1504` against a
+752-row set, exactly 2×. Until that is understood their RAG anchor is a per-case
+mean reference, not a row-for-row equivalent. The stock-vs-R2 pairing above is
+unaffected — same 752 rows, same protocol, both sides.
+
+---
+
+## 17. B0: the config that actually holds, and what it cost to find
+
+### 17.1 The plateau measurement
+
+Third configuration, and the first one measured to an actual plateau rather than a
+sample. 150-step calibration, `4 rows × 32 accumulation`, `save_every_steps: 25`:
+
+| step | 1 | 15 | 30 | **50** | 75 | 100 | 125 | 150 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| peak reserved MiB | 2,450 | 2,908 | 3,826 | **4,330** | 4,330 | 4,330 | 4,330 | 4,330 |
+
+**Plateaued at step 50, then flat for 100 steps.** Max 4,330 of a 5,120 cap —
+**790 MiB of real headroom.**
+
+The three configurations side by side, which is the actual lesson:
+
+| | 16 × 8 | 8 × 16 | **4 × 32** |
+|---|---:|---:|---:|
+| longest flat stretch before failing | — | ~9 steps | **100 steps** |
+| plateau reached | never | never | **step 50** |
+| max peak | 5,090 | 5,090 | **4,330** |
+| headroom under cap | 30 MiB | 30 MiB | **790 MiB** |
+| outcome | — | hung at step 72 | **running to completion** |
+
+Identical in every training-relevant respect: 128 rows/step, 1,003 steps, the same
+total compute. The whole difference is micro-batch granularity, and it cost ~12%
+wall clock.
+
+### 17.2 Three process defects fixed under fire
+
+**The orphan problem.** Three consecutive launches left a trainer alive after a
+"successful" stop. One burned **8,029 CPU-seconds over 74 minutes**, competing with
+a user job, and was very likely the true cause of a `CUBLAS_STATUS_INTERNAL_ERROR`
+at step 4 that presented as a clean dose-response curve against `grad_accum`
+(8 fine → 16 hung → 32 crashed) and looked exactly like cuBLAS workspace
+exhaustion. It was contention. `Stop-Process -Force` and `taskkill /F` both failed
+*silently* — taskkill even reported "there is no running instance" about a process
+consuming a full core. Only `Invoke-CimMethod -MethodName Terminate` worked.
+
+Fixed structurally: `heal.py` now holds a heartbeat lock on its run directory and
+refuses to start while another instance is live. No process enumeration and no
+signal probing, because on Windows `os.kill(pid, 0)` *terminates* the target.
+
+**The lock leak.** The mutex's own `--max-steps` exit path did not release the
+lock. Found by checking the filesystem after a clean exit instead of assuming the
+release had happened. Now a `finally` covers every path including OOM.
+
+**`save_every_steps: 200`.** At ~9 s/step that put the first checkpoint 30 minutes
+in, which is why the step-72 hang lost everything. Now 25.
+
+### 17.3 The code-fingerprint guard caught its author
+
+Resuming from the step-150 checkpoint was **refused**: `heal.py: modified`. The
+`finally` fix had landed between the calibration and the resume.
+
+That is the guard working, and it was resolved the way P5 demands rather than by
+flipping the flag:
+
+1. diff the actual change (`dc31a8b..963a41f`) — a `# noqa` comment plus a
+   `finally` block unlinking a JSON heartbeat file;
+2. confirm no other training module differed;
+3. establish inertness on evidence — no tensor, RNG, optimizer or plan touched;
+4. record the justification and the commit range in `configs/heal_b0.yaml`, with
+   an explicit note to return `allow_code_drift` to `false` once B0 completes.
+
+> An override with a recorded justification is a decision. An override because a
+> guard was inconvenient is how a safety mechanism becomes decoration.
+
+### 17.4 Open items
+
+- **`allow_code_drift: true` is live in `configs/heal_b0.yaml`** for this run only.
+  Revert it when B0 finishes.
+- **§15.4's bucketing rejection is withdrawn**, not reversed — it was measured
+  pre-plateau like everything else in §15. Redoing it properly costs ~40 minutes.
+- **M1 (seed variance) is still unrun**, so B0's aggregate deltas will not be
+  interpretable. Its *declared* criterion will be: `conflict` abstention ≥ 93.1%
+  is a discrete count over a 38-case category, a ~24 pp swing, almost certainly
+  above seed noise. Aggregate `mean_quality_score` moves are not.

@@ -1,0 +1,52 @@
+{
+  "variant": "swa-w512-g4",
+  "dataset": "chat_dev",
+  "config_overrides": {
+    "use_sliding_window": true,
+    "sliding_window": 512,
+    "layer_types": [
+      "full_attention",
+      "full_attention",
+      "full_attention",
+      "full_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention"
+    ],
+    "max_window_layers": 4
+  },
+  "needs_surgery": false,
+  "unhealed": false,
+  "case_count": 510,
+  "protocol": {
+    "max_new_tokens": 32,
+    "response_control": "eos_only",
+    "min_new_tokens_before_boundary": 1,
+    "do_sample": false,
+    "temperature": null,
+    "top_p": null,
+    "source": "artifacts/teacher_dual_sft_v1/baseline_chat_dev/evaluation_manifest.json"
+  },
+  "elapsed_s": 325.6
+}

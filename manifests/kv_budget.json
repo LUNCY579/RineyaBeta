@@ -1,0 +1,299 @@
+{
+  "model": "Qwen3-0.6B",
+  "budget_gb": 6.5,
+  "overhead_gb": 0.6,
+  "shape": {
+    "n_layers": 28,
+    "head_dim": 128,
+    "n_q_heads": 16,
+    "stock_kv_heads": 8
+  },
+  "cells": [
+    {
+      "kv_heads": 8,
+      "kv_dtype": "bf16",
+      "length": 4096,
+      "total_gb": 2.262,
+      "fits": true
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "bf16",
+      "length": 16384,
+      "total_gb": 3.671,
+      "fits": true
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "bf16",
+      "length": 32768,
+      "total_gb": 5.55,
+      "fits": true
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "bf16",
+      "length": 65536,
+      "total_gb": 9.308,
+      "fits": false
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "bf16",
+      "length": 131072,
+      "total_gb": 16.824,
+      "fits": false
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "bf16",
+      "length": 4096,
+      "total_gb": 1.968,
+      "fits": true
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "bf16",
+      "length": 16384,
+      "total_gb": 2.673,
+      "fits": true
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "bf16",
+      "length": 32768,
+      "total_gb": 3.612,
+      "fits": true
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "bf16",
+      "length": 65536,
+      "total_gb": 5.491,
+      "fits": true
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "bf16",
+      "length": 131072,
+      "total_gb": 9.25,
+      "fits": false
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "bf16",
+      "length": 4096,
+      "total_gb": 1.821,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "bf16",
+      "length": 16384,
+      "total_gb": 2.174,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "bf16",
+      "length": 32768,
+      "total_gb": 2.644,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "bf16",
+      "length": 65536,
+      "total_gb": 3.583,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "bf16",
+      "length": 131072,
+      "total_gb": 5.462,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "bf16",
+      "length": 4096,
+      "total_gb": 1.748,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "bf16",
+      "length": 16384,
+      "total_gb": 1.924,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "bf16",
+      "length": 32768,
+      "total_gb": 2.159,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "bf16",
+      "length": 65536,
+      "total_gb": 2.629,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "bf16",
+      "length": 131072,
+      "total_gb": 3.568,
+      "fits": true
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "int8",
+      "length": 4096,
+      "total_gb": 2.027,
+      "fits": true
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "int8",
+      "length": 16384,
+      "total_gb": 2.732,
+      "fits": true
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "int8",
+      "length": 32768,
+      "total_gb": 3.671,
+      "fits": true
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "int8",
+      "length": 65536,
+      "total_gb": 5.55,
+      "fits": true
+    },
+    {
+      "kv_heads": 8,
+      "kv_dtype": "int8",
+      "length": 131072,
+      "total_gb": 9.308,
+      "fits": false
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "int8",
+      "length": 4096,
+      "total_gb": 1.851,
+      "fits": true
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "int8",
+      "length": 16384,
+      "total_gb": 2.203,
+      "fits": true
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "int8",
+      "length": 32768,
+      "total_gb": 2.673,
+      "fits": true
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "int8",
+      "length": 65536,
+      "total_gb": 3.612,
+      "fits": true
+    },
+    {
+      "kv_heads": 4,
+      "kv_dtype": "int8",
+      "length": 131072,
+      "total_gb": 5.491,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "int8",
+      "length": 4096,
+      "total_gb": 1.763,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "int8",
+      "length": 16384,
+      "total_gb": 1.939,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "int8",
+      "length": 32768,
+      "total_gb": 2.174,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "int8",
+      "length": 65536,
+      "total_gb": 2.644,
+      "fits": true
+    },
+    {
+      "kv_heads": 2,
+      "kv_dtype": "int8",
+      "length": 131072,
+      "total_gb": 3.583,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "int8",
+      "length": 4096,
+      "total_gb": 1.719,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "int8",
+      "length": 16384,
+      "total_gb": 1.807,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "int8",
+      "length": 32768,
+      "total_gb": 1.924,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "int8",
+      "length": 65536,
+      "total_gb": 2.159,
+      "fits": true
+    },
+    {
+      "kv_heads": 1,
+      "kv_dtype": "int8",
+      "length": 131072,
+      "total_gb": 2.629,
+      "fits": true
+    }
+  ],
+  "iso_memory_max_length": {
+    "8": 41049,
+    "4": 83123,
+    "2": 167270,
+    "1": 335565
+  }
+}

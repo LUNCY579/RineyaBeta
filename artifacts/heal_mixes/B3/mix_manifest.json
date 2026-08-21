@@ -1,0 +1,166 @@
+{
+  "run": "B3",
+  "label": "everything",
+  "seed": 20260819,
+  "sources": [
+    "v3",
+    "rag",
+    "puzzle",
+    "lcr"
+  ],
+  "rows": 176365,
+  "rows_per_source": {
+    "v3": 123955,
+    "rag": 4410,
+    "puzzle": 40800,
+    "lcr": 7200
+  },
+  "duplicates_dropped": {
+    "v3": 45,
+    "rag": 0,
+    "puzzle": 0,
+    "lcr": 0
+  },
+  "categories_per_source": {
+    "lcr_sft": {
+      "address_route_tracking": 728,
+      "alias_resolution": 724,
+      "causal_disambiguation": 712,
+      "count_exclusions_duplicates": 728,
+      "definition_binding": 724,
+      "latest_verified_record_vs_rumor": 700,
+      "multi_condition_identity": 712,
+      "object_state_tracking": 708,
+      "rule_exception": 728,
+      "temporal_correction": 736
+    },
+    "puzzle51k": {
+      "arithmetic_constraints": 2720,
+      "boolean_switches": 2720,
+      "calendar_reasoning": 2720,
+      "code_breaking": 2720,
+      "epistemic_hats": 2720,
+      "family_relations": 2720,
+      "hanoi_planning": 2720,
+      "knights_knaves": 2720,
+      "linear_order": 2720,
+      "logic_grid": 2720,
+      "mislabeled_boxes": 2720,
+      "object_tracking": 2720,
+      "prisoner_alibis": 2720,
+      "rule_deduction": 2720,
+      "shortest_path": 2720
+    },
+    "rag_v3": {
+      "ambiguous_evidence": 225,
+      "conflict": 225,
+      "missing_answer": 225,
+      "multi_fact_supported": 225,
+      "partial_support": 225,
+      "procedure_conflict": 150,
+      "procedure_missing_input": 150,
+      "procedure_supported": 750,
+      "procedure_with_distractor": 150,
+      "prompt_injection": 225,
+      "qualified_answer": 225,
+      "social": 60,
+      "stale_evidence": 225,
+      "supported": 900,
+      "supported_paraphrase": 225,
+      "supported_with_distractor": 225
+    },
+    "v3_chat": {
+      "acknowledgment": 140,
+      "acknowledgment_update": 2750,
+      "apology_repair": 2816,
+      "arithmetic_chain": 2750,
+      "arithmetic_short_answer": 160,
+      "boundary_setting": 2750,
+      "causal_reasoning": 2750,
+      "celebration": 120,
+      "clarification": 280,
+      "clarification_request": 2750,
+      "communication_rewrite": 4000,
+      "comparative_recommendation": 4000,
+      "comparison_ranking": 2750,
+      "comparison_recommendation": 140,
+      "complex_escalation": 80,
+      "concise_explanation": 160,
+      "conditional_rules": 2750,
+      "confirmation": 100,
+      "conflict_deescalation": 80,
+      "constraint_selection": 2750,
+      "context_recall": 249,
+      "context_update": 134,
+      "contradiction_detection": 2750,
+      "conversation_closure": 2750,
+      "counting_sets": 2750,
+      "decision_explanation": 4000,
+      "deescalation": 2750,
+      "direct_preference": 140,
+      "empathy": 180,
+      "empathy_validation": 2750,
+      "estimation_sanity": 2750,
+      "evidence_grounded_dialogue": 4000,
+      "evidence_inference": 2750,
+      "factual_compression": 400,
+      "gentle_disagreement": 120,
+      "informal_texting": 2930,
+      "insufficient_information": 2750,
+      "knowledge_boundary": 140,
+      "logical_implication": 2750,
+      "multi_turn_context_update": 4000,
+      "natural_follow_up": 2870,
+      "negotiation_compromise": 2750,
+      "output_only": 100,
+      "percentage_reasoning": 2750,
+      "physical_commonsense": 2750,
+      "plan_revision": 4000,
+      "practical_next_step": 4000,
+      "practical_one_step": 180,
+      "preference_opinion": 2750,
+      "pronoun_resolution": 86,
+      "ratio_proportion": 2750,
+      "roleplay_reasoning": 4000,
+      "roleplay_short": 160,
+      "safety_boundary": 260,
+      "schedule_ordering": 2750,
+      "sequence_pattern": 2750,
+      "spatial_relations": 2750,
+      "tactful_disagreement": 2750,
+      "time_duration": 2750,
+      "troubleshooting_diagnosis": 2750,
+      "uncertainty": 180,
+      "unit_conversion": 2750
+    }
+  },
+  "inputs": {
+    "v3": {
+      "path": "Rineya_General_Reasoning_and_Natural_Communication_Corpus_v3.0/data/sft/rineya_v3_recommended_combined_124000.jsonl",
+      "sha256": "32ec39d30a1d99df94f758333070f24c662f175887c4180f7f14901487062cb7"
+    },
+    "rag": {
+      "path": "Aegis_RAG_v3_train_4410/rag_v3_train.sft.jsonl",
+      "sha256": "ed615a6d67fe4148af0baa5e6120cb6ea03089687daf31feb4cecd7ab847f0f7"
+    },
+    "puzzle": {
+      "path": "Rineya-Puzzle-Reasoning-51k/data/train.jsonl",
+      "sha256": "9e48cb5c207605209aa642438fc6bbb186f76cea22bd3fcef78807495175a703"
+    },
+    "lcr": {
+      "path": "Rineya_LCR_SFT_v1/Rineya_LCR_SFT_v1/data/lcr_sft_v1.jsonl",
+      "sha256": "8f0bc0174408eb513851443a6f9c32e2e79a00563fb9d35d659e7d27ab792c9c"
+    }
+  },
+  "output": {
+    "path": "artifacts/heal_mixes/B3/heal_mix_b3.jsonl",
+    "sha256": "bc8fa0ad881d15a9ca3701ca21cd51d4bdba9933c87f5caed26afcafd23be704",
+    "rows": 176365
+  },
+  "excluded": {
+    "Rineya_Long_Context_Demo_v1": "frozen evaluation pack",
+    "v1_short_response": "already carried by v2/v3 preservation slices",
+    "v2_combined": "already carried by the v3 preservation slice",
+    "puzzle_think_sft": "conflicts with no-CoT targets and enable_thinking=false"
+  }
+}

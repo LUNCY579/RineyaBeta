@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 660" width="1080" height="660" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<style>.ttl{font-size:24px;font-weight:700;fill:#10151c}.sub{font-size:14px;fill:#4a5568}.ax{font-size:12px;fill:#5a6472}.lg{font-size:13px;fill:#1a202c}.mono{font-family:Consolas,monospace;font-size:11.5px;fill:#10151c}.note{font-size:12.5px;fill:#4a5568}</style>
+<rect width="1080" height="660" fill="#fbfcfd"/>
+<text class="ttl" x="34" y="42">Cache growth: one axis saturates, the others do not</text>
+<text class="sub" x="34" y="68">Qwen3-0.6B shape, bf16. Sliding-window layers stop growing once context passes the window; head- and rank-based schemes never do.</text>
+<line x1="96" y1="530.0" x2="756" y2="530.0" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="86" y="534.0" text-anchor="end">8 MiB</text>
+<line x1="96" y1="460.0" x2="756" y2="460.0" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="86" y="464.0" text-anchor="end">32 MiB</text>
+<line x1="96" y1="390.0" x2="756" y2="390.0" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="86" y="394.0" text-anchor="end">128 MiB</text>
+<line x1="96" y1="320.0" x2="756" y2="320.0" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="86" y="324.0" text-anchor="end">512 MiB</text>
+<line x1="96" y1="250.0" x2="756" y2="250.0" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="86" y="254.0" text-anchor="end">2 GiB</text>
+<line x1="96" y1="180.0" x2="756" y2="180.0" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="86" y="184.0" text-anchor="end">8 GiB</text>
+<line x1="96" y1="110.0" x2="756" y2="110.0" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="86" y="114.0" text-anchor="end">32 GiB</text>
+<line x1="96.0" y1="110" x2="96.0" y2="530" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="96.0" y="550" text-anchor="middle">4K</text>
+<line x1="206.0" y1="110" x2="206.0" y2="530" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="206.0" y="550" text-anchor="middle">8K</text>
+<line x1="316.0" y1="110" x2="316.0" y2="530" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="316.0" y="550" text-anchor="middle">16K</text>
+<line x1="426.0" y1="110" x2="426.0" y2="530" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="426.0" y="550" text-anchor="middle">32K</text>
+<line x1="536.0" y1="110" x2="536.0" y2="530" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="536.0" y="550" text-anchor="middle">64K</text>
+<line x1="646.0" y1="110" x2="646.0" y2="530" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="646.0" y="550" text-anchor="middle">128K</text>
+<line x1="756.0" y1="110" x2="756.0" y2="530" stroke="#e3e8ee" stroke-width="1"/>
+<text class="ax" x="756.0" y="550" text-anchor="middle">256K</text>
+<text class="ax" x="426" y="576" text-anchor="middle">context length (tokens)</text>
+<line x1="96" y1="180.0" x2="756" y2="180.0" stroke="#c0392b" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text class="mono" x="104" y="172.0" fill="#c0392b">8 GiB — the whole card</text>
+<polyline points="96.0,326.7 206.0,291.7 316.0,256.7 426.0,221.7 536.0,186.7 646.0,151.7 756.0,116.7" fill="none" stroke="#1c4e8a" stroke-width="2.6"/>
+<circle cx="96.0" cy="326.7" r="3.2" fill="#1c4e8a"/>
+<circle cx="206.0" cy="291.7" r="3.2" fill="#1c4e8a"/>
+<circle cx="316.0" cy="256.7" r="3.2" fill="#1c4e8a"/>
+<circle cx="426.0" cy="221.7" r="3.2" fill="#1c4e8a"/>
+<circle cx="536.0" cy="186.7" r="3.2" fill="#1c4e8a"/>
+<circle cx="646.0" cy="151.7" r="3.2" fill="#1c4e8a"/>
+<circle cx="756.0" cy="116.7" r="3.2" fill="#1c4e8a"/>
+<polyline points="96.0,396.7 206.0,361.7 316.0,326.7 426.0,291.7 536.0,256.7 646.0,221.7 756.0,186.7" fill="none" stroke="#7ba0d0" stroke-width="2.6" stroke-dasharray="6 4"/>
+<circle cx="96.0" cy="396.7" r="3.2" fill="#7ba0d0"/>
+<circle cx="206.0" cy="361.7" r="3.2" fill="#7ba0d0"/>
+<circle cx="316.0" cy="326.7" r="3.2" fill="#7ba0d0"/>
+<circle cx="426.0" cy="291.7" r="3.2" fill="#7ba0d0"/>
+<circle cx="536.0" cy="256.7" r="3.2" fill="#7ba0d0"/>
+<circle cx="646.0" cy="221.7" r="3.2" fill="#7ba0d0"/>
+<circle cx="756.0" cy="186.7" r="3.2" fill="#7ba0d0"/>
+<polyline points="96.0,378.7 206.0,361.7 316.0,338.9 426.0,311.3 536.0,280.5 646.0,247.7 756.0,213.8" fill="none" stroke="#c2410c" stroke-width="2.6"/>
+<circle cx="96.0" cy="378.7" r="3.2" fill="#c2410c"/>
+<circle cx="206.0" cy="361.7" r="3.2" fill="#c2410c"/>
+<circle cx="316.0" cy="338.9" r="3.2" fill="#c2410c"/>
+<circle cx="426.0" cy="311.3" r="3.2" fill="#c2410c"/>
+<circle cx="536.0" cy="280.5" r="3.2" fill="#c2410c"/>
+<circle cx="646.0" cy="247.7" r="3.2" fill="#c2410c"/>
+<circle cx="756.0" cy="213.8" r="3.2" fill="#c2410c"/>
+<polyline points="96.0,408.9 206.0,381.3 316.0,350.5 426.0,317.7 536.0,283.8 646.0,249.4 756.0,214.7" fill="none" stroke="#ea8a4f" stroke-width="2.6"/>
+<circle cx="96.0" cy="408.9" r="3.2" fill="#ea8a4f"/>
+<circle cx="206.0" cy="381.3" r="3.2" fill="#ea8a4f"/>
+<circle cx="316.0" cy="350.5" r="3.2" fill="#ea8a4f"/>
+<circle cx="426.0" cy="317.7" r="3.2" fill="#ea8a4f"/>
+<circle cx="536.0" cy="283.8" r="3.2" fill="#ea8a4f"/>
+<circle cx="646.0" cy="249.4" r="3.2" fill="#ea8a4f"/>
+<circle cx="756.0" cy="214.7" r="3.2" fill="#ea8a4f"/>
+<polyline points="96.0,420.5 206.0,385.5 316.0,350.5 426.0,315.5 536.0,280.5 646.0,245.5 756.0,210.5" fill="none" stroke="#186a4e" stroke-width="2.6" stroke-dasharray="6 4"/>
+<circle cx="96.0" cy="420.5" r="3.2" fill="#186a4e"/>
+<circle cx="206.0" cy="385.5" r="3.2" fill="#186a4e"/>
+<circle cx="316.0" cy="350.5" r="3.2" fill="#186a4e"/>
+<circle cx="426.0" cy="315.5" r="3.2" fill="#186a4e"/>
+<circle cx="536.0" cy="280.5" r="3.2" fill="#186a4e"/>
+<circle cx="646.0" cy="245.5" r="3.2" fill="#186a4e"/>
+<circle cx="756.0" cy="210.5" r="3.2" fill="#186a4e"/>
+<rect x="780" y="94" width="264" height="196" rx="9" fill="#fff" stroke="#e3e8ee" stroke-width="1.4"/>
+<line x1="794" y1="116" x2="828" y2="116" stroke="#1c4e8a" stroke-width="3"/>
+<text class="lg" x="836" y="120">GQA-8KV  (R2 today)</text>
+<line x1="794" y1="140" x2="828" y2="140" stroke="#7ba0d0" stroke-width="3" stroke-dasharray="6 4"/>
+<text class="lg" x="836" y="144">GQA-2KV  (surgery + healing)</text>
+<line x1="794" y1="164" x2="828" y2="164" stroke="#c2410c" stroke-width="3"/>
+<text class="lg" x="836" y="168">SWA w=1024, 4 global  (free)</text>
+<line x1="794" y1="188" x2="828" y2="188" stroke="#ea8a4f" stroke-width="3"/>
+<text class="lg" x="836" y="192">SWA w=256, 4 global  (free)</text>
+<line x1="794" y1="212" x2="828" y2="212" stroke="#186a4e" stroke-width="3" stroke-dasharray="6 4"/>
+<text class="lg" x="836" y="216">MLA d_c=256  (new code)</text>
+<text class="note" x="794" y="246">dashed = needs</text>
+<text class="note" x="794" y="264">work before use</text>
+<rect x="34" y="584" width="1012" height="56" rx="9" fill="#fffbe9" stroke="#e0c060" stroke-width="1.4"/>
+<text class="note" x="56" y="608">Straight lines on a log-log plot are constant cost per token: halving KV heads or lowering MLA rank shifts the line down but never bends it.</text>
+<text class="note" x="56" y="628">The sliding-window curves bend. But this plot shows CACHE only: measured peak memory tells a different story — see figure 05.</text>
+</svg>
