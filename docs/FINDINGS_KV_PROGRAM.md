@@ -501,12 +501,20 @@ matching its own 32K and 64K numbers. The length wall was a budget wall.
 | 2,048 | permutation p = 0.0315 | depth 0.9 beats depth 0.5 (+6/−0, p = 0.0312); depths 0.1 and 0.5 are **indistinguishable** (+2/−3, p = 1.0000) |
 | 8,192 | permutation p = 0.8879 | no depth dependence left |
 
-Late needles do better, and the advantage is concentrated in the last chunks that
-escape compression rather than spread as a gradient. An earlier 6-needle run of
-this same grid read 0.17 / 0.50 / 0.83 and looked cleanly monotone; at 12 needles
-it is 0.42 / 0.33 / 0.83. The monotone reading was noise. The surviving claim is
-the weaker and more robust one: **late beats early, and early versus middle is not
-resolved at this trial count.**
+At 128K and B=2048, late needles do better and the advantage sits in the last
+chunks that escape compression rather than spreading as a gradient. An earlier
+6-needle run of this same grid read 0.17 / 0.50 / 0.83 and looked cleanly
+monotone; at 12 needles it is 0.42 / 0.33 / 0.83, so the monotone reading was
+noise.
+
+**And this does not replicate at 64K, so it is not a depth law.** The 64K ladder
+below runs the same three depths at three budgets with the same 12 needles, and
+*no* depth contrast reaches significance at any budget — trends p = 0.40 / 0.91 /
+1.00. Worse for the story, the ordering flips: depth 0.9 is the **worst** depth at
+every 64K budget and the **best** at 128K/B=2048. One significant depth effect at
+one length and one budget, contradicted in ordering at another length, is not a
+finding. **No depth law is established.** What is established is the budget axis,
+which is significant at both lengths and never reverses.
 
 #### A power limit worth stating once
 
@@ -517,19 +525,59 @@ six discordant pairs. Every 6-trial cell in this program is therefore incapable 
 reaching significance on its own, which is the real reason the trial count moved
 to 12 rather than any particular result.
 
+#### 6.5% keep is an operating point, not a 128K coincidence
+
+The 128K result says accuracy tracks the keep *fraction*. That is only worth
+anything if it holds at another length. 64K, 12 paired needles, e=1.0, YaRN ×4,
+query-aware — `results/pk_64k_ladder.json`:
+
+| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1,024 | 1.6% | 0.50 | 0.75 | 0.58 | 0.61 | 1621 MiB |
+| 2,048 | 3.3% | 0.83 | 0.92 | 0.67 | 0.81 | 1742 MiB |
+| 4,096 | 6.5% | **1.00** | **1.00** | **0.92** | **0.97** | 2002 MiB |
+
+Within-needle permutation trend across the three budgets: p = 0.0015 at depth 0.1,
+0.0168 at depth 0.9, 0.0369 at depth 0.5. The 1024 → 4096 contrast moves 13
+needles across the three depths with **zero reversals**.
+
+Put the two lengths on the same axis and length nearly drops out:
+
+| keep | 64K | 128K |
+|---:|---:|---:|
+| 1.6% | 0.61 | 0.53 |
+| 6.5% | **0.97** | **0.92** |
+
+**Doubling the context costs about 0.05. Quadrupling the keep fraction gains about
+0.36.** The keep fraction is the controlling variable and the length is nearly a
+free parameter — which is the strongest form the compression claim has taken in
+this program, and the first time it has been checked at two lengths with matched
+needles.
+
+Missing from that table: 32K under the paired design. The 0.89 quoted for 32K
+elsewhere in this document is a 6-trial unpaired run and is not comparable with
+these rows.
 ### Where this leaves long context
 
-| n | budget | keep | accuracy | peak |
-|---:|---:|---:|---:|---:|
-| 32,768 | 0 (full cache) | 1.0 | **1.00** | 4699 MiB |
-| 32,768 | 2048 | 0.0625 | **0.89** | 1744 MiB |
-| 65,536 | 2048 | 0.031 | **0.89** | 1742 MiB |
-| 131,072 | 2048 | 0.0156 | 0.53 | 1743 MiB |
-| 131,072 | 8192 | 0.0625 | **0.92** | 2521 MiB |
+| n | budget | keep | accuracy | peak | needles |
+|---:|---:|---:|---:|---:|---:|
+| 32,768 | 0 (full cache) | 100% | **1.00** | 4699 MiB | 3, unpaired |
+| 32,768 | 2048 | 6.3% | 0.89 | 1744 MiB | 6, unpaired |
+| 65,536 | 1024 | 1.6% | 0.61 | 1621 MiB | **12, paired** |
+| 65,536 | 2048 | 3.3% | 0.81 | 1742 MiB | **12, paired** |
+| 65,536 | 4096 | 6.5% | **0.97** | 2002 MiB | **12, paired** |
+| 131,072 | 2048 | 1.6% | 0.53 | 1743 MiB | **12, paired** |
+| 131,072 | 8192 | 6.5% | **0.92** | 2521 MiB | **12, paired** |
 
-**128K retrieval works at a 16× compression ratio on an 8 GiB card**, at the same
-keep fraction that works at 32K. Read the 32K rows together: full cache 1.00
-against 0.89 at keep 0.0625 is the cost of eviction *against a measured control*.
+**Retrieval at 64K and 128K works at a ~15× compression ratio on an 8 GiB card,**
+and at matched keep fraction the two lengths differ by 0.05 while the keep
+fraction itself moves accuracy by 0.36. Read the 32K rows together for the one
+place a measured control exists: full cache 1.00 against 0.89 at 6.3% keep is the
+cost of eviction *against a measurement* rather than against an assumption.
+
+The two 32K rows are the weakest in the table — 3 and 6 unpaired needles against
+12 paired ones below them. They are not comparable with the 64K and 128K rows and
+are marked accordingly rather than quietly averaged in.
 
 All of it is *retrieval*; multi-hop reasoning at length remains untested, and the
 frozen demo suite indicates that is where this checkpoint is genuinely weak.

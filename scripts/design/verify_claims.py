@@ -287,6 +287,23 @@ CLAIMS = [
      lambda: pk("pk_128k_grid12.json", None, 2048), 5e-4, "0.53", "findings"),
     ("32K uncompressed reference", 1.0000,
      lambda: pk("passkey_ceiling.json", None, 0, 32768), 5e-4, "1.00", "findings"),
+
+    # --- 64K ladder: the keep fraction replicated at a second length --------
+    # The point of these is the CONTRAST with the 128K rows above at matched keep:
+    # 1.6% -> 0.61 / 0.53 and 6.5% -> 0.97 / 0.92. If either pair drifts apart the
+    # claim that length is nearly a free parameter has to be restated.
+    ("64K B=1024 mean over depths", 0.6111,
+     lambda: pk("pk_64k_ladder.json", None, 1024), 5e-4, "0.61", "findings"),
+    ("64K B=2048 mean over depths", 0.8056,
+     lambda: pk("pk_64k_ladder.json", None, 2048), 5e-4, "0.81", "findings"),
+    ("64K B=4096 mean over depths", 0.9722,
+     lambda: pk("pk_64k_ladder.json", None, 4096), 5e-4, "0.97", "findings"),
+    ("64K B=4096 depth 0.1", 1.0000,
+     lambda: pk("pk_64k_ladder.json", 0.1, 4096), 5e-4, "1.00", "findings"),
+    ("64K B=4096 depth 0.9", 0.9167,
+     lambda: pk("pk_64k_ladder.json", 0.9, 4096), 5e-4, "0.92", "findings"),
+    ("64K B=1024 depth 0.9", 0.5833,
+     lambda: pk("pk_64k_ladder.json", 0.9, 1024), 5e-4, "0.58", "findings"),
 ]
 
 
