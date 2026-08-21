@@ -97,7 +97,7 @@ def concentration(k: int):
 
 
 # (label, documented value, how to recompute, tolerance, text that must appear,
-#  which document is supposed to state it)
+#  which document(s) must state it -- comma-separated means "all of these")
 CLAIMS = [
     ("quality: no eviction", 0.66939,
      lambda: summary(KVS, "off"), 5e-6, "0.66939", "findings"),
@@ -147,20 +147,20 @@ CLAIMS = [
     # judge, so an edit that moves a candidate without its reference fails here.
     ("calib: keep 0.75 relerr", 0.00937,
      lambda: probe("store_probe.json", "calibration", "keep0.75", "mean"),
-     5e-6, "0.00937", "negative"),
+     5e-6, "0.00937", "findings,negative"),
     ("calib: keep 0.50 relerr", 0.03729,
      lambda: probe("store_probe.json", "calibration", "keep0.50", "mean"),
-     5e-6, "0.03729", "negative"),
+     5e-6, "0.03729", "findings,negative"),
     ("calib: keep 0.25 relerr", 0.11381,
      lambda: probe("store_probe.json", "calibration", "keep0.25", "mean"),
-     5e-6, "0.11381", "negative"),
+     5e-6, "0.11381", "findings,negative"),
 
     ("store: int8 K per-channel", 0.00774,
      lambda: probe("store_probe.json", "calibration", "int8", "mean"),
-     5e-6, "0.00774", "negative"),
+     5e-6, "0.00774", "findings,negative"),
     ("store: int8 both per-token", 0.04134,
      lambda: probe("store_probe.json", "calibration", "int8_tokenwise", "mean"),
-     5e-6, "0.04134", "negative"),
+     5e-6, "0.04134", "findings,negative"),
     ("store: int4 sinks quantised too", 0.12804,
      lambda: probe("store_probe.json", "calibration", "int4_notsink", "mean"),
      5e-6, "0.12804", "negative"),
@@ -179,27 +179,27 @@ CLAIMS = [
     ("store: unhealed 8->2 KV merge", 1.0206,
      lambda: probe("store_probe.json", "calibration", "gqa2kv_merge", "mean"),
      5e-5, "1.0206", "negative"),
-    ("store: CLA held-out relerr", 0.1720, cla_mean, 5e-5, "0.1720", "negative"),
+    ("store: CLA held-out relerr", 0.1720, cla_mean, 5e-5, "0.1720", "findings,negative"),
 
     # --- significance-gated mixed precision (the survivor) ------------------
     ("mixed: pure int8 @4K relerr", 0.00762,
      lambda: probe("mixed_precision.json", "pure_int8@4K", "relerr"),
-     5e-6, "0.00762", "negative"),
+     5e-6, "0.00762", "findings,negative"),
     ("mixed: pure int4 @4K relerr", 0.11179,
      lambda: probe("mixed_precision.json", "pure_int4@4K", "relerr"),
-     5e-6, "0.11179", "negative"),
+     5e-6, "0.11179", "findings,negative"),
     ("mixed: top-25% @4K relerr", 0.00693,
      lambda: probe("mixed_precision.json", "mix_p0.25@4K", "relerr"),
-     5e-6, "0.00693", "negative"),
+     5e-6, "0.00693", "findings,negative"),
     ("mixed: top-25% @4K factor", 3.041,
      lambda: probe("mixed_precision.json", "mix_p0.25@4K", "factor"),
-     5e-4, "3.04", "negative"),
+     5e-4, "3.04", "findings,negative"),
     ("mixed: pure int8 @4K factor", 1.936,
      lambda: probe("mixed_precision.json", "pure_int8@4K", "factor"),
-     5e-4, "1.94", "negative"),
+     5e-4, "1.94", "findings,negative"),
     ("mixed: pure int4 @4K factor", 3.755,
      lambda: probe("mixed_precision.json", "pure_int4@4K", "factor"),
-     5e-4, "3.75", "negative"),
+     5e-4, "3.75", "findings,negative"),
 ]
 
 
@@ -224,7 +224,9 @@ def main() -> None:
             got = None
             if args.verbose:
                 print(f"  {label}: {type(e).__name__}: {e}")
-        in_doc = needle in text[which]
+        # `which` may name several documents; the number has to appear in each,
+        # so a figure duplicated across docs cannot drift in one copy only.
+        in_doc = all(needle in text[w] for w in which.split(","))
         ok = got is not None and abs(doc_val - got) <= tol and in_doc
         bad += not ok
         shown = f"{got:>12.5f}" if isinstance(got, (int, float)) else f"{'MISSING':>12}"

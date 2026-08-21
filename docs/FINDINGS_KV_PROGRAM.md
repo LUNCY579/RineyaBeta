@@ -384,6 +384,74 @@ trial in 18 between runs, which is the noise floor to keep in mind for every
 number in this section.
 
 
+## 4d. What to STORE, not just what to keep
+
+Eviction answers *which* positions survive. This answers *in what form*, and the
+two costs compose on the same cache, so they have to be measured on the same
+scale. Code `experiments/kv_significance/src/{store_probe,mixed_precision}.py`,
+data `results/{store_probe,mixed_precision}.json`.
+
+### The scale
+
+Attention-output relative error is uninterpretable on its own. So the probe
+computes, in one pass on the same 24 rag_dev prompts across all 28 layers, three
+perturbations whose end-to-end cost is already on record in §2:
+
+| reference | attention relerr | rag_dev quality |
+|---|---:|---:|
+| keep 0.75 | 0.00937 | −0.01262 |
+| keep 0.50 | 0.03729 | −0.05538 |
+| keep 0.25 | 0.11381 | **−0.33076** |
+
+A candidate below 0.00937 is cheaper than the eviction setting already in use;
+one near 0.11381 costs a third of the benchmark.
+
+### The result that matters: the grouping, not the bit width
+
+| scheme | attention relerr | store factor |
+|---|---:|---:|
+| int8, K per-channel g=128, V per-token | **0.00774** | 1.94× |
+| int8, K and V both per-token | 0.04134 | 1.94× |
+
+Same bit width, same bytes, **5.3× the error**. The good variant sits below the
+keep-0.75 reference; the naive one lands between keep-0.50 and keep-0.25. Nothing
+about "int8" predicts which you get.
+
+### The survivor: significance-gated mixed precision
+
+The cache is not uniform — 46.3% of attention mass is on the first 4 tokens — and
+eviction already computes a per-position, per-KV-head score saying where the rest
+goes. That score is free here. Sinks stay bf16, the top 25% by score go int8, the
+rest int4. Bytes are counted from the real layout including scale overhead
+(bf16 4096, int8 2112, int4 1088 B per token per layer), 4K haystack context:
+
+| scheme | attention relerr | store factor |
+|---|---:|---:|
+| pure int8 | 0.00762 | 1.94× |
+| **mixed, top 25% by significance** | **0.00693** | **3.04×** |
+| pure int4 | 0.11179 | 3.75× |
+
+**Lower error than pure int8 at 1.6× more compression.** It is a strict Pareto
+improvement over both uniform schemes, it reuses a signal that has to be computed
+anyway, and it composes with eviction rather than competing with it. Nothing in
+this program is implemented in the live cache path yet — this is the strongest
+unexploited result here.
+
+### What the same probe killed
+
+int4 uniformly, per-token int8 grouping, cross-layer KV sharing (held-out relerr
+0.1720 with a dense adapter that costs 4.19M parameters to remove 2.10M), and any
+latent scheme that treats K and V symmetrically (at equal rank, truncating V
+costs 2.3× what truncating K costs). Full tables and reasoning in
+[`NEGATIVE_RESULTS.md`](NEGATIVE_RESULTS.md) §5.
+
+**Not established:** none of these numbers is an end-to-end quality measurement.
+The calibration makes them interpretable; it does not make them equivalent. See
+§7.
+
+
+---
+
 ---
 
 ## 5. Every bug found, and how it was caught
@@ -441,15 +509,34 @@ the condition is visible in the artefact rather than only in a log.
 
 ## 7. What is not established
 
-- **Nothing above 32K.** No uncompressed reference fits on this host (64K needs
-  8,072 MiB, 128K needs 15,240 MiB against 8,188 MiB total). All 64K/128K
-  statements in this program are memory arithmetic, not behaviour.
-- **Nothing at long context, full stop.** Every quality number comes from prompts
-  of 41–330 tokens. The regime eviction exists for — tens of thousands of tokens
-  with real redundancy — is unreachable: nothing in this repository exceeds
-  ~2.7K tokens.
+**Two entries here were retired rather than deleted.** "Nothing above 32K" and
+"nothing at long context, full stop" were true when written and are false now —
+chunked prefill (§4a) and passkey retrieval (§4b, §4c) reach 128K on this host.
+They are recorded as superseded because a list of open questions that quietly
+drops the ones that got answered is not auditable.
+
+What is genuinely not established:
+
+- **Reasoning at length.** Every long-context result in this program is
+  *retrieval* — a 5-digit key in repetitive filler, chosen precisely because it
+  isolates retrieval from comprehension. Multi-hop reasoning over a long context
+  has never been measured here, and the frozen demo suite indicates that is where
+  this checkpoint is genuinely weak. This is the largest open gap.
+- **Perplexity at length.** Never measured, at any length, under any policy.
+- **Short-context regression under long-context settings.** The quality sweep
+  (§2) ran without YaRN; the long-context runs (§4b, §4c) ran with YaRN ×4.
+  YaRN rescales RoPE globally, so the two are not the same model and the cost of
+  that scaling to ordinary short prompts is unmeasured.
+- **End-to-end cost of any storage format.** §4d measures attention-output
+  relative error against calibrated reference points; it does not run the
+  benchmark. The calibration makes the number interpretable, not equivalent.
+- **Any low-rank or MLA scheme with a FIXED basis.** The rank-512 result in §4d
+  uses a per-prompt SVD — an oracle fitted to the prompt it is applied to. The
+  gap between that and a learned projection is the entire engineering problem and
+  it is not measured.
+- **Whether an interior decay exponent helps at 128K.** Under measurement; the
+  two endpoints are known and neither is uniformly good (§4c).
 - **No throughput claim below 2×**, per the thermal band.
-- **Peak memory is unimproved** and cannot be claimed without chunked prefill.
 - **Generality.** The 46.3% sink share, the per-layer ρ curves and the
   sink-pinning rule are properties of *this* checkpoint, measured on 8 prompts.
 
