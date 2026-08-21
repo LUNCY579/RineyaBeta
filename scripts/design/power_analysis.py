@@ -31,38 +31,104 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import math
 
 import numpy as np
 
-# Two-sided t critical values at alpha = 0.05, df 1..30; normal beyond.
-T_CRIT_95 = {
-    1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365,
-    8: 2.306, 9: 2.262, 10: 2.228, 11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145,
-    15: 2.131, 16: 2.120, 17: 2.110, 18: 2.101, 19: 2.093, 20: 2.086,
-    21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060, 26: 2.056,
-    27: 2.052, 28: 2.048, 29: 2.045, 30: 2.042,
-}
+# Critical values are computed exactly by t_crit() below. The hard-coded table
+# that used to live here only covered the unadjusted alpha = 0.05 case and was
+# scaled by a normal-quantile ratio for multiplicity, which was wrong.
+
+
+def _betacf(a: float, b: float, x: float) -> float:
+    """Continued fraction for the incomplete beta function (Lentz's method)."""
+    tiny = 1e-300
+    qab, qap, qam = a + b, a + 1.0, a - 1.0
+    c, d = 1.0, 1.0 - qab * x / qap
+    if abs(d) < tiny:
+        d = tiny
+    d = 1.0 / d
+    h = d
+    for m in range(1, 300):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1.0 + aa * d
+        c = 1.0 + aa / c
+        if abs(d) < tiny:
+            d = tiny
+        if abs(c) < tiny:
+            c = tiny
+        d = 1.0 / d
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1.0 + aa * d
+        c = 1.0 + aa / c
+        if abs(d) < tiny:
+            d = tiny
+        if abs(c) < tiny:
+            c = tiny
+        d = 1.0 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < 3e-16:
+            break
+    return h
+
+
+def _betainc(a: float, b: float, x: float) -> float:
+    """Regularised incomplete beta I_x(a, b)."""
+    if x <= 0.0:
+        return 0.0
+    if x >= 1.0:
+        return 1.0
+    lbeta = (math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b)
+             + a * math.log(x) + b * math.log1p(-x))
+    if x < (a + 1.0) / (a + b + 2.0):
+        return math.exp(lbeta) * _betacf(a, b, x) / a
+    return 1.0 - math.exp(lbeta) * _betacf(b, a, 1.0 - x) / b
+
+
+def t_sf2(t: float, df: int) -> float:
+    """Two-sided tail P(|T| > t) for Student t with `df` degrees of freedom."""
+    if t <= 0:
+        return 1.0
+    return _betainc(df / 2.0, 0.5, df / (df + t * t))
 
 
 def t_crit(df: int, n_comparisons: int = 1) -> float:
-    """Two-sided 5% critical value, Bonferroni-adjusted across a family.
+    """Two-sided critical value at alpha = 0.05, Bonferroni-adjusted over a family.
 
-    Holm is uniformly more powerful and is what the analysis will use; Bonferroni
-    here makes the reported MDE conservative, which is the right direction for a
-    planning number.
+    Computed by inverting the exact t distribution, because the obvious shortcut
+    is wrong in the direction that matters. This function used to scale the
+    unadjusted t value by a ratio of NORMAL quantiles (zc * t / 1.96), which is
+    valid only as df -> infinity and whose error grows as 1/df -- worst at
+    exactly the df a k=3 seed design lives at. Measured on 400k null
+    simulations, that gave alpha = 0.0340 against a 0.0167 target at df=2, m=3,
+    i.e. a family-wise error of 0.098 for a three-member family, roughly double
+    the declared 0.05, and every training-level MDE derived from it was 7-43%
+    too small.
+
+    scipy is genuinely absent from the environment lock, hence the stdlib
+    implementation rather than scipy.stats.t.ppf.
     """
-    if n_comparisons > 1:
-        # Sidak-equivalent df inflation is not tabulated; step up conservatively
-        # by widening alpha/m through the normal approximation for df > 30 and
-        # by a scaled table lookup otherwise.
-        z = {1: 1.960, 2: 2.241, 3: 2.394, 4: 2.498, 5: 2.576, 6: 2.638,
-             8: 2.734, 10: 2.807, 12: 2.865, 16: 2.955, 20: 3.023,
-             24: 3.078, 30: 3.144, 40: 3.230}
-        keys = sorted(z)
-        zc = z[min(keys, key=lambda k: abs(k - n_comparisons))]
-        base = T_CRIT_95.get(df, 1.960)
-        return zc * base / 1.960
-    return T_CRIT_95.get(df, 1.960)
+    alpha = 0.05 / max(1, n_comparisons)
+    if df >= 10 ** 6:                       # normal limit
+        lo, hi = 0.0, 40.0
+        for _ in range(200):
+            mid = 0.5 * (lo + hi)
+            if math.erfc(mid / math.sqrt(2.0)) > alpha:
+                lo = mid
+            else:
+                hi = mid
+        return 0.5 * (lo + hi)
+    lo, hi = 0.0, 400.0
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if t_sf2(mid, df) > alpha:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
 
 
 def run_level_power(

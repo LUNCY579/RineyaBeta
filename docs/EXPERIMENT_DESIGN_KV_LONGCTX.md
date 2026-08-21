@@ -457,17 +457,29 @@ seeds, 400 items:
 
 | σ_run | k=3 | k=4 | k=5 | k=6 | k=8 |
 |---|---|---|---|---|---|
-| 0.5pp | 7.91pp | 5.10 | 3.98 | 3.38 | 2.72 |
-| 1.0 | 8.58 | 5.54 | 4.37 | 3.68 | 2.95 |
-| 1.5 | 9.61 | 6.24 | 4.90 | 4.16 | 3.33 |
-| 2.0 | 10.94 | 7.08 | 5.55 | 4.73 | 3.80 |
-| 3.0 | 14.06 | 9.08 | 7.13 | 6.03 | 4.83 |
+| 0.5pp | 11.35pp | 6.25 | 4.57 | 3.73 | 2.90 |
+| 1.0 | 12.33 | 6.80 | 5.01 | 4.09 | 3.16 |
+| 1.5 | 13.92 | 7.65 | 5.61 | 4.60 | 3.56 |
+| 2.0 | 15.79 | 8.70 | 6.38 | 5.24 | 4.05 |
+| 3.0 | 20.25 | 11.12 | 8.17 | 6.73 | 5.17 |
 
-**Three seeds gives 2 degrees of freedom and a critical value of 4.303.** Four
-gives 3.182; five gives 2.776. Going from k=3 to k=4 cuts the MDE by ~35% for the
-cost of one extra run — by far the best-value compute in the entire program.
-At k=3 and σ_run=1.5pp the study can only detect a 9.6-point effect; effects that
-large are not the interesting ones.
+**Three seeds gives 2 degrees of freedom, and under the m=3 multiplicity family
+the critical value is 7.649** — not 4.303, which is the *unadjusted* value.
+k=4 gives 4.857, k=5 gives 3.961.
+
+Going from k=3 to k=4 cuts the MDE by ~45% for the cost of one extra run — by far
+the best-value compute in the entire program. **At k=3 and σ_run=1.5pp the study
+can only detect a 13.9-point effect**; effects that large are not the interesting
+ones.
+
+> **Corrected.** These figures were previously 7–43% smaller, because `t_crit`
+> applied the multiplicity adjustment by scaling the t value by a ratio of
+> *normal* quantiles. That is valid only as df→∞ and its error grows as 1/df —
+> worst at exactly the df a k=3 design lives at. Measured on 400k null
+> simulations it gave α = 0.0340 against a 0.0167 target, i.e. FWER 0.098 for a
+> three-member family, about double the declared 0.05. `t_crit` now inverts the
+> exact t distribution (validated against published tables to 4 decimals; FWER
+> re-measured at 0.0492). The headline was 9.6pp and is 13.9pp.
 
 And more items cannot buy this back. The floor as items → ∞:
 
