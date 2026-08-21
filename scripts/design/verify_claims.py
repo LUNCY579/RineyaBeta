@@ -240,10 +240,17 @@ CLAIMS = [
      5e-4, "0.22", "findings"),
     ("decay: e=1 pooled @128K", 0.3889, lambda: pk("pk_128k_e1.0.json"),
      5e-4, "0.39", "findings"),
-    ("decay: e=1 at depth 0.9", 0.8333, lambda: pk("pk_128k_e1.0.json", 0.9),
-     5e-4, "5/6", "findings,negative"),
-    ("decay: e=0 at depth 0.9", 0.1667, lambda: pk("pk_128k_e0.0.json", 0.9),
-     5e-4, "1/6", "findings,negative"),
+    # The 6-trial arms these used to pin are superseded by the 12-needle paired
+    # sweep; the old cells are still on disk but their prose is gone from both
+    # documents, which is exactly what this check is for.
+    ("decay paired: e=0 at depth 0.9", 0.0000,
+     lambda: pk("pk_128k_pe0.0.json", 0.9), 5e-4, "0.00", "findings"),
+    ("decay paired: e=1 at depth 0.9", 0.8333,
+     lambda: pk("pk_128k_pe1.0.json", 0.9), 5e-4, "0.83", "findings"),
+    ("decay paired: e=0 mean", 0.2222,
+     lambda: pk("pk_128k_pe0.0.json"), 5e-4, "0.22", "findings"),
+    ("decay paired: e=1 mean", 0.5278,
+     lambda: pk("pk_128k_pe1.0.json"), 5e-4, "0.53", "findings"),
     # The pooled depth curve that used to be checked here is WITHDRAWN: the five
     # arms share one key sequence, so "n = 30 per depth" was five repetitions of
     # six needles, and depth was confounded with needle identity. A withdrawn

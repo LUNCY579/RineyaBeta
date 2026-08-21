@@ -216,6 +216,15 @@ meaningful. And no quality number anywhere in this program comes from a prompt
 longer than 330 tokens. Chunked prefill removes the memory obstacle to measuring
 long-context quality; it does not measure it.
 
+> **Superseded, in the two ways that matter.** Both italicised claims were true
+> when written and are false now. YaRN ×4 (training-free) extends the usable range
+> to 163,840, and output at 128K is coherent rather than garbage — §4b shows the
+> failure mode changing from digit-noise to fluent text. And §4b–§4c measure
+> behaviour to 128K, so there *are* quality numbers far above 330 tokens: they are
+> retrieval accuracy rather than the rag_dev scorer, but they are measurements.
+> What still stands is the sentence's actual point — this section establishes a
+> memory identity, and a memory identity is not a quality result.
+
 
 ---
 
@@ -265,9 +274,19 @@ at once, and is withdrawn.
 
 Two consequences.
 
-**There is now a measured baseline at 32K.** Eviction to a 2048-token budget
-scores 0.89 there, so its cost is 0.11 *against a measurement* rather than against
-an assumption. Every earlier statement of eviction cost at 32K was uncontrolled.
+**There is now a measured uncompressed baseline at 32K: 1.00 at every depth.**
+
+It does **not** yet give the cost of eviction, and an earlier version of this
+paragraph claimed it did. The reference run has `rope_scaling: null`
+(`passkey_ceiling.json`, `yarn: None`) while every 32K eviction number here was
+taken with YaRN ×4 (`pk_32k_sum.json`, `yarn: 4.0`). YaRN rescales RoPE globally,
+so 1.00 and 0.89 come from two different models and their difference is not
+attributable to eviction. Subtracting them is the same class of error as the
+unmatched depth sets above.
+
+What is needed is one run: the full cache at 32K **with YaRN ×4**, at `--cap-mib`
+above the 6144 default. Until then the eviction cost at 32K remains uncontrolled,
+as it was before — the baseline exists but is not yet comparable.
 
 **64K remains out of reach, and now for a stated reason rather than a guess.**
 Its cache alone is exactly 7,168 MiB (28 × 8 × 128 × 2 × 2 bytes × 65,536)
@@ -365,17 +384,30 @@ Cost: one forward over ~10 question tokens per chunk boundary.
 
 ### The effect, 32K, budget 2048 (keep 0.0625), YaRN ×4, 3 trials
 
+**Corrected.** This table previously read `0.20 → 0.87` and called it the largest
+quality effect in the program. Both endpoints came from runs with *different depth
+sets*: the blind arm (`pk_blind.json`) was measured at three depths and the 0.87
+came from a five-depth query-aware run (`pk_sum.json`). Averaging a 3-depth arm
+against a 5-depth arm is precisely the error this document criticises two sections
+below. The 0.20 was never in any committed file — it is a 5-depth mean over a
+3-depth run, with the two missing cells silently counted as zero.
+
+The depth-matched pair, both at three depths, 3 trials, YaRN ×4
+(`pk_blind.json` vs `pk_aware.json`):
+
 | depth | blind | query-aware |
 |---:|---:|---:|
 | 0.1 | 0.00 | **1.00** |
-| 0.3 | 0.00 | 0.67 |
-| 0.5 | 0.00 | 0.67 |
-| 0.7 | 0.00 | **1.00** |
+| 0.5 | 0.00 | 0.33 |
 | 0.9 | 1.00 | 1.00 |
-| **mean** | **0.20** | **0.87** |
+| **mean** | **0.33** | **0.78** |
 
-**0.20 → 0.87 at a 16× compression ratio.** This is the single largest quality
-effect measured anywhere in the program.
+**0.33 → 0.78 at a 16× compression ratio**, which is still the largest quality
+effect measured in this program, and still driven by the same mechanism: at depth
+0.1 a blind run scores zero and an aware run scores 1.00.
+
+Both arms are 3 trials and predate the pairing fix, so they are descriptive. The
+claim rests on the size of the gap at depth 0.1, not on the mean.
 
 ### Sum vs mean: a ranking bug, a wrong fix, and a corrected finding
 
@@ -406,45 +438,61 @@ since been re-run matched at 6 trials × 3 depths and the sum arm is **0.22**, n
 0.44. The per-depth figures that circulated with it (sum 1.00 / 0.33 / 0.00) were
 noise at n=3 and are withdrawn; the matched values are 0.33 / 0.17 / 0.17.
 
-### The decay exponent: one real effect, and one thing it cannot touch
+### The decay exponent, re-measured under the paired design
 
-`Policy.count_exponent` generalises the boolean to `sum / count**e`, so e=0 and
-e=1 are the two endpoints above and the interior is reachable. All five arms
-matched — 128K, budget 2048 (1.6% keep), YaRN ×4, query-aware, 6 trials × 3
-depths, same committed code. Hits out of 6:
+An earlier version of this section reported Cochran–Armitage trend tests
+(z = +2.840, p = 0.0045 at depth 0.9; p = 1.0000 at depth 0.5) and a Fisher
+contrast (p = 0.4705, "not established") over five 6-trial arms. **Those four
+p-values are withdrawn.** Cochran–Armitage and Fisher are independent-groups
+tests, and the arms are paired on needles — this document says so two sections
+below. The counts were fine; the inference used the wrong model, and at 6 trials
+could not have reached significance anyway (p = 2/2ⁿ floors at 0.0625).
 
-| e | depth 0.1 | 0.5 | 0.9 | pooled |
+Re-run with **12 needles identical in every cell**, 128K, B=2048, YaRN ×4,
+query-aware. `results/pk_128k_pe{0.0,0.25,0.5,0.75,1.0}.json`:
+
+| e | depth 0.1 | 0.5 | 0.9 | mean |
 |---:|---:|---:|---:|---:|
-| 0.00 (sum) | 2/6 | 1/6 | 1/6 | 4/18 |
-| 0.25 | 3/6 | 1/6 | 1/6 | 5/18 |
-| 0.50 | 3/6 | 0/6 | 4/6 | 7/18 |
-| 0.75 | 2/6 | 1/6 | 4/6 | 7/18 |
-| 1.00 (mean) | 1/6 | 1/6 | **5/6** | 7/18 |
+| 0.00 (raw sum) | 0.58 | 0.08 | **0.00** | 0.22 |
+| 0.25 | 0.67 | 0.08 | 0.08 | 0.28 |
+| 0.50 | 0.67 | 0.00 | 0.33 | 0.33 |
+| 0.75 | 0.58 | 0.17 | 0.67 | 0.47 |
+| 1.00 (mean) | 0.42 | 0.33 | **0.83** | **0.53** |
 
-Bonferroni over the three depth-wise trend tests, α = 0.0167:
+Within-needle permutation trend across the five exponents, Bonferroni over three
+depths (α = 0.0167):
 
-| claim | test | result |
-|---|---|---|
-| accuracy rises with e at **depth 0.9** | Cochran–Armitage | z = **+2.840**, p = **0.0045** — survives |
-| accuracy rises with e at depth 0.5 | Cochran–Armitage | z = +0.000, p = 1.0000 |
-| accuracy rises with e at depth 0.1 | Cochran–Armitage | z = −0.804, p = 0.4216 |
-| best arm beats worst overall | Fisher, 7/18 vs 4/18 | p = 0.4705 — **not established** |
+| depth | trend p | exact McNemar, e=0 → e=1 |
+|---:|---:|---|
+| 0.9 | **< 0.0001** | 0.00 → 0.83, **+10 / −0**, p = 0.0020 |
+| 0.5 | **0.0125** | 0.08 → 0.33, +3 / −0, p = 0.2500 |
+| 0.1 | 0.9762 | 0.58 → 0.42, +0 / −2, p = 0.5000 |
 
-**The exponent is a real control on late-context retrieval and does exactly
-nothing for mid-context.** Overall accuracy does not improve significantly; the
-knob redistributes it from early depths to late ones.
+Pooled over all 36 needle-positions, sum → mean is **0.22 → 0.53, +13 / −2
+discordant, exact McNemar p = 0.0074.**
 
-That is the mechanism, not a coincidence. A depth-0.9 needle sits in a late chunk,
-has survived few compression rounds, and carries a small accumulated sum purely
-because it was scored fewer times — dividing by `count**e` restores it. A
-depth-0.5 needle has been through roughly fifteen rounds, and **if it was dropped
-in an early one it is gone permanently**: eviction is not reversible, so no
-ranking statistic can recover a position that is no longer in the cache.
+**Two of the old conclusions were wrong, and the paired data reverses both.**
 
-So the mid-context failure is not a ranking problem. That is the sweep's real
-result, and it is worth more than a tuned exponent would have been: it removes
-an entire class of fix from consideration.
+- "The best arm does not beat the worst overall (p = 0.4705, not established)" —
+  **wrong.** Mean ranking beats sum ranking by 0.31 overall at p = 0.0074. The
+  earlier test was underpowered and mis-specified, not the effect absent.
+- "Exactly no trend at depth 0.5 (p = 1.0000)" — **wrong.** The trend is there
+  (p = 0.0125) and survives correction; it was hidden by six trials and by an
+  independent-groups test on paired data.
 
+What survives, and much more strongly: **the exponent is a real and large control
+on late-context retrieval.** At depth 0.9 raw-sum ranking scores **zero of twelve**
+and mean ranking scores ten of twelve, with every one of ten discordant needles
+pointing the same way. That is the mechanism doing exactly what it should — a
+late-arriving needle carries a small accumulated sum only because it was scored
+fewer times, and dividing by `count**e` removes precisely that artefact.
+
+The cost is real but smaller: at depth 0.1 the mean is *worse* (0.58 → 0.42,
+trend p = 0.9762 in the increasing direction, i.e. a non-significant decrease).
+Long-accumulated early positions do carry genuine evidence that normalising
+discards. **e = 1 is the right default and the interior is not worth tuning** —
+the monotone gain in the mean column runs 0.22 / 0.28 / 0.33 / 0.47 / 0.53 with
+no interior optimum.
 ### RETRACTED — the depth curve at 128K was confounded with needle identity
 
 This section reported a pooled depth curve of 0.367 / 0.133 / 0.500 over "n = 30
@@ -476,7 +524,7 @@ Re-measured under the paired design. **12 needles, identical in every cell**,
 | budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
 |---:|---:|---:|---:|---:|---:|---:|
 | 2,048 | 1.6% | 0.42 | 0.33 | 0.83 | 0.53 | 1743 MiB |
-| 8,192 | 6.3% | **1.00** | **0.83** | **0.92** | **0.92** | 2521 MiB |
+| 8,192 | 6.5% | **1.00** | **0.83** | **0.92** | **0.92** | 2521 MiB |
 
 The budget contrast, per depth, exact McNemar on the needles that disagreed:
 
@@ -491,7 +539,7 @@ does not. What is not a matter of thresholds: **14 discordant needles across the
 three depths, all 14 favouring the larger budget, zero reversals.**
 
 **So the 128K story this program has been telling was about B=2048, not about
-128K.** At 6.3% keep the checkpoint retrieves at 0.92 across depths in 2,521 MiB —
+128K.** At 6.5% keep the checkpoint retrieves at 0.92 across depths in 2,521 MiB —
 matching its own 32K and 64K numbers. The length wall was a budget wall.
 
 #### What the depth axis actually does
@@ -510,8 +558,11 @@ noise.
 **And this does not replicate at 64K, so it is not a depth law.** The 64K ladder
 below runs the same three depths at three budgets with the same 12 needles, and
 *no* depth contrast reaches significance at any budget — trends p = 0.40 / 0.91 /
-1.00. Worse for the story, the ordering flips: depth 0.9 is the **worst** depth at
-every 64K budget and the **best** at 128K/B=2048. One significant depth effect at
+1.00. Worse for the story, the ordering is not even stable within 64K: depth 0.9
+is the worst depth at B=2048 (0.67 against 0.83 and 0.92) and at B=4096 (0.92
+against 1.00 and 1.00), but at B=1024 the worst depth is 0.1 (0.50 against 0.58
+for depth 0.9). And at 128K/B=2048 depth 0.9 is the **best**. One significant
+depth effect at
 one length and one budget, contradicted in ordering at another length, is not a
 finding. **No depth law is established.** What is established is the budget axis,
 which is significant at both lengths and never reverses.
@@ -561,8 +612,8 @@ these rows.
 
 | n | budget | keep | accuracy | peak | needles |
 |---:|---:|---:|---:|---:|---:|
-| 32,768 | 0 (full cache) | 100% | **1.00** | 4699 MiB | 3, unpaired |
-| 32,768 | 2048 | 6.3% | 0.89 | 1744 MiB | 6, unpaired |
+| 32,768 | 0 (full cache) | 100% | **1.00** | 4699 MiB | 3, unpaired, **no YaRN** |
+| 32,768 | 2048 | 6.3% | 0.89 | 1744 MiB | 6, unpaired, YaRN ×4 |
 | 65,536 | 1024 | 1.6% | 0.61 | 1621 MiB | **12, paired** |
 | 65,536 | 2048 | 3.3% | 0.81 | 1742 MiB | **12, paired** |
 | 65,536 | 4096 | 6.5% | **0.97** | 2002 MiB | **12, paired** |
@@ -572,8 +623,10 @@ these rows.
 **Retrieval at 64K and 128K works at a ~15× compression ratio on an 8 GiB card,**
 and at matched keep fraction the two lengths differ by 0.05 while the keep
 fraction itself moves accuracy by 0.36. Read the 32K rows together for the one
-place a measured control exists: full cache 1.00 against 0.89 at 6.3% keep is the
-cost of eviction *against a measurement* rather than against an assumption.
+place an uncompressed control exists at all. Note what that pair does **not**
+give: the 1.00 row is `rope_scaling: null` and the 0.89 row is YaRN ×4, so their
+difference is a model change plus an eviction change and is not the cost of
+eviction. The matched control — full cache at 32K *with* YaRN — has not been run.
 
 The two 32K rows are the weakest in the table — 3 and 6 unpaired needles against
 12 paired ones below them. They are not comparable with the 64K and 128K rows and
