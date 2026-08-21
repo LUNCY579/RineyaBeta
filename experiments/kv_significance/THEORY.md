@@ -376,6 +376,33 @@ with the budget matters at aggressive settings**: at keep 0.25 it is worth
 +0.081 on rag_dev, because a fixed `recent=32` consumes almost the entire
 allowance and leaves nothing for scoring.
 
+> ## ⚠ RETRACTED — the StreamingLLM comparison below is invalid
+>
+> The "StreamingLLM" column was read from `results/_invalidated_prefill_bug/`,
+> the run both this document and the README declare invalid. Characterising it
+> as "an exact StreamingLLM baseline produced by accident" was wrong on three
+> counts, all verified:
+>
+> 1. **It is not a sliding window.** Replaying the pre-fix `select_keep` with
+>    all-zero scores at n=232, budget=174 keeps positions **0–141 plus 200–231** —
+>    a *prefix* plus recent, close to the opposite of a window.
+> 2. **The forward pass was corrupted, not merely differently-policied.** Eviction
+>    fired inside prefill with `attention_mask=None`, so SDPA ran `is_causal=True`
+>    with L≠S and an upper-left mask: query row 0 saw one key, and rows past the
+>    budget saw end-of-prompt RoPE positions. Acausal and position-misaligned.
+> 3. **It does not respond to its own variable.** In that run, keep 0.75 vs keep
+>    0.50 gives **731/752 byte-identical replies** (Δ 0.0017), where the fixed
+>    policy moves 609/752 and Δ 0.0428. A control insensitive to the quantity it
+>    controls is not a control.
+>
+> The advantage figures (+0.18670 / +0.14562 / +0.20362) and the S5 verdict are
+> withdrawn. A real control — `Policy(budget=B, sinks=4, recent=B−4)`, heavy=0,
+> full prefill, current code — is being run; until it lands, **no matched-budget
+> comparison against a positional policy has been made.**
+>
+> The absolute numbers are unaffected: keep 0.75 costing 0.01262 with 711/752
+> byte-identical replies is measured against no eviction and stands.
+
 ### The comparison that matters: significance vs position, at matched budget
 
 The invalidated run turned out to be a gift. Because its fallback selected
