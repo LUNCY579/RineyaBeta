@@ -289,7 +289,7 @@ plan hash inputs). All comparisons are against the sham, never against stock.
 
 `C-param` matters because A-4 removes 29,360,128 parameters, and without it any
 degradation is equally explained by size. `C-repair` is scoped in Phase 0's pilot
-(§9) and promoted to a full arm only if the pilot shows the merge rule moves the
+(§10, Phase 0.10) and promoted to a full arm only if the pilot shows the merge rule moves the
 result — otherwise mean-pooling is fixed by fiat and the arm is dropped.
 
 Stock Qwen3-0.6B and un-healed R2 are reported as landmarks, never as controls.
@@ -493,15 +493,25 @@ And more items cannot buy this back. The floor as items → ∞:
 
 | σ_run | k=3 | k=5 | k=8 |
 |---|---|---|---|
-| 1.0pp | 3.95pp | 2.00pp | 1.36pp |
-| 1.5 | 5.93 | 2.99 | 2.03 |
-| 3.0 | 11.85 | 5.99 | 4.08 |
+| 1.0pp | 5.67pp | 2.29pp | 1.45pp |
+| 1.5 | 8.48 | 3.44 | 2.18 |
+| 3.0 | 16.99 | 6.89 | 4.35 |
 
-At k=3, σ=1.5pp, going from 400 to 3,200 items moves the MDE only 9.6 → 6.5pp.
+At k=3, σ=1.5pp, going from 400 to 3,200 items moves the MDE only 13.8 → 9.3pp.
+
+> Both figures above are post-correction. An earlier version of this section
+> regenerated only the 400-item table when `t_crit` was fixed, leaving these two
+> adjacent to it at their pre-correction values — so the page contradicted
+> itself by a factor of ~1.4. Regenerate the whole section together:
+> `python scripts/design/power_analysis.py`.
 
 **Decisions:**
 - **k = 5 seeds** for training arms, matched across arms (same seeds, same data
-  order). Matched pairing is roughly a wash at k=3 but clearly better from k=4 up.
+  order). After the `t_crit` correction, matched pairing is *worse* than
+  independent seeds at k=3 — 13.92pp against 11.00pp at σ=1.5 — because pairing
+  spends 2 degrees of freedom instead of 4 and the exact t critical value is
+  punishing there. It turns favourable from k=4 (7.65 against 8.03) and the gap
+  widens with k. **The k=3 case is the one to avoid**, not the pairing.
 - **≥1,000 items** per retrieval cell (synthetic, so they are nearly free).
 - **σ_run is unknown until M1 runs**, and it sets everything above. M1 is
   therefore blocking, not optional — it is the one measurement that decides
@@ -525,7 +535,7 @@ After k=3 on the A-sham vs A-2 contrast:
 Ordered so that the cheapest test that can invalidate an expensive one runs
 first (P7). Throughput anchor: the live B0 run measures **12.48 s/step, 1,003
 steps ≈ 3.5 h/run** at `max_len=384`; long-context healing will be slower and
-Phase 0.6 measures it rather than assuming.
+Phase 0.11 measures it rather than assuming.
 
 ### Phase 0 — build the instrument (blocking, ~2–3 weeks)
 Larger than first scoped, because §2a showed there is nothing to measure with.
@@ -562,7 +572,7 @@ Two things it settles before any expensive commitment:
 
 ### Phase 2 — GQA surgery + healing (the expensive phase, ~2–3 weeks)
 4 arms (A-sham, A-4, A-2, A-1) × 5 matched seeds = **20 runs**. C-param and
-C-repair promoted only if Phase 0.5 says they are needed. Sequential: A-sham vs
+C-repair promoted only if Phase 0.10 says they are needed. Sequential: A-sham vs
 A-2 first (largest expected effect, and the existence claim), then fill in.
 
 ### Phase 3 — interaction study
@@ -603,7 +613,7 @@ as remediation, not as step 2 of a program whose premise is a small model.
 |---|---|---|---|
 | 1 | Training-budget confound | A-sham arm | none if sham holds |
 | 2 | Parameter-count confound | C-param arm | conditional on running it |
-| 3 | LoRA cannot repair KV surgery | Phase 0.5 pilot; unfreeze k/v/o | external validity only |
+| 3 | LoRA cannot repair KV surgery | Phase 0.10 pilot; unfreeze k/v/o | external validity only |
 | 4 | Control unmeasurable >32K | iso-memory primary; rent for matched-length | matched-length claims are rented or absent |
 | 5 | Eval nondeterminism | §7a contract, verified per-item | weaker than training contract; labelled |
 | 6 | Seed variance swamps effects | M1 first; k=5; §9a stopping rule | may end the study — declared acceptable |

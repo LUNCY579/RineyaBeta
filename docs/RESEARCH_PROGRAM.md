@@ -232,12 +232,22 @@ mem-efficient backward as nondeterministic: 4.7e-10 and 1.5e-11).
 
 **Now specified in full:** `EXPERIMENT_DESIGN_KV_LONGCTX.md` pre-registers this
 as a study — KV-head compression against RoPE scaling and chunked attention, on
-an iso-memory frontier. Three findings from its Phase 0 audit change the shape of
+an iso-memory frontier. Three findings from its Phase 0 audit changed the shape of
 A4 as written above: the 8KV control **cannot reach 64K or 128K on this card at
 all**, eager attention is impossible past 4K so the evaluation path needs its own
-weaker determinism contract, and the repository contains **no long-context
-evaluation asset of any kind** — the longest context ever measured here is 1,504
+weaker determinism contract, and the repository contained **no long-context
+evaluation asset of any kind** — the longest context ever measured was 1,504
 tokens.
+
+> **Superseded on the third finding, and partly on the first.** A passkey
+> generator with depth × length control now exists
+> (`experiments/kv_significance/src/passkey.py`) and retrieval has been measured
+> to 128K — roughly 87× the 1,504 tokens quoted above. The first finding survives
+> in corrected form: the *uncompressed* 8KV control reaches 32K on this card, not
+> 16K as later believed and not 64K (7,168 MiB of cache against 8,188 MiB total).
+> Compressed, both 64K and 128K run in under 2.6 GiB. What controls accuracy is
+> the keep fraction rather than the length: ~6.5% keep gives 0.97 at 64K and 0.92
+> at 128K. See [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4b–§4c.
 
 ### A5. Small-scale MoE **[P]** — define the metric before attempting
 Sparse experts raise *total* parameters while lowering *active* ones. That is only
