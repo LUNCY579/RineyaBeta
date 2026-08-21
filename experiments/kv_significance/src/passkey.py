@@ -280,8 +280,14 @@ def main() -> None:
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(
+        # cap_mib and window belong in the manifest because they change the
+        # OUTCOME, not only the speed. The cap bounds RESERVED memory, so a cell
+        # can OOM at an allocated peak far below it, and a result file that does
+        # not record its cap cannot explain its own empty cells. Three memory
+        # figures in this program had no recoverable source for exactly this.
         {"model": MODEL, "yarn": args.yarn, "chunk": args.chunk,
-         "recent": args.recent, "trials": args.trials,
+         "recent": args.recent, "trials": args.trials, "window": args.window,
+         "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
          "count_exponent": args.count_exponent, "normalize": args.normalize,
          "query_aware": args.query_aware, "seed": args.seed,
          "results": rows},

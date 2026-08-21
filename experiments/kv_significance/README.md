@@ -354,7 +354,9 @@ their results live in **[docs/FINDINGS_KV_PROGRAM.md](../../docs/FINDINGS_KV_PRO
   experiment could not see: prefill-time eviction scores each chunk against its
   own trailing rows, which are filler, so a needle earns no score before the
   question is asked. Making scoring query-aware moved 32K retrieval from
-  **0.20 to 0.87** at keep 0.0625.
+  **0.33 to 0.78** at keep 0.0625, on the depth-matched pair. (An earlier
+  statement of `0.20 → 0.87` averaged a 3-depth blind arm against a 5-depth
+  query-aware one and is withdrawn.)
 - **Retrieval works at ~15x compression at both long lengths**, and what controls
   it is the keep *fraction*, not the length: 6.5% keep gives **0.97 at 64K**
   (B=4096, peak 2002 MiB) and **0.92 at 128K** (B=8192, peak 2521 MiB), while

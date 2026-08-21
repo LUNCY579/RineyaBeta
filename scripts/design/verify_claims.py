@@ -348,6 +348,27 @@ CLAIMS = [
     ("pooling: identical replies", 631,
      lambda: identical_replies("off", "frac0.5-pool7-fixed", "rag_dev"),
      0.5, "631/752", "kv_readme"),
+
+    # --- the cap-vs-chunk grid, which decides where the reference ladder stops -
+    # These four cells were run from scratch files that were then deleted, so the
+    # 2x2 in FINDINGS 4b had no source for a while. Re-run with cap_mib in the
+    # manifest and pinned here. The claim is that the CAP decides feasibility and
+    # the chunk size does not, so both diagonals matter.
+    ("mem: 32K cap6144 chunk1024 peak", 4571.0,
+     lambda: measured(KVS / "mem_cap6144_chunk1024.json", "peak_mib", length=32768),
+     1.0, "4571", "findings"),
+    ("mem: 32K cap6144 chunk4096 peak", 4897.0,
+     lambda: measured(KVS / "mem_cap6144_chunk4096.json", "peak_mib", length=32768),
+     1.0, "4897", "findings"),
+    ("mem: 32K cap7800 chunk1024 peak", 4699.0,
+     lambda: measured(KVS / "mem_cap7800_chunk1024.json", "peak_mib", length=32768),
+     1.0, "4699", "findings"),
+    ("mem: 32K cap7800 chunk4096 peak", 4973.0,
+     lambda: measured(KVS / "mem_cap7800_chunk4096.json", "peak_mib", length=32768),
+     1.0, "4973", "findings"),
+    ("mem: 64K full cache peak at OOM", 6426.0,
+     lambda: measured(KVS / "mem_64k_full.json", "peak_mib", length=65536),
+     1.0, "6,426", "findings"),
 ]
 
 

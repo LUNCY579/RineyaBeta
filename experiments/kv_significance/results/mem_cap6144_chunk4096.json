@@ -1,0 +1,29 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": null,
+  "chunk": 4096,
+  "recent": 512,
+  "trials": 1,
+  "window": 16,
+  "cap_mib": 6144.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": null,
+  "normalize": false,
+  "query_aware": false,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": null,
+      "peak_mib": 4896.7,
+      "yarn": null,
+      "trials_ok": 0,
+      "ooms": 1,
+      "rank_exponent": null,
+      "trials": []
+    }
+  ]
+}

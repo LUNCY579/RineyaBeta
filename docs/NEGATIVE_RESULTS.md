@@ -177,7 +177,10 @@ before anyone asks for it. At 64K with YaRN, budget 2048:
 
 **A 4× larger budget does not help** (B=8192 gives the same 0.00), so it is not a
 budget limit. **Fixed** by `chunked_prefill.score_with_query`, which moved 32K
-retrieval from 0.20 to 0.87.
+retrieval from **0.33 to 0.78** on the depth-matched pair
+(`pk_blind.json` vs `pk_aware.json`, three depths each). An earlier statement of
+this as `0.20 → 0.87` averaged a 3-depth arm against a 5-depth one and is
+withdrawn; see [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4c.
 
 ---
 

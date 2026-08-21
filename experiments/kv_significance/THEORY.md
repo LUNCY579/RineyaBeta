@@ -499,7 +499,7 @@ Headline changes, all in `docs/FINDINGS_KV_PROGRAM.md`:
 |---|---|---|
 | peak memory | unchanged (1.00×) | flat 1744 MiB, 16K → 128K |
 | longest measured | 330-token prompts | 128K |
-| 32K retrieval | not measurable | 0.20 blind → **0.87** query-aware |
+| 32K retrieval | not measurable | 0.33 blind → **0.78** query-aware (depth-matched) |
 | 64K retrieval | not measurable | **0.89** at keep 0.031 |
 
 The efficiency and quality numbers in §§9–10 stand as measured; they are simply
