@@ -20,6 +20,7 @@ rather than overwritten.
 | [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) | **Consolidated findings** for KV compression and long context. Mechanism spec, all measurements, all nine bugs, all retractions, and an explicit "not established" list. | current |
 | [`NEGATIVE_RESULTS.md`](NEGATIVE_RESULTS.md) | Things that were tried and do not work, with the measurement that killed each. | current |
 | [`PAPER_DRAFT_SIGNIFICANCE.md`](PAPER_DRAFT_SIGNIFICANCE.md) | Paper-shaped draft scoped to the significance matrix as the single contribution: abstract, related work, method, experiments, limitations, retraction table. | current |
+| [`EXPERIMENT_DESIGN_STABILIZER.md`](EXPERIMENT_DESIGN_STABILIZER.md) | Pre-registration for the **stabilizer matrix**: a persistent global projector that selects which FFN neurons fire. Designed, not started — branch `exp/stabilizer-matrix`. Includes three Phase 0 kill-tests and the reasons our own decode measurements argue against its speed claim. | designed |
 | [`EXPERIMENT_DESIGN_KV_LONGCTX.md`](EXPERIMENT_DESIGN_KV_LONGCTX.md) | Pre-registration for the KV-head × long-context study. Written before any result, deliberately not revised into agreement with them. | **§2a superseded** — the asset gap it describes has since been partly filled |
 
 ## The experiments
