@@ -42,6 +42,7 @@ ATS = ROOT / "experiments/attention_shape/results"
 DOCS = {
     "findings": ROOT / "docs/FINDINGS_KV_PROGRAM.md",
     "negative": ROOT / "docs/NEGATIVE_RESULTS.md",
+    "paper": ROOT / "docs/PAPER_DRAFT_SIGNIFICANCE.md",
     "attention_shape": ROOT / "experiments/attention_shape/README.md",
     "kv_readme": ROOT / "experiments/kv_significance/README.md",
 }
@@ -400,6 +401,20 @@ CLAIMS = [
      lambda: pk("pk_32k_reference_yarn.json", 0.5), 5e-4, "0.92", "findings"),
     ("32K B=2048 depth 0.5", 0.5833,
      lambda: pk("pk_32k_paired.json", 0.5), 5e-4, "0.58", "findings"),
+
+    # --- the mechanism's own memory overhead --------------------------------
+    # Unpinned until now, which is how 0.25% survived in the paper abstract while
+    # 74/74 passed. The committed measurement is 0.78% for the score tensor; the
+    # mechanism as used also carries _COUNTS, so 1.56% is the honest figure.
+    ("overhead: score tensor pct", 0.781,
+     lambda: measured(KVS / "measure_sig.json", "score_pct_of_cache", budget=1024),
+     5e-4, "0.78%", "findings"),
+    ("overhead: score MiB at B=1024", 0.929,
+     lambda: measured(KVS / "measure_sig.json", "score_mib", budget=1024),
+     5e-4, "0.929", "paper"),
+    ("overhead: full matrix pct", 1.5625,
+     lambda: 2 * (measured(KVS / "measure_sig.json", "score_pct_of_cache",
+                           budget=1024) or 0), 1e-3, "1.56%", "paper"),
 ]
 
 

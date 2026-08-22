@@ -552,5 +552,20 @@ def cache_bytes(cache) -> int:
 
 
 def score_bytes(scores: dict[int, torch.Tensor] | None = None) -> int:
+    """Bytes held by the SCORE tensors alone.
+
+    This is NOT the mechanism's full overhead. `_COUNTS` is a second tensor of
+    identical shape and dtype, and count normalisation -- the part that makes the
+    ranking work at long context -- cannot run without it. Reporting this number
+    as "the significance matrix costs X" understates it by exactly 2x, which is
+    what happened: 0.78% was published where the mechanism as used costs 1.56%.
+    Use `matrix_bytes()` for the whole thing.
+    """
     scores = scores if scores is not None else _SCORES
     return sum(t.numel() * t.element_size() for t in scores.values())
+
+
+def matrix_bytes() -> int:
+    """Bytes held by the whole significance matrix: scores AND observation counts."""
+    return (sum(t.numel() * t.element_size() for t in _SCORES.values())
+            + sum(t.numel() * t.element_size() for t in _COUNTS.values()))

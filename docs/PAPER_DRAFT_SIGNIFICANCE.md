@@ -11,7 +11,8 @@ a small language model on consumer hardware. We introduce the **significance
 matrix**: a persistent, per-position, per-KV-head accumulator of received
 attention mass, maintained *across* successive compression rounds, which decides
 which cached positions survive eviction. The mechanism adds **zero parameters**
-and costs **0.25% of the cache it governs**.
+and costs **1.56% of the cache it governs** (0.78% scores + 0.78% observation
+counts).
 
 Persistence across rounds creates a failure mode that single-shot scorers do not
 have, and correcting it is our central contribution. A position that has survived
@@ -71,7 +72,7 @@ where there is only one round.
 
 1. **The significance matrix** (§3.1–3.2): a persistent per-position,
    per-KV-head accumulator of attention mass with a sinks + recent + top-B keep
-   rule, adding zero parameters and 0.25% memory overhead.
+   rule, adding zero parameters and 1.56% memory overhead.
 2. **Count normalisation** (§3.3), the core contribution: the ratchet induced by
    persistence, and its correction by ranking on `S / C^e`. This is a
    large effect — 0/12 against 10/12 at the hardest measured cell — and it exists
@@ -107,10 +108,11 @@ What is new is what happens when an accumulator is carried across many
 compression rounds rather than consulted once. To our knowledge the resulting
 observation-count asymmetry has not been identified or corrected. It is not
 visible in the single-shot setting that SnapKV targets, and it is not visible at
-short context: at 32K (8 rounds) the sum and mean rankings are statistically
-indistinguishable, at 64K (16 rounds) the mean pulls ahead, and at 128K (31
-rounds) the gap is the difference between total failure and near-ceiling at the
-deepest position (§5.4).
+short context. The 128K evidence is strong and paired (§5.4). The 32K and 64K
+rungs of that story rest on **6-trial unpaired cells without per-trial records**,
+so they are suggestive rather than established, and the round-count scaling should
+be read as a mechanism that explains the 128K result rather than as a measured
+trend across three lengths.
 
 We also position against a **measured** positional control rather than a cited
 one, and report a crossover where the positional baseline wins (§5.2). We regard
@@ -229,7 +231,9 @@ against a 2048-token cache.
 | Quantity | Value |
 |---|---|
 | Added parameters | **0** |
-| Significance matrix memory | 0.055 MiB against a 21.55 MiB cache — **0.25%** |
+| Score tensor | 0.929 MiB against a 118.89 MiB cache — **0.78%**, length-independent |
+| Observation counts | a second tensor of identical shape — a further **0.78%** |
+| **Significance matrix, total** | **1.56%** of the cache it governs |
 | Per-round work | one top-*k* over `n` per (layer, KV head) |
 | Query-aware overhead | one forward over the question per chunk boundary |
 
@@ -454,15 +458,18 @@ decode is flat in context length: 47.7 / 47.1 / 46.7 / 47.2 / 48.0 ms/token from
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 2,048 | 1.56% | 224 MiB | 0.42 | 0.33 | 0.83 | 0.53 | 34.7 ms |
 | **4,096** | **3.12%** | **448 MiB** | **0.75** | **0.67** | **0.92** | **0.78** | **34.7 ms** |
-| 8,192 | 6.25% | 896 MiB | 1.00 | 0.83 | 0.92 | 0.92 | 48.6 ms |
+| 8,192 | 6.25% | 896 MiB | 1.00 | 0.83 | 0.92 | 0.92 | 45.3 ms |
 
 Budget 2,048 and 4,096 sit on the same floor and cost the same decode time, so
 the first row is dominated: it gives up 0.25 mean accuracy for nothing. Beyond the
-knee the trade becomes explicit — 8,192 buys a further +0.14 for +40% latency.
+knee the trade becomes explicit — 8,192 buys a further +0.14 for +30% latency
+(45.25 ms measured against the 34.7 ms floor).
 
 Within-needle permutation trend across the three budgets: *p* = 0.0005 (depth
-0.1), 0.0052 (depth 0.5), 0.3363 (depth 0.9, at ceiling), with **zero reversals
-anywhere in the ladder**.
+0.1), 0.0052 (depth 0.5), 0.3363 (depth 0.9, at ceiling). The 2,048 → 4,096 and
+2,048 → 8,192 contrasts have **zero reversals**; the 4,096 → 8,192 contrast at
+depth 0.5 has one (+3/−1), so the ladder is not uniformly reversal-free above the
+knee.
 
 **A caveat on which configuration is timed.** Scoring during decode costs 20–24%,
 but the query-aware configuration behind every accuracy number here does not do
@@ -485,14 +492,17 @@ uncompressed baseline on this host. Quantised KV would make the control runnable
 (int8 at 1.94× fits 64K; mixed at 3.04× fits 128K) and this is the next
 measurement we would take.
 
-**The 32K baseline is not yet a comparison.** The uncompressed 32K reference
-(1.00 at every depth) was run with `rope_scaling: null` while the 32K eviction
-numbers use YaRN ×4. Two different models; their difference is not the cost of
-eviction. The matched control has not been run.
+**~~The 32K baseline is not yet a comparison.~~ Now measured.** The reference was
+re-run with YaRN ×4 on the same 12 needles as the eviction arm: 0.97 against 0.78
+at 6.25% keep, so **eviction costs 0.19** — 7 needles lost, 0 gained across 36
+needle-positions, exact *p* = 0.0156. This is the only matched eviction cost in
+the program; 64K and 128K still have none.
 
 **Sample sizes.** Long-context cells are 12 needles. Short-context sweeps are 752
-items. Trial counts below 12 cannot reach significance under the paired test at
-all, and several early results in this program were noise at n = 3.
+items. Below 12 the paired test is fragile rather than impossible: *p* < 0.05
+needs *d* ≥ 6 discordant pairs, so a 6-needle cell reaches 0.03125 only if *every*
+needle flips, and fewer than six needles cannot reach 0.05 at all. Several early
+results in this program were noise at *n* = 3.
 
 **Single checkpoint, single host.** The 46.3% sink share, the ρ(*k*) curves and
 the sink-pinning rule are properties of *this* checkpoint. The latency floor of
@@ -533,7 +543,7 @@ committed data found 41 further defects, all fixed.
 
 The significance matrix decides KV eviction by accumulated attention mass, per
 position and per KV head, maintained across compression rounds, for zero added
-parameters and 0.25% memory overhead.
+parameters and 1.56% memory overhead.
 
 Its persistence is both what makes it work at long context and what creates its
 one non-obvious failure mode. Because survivors are scored more often than

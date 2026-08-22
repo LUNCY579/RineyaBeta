@@ -287,8 +287,9 @@ attributable to eviction. Subtracting them is the same class of error as the
 unmatched depth sets above.
 
 What is needed is one run: the full cache at 32K **with YaRN ×4**, at `--cap-mib`
-above the 6144 default. Until then the eviction cost at 32K remains uncontrolled,
-as it was before — the baseline exists but is not yet comparable.
+above the 6144 default. **That run has since been done** and is reported later in
+this section: 0.97 uncompressed against 0.78 at 6.25% keep, so eviction costs
+0.19 at 32K against a matched control.
 
 **64K remains out of reach, and now for a stated reason rather than a guess.**
 Its cache alone is exactly 7,168 MiB (28 × 8 × 128 × 2 × 2 bytes × 65,536)
@@ -614,15 +615,18 @@ Keep fractions are budget ÷ *nominal* length, so 64K/B=4096 and 128K/B=8192 are
 both exactly 6.25% and the two rows are matched by construction. Against real
 token counts (62,898 and 125,826) they are 6.51%.
 
-**Doubling the context costs about 0.05. Quadrupling the keep fraction gains about
+**Doubling the context costs about 0.05 between 64K and 128K, but the 32K cell at
+the same keep fraction is the LOWEST of the three (0.78 against 0.97 and 0.92), so
+this is no systematic length effect — the spread is sampling at 12 needles.
+Quadrupling the keep fraction gains about
 0.36.** The keep fraction is the controlling variable and the length is nearly a
 free parameter — which is the strongest form the compression claim has taken in
 this program, and the first time it has been checked at two lengths with matched
 needles.
 
-Missing from that table: 32K under the paired design. The 0.89 quoted for 32K
-elsewhere in this document is a 6-trial unpaired run and is not comparable with
-these rows.
+32K under the paired design is now measured and appears in the next subsection:
+0.78 at 6.25% keep, against an uncompressed control of 0.97. The 0.89 previously
+quoted for that cell was a 6-trial unpaired run at e=0 and is withdrawn.
 #### The matched control at 32K: eviction costs 0.19
 
 Until now this program had no uncompressed arm that was comparable with its
@@ -675,11 +679,12 @@ fraction itself moves accuracy by 0.36. Read the 32K rows together for the one
 place an uncompressed control exists at all. Note what that pair does **not**
 give: the 1.00 row is `rope_scaling: null` and the 0.89 row is YaRN ×4, so their
 difference is a model change plus an eviction change and is not the cost of
-eviction. The matched control — full cache at 32K *with* YaRN — has not been run.
+eviction. The matched control — full cache at 32K *with* YaRN — **has since been
+run**, and is the row above: 0.97 against 0.78, a cost of 0.19.
 
-The two 32K rows are the weakest in the table — 3 and 6 unpaired needles against
-12 paired ones below them. They are not comparable with the 64K and 128K rows and
-are marked accordingly rather than quietly averaged in.
+The first 32K row is the weakest in the table — 3 unpaired needles without YaRN —
+and is kept only to mark what it superseded. The two rows below it are 12-needle
+paired with YaRN ×4 and are the ones to read.
 
 All of it is *retrieval*; multi-hop reasoning at length remains untested, and the
 frozen demo suite indicates that is where this checkpoint is genuinely weak.
