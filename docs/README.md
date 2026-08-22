@@ -102,7 +102,8 @@ the keep *fraction*, not the length:
 | 65,536 | 2048 | 3.12% | 0.81 | 1742 MiB |
 | 65,536 | 8192 | 12.5% | **1.00** | 2196 MiB |
 | 131,072 | 2048 | 1.56% | 0.53 | 1743 MiB |
-| 131,072 | 8192 | 6.25% | **0.92** | 2521 MiB |
+| 131,072 | 8192 | 6.25% | 0.92 | 2521 MiB |
+| 131,072 | 16384 | 12.5% | **1.00** | 3202 MiB |
 
 At a constant 6.25% keep there is no systematic degradation with length: 0.78 at
 32K, 0.97 at 64K, 0.92 at 128K — the shortest context is the *lowest* of the

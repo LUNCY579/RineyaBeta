@@ -660,7 +660,7 @@ B=2048. That was a 6-trial *unpaired* run ranked on the raw sum (e=0), sitting i
 tables whose other rows are 12-needle paired at e=1. Re-measured under the matched
 design it is **0.78**, and the keep-fraction row for 32K changes with it.
 
-#### 64K is lossless at 12.5% keep, which closes the bound without the impossible run
+#### Lossless at 12.5% keep, at BOTH lengths — which closes the bound without the impossible run
 
 The uncompressed arm does not fit at 64K -- 7,168 MiB of cache against an 8,188
 MiB card -- so the eviction cost there had no reference. It does not need one.
@@ -677,10 +677,22 @@ every cost below it follows.
 | 4,096 | 6.25% | 1.00 | 1.00 | 0.92 | 0.97 | 2,002 MiB | 0.03 |
 | **8,192** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **2,196 MiB** | **0.00** |
 
-**Lossless retrieval at 8x compression on a 64K context, in 2,196 MiB**, on a card
-that cannot hold the uncompressed cache at all. This is the strongest single
-result in the program, and it required no baseline because saturation is the
-baseline.
+The same holds one doubling later. **128K, 12 paired needles:**
+
+| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak | cost |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB | 0.47 |
+| 4,096 | 3.12% | 0.75 | 0.67 | 0.92 | 0.78 | 2,002 MiB | 0.22 |
+| 8,192 | 6.25% | 1.00 | 0.83 | 0.92 | 0.92 | 2,521 MiB | 0.08 |
+| **16,384** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **3,202 MiB** | **0.00** |
+
+**Lossless retrieval at 8× compression at 64K (2,196 MiB) and at 128K
+(3,202 MiB)** — on a card that holds neither uncompressed cache (7,168 and
+14,336 MiB). The saturating keep fraction is **the same at both lengths**, which
+is a far stronger statement than the earlier "no systematic length effect": the
+keep fraction, not the length, is what the mechanism is a function of. This is
+the strongest result in the program and it required no baseline, because
+saturation is the baseline.
 
 Two cautions. Saturation bounds the reference from above only for **this task** --
 a harder task could separate 12.5% keep from uncompressed where passkey cannot.

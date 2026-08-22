@@ -421,6 +421,10 @@ CLAIMS = [
      lambda: pk("pk_ladder_65536_B8192.json"), 5e-4, "1.00", "findings"),
     ("64K B=8192 depth 0.9", 1.0000,
      lambda: pk("pk_ladder_65536_B8192.json", 0.9), 5e-4, "1.00", "findings"),
+    ("128K B=16384 mean (saturated)", 1.0000,
+     lambda: pk("pk_ladder_131072_B16384.json"), 5e-4, "1.00", "findings"),
+    ("128K B=16384 depth 0.5", 1.0000,
+     lambda: pk("pk_ladder_131072_B16384.json", 0.5), 5e-4, "1.00", "findings"),
 ]
 
 

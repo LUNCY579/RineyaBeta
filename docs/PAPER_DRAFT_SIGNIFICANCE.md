@@ -26,11 +26,12 @@ needles at depth 0.9 while mean ranking retrieves **10 of 12** (exact McNemar,
 
 With the corrected ranking, retrieval accuracy is governed by the **keep
 fraction**, not by the context length: at ~6.25% keep the model scores 0.97 at 64K
-and 0.92 at 128K, against 0.61 and 0.53 at 1.56% keep. At 12.5% keep, 64K
-retrieval is **lossless** — 12 of 12 needles at every depth, in 2,196 MiB — which
-bounds the uncompressed reference at 1.00 on a card that cannot hold the
-uncompressed cache, and yields the eviction cost at every smaller budget without
-ever running the impossible arm. All of it runs on a single 8 GB laptop GPU.
+and 0.92 at 128K, against 0.61 and 0.53 at 1.56% keep. At 12.5% keep, retrieval is **lossless at both
+lengths** — 12 of 12 needles at every depth, in 2,196 MiB at 64K and 3,202 MiB at
+128K — on a card that holds neither uncompressed cache (7,168 and 14,336 MiB).
+The saturating keep fraction is the *same* at both lengths, which bounds each
+uncompressed reference at 1.00 and yields the eviction cost at every smaller
+budget without running the impossible arm. All of it on a single 8 GB laptop GPU.
 
 Compression also converts into latency, which a memory result does not
 guarantee. Decode is 82.6 ms/token on an uncompressed 16K cache against 46.5 ms
@@ -352,9 +353,10 @@ Within-needle permutation trend across budgets: *p* = 0.0015 (depth 0.1),
 0.0168 (depth 0.9), 0.0369 (depth 0.5). The 1,024 → 4,096 contrast moves 13
 needles with **zero reversals**.
 
-**64K is lossless at 12.5% keep.** The uncompressed arm does not fit — 7,168 MiB
-of cache against an 8,188 MiB card — so this cell had no reference. It does not
-need one: accuracy saturates, and accuracy cannot exceed 1.00.
+**Lossless at 12.5% keep, at both lengths.** Neither uncompressed arm fits —
+7,168 MiB of cache at 64K, 14,336 at 128K, against an 8,188 MiB card — so these
+cells had no reference. They do not need one: accuracy saturates, and accuracy
+cannot exceed 1.00.
 
 | budget | keep | 0.1 | 0.5 | 0.9 | mean | peak | cost |
 |---:|---:|---:|---:|---:|---:|---:|---:|
@@ -363,11 +365,24 @@ need one: accuracy saturates, and accuracy cannot exceed 1.00.
 | 4,096 | 6.25% | 1.00 | 1.00 | 0.92 | 0.97 | 2,002 MiB | 0.03 |
 | **8,192** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **2,196 MiB** | **0.00** |
 
-**Lossless retrieval at 8× compression on a 64K context, in 2,196 MiB.**
-Saturation replaces the impossible baseline: the reference is 1.00 because it
-cannot be more. Two cautions — this bounds the reference *for this task*, and 12
-needles cannot distinguish 1.00 from 0.98. What is established is that no needle
-was lost.
+And one doubling later, at **128K**:
+
+| budget | keep | 0.1 | 0.5 | 0.9 | mean | peak | cost |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB | 0.47 |
+| 4,096 | 3.12% | 0.75 | 0.67 | 0.92 | 0.78 | 2,002 MiB | 0.22 |
+| 8,192 | 6.25% | 1.00 | 0.83 | 0.92 | 0.92 | 2,521 MiB | 0.08 |
+| **16,384** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **3,202 MiB** | **0.00** |
+
+**Lossless retrieval at 8× compression at 64K and at 128K**, in 2,196 and 3,202
+MiB. The saturating keep fraction is identical at both lengths — the mechanism is
+a function of the keep fraction, not of the context. Saturation replaces the
+impossible baseline: the reference is 1.00 because it cannot be more.
+
+Two cautions. This bounds the reference *for this task* — a harder one could
+separate 12.5% keep from uncompressed where passkey cannot. And 12 needles cannot
+distinguish 1.00 from 0.98; what is established is that no needle was lost, at
+either length.
 
 **Putting both lengths on one axis:**
 
@@ -505,11 +520,11 @@ precisely to isolate retrieval from comprehension. Multi-hop reasoning at length
 is unmeasured, and the frozen demo suite indicates that is where this checkpoint
 is genuinely weak. This is the single largest gap.
 
-**No uncompressed control above 32K — but at 64K it is no longer needed.** The
-64K cache alone is 7,168 MiB against 8,188 MiB total with 904 MiB of weights, so
-the arm cannot run. Saturation supplies the bound instead: 12.5% keep retrieves
-12 of 12 at every depth, so the reference is 1.00. **128K still has no bound** —
-6.25% keep gives 0.92, and whether it saturates by 12.5% is being measured. Quantised KV would make the control runnable
+**No uncompressed control above 32K — and it is no longer needed.** Neither arm
+can run: 7,168 MiB of cache at 64K and 14,336 at 128K against an 8,188 MiB card.
+Saturation supplies the bound at both: 12.5% keep retrieves 12 of 12 at every
+depth, so each reference is 1.00. What this does *not* establish is the reference
+for a harder task, where 12.5% keep and uncompressed might separate. Quantised KV would make the control runnable
 (int8 at 1.94× fits 64K; mixed at 3.04× fits 128K) and this is the next
 measurement we would take.
 
@@ -576,8 +591,8 @@ and no tuning.
 
 With that correction the empirical picture is simple: **retrieval accuracy is a
 function of the keep fraction, not of the context length** — and at 12.5% keep it
-is lossless at 64K, in 2.2 GiB, on a card that cannot hold the uncompressed
-cache. At ~6.25% keep a 0.6B
+is lossless at 64K *and* 128K, in 2.2 and 3.1 GiB, on a card that can hold
+neither uncompressed cache. At ~6.25% keep a 0.6B
 model retrieves at 0.97 (64K) and 0.92 (128K) on an 8 GB laptop GPU, in 2.5 GiB.
 The method's limits are equally clear — it loses to a positional baseline below
 keep 0.25 on short prompts, and everything measured at length is retrieval rather
