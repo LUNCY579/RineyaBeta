@@ -387,6 +387,19 @@ CLAIMS = [
      lambda: pk("pk_128k_B4096.json", 0.1), 5e-4, "0.75", "findings"),
     ("128K B=4096 depth 0.5", 0.6667,
      lambda: pk("pk_128k_B4096.json", 0.5), 5e-4, "0.67", "findings"),
+
+    # --- the matched 32K control: the only measured eviction cost -----------
+    # Reference and eviction arm share seed, needles, trial count AND RoPE
+    # scaling. The older 32K pair did not share the last of those, so its
+    # difference was a model change plus an eviction change.
+    ("32K matched reference (YaRN)", 0.9722,
+     lambda: pk("pk_32k_reference_yarn.json"), 5e-4, "0.97", "findings"),
+    ("32K B=2048 paired", 0.7778,
+     lambda: pk("pk_32k_paired.json"), 5e-4, "0.78", "findings"),
+    ("32K reference depth 0.5", 0.9167,
+     lambda: pk("pk_32k_reference_yarn.json", 0.5), 5e-4, "0.92", "findings"),
+    ("32K B=2048 depth 0.5", 0.5833,
+     lambda: pk("pk_32k_paired.json", 0.5), 5e-4, "0.58", "findings"),
 ]
 
 

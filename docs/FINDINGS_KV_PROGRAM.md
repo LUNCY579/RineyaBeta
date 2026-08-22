@@ -623,12 +623,46 @@ needles.
 Missing from that table: 32K under the paired design. The 0.89 quoted for 32K
 elsewhere in this document is a 6-trial unpaired run and is not comparable with
 these rows.
+#### The matched control at 32K: eviction costs 0.19
+
+Until now this program had no uncompressed arm that was comparable with its
+eviction arms. The 32K reference existed but ran with `rope_scaling: null` while
+every eviction arm used YaRN x4, so their difference was a model change plus an
+eviction change. That gap is now closed: the reference was re-run **with YaRN x4**,
+12 needles, identical to the eviction arm's
+(`results/pk_32k_reference_yarn.json` and `pk_32k_paired.json`, merged into
+`pk_32k_control.json`).
+
+| depth | no eviction | B=2048 (6.25% keep) | cost |
+|---:|---:|---:|---:|
+| 0.1 | 1.00 | 0.75 | 0.25 |
+| 0.5 | 0.92 | 0.58 | 0.33 |
+| 0.9 | 1.00 | 1.00 | **0.00** |
+| **mean** | **0.97** | **0.78** | **0.19** |
+
+Peak memory 4,699 MiB against 1,742 MiB.
+
+**Eviction to 6.25% of the cache costs 0.19 accuracy at 32K, against a measured
+control.** Pooled over all 36 needle-positions, 7 needles were lost to eviction
+and **0 were gained** (exact p = 0.0156). Per depth the contrasts are +0/-3
+(p = 0.2500), +0/-4 (p = 0.1250) and +0/-0 -- individually short of significance
+at 12 needles, uniform in direction, and unanimous pooled.
+
+The depth pattern is the compression-rounds story again: the needle nearest the
+end costs nothing, because it entered in a late chunk and survived few rounds.
+
+**This also corrects a number.** The 32K cell previously reported 0.89 for
+B=2048. That was a 6-trial *unpaired* run ranked on the raw sum (e=0), sitting in
+tables whose other rows are 12-needle paired at e=1. Re-measured under the matched
+design it is **0.78**, and the keep-fraction row for 32K changes with it.
+
 ### Where this leaves long context
 
 | n | budget | keep | accuracy | peak | needles |
 |---:|---:|---:|---:|---:|---:|
-| 32,768 | 0 (full cache) | 100% | **1.00** | 4699 MiB | 3, unpaired, **no YaRN** |
-| 32,768 | 2048 | 6.25% | 0.89 | 1744 MiB | 6, unpaired, YaRN ×4 |
+| 32,768 | 0 (full cache) | 100% | 1.00 | 4699 MiB | 3, unpaired, **no YaRN** — superseded |
+| 32,768 | 0 (full cache) | 100% | **0.97** | 4699 MiB | **12, paired, YaRN ×4** |
+| 32,768 | 2048 | 6.25% | **0.78** | 1742 MiB | **12, paired, YaRN ×4** |
 | 65,536 | 1024 | 1.56% | 0.61 | 1621 MiB | **12, paired** |
 | 65,536 | 2048 | 3.12% | 0.81 | 1742 MiB | **12, paired** |
 | 65,536 | 4096 | 6.25% | **0.97** | 2002 MiB | **12, paired** |
