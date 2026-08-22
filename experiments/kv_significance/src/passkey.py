@@ -140,6 +140,13 @@ def main() -> None:
     ap.add_argument("--chunk", type=int, default=4096)
     ap.add_argument("--recent", type=int, default=512)
     ap.add_argument("--window", type=int, default=16)
+    ap.add_argument("--pool", type=int, default=1,
+                    help="SnapKV max-pool width over scores before top-k. "
+                         "1 disables it, which was the DEFAULT for every "
+                         "long-context result in this program -- a needle "
+                         "traced at 128K kept only 57-65%% of its tokens, i.e. "
+                         "the span survived in fragments. Pooling exists to "
+                         "stop exactly that.")
     ap.add_argument("--count-exponent", type=float, default=None,
                     help="rank on sum/count**e; 0 = raw sum, 1 = mean, between = decay")
     ap.add_argument("--normalize", action="store_true",
@@ -226,6 +233,7 @@ def main() -> None:
                     torch.cuda.empty_cache()
                     torch.cuda.reset_peak_memory_stats()
                     policy = (sig.Policy(budget=budget, sinks=4, recent=args.recent,
+                                         pool=args.pool,
                                          normalize=args.normalize,
                                          count_exponent=args.count_exponent)
                               if budget else None)
@@ -287,6 +295,7 @@ def main() -> None:
         # figures in this program had no recoverable source for exactly this.
         {"model": MODEL, "yarn": args.yarn, "chunk": args.chunk,
          "recent": args.recent, "trials": args.trials, "window": args.window,
+         "pool": args.pool,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
          "count_exponent": args.count_exponent, "normalize": args.normalize,
          "query_aware": args.query_aware, "seed": args.seed,
