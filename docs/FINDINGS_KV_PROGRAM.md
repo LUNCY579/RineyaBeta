@@ -660,6 +660,33 @@ B=2048. That was a 6-trial *unpaired* run ranked on the raw sum (e=0), sitting i
 tables whose other rows are 12-needle paired at e=1. Re-measured under the matched
 design it is **0.78**, and the keep-fraction row for 32K changes with it.
 
+#### 64K is lossless at 12.5% keep, which closes the bound without the impossible run
+
+The uncompressed arm does not fit at 64K -- 7,168 MiB of cache against an 8,188
+MiB card -- so the eviction cost there had no reference. It does not need one.
+Accuracy **saturates**: at 12.5% keep the model retrieves the needle at every
+depth, and accuracy cannot exceed 1.00, so the uncompressed value IS 1.00 and
+every cost below it follows.
+
+12 paired needles, e = 1, YaRN x4, query-aware:
+
+| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak | cost vs reference |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB | 0.39 |
+| 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB | 0.19 |
+| 4,096 | 6.25% | 1.00 | 1.00 | 0.92 | 0.97 | 2,002 MiB | 0.03 |
+| **8,192** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **2,196 MiB** | **0.00** |
+
+**Lossless retrieval at 8x compression on a 64K context, in 2,196 MiB**, on a card
+that cannot hold the uncompressed cache at all. This is the strongest single
+result in the program, and it required no baseline because saturation is the
+baseline.
+
+Two cautions. Saturation bounds the reference from above only for **this task** --
+a harder task could separate 12.5% keep from uncompressed where passkey cannot.
+And 12 needles cannot distinguish 1.00 from, say, 0.98; what is established is
+that no needle was lost, not that none ever would be.
+
 ### Where this leaves long context
 
 | n | budget | keep | accuracy | peak | needles |
@@ -669,7 +696,8 @@ design it is **0.78**, and the keep-fraction row for 32K changes with it.
 | 32,768 | 2048 | 6.25% | **0.78** | 1742 MiB | **12, paired, YaRN ×4** |
 | 65,536 | 1024 | 1.56% | 0.61 | 1621 MiB | **12, paired** |
 | 65,536 | 2048 | 3.12% | 0.81 | 1742 MiB | **12, paired** |
-| 65,536 | 4096 | 6.25% | **0.97** | 2002 MiB | **12, paired** |
+| 65,536 | 4096 | 6.25% | 0.97 | 2002 MiB | **12, paired** |
+| 65,536 | 8192 | 12.5% | **1.00** | 2196 MiB | **12, paired** |
 | 131,072 | 2048 | 1.56% | 0.53 | 1743 MiB | **12, paired** |
 | 131,072 | 8192 | 6.25% | **0.92** | 2521 MiB | **12, paired** |
 

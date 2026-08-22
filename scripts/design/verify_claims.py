@@ -415,6 +415,12 @@ CLAIMS = [
     ("overhead: full matrix pct", 1.5625,
      lambda: 2 * (measured(KVS / "measure_sig.json", "score_pct_of_cache",
                            budget=1024) or 0), 1e-3, "1.56%", "paper"),
+
+    # --- 64K saturation: the bound that replaces an impossible baseline -----
+    ("64K B=8192 mean (saturated)", 1.0000,
+     lambda: pk("pk_ladder_65536_B8192.json"), 5e-4, "1.00", "findings"),
+    ("64K B=8192 depth 0.9", 1.0000,
+     lambda: pk("pk_ladder_65536_B8192.json", 0.9), 5e-4, "1.00", "findings"),
 ]
 
 
