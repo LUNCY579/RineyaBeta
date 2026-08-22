@@ -522,6 +522,12 @@ needles; `--seed` selects an independent replicate; each cell records per-trial
 runs exact McNemar on discordant pairs and a within-needle permutation trend test,
 and refuses to compare cells that share no needles.
 
+> **Operating point superseded by §4f.** Everything in this section was measured
+> with SnapKV span pooling DISABLED (`pool=1`, the default `passkey.py` never
+> overrode). With `pool=7`, 128K is lossless at B=2,048 rather than B=16,384.
+> The measurements below are correct for `pool=1` and are kept as such; the
+> ladders have not yet been re-run.
+
 ### 128K was a budget choice, not a length wall
 
 Re-measured under the paired design. **12 needles, identical in every cell**,
@@ -888,6 +894,76 @@ does not do it: `passkey.py` leaves recording off for the whole run, switching i
 on only inside `score_with_query` between prefill chunks. That overhead belongs to
 the query-blind setting, and an earlier plan to optimise it was optimising
 something already avoided.
+
+---
+
+## 4f. Span pooling was disabled, and enabling it makes 128K lossless at 1.56% keep
+
+**This supersedes the operating point of every long-context result above.** Those
+results are correct measurements of `pool=1`; they are no longer measurements of
+the best configuration.
+
+### The result
+
+128K, B=2048 (1.56% keep), 12 paired needles, e=1, YaRN ×4, query-aware:
+
+| depth | pool=1 | pool=7 | pool=15 |
+|---:|---:|---:|---:|
+| 0.1 | 0.42 | **1.00** | **1.00** |
+| 0.5 | 0.33 | **1.00** | **1.00** |
+| 0.9 | 0.83 | **1.00** | **1.00** |
+| **mean** | **0.53** | **1.00** | **1.00** |
+
+36/36 needles at each pool width. **Peak memory 1,742.9 MiB either way** — pooling
+changes which positions win the top-k and costs nothing.
+
+| | budget for lossless 128K | keep | peak |
+|---|---:|---:|---:|
+| §4c, pool=1 | 16,384 | 12.5% | 3,202 MiB |
+| **pool=7** | **2,048** | **1.56%** | **1,743 MiB** |
+
+**Eight times less budget and 1.46 GiB less memory for the same 1.00**, and two
+pool widths give the same answer, so this is not a tuned knife-edge.
+
+### How it was found, because the route generalises and the number does not
+
+The plan was to build a demotion tier: eviction is irreversible, so an early
+mistake at depth 0.5 is unrecoverable, and a second tier would give it a second
+chance. Before building it, `experiments/stabilizer/src/trace_needle_eviction.py`
+tested the premise by carrying original position identities through every gather.
+
+**The needle is not evicted.** At 128K/B=2048 it survives in 178/224, 181/224 and
+201/224 (layer, KV head) streams at depths 0.1, 0.5 and 0.9 — 79% to 90% — while
+accuracy over the same cells is 0.42, 0.33, 0.83. Retention barely moves while
+accuracy moves by 0.50, so eviction was never the failure and the tier went
+unbuilt.
+
+But the trace also reported that only **57–65% of the needle's tokens** survive.
+The span was not kept or dropped; it was **fragmented** — scattered positions
+retained out of a contiguous span, which for a five-digit key split across tokens
+is unrecoverable.
+
+The mechanism against exactly that is SnapKV-style max-pooling, adopted early here
+and measured worth +0.020 on rag_dev at keep 0.50 (§2.2). `Policy.pool` defaults
+to 1, and `passkey.py` never set it.
+
+### What still has to be re-measured
+
+The 32K, 64K and 128K keep-fraction ladders, the decay-exponent sweep, the budget
+grids, the 12.5%-keep saturation result and Figure 1 were all measured at
+`pool=1`. They are not retracted — they are correct measurements of that
+configuration — but the ladders must be re-run before the paper's tables are
+rebuilt.
+
+**One conclusion is specifically at risk.** §4c reports that mean ranking beats
+sum ranking by 0.31 (e=0 → 0.22, e=1 → 0.53) at 128K/B=2048, measured at
+`pool=1`. If fragmentation was the dominant loss there, the ratchet may matter far
+less than it appeared, and the count-normalisation result — the program's central
+contribution — could soften. It needs re-measuring at `pool=7` rather than assumed
+to carry over.
+
+`passkey.py --pool` now exists, is recorded in the result manifest, and carries
+this history in its help text so the default cannot be inherited silently again.
 
 ---
 

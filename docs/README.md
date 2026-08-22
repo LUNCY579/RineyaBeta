@@ -37,6 +37,7 @@ rather than overwritten.
 |---|---|
 | `scripts/kv/significance.py` | The working mechanism. Significance-gated KV eviction: per-position, per-KV-head accumulated attention mass; keep = sinks + recent + top-B. Zero added parameters. |
 | `scripts/kv/chunked_prefill.py` | Chunked prefill with inter-chunk compression, so peak cache is `B + C` with prompt length eliminated. Also `score_with_query`, which makes eviction query-aware. |
+| `experiments/stabilizer/src/trace_needle_eviction.py` | Carries original position identity through every gather, so you can ask whether a specific span survived compression and how much of it. This is what showed the needle was fragmented rather than evicted. |
 | `experiments/kv_significance/src/measure_decode.py` | Decode throughput against an uncompressed baseline, three arms, arms rotated per round and minimum-of-rounds reported because this host's thermal band is 2.17×. |
 | `experiments/kv_significance/src/probe_decode_floor.py` | What actually sets decode latency. Sweeps cache size with nothing else varying and fits a hinge; answers whether the runtime or memory traffic is the limit. |
 | `experiments/kv_significance/src/store_probe.py` | What to STORE each kept position as — quantisation, low-rank, cross-layer sharing — measured against three eviction settings whose end-to-end cost is known, so the relative errors have a scale. |
@@ -89,6 +90,11 @@ is a CPU-only torch build and every CUDA measurement taken with it is void.
 deliberately isolates retrieval from comprehension. Multi-hop reasoning at length
 has never been measured, and the frozen demo suite indicates that is where this
 checkpoint is genuinely weak.
+
+> **Newest result, §4f of FINDINGS.** SnapKV span pooling was off by default in
+> every long-context run. With `--pool 7`, 128K is **lossless at 1.56% keep**
+> (B=2,048, 1,743 MiB) rather than at 12.5%. The table below is the `pool=1`
+> measurement and is being re-run.
 
 **"Works at 128K" needs a budget attached.** Uncompressed, this checkpoint is
 1.00 at every depth to **32K** — the largest reference this card can hold, since

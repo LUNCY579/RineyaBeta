@@ -425,6 +425,16 @@ CLAIMS = [
      lambda: pk("pk_ladder_131072_B16384.json"), 5e-4, "1.00", "findings"),
     ("128K B=16384 depth 0.5", 1.0000,
      lambda: pk("pk_ladder_131072_B16384.json", 0.5), 5e-4, "1.00", "findings"),
+
+    # --- span pooling: the setting that was off ------------------------------
+    # 4f. Pinned at both widths because the claim is that the effect is robust to
+    # pool width, not tuned to one. If either drifts, that claim goes with it.
+    ("pool=7 @128K B=2048 mean", 1.0000,
+     lambda: pk("pk_128k_pool7.json"), 5e-4, "1.00", "findings"),
+    ("pool=15 @128K B=2048 mean", 1.0000,
+     lambda: pk("pk_128k_pool15.json"), 5e-4, "1.00", "findings"),
+    ("pool=7 @128K depth 0.5", 1.0000,
+     lambda: pk("pk_128k_pool7.json", 0.5), 5e-4, "1.00", "findings"),
 ]
 
 
