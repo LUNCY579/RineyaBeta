@@ -327,78 +327,51 @@ contiguous, coherent suffix, while a scattered top-k keeps fragments of spans it
 cannot complete. This bounds the claim rather than defeating it — and it is why
 we report the operating range as part of the method.
 
-### 5.3 Long context: accuracy tracks the keep fraction, not the length
+### 5.3 Long context: retrieval is lossless at 12.5% keep, at both lengths
 
-**128K, 12 paired needles, `e = 1`, YaRN ×4, query-aware:**
+**At 12.5% keep the mechanism loses nothing.** Twelve of twelve needles at every
+depth, at 64K and again at 128K — in 2,196 and 3,202 MiB, on a card that holds
+neither uncompressed cache (7,168 and 14,336 MiB). Because accuracy cannot exceed
+1.00, saturation *bounds* each unmeasurable reference at 1.00 and yields the
+eviction cost at every smaller budget without running the impossible arm.
 
-| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
-|---:|---:|---:|---:|---:|---:|---:|
-| 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB |
-| 8,192 | 6.25% | **1.00** | **0.83** | **0.92** | **0.92** | 2,521 MiB |
+Both ladders, 12 paired needles per cell, `e = 1`, YaRN ×4, query-aware. Cost is
+against the saturated reference:
 
-Budget contrast by exact McNemar: depth 0.1 +7/−0, *p* = 0.0156; depth 0.5 +6/−0,
-*p* = 0.0312; depth 0.9 +1/−0 (at ceiling). Under Bonferroni across three depths
-(α = 0.0167) depth 0.1 survives. Not a threshold argument: **14 discordant needles
-across the three depths, all 14 favouring the larger budget, zero reversals.**
+| length | budget | keep | 0.1 | 0.5 | 0.9 | mean | peak | cost |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 64K | 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB | 0.39 |
+| 64K | 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB | 0.19 |
+| 64K | 4,096 | 6.25% | 1.00 | 1.00 | 0.92 | 0.97 | 2,002 MiB | 0.03 |
+| 64K | **8,192** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **2,196 MiB** | **0.00** |
+| 128K | 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB | 0.47 |
+| 128K | 4,096 | 3.12% | 0.75 | 0.67 | 0.92 | 0.78 | 2,002 MiB | 0.22 |
+| 128K | 8,192 | 6.25% | 1.00 | 0.83 | 0.92 | 0.92 | 2,521 MiB | 0.08 |
+| 128K | **16,384** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **3,202 MiB** | **0.00** |
 
-**64K, 12 paired needles — the replication:**
+**The saturating keep fraction is identical at both lengths.** Read the table down
+the *keep* column rather than the length column and the two ladders coincide:
+1.56% gives 0.61 and 0.53, 6.25% gives 0.97 and 0.92, 12.5% gives 1.00 and 1.00.
+Doubling the context moves accuracy by ≈ 0.05; quadrupling the keep fraction moves
+it by ≈ 0.36. The mechanism is a function of the keep fraction, and the context
+length drops out.
 
-| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
-|---:|---:|---:|---:|---:|---:|---:|
-| 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB |
-| 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB |
-| 4,096 | 6.25% | **1.00** | **1.00** | **0.92** | **0.97** | 2,002 MiB |
+Keep fractions are budget ÷ nominal length, so 64K/B=4,096 and 128K/B=8,192 are
+both exactly 6.25% — matched by construction rather than by rounding. Against real
+token counts (62,898 and 125,826) both are 6.51%.
 
-Within-needle permutation trend across budgets: *p* = 0.0015 (depth 0.1),
-0.0168 (depth 0.9), 0.0369 (depth 0.5). The 1,024 → 4,096 contrast moves 13
-needles with **zero reversals**.
+**Statistics.** At 128K the 2,048 → 8,192 contrast is +7/−0 at depth 0.1
+(*p* = 0.0156), +6/−0 at depth 0.5 (*p* = 0.0312) and +1/−0 at depth 0.9, already
+at ceiling; under Bonferroni across three depths (α = 0.0167) depth 0.1 survives.
+At 64K the within-needle permutation trend across budgets is *p* = 0.0015 (depth
+0.1), 0.0168 (0.9) and 0.0369 (0.5). Across both ladders, **27 discordant needles
+all favour the larger budget, with zero reversals** — which is the part that does
+not depend on a significance threshold.
 
-**Lossless at 12.5% keep, at both lengths.** Neither uncompressed arm fits —
-7,168 MiB of cache at 64K, 14,336 at 128K, against an 8,188 MiB card — so these
-cells had no reference. They do not need one: accuracy saturates, and accuracy
-cannot exceed 1.00.
-
-| budget | keep | 0.1 | 0.5 | 0.9 | mean | peak | cost |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB | 0.39 |
-| 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB | 0.19 |
-| 4,096 | 6.25% | 1.00 | 1.00 | 0.92 | 0.97 | 2,002 MiB | 0.03 |
-| **8,192** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **2,196 MiB** | **0.00** |
-
-And one doubling later, at **128K**:
-
-| budget | keep | 0.1 | 0.5 | 0.9 | mean | peak | cost |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB | 0.47 |
-| 4,096 | 3.12% | 0.75 | 0.67 | 0.92 | 0.78 | 2,002 MiB | 0.22 |
-| 8,192 | 6.25% | 1.00 | 0.83 | 0.92 | 0.92 | 2,521 MiB | 0.08 |
-| **16,384** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **3,202 MiB** | **0.00** |
-
-**Lossless retrieval at 8× compression at 64K and at 128K**, in 2,196 and 3,202
-MiB. The saturating keep fraction is identical at both lengths — the mechanism is
-a function of the keep fraction, not of the context. Saturation replaces the
-impossible baseline: the reference is 1.00 because it cannot be more.
-
-Two cautions. This bounds the reference *for this task* — a harder one could
-separate 12.5% keep from uncompressed where passkey cannot. And 12 needles cannot
-distinguish 1.00 from 0.98; what is established is that no needle was lost, at
-either length.
-
-**Putting both lengths on one axis:**
-
-| keep | 64K | 128K |
-|---:|---:|---:|
-| 1.56% | 0.61 | 0.53 |
-| 6.25% | **0.97** | **0.92** |
-
-Keep fractions are budget ÷ nominal length, so 64K/B=4096 and 128K/B=8192 are
-both exactly 6.25% — the two rows are matched by construction rather than by
-rounding. Against real token counts (62,898 and 125,826) both are 6.51%.
-
-**Doubling the context costs ≈ 0.05. Quadrupling the keep fraction gains ≈ 0.36.**
-The keep fraction is the controlling variable and the length is nearly a free
-parameter. This is the strongest form of the compression claim in this work, and
-the first checked at two lengths with matched needles.
+**Two cautions.** Saturation bounds the reference *for this task*: a harder task
+could separate 12.5% keep from uncompressed where passkey cannot. And 12 needles
+cannot distinguish 1.00 from 0.98 — what is established is that no needle was
+lost, at either length.
 
 ### 5.4 Ablation: the count-normalisation exponent
 
@@ -480,12 +453,26 @@ term is bandwidth-saturated**: at batch 1 decode is dominated by per-step overhe
 can address. The ceiling on compression's latency benefit is therefore a property
 of the runtime, not of memory traffic.
 
-**What the mechanism is worth.** Measured directly at 16K on clean per-process
-runs: 82.57 ms uncompressed against 46.49 ms compressed, **1.78×**. From the
-curve, 3.80× at 32K, 6.99× at 64K, 13.39× at 128K — those three are predictions,
-not measurements, because no uncompressed arm fits above 32K. With eviction on,
-decode is flat in context length: 47.7 / 47.1 / 46.7 / 47.2 / 48.0 ms/token from
-4K to 128K at a constant 118 MiB cache.
+**What the mechanism is worth.** One row of the following is measured; three are
+read off the fitted curve, because no uncompressed arm fits above 32K. They are
+separated here rather than tabulated together, since a prediction that looks
+like a measurement is the most damaging thing this section could contain.
+
+| context | uncompressed | compressed | speedup | status |
+|---:|---:|---:|---:|---|
+| **16,384** | **82.57 ms** | **46.49 ms** | **1.78×** | **measured**, clean per-process runs |
+| 32,768 | 131.7 ms | 34.7 ms | 3.80× | *predicted from the curve* |
+| 65,536 | 242.6 ms | 34.7 ms | 6.99× | *predicted from the curve* |
+| 131,072 | 464.4 ms | 34.7 ms | 13.39× | *predicted from the curve* |
+
+The predictions rest on the hinge fit above, whose flat region is measured
+directly and whose slope is measured over 4,096 → 16,384 tokens; extrapolating
+the uncompressed column to 128K is an extension of that slope by a factor of
+eight and should be read accordingly.
+
+What needs no extrapolation: with eviction on, decode is **flat in context
+length** — 47.7 / 47.1 / 46.7 / 47.2 / 48.0 ms/token from 4K to 128K at a
+constant 118 MiB cache. That is measured at every point.
 
 **Where the operating point should sit.** 128K, 12 paired needles, *e* = 1:
 
@@ -548,17 +535,13 @@ where a smaller cache should matter more, not less. Throughput was measured with
 rotated arms and minimum-of-rounds because the host's thermal band is 2.17×;
 single-shot throughput numbers on this machine are not usable.
 
-**Retractions.** We list these because the corrections shaped the method:
-
-| Retracted | Cause | Corrected |
-|---|---|---|
-| "Lost in the middle" depth curve at 128K | one RNG stream across the loop; depth confounded with needle identity | no depth law is established; the 128K ordering does not replicate at 64K |
-| "+0.15–0.20 over StreamingLLM at every budget" | control came from an invalidated run whose fallback was acausal | crossover: +0.18/+0.14, **−0.083 at keep 0.25** |
-| Query-aware "0.20 → 0.87" | 3-depth arm averaged against a 5-depth arm | 0.33 → 0.78, depth-matched |
-| Exponent *p*-values (Cochran–Armitage, Fisher) | independent-groups tests on needle-paired arms at n = 6 | paired re-run reversed two conclusions (§5.4) |
-| "Above 16K the full cache does not fit" | a `--cap-mib 6144` default bounding *reserved* memory | the uncompressed reference reaches 32K |
-| "A 15× smaller cache cannot exceed 2.65× decode" | arithmetic presented as physics; assumed full weight-read bandwidth | measured ceiling 13.4× at 128K (§5.6) |
-| "The fixed cost is a weights read, so decode is bandwidth-bound" | one line fitted through two regimes; the largest points set the intercept | a floor with a knee, at 11–13% of peak bandwidth — overhead-bound |
+**Retractions.** Ten published figures in this work were withdrawn and corrected
+during its development, several of them load-bearing. They are listed in full in
+**Appendix A**, with the cause of each. We report them because the corrections
+shaped the method and the measurement protocol: the paired design of §4 exists
+because a depth result turned out to be confounded with needle identity, and the
+contamination guards in §5.6 exist because a throughput baseline was found to be
+spilling to host RAM.
 
 **Implementation defects.** Nine were found during development; **every one
 produced a plausible wrong number rather than a crash**, and every one was caught
@@ -634,3 +617,50 @@ python experiments/kv_significance/src/measure_decode.py --lengths 16384
 | Method | `scripts/kv/{significance,chunked_prefill}.py` |
 
 All paths relative to `experiments/kv_significance/` unless otherwise stated.
+
+---
+
+## Appendix A. Retractions
+
+Every figure below appeared in a draft of this work and was withdrawn after a
+control, a re-measurement or an audit contradicted it. None is a typo; each was a
+conclusion drawn from data that did not support it.
+
+| Retracted | Cause | Corrected to |
+|---|---|---|
+| "Lost in the middle" depth curve at 128K | one RNG stream across the loop; depth confounded with needle identity | no depth law is established; the 128K ordering does not replicate at 64K |
+| "+0.15–0.20 over StreamingLLM at every budget" | control came from an invalidated run whose fallback was acausal | crossover: +0.18/+0.14, **−0.083 at keep 0.25** |
+| Query-aware "0.20 → 0.87" | 3-depth arm averaged against a 5-depth arm | 0.33 → 0.78, depth-matched |
+| Exponent *p*-values (Cochran–Armitage, Fisher) | independent-groups tests on needle-paired arms at n = 6 | paired re-run reversed two conclusions (§5.4) |
+| "Above 16K the full cache does not fit" | a `--cap-mib 6144` default bounding *reserved* memory | the uncompressed reference reaches 32K |
+| "A 15× smaller cache cannot exceed 2.65× decode" | arithmetic presented as physics; assumed full weight-read bandwidth | measured ceiling 13.4× at 128K (§5.6) |
+| "The fixed cost is a weights read, so decode is bandwidth-bound" | one line fitted through two regimes; the largest points set the intercept | a floor with a knee, at 11–13% of peak bandwidth — overhead-bound |
+| Significance matrix costs **0.25%** of the cache | a post-eviction score matrix divided by a pre-eviction cache | **1.56%** — 0.78% scores plus 0.78% observation counts, which count normalisation requires (§3.5) |
+| "Six paired needles cannot reach *p* < 0.05" | confused the floor at five discordant pairs with the floor at six | *p* = 2/2^*d* needs *d* ≥ 6; six needles reach 0.03125 if every needle flips (§4) |
+| "Accuracy is flat in length at matched keep" | a 32K cell that was 6-trial, unpaired and ranked on the raw sum | superseded by the stronger result: the *saturating* keep fraction is identical at both lengths (§5.3) |
+
+Three of these deserve emphasis because they changed how the work was done, not
+merely what it reported.
+
+**The depth curve** was confounded with needle identity: a single RNG stream ran
+across the experimental loop, so each depth drew a different block of needles.
+The fix was not a wider interval but a paired design — every cell now draws the
+same needle sequence, and the analysis lives in a tool that *refuses* to compare
+cells sharing no needles.
+
+**The StreamingLLM comparison** was drawn from a run whose fallback was acausal.
+Against a real positional control the conclusion reverses at the tightest budget,
+which is why §5.2 reports an operating range rather than a win.
+
+**The decode ceiling** was asserted from arithmetic ("weights dominate, so 2.65×")
+and then from a straight line fitted through two regimes. Measured, the curve is a
+floor with a knee and the ceiling is 13.4×. The lesson recorded in §5.6 is that a
+model quoted where a measurement exists is a defect even when the model is close.
+
+A checker (`scripts/design/verify_claims.py`) now recomputes 85 headline numbers
+from committed data *and* asserts each appears in the prose of the document that
+states it, so prose and data cannot drift apart unnoticed. Several of the
+retractions above were caught by audits after that checker was already passing —
+it constrains numbers it knows about, not claims it does not.
+
+---
