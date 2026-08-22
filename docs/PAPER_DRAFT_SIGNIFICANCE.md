@@ -98,32 +98,104 @@ where there is only one round.
 
 | Method | Scoring signal | Scoring events | Persistent across rounds |
 |---|---|---|---|
-| StreamingLLM | position (sinks + window) | n/a | n/a |
-| H2O | accumulated attention | continuous | per-head, no count correction |
-| SnapKV | attention over an observation window | once, end of prefill | no |
-| Scissorhands | attention persistence | windowed | partial |
+| StreamingLLM [1] | position (sinks + window) | n/a | n/a |
+| H2O [2] | accumulated attention | continuous | per-head, no count correction |
+| SnapKV [3] | attention over an observation window | once, end of prefill | no |
+| Scissorhands [4] | attention persistence | windowed | partial |
 | **This work** | accumulated attention, per KV head | every forward pass | **yes, with count correction** |
 
-Our keep rule (sinks + recent + top-B) and our pooling step are not novel in
-isolation: the sink term is StreamingLLM's observation, and max-pooling the score
-before top-k is SnapKV's. We adopt both and say so.
+**What we adopt rather than claim.** The sink term in our keep rule is
+StreamingLLM's observation [1] that a few initial positions absorb a large share
+of attention mass — on this checkpoint 46.3% on the first four tokens. Max-pooling
+the score before top-*k* is SnapKV's [3]. Ranking cached positions by accumulated
+attention is H2O's [2] and Scissorhands' [4]. We use all four and say so; none is
+presented as novel here.
 
-What is new is what happens when an accumulator is carried across many
-compression rounds rather than consulted once. To our knowledge the resulting
-observation-count asymmetry has not been identified or corrected. It is not
-visible in the single-shot setting that SnapKV targets, and it is not visible at
-short context. The 128K evidence is strong and paired (§5.4). The 32K and 64K
-rungs of that story rest on **6-trial unpaired cells without per-trial records**,
-so they are suggestive rather than established, and the round-count scaling should
-be read as a mechanism that explains the 128K result rather than as a measured
-trend across three lengths.
+**What is new.** All four score the cache either once or without regard to how
+many times a position has been scored. Long context on a memory-bounded device
+forces something else: prefilling 128K tokens in under 2 GiB requires chunking and
+compressing *between* chunks — roughly 31 compression rounds at 4K chunks, not
+one. An accumulator carried across those rounds develops an asymmetry that has
+nothing to do with importance: survivors are scored *T* times and arrivals once.
+To our knowledge this observation-count bias, and its correction by ranking on
+`S / C^e`, has not been identified. It is invisible in SnapKV's single-shot
+setting by construction, and invisible at short context because there is only one
+round.
 
-We also position against a **measured** positional control rather than a cited
-one, and report a crossover where the positional baseline wins (§5.2). We regard
-this as a requirement rather than a concession: a method with a stated operating
-range is characterised, one without is oversold.
+The effect is large and specific: at 128K and 1.56% keep, raw-sum ranking
+retrieves **0 of 12** needles at depth 0.9 while count-normalised ranking retrieves
+**10 of 12** (§5.4).
 
----
+**Two further differences of framing.** We evaluate against a *measured*
+positional control rather than a cited one, and report the budget at which our
+method loses to it (§5.2) — a method with a stated operating range is
+characterised; one without is oversold. And where the uncompressed baseline cannot
+fit on the hardware, we bound it by saturation rather than omit it (§5.3).
+
+**Adjacent lines we do not compete with.** Architectural reductions of the cache —
+MQA [5], GQA [6], and the latent projection of MLA [7] — change what is stored per
+layer and are orthogonal to *which positions* are stored; our mechanism operates
+on a GQA cache and would operate on the others. KV quantisation [8] is likewise
+orthogonal, and §5.5 shows the two compose: our score allocates bit width as well
+as slots. Context-window extension by RoPE [9] rescaling — we use YaRN [10] — is
+what makes positions beyond the trained range addressable at all, and is a
+prerequisite here rather than a competitor. The depth-dependence of long-context
+retrieval [11] motivates our reporting accuracy per depth rather than pooled.
+
+### References
+
+> **Unverified.** These are recalled from the literature, not resolved against a
+> bibliographic database from this machine. Titles and venues are more reliable
+> than years and arXiv identifiers; every entry should be checked before
+> submission, and the two marked † are the ones I am least certain of.
+
+[1] G. Xiao, Y. Tian, B. Chen, S. Han, M. Lewis. *Efficient Streaming Language
+Models with Attention Sinks.* ICLR 2024. arXiv:2309.17453.
+
+[2] Z. Zhang, Y. Sheng, T. Zhou, T. Chen, L. Zheng, R. Cai, Z. Song, Y. Tian,
+C. Ré, C. Barrett, Z. Wang, B. Chen. *H2O: Heavy-Hitter Oracle for Efficient
+Generative Inference of Large Language Models.* NeurIPS 2023. arXiv:2306.14048.
+
+[3] Y. Li, Y. Huang, B. Yang, B. Venkitesh, A. Locatelli, H. Ye, T. Cai,
+P. Lewis, D. Chen. *SnapKV: LLM Knows What You are Looking for Before
+Generation.* NeurIPS 2024. arXiv:2404.14469.
+
+[4] Z. Liu, A. Desai, F. Liao, W. Wang, V. Xie, Z. Xu, A. Kyrillidis,
+A. Shrivastava. *Scissorhands: Exploiting the Persistence of Importance
+Hypothesis for LLM KV Cache Compression at Test Time.* NeurIPS 2023.
+arXiv:2305.17118.
+
+[5] N. Shazeer. *Fast Transformer Decoding: One Write-Head is All You Need.*
+arXiv:1911.02150, 2019.
+
+[6] J. Ainslie, J. Lee-Thorp, M. de Jong, Y. Zemlyanskiy, F. Lebrón, S. Sanghai.
+*GQA: Training Generalized Multi-Query Transformer Models from Multi-Head
+Checkpoints.* EMNLP 2023. arXiv:2305.13245.
+
+[7] DeepSeek-AI. *DeepSeek-V2: A Strong, Economical, and Efficient
+Mixture-of-Experts Language Model.* arXiv:2405.04434, 2024. (Multi-head Latent
+Attention.)
+
+[8] † Z. Liu, J. Yuan, H. Jin, S. Zhong, Z. Xu, V. Braverman, B. Chen, X. Hu.
+*KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache.* ICML 2024.
+arXiv:2402.02750.
+
+[9] J. Su, Y. Lu, S. Pan, A. Murtadha, B. Wen, Y. Liu. *RoFormer: Enhanced
+Transformer with Rotary Position Embedding.* arXiv:2104.09864, 2021.
+
+[10] B. Peng, J. Quesnelle, H. Fan, E. Shippole. *YaRN: Efficient Context Window
+Extension of Large Language Models.* ICLR 2024. arXiv:2309.00071.
+
+[11] N. F. Liu, K. Lin, J. Hewitt, A. Paranjape, M. Bevilacqua, F. Petroni,
+P. Liang. *Lost in the Middle: How Language Models Use Long Contexts.* TACL 2024.
+arXiv:2307.03172.
+
+[12] † A. Mohtashami, M. Jaggi. *Landmark Attention: Random-Access Infinite
+Context Length for Transformers.* NeurIPS 2023. arXiv:2305.16300. (Origin of the
+passkey retrieval probe used in §4.)
+
+[13] Q. McNemar. *Note on the sampling error of the difference between correlated
+proportions or percentages.* Psychometrika 12(2):153–157, 1947.
 
 ## 3. Method
 
@@ -349,6 +421,15 @@ against the saturated reference:
 | 128K | 8,192 | 6.25% | 1.00 | 0.83 | 0.92 | 0.92 | 2,521 MiB | 0.08 |
 | 128K | **16,384** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **3,202 MiB** | **0.00** |
 
+![Figure 1](figures/keep_fraction.svg)
+
+**Figure 1.** Accuracy against the keep fraction, with context length as the
+series. Drawn on the keep axis rather than the length axis because that is where
+the claim lives: the two ladders lie on top of each other and reach 1.00 at the
+same keep fraction. Generated from the committed result files by
+`scripts/design/figure_keep_fraction.py`. The 32K diamond is a single cell and
+sits *below* both longer contexts at 6.25% keep — see §6.
+
 **The saturating keep fraction is identical at both lengths.** Read the table down
 the *keep* column rather than the length column and the two ladders coincide:
 1.56% gives 0.61 and 0.53, 6.25% gives 0.97 and 0.92, 12.5% gives 1.00 and 1.00.
@@ -521,6 +602,14 @@ at 6.25% keep, so **eviction costs 0.19** — 7 needles lost, 0 gained across 36
 needle-positions, exact *p* = 0.0156. This is the only matched eviction cost in
 the program; 64K and 128K still have none.
 
+**The 32K cell is anomalous and unexplained.** At 6.25% keep, 32K scores 0.78
+while 64K scores 0.97 and 128K 0.92 on the same keep fraction — the shortest
+context is the worst of the three, which no account in this paper predicts. All
+three are 12 paired needles. It may be sampling: 0.78 against 0.97 is three
+needles. We report it rather than drop it, and it is the clearest reason to read
+the keep-fraction result as holding *between 64K and 128K* rather than
+universally.
+
 **Sample sizes.** Long-context cells are 12 needles. Short-context sweeps are 752
 items. Below 12 the paired test is fragile rather than impossible: *p* < 0.05
 needs *d* ≥ 6 discordant pairs, so a 6-needle cell reaches 0.03125 only if *every*
@@ -615,6 +704,7 @@ python experiments/kv_significance/src/measure_decode.py --lengths 16384
 | §5.6 operating point | `results/{pk_128k_budget_ladder,pk_128k_B4096}.json` |
 | §6 reference ladder | `results/passkey_ceiling.json` |
 | Method | `scripts/kv/{significance,chunked_prefill}.py` |
+| Figure 1 | `scripts/design/figure_keep_fraction.py` → `docs/figures/keep_fraction.svg` |
 
 All paths relative to `experiments/kv_significance/` unless otherwise stated.
 
