@@ -1,0 +1,17 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "n": 3923,
+  "split": 2353,
+  "keep": 0.0625,
+  "topB": 147,
+  "layers": 28,
+  "recall": {
+    "random": 0.06474732750242951,
+    "past-only": 0.3943756073858116,
+    "predicted (key only)": 0.1564018464528669,
+    "past + predicted": 0.3810738581146743,
+    "ORACLE (future itself)": 1.0
+  },
+  "gain_over_past": -0.013301749271137309,
+  "verdict": "the key adds nothing the accumulated score does not already carry"
+}
