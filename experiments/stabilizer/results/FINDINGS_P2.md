@@ -203,3 +203,80 @@ harness's accuracy; use `passkey.py` for that.
 python experiments/stabilizer/src/trace_span_positions.py \
   --length 131072 --budgets 64 128 --depths 0.1 0.5 0.9
 ```
+
+---
+
+# P2.3 — the fix P2.2 predicted, and it holds at every length
+
+`--pool-back` / `--pool-fwd` on `passkey.py`, backed by `Policy.pool_window()`. The
+score pool was a centred window; it is now an arbitrary `(back, fwd)` reach, with
+the centred window as the default. The refactor is behaviour-preserving: the new
+padding path is bit-identical to `max_pool1d(kernel=p, padding=p//2)` for p in
+{3,7,15,31} across n in {64,257,1000}, and the `(3,3)` control arm reproduced the
+committed baseline's per-trial hit vector **exactly** (10/36 at 128K/B=64).
+
+## The result
+
+Paired on the same 12 keys, exact McNemar on discordant needles:
+
+| length | B | compression | centred (3,3) | causal (6,0) | gain | 0→1 | 1→0 | p |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 32K | 16 | 1,966× | 0.028 | **1.000** | +0.972 | 35 | 0 | <10⁻⁵ |
+| 32K | 32 | 983× | 0.389 | **1.000** | +0.611 | 22 | 0 | <10⁻⁵ |
+| 64K | 16 | 3,931× | 0.000 | 0.972 | +0.972 | 35 | 0 | <10⁻⁵ |
+| 64K | 32 | 1,966× | 0.000 | **1.000** | +1.000 | 36 | 0 | <10⁻⁵ |
+| 128K | 16 | **7,864×** | 0.000 | **1.000** | +1.000 | 36 | 0 | <10⁻⁵ |
+| 128K | 32 | 3,932× | 0.000 | **1.000** | +1.000 | 36 | 0 | <10⁻⁵ |
+| 128K | 64 | 1,966× | 0.278 | **1.000** | +0.722 | 26 | 0 | <10⁻⁵ |
+
+**216 discordant pairs, every one in the same direction; not a single needle that
+the centred window retrieved and the causal window lost.** Pooled 251/252. Peak
+memory 1,500–1,507 MiB across the whole table — the gain costs nothing.
+
+The failure text confirms the mechanism end to end. At 128K/B=32 the centred window
+emits `755`, `856`, `998`, `4264` for keys `75526`, `85667`, `99873`, `42649` — the
+4-of-5 truncation P2 documented. The causal window emits the keys.
+
+**P2.2 diagnosed the failure, predicted this repair, and the repair worked.** That
+chain is stronger evidence for the span account than any single accuracy number.
+
+## Two things this does NOT establish
+
+**It is not shown to be the causal shape.** A centred `(7,7)` window — width 15, no
+causal bias — also scores 1.000 at 128K/B=64. So "reach backward to the label" and
+"reach further in any direction" are confounded. P2.4 tests matched backward reach
+with different forward reach to separate them. Until it reports, the honest claim is
+*a wider or backward-reaching pool window*, not *a causal one*.
+
+**The floor is now the policy's, not the task's.** At B=16 the budget is 4 sinks +
+4 recent + **8 heavy slots**. At B=8 the recent window and sinks consume everything,
+`heavy()` reaches 0, and the policy degenerates to StreamingLLM with no significance
+ranking at all. So B=16 is close to the smallest budget at which this mechanism can
+operate, and the ladder cannot be pushed much lower without changing the policy's
+own overhead. The 7,864× figure is a floor of the *implementation*, not a measured
+information limit.
+
+## And the √L law from P2 no longer applies
+
+P2 fitted B_half = 0.141·L^0.535 from the centred window. With the causal window
+every length is lossless at or below B=16, so B_half is below the sampled range at
+32K, 64K and 128K alike and no exponent can be fitted. The sub-linear law described
+the *centred* mechanism. It should not be carried forward as a property of the
+significance matrix.
+
+## Limitations
+
+Twelve independent needles per cell (the three depths share keys), so a perfect cell
+supports a 95% Clopper–Pearson lower bound of 0.779. The *comparisons* above are
+solid — 216 discordant pairs is overwhelming — but "lossless" remains "no failure in
+12". One task, one span type, one key format, homogeneous filler. The B=16 result in
+particular leans on a haystack with exactly one distinctive region; with 8 heavy
+slots, a task carrying several plausible distractors cannot possibly behave this way.
+
+## Reproduce
+
+```bash
+python experiments/kv_significance/src/passkey.py --lengths 131072 --budgets 16 \
+  --recent 4 --pool 7 --pool-back 6 --pool-fwd 0 --trials 12 \
+  --count-exponent 1.0 --yarn 4.0 --query-aware --cap-mib 7400
+```

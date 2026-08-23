@@ -1,0 +1,241 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 16,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 64,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember this key.\n\nThe",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember that key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember that key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. Remember that key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember that key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember this key.",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. Remember that key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. Remember that key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember that key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember this key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. Remember that key.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. Remember that key.\n\nSo",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 64,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember that key.",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. Remember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember that key.",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. Remember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. Remember that key.",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember that key.",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. Remember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. Remember that key.",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 64,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. Remember that. \n\nSo",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember that. \n\nSo",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. \n\nSo the answer is",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}

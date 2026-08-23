@@ -1,0 +1,241 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 8,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 32,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1502.4,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. Remember to memorise it",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. Remember to memorise it",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 32,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 1502.4,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember to use it as",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember to use it as",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember to use the pass",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. Remember to use it as",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember to use it as",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. Remember to use the pass",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember to use it as",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. Remember to remember to r",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. Remember to use it as",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 32,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1502.4,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember it. \n\nThe",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it. \n\nThe",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember it. \n\nThe",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. Remember to memorize it",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. Remember to memorize it",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}

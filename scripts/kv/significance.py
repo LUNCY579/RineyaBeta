@@ -389,10 +389,28 @@ def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
     # position independently tends to keep scattered singletons out of several
     # different spans. Max-pooling over a width-p neighbourhood makes a
     # high-scoring token pull its neighbours in with it.
+    # A pool_back/pool_fwd set while pool <= 1 would silently do nothing, which
+    # is precisely the failure the pool=1 default already produced once in this
+    # program -- a knob that looked set and was inert for every measurement.
+    if policy.pool <= 1 and (policy.pool_back or policy.pool_fwd):
+        raise ValueError(
+            "pool_back/pool_fwd require pool > 1; pooling is disabled at "
+            f"pool={policy.pool} and the window would be ignored")
     if policy.pool > 1 and n > policy.pool:
         import torch.nn.functional as F
-        pooled = F.max_pool1d(middle, kernel_size=policy.pool, stride=1,
-                              padding=policy.pool // 2)[..., :n]
+        # The window is asymmetric in general. A centred window is the SnapKV
+        # default and stays the default here, but it is not obviously the right
+        # shape: P2.2 measured that pooling does not protect spans as such, it
+        # propagates a high score to the NEIGHBOURS of a high scorer. Query-aware
+        # scoring makes the query-like framing of an evidence span score high and
+        # the payload score low -- 54% against 35% survival over 224 streams --
+        # and the payload sits AFTER its label. Reaching further back than forward
+        # therefore credits an answer for the label that introduces it. `back`
+        # and `fwd` make that shape a parameter instead of an assumption.
+        back, fwd = policy.pool_window()
+        padded = F.pad(middle, (back, fwd), value=float("-inf"))
+        pooled = F.max_pool1d(padded, kernel_size=back + fwd + 1,
+                              stride=1, padding=0)[..., :n]
         # Re-assert the masks: max_pool1d propagates finite values into the
         # masked regions, which would make sinks/recent eligible for the heavy
         # top-k and let a position be selected twice.
@@ -448,6 +466,8 @@ class Policy:
     protect_sinks: bool = True
     slack: int = 0             # evict only once stored exceeds budget + slack
     pool: int = 1              # max-pool width over scores before top-k (SnapKV)
+    pool_back: int | None = None   # reach behind i; None = pool // 2 (centred)
+    pool_fwd: int | None = None    # reach ahead of i;  None = pool // 2 (centred)
     normalize: bool = False    # shorthand for count_exponent = 1.0
     count_exponent: float | None = None   # rank on sum / count**e; 0 = sum, 1 = mean
     stats: dict = field(default_factory=dict)
@@ -457,6 +477,20 @@ class Policy:
         if self.count_exponent is not None:
             return float(self.count_exponent)
         return 1.0 if self.normalize else 0.0
+
+    def pool_window(self) -> tuple[int, int]:
+        """(reach behind, reach ahead) for the score pool.
+
+        Defaults to the centred SnapKV window, so every result measured before
+        this parameter existed reproduces exactly: pool=7 gives (3, 3), which is
+        what max_pool1d(kernel=7, padding=3) did. Setting pool_back alone gives a
+        causal window -- position i inherits only from positions at or before it,
+        which is the shape that credits a payload for the label preceding it.
+        """
+        half = self.pool // 2
+        back = half if self.pool_back is None else int(self.pool_back)
+        fwd = half if self.pool_fwd is None else int(self.pool_fwd)
+        return back, fwd
 
     def n_sinks(self) -> int:
         return min(self.sinks if self.protect_sinks else 0, self.budget)

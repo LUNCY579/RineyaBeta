@@ -147,6 +147,13 @@ def main() -> None:
                          "traced at 128K kept only 57-65%% of its tokens, i.e. "
                          "the span survived in fragments. Pooling exists to "
                          "stop exactly that.")
+    ap.add_argument("--pool-back", type=int, default=None,
+                    help="score-pool reach BEHIND a position; default pool//2. "
+                         "Setting this alone gives a causal window, which credits "
+                         "a payload for the query-matching label preceding it "
+                         "(P2.2: framing survives at 54%%, payload at 35%%).")
+    ap.add_argument("--pool-fwd", type=int, default=None,
+                    help="score-pool reach AHEAD of a position; default pool//2.")
     ap.add_argument("--count-exponent", type=float, default=None,
                     help="rank on sum/count**e; 0 = raw sum, 1 = mean, between = decay")
     ap.add_argument("--normalize", action="store_true",
@@ -234,6 +241,8 @@ def main() -> None:
                     torch.cuda.reset_peak_memory_stats()
                     policy = (sig.Policy(budget=budget, sinks=4, recent=args.recent,
                                          pool=args.pool,
+                                         pool_back=args.pool_back,
+                                         pool_fwd=args.pool_fwd,
                                          normalize=args.normalize,
                                          count_exponent=args.count_exponent)
                               if budget else None)
@@ -296,6 +305,7 @@ def main() -> None:
         {"model": MODEL, "yarn": args.yarn, "chunk": args.chunk,
          "recent": args.recent, "trials": args.trials, "window": args.window,
          "pool": args.pool,
+         "pool_back": args.pool_back, "pool_fwd": args.pool_fwd,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
          "count_exponent": args.count_exponent, "normalize": args.normalize,
          "query_aware": args.query_aware, "seed": args.seed,
