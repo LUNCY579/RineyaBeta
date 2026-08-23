@@ -55,14 +55,48 @@ def summary(base: Path, tag: str, ds: str = "rag_dev"):
     return json.loads(p.read_text(encoding="utf-8"))["mean_quality_score"]
 
 
-def measured(path: Path, key: str, **match):
+def measured(path: Path, key: str, _require: dict | None = None, **match):
+    """Value from a committed result row, with the file's provenance asserted.
+
+    Three ways this used to hand back a plausible wrong number. All are now fatal.
+
+    THE FILE IS QUARANTINED. Results under _invalidated_* came from a build with a
+    known prefill bug. A one-directory path slip read them silently. One of them
+    carries score_pct_of_cache 0.781 at budget=1024 -- the same value the 0.78%
+    overhead claim pins -- so the slip would not even change the answer, and
+    nothing downstream would look wrong.
+
+    MORE THAN ONE ROW MATCHES. `match` is often a budget alone, and a file may
+    hold that budget at several lengths; the quarantined file above has 0.781 at
+    budget=1024 in TWO rows. Returning the first made the answer depend on row
+    order.
+
+    THE FILE IS NOT THE CONFIGURATION THE CLAIM IS ABOUT. pk_128k_pool7_B256.json
+    and pk_128k_pool7_B256_rf.json share length, budget and pool, differ only in
+    `recent` (512 against 64), and report accuracy 0.00 against 1.00. Selecting by
+    filename picked the wrong one during this program. Filenames do not carry
+    configuration; the manifest does. Pass _require to assert the axes the claim
+    depends on, e.g. _require={"recent": 64, "pool": 7}.
+    """
     if not path.exists():
         return None
-    rows = json.loads(path.read_text(encoding="utf-8"))["results"]
-    for r in rows:
-        if all(r.get(k) == v for k, v in match.items()):
-            return r.get(key)
-    return None
+    if any(part.startswith("_invalidated") for part in path.parts):
+        raise AssertionError(
+            f"{path.name}: quarantined result, not admissible as evidence")
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    for k, want in (_require or {}).items():
+        got = doc.get(k)
+        if got != want:
+            raise AssertionError(
+                f"{path.name}: manifest {k}={got!r} but the claim requires "
+                f"{want!r} -- this file is a different configuration")
+    hits = [r for r in doc["results"]
+            if all(r.get(k) == v for k, v in match.items())]
+    if len(hits) > 1:
+        raise AssertionError(
+            f"{path.name}: {len(hits)} rows match {match} -- the selection is "
+            f"ambiguous. Add a field that separates them.")
+    return hits[0].get(key) if hits else None
 
 
 def probe(fname: str, *keys):
@@ -92,17 +126,37 @@ def cla_mean():
 
 
 def pk(fname: str, depth: float | None = None, budget: int | None = None,
-       length: int | None = None):
+       length: int | None = None, require: dict | None = None):
     """Passkey accuracy from a committed arm; pooled over depths if depth is None.
 
     Skips cells whose acc is null -- those are trials that ran out of memory and
     measured nothing. Averaging a null as zero is the exact mistake the harness
     itself used to make.
+
+    `require` asserts manifest fields, for the same reason measured() does: two
+    files here differ only in `recent` and report 0.00 against 1.00. Any pin whose
+    file has a same-(length, budget, pool) twin should state the axis that
+    separates them rather than trusting the filename.
+
+    NOTE ON n. Every depth of a cell draws the SAME key sequence -- deliberately,
+    so depths are paired on needles (see passkey.py). A cell of `trials` keys at
+    three depths is therefore `trials` independent needles observed three times,
+    NOT 3*trials independent needles. Pooling over depth does not increase n, and
+    a confidence bound computed as if it did is anti-conservative.
     """
     path = KVS / fname
     if not path.exists():
         return None
+    if any(part.startswith("_invalidated") for part in path.parts):
+        raise AssertionError(
+            f"{path.name}: quarantined result, not admissible as evidence")
     d = json.loads(path.read_text(encoding="utf-8"))
+    for k, want in (require or {}).items():
+        got = d.get(k)
+        if got != want:
+            raise AssertionError(
+                f"{path.name}: manifest {k}={got!r} but the claim requires "
+                f"{want!r} -- this file is a different configuration")
     rows = [r for r in d["results"] if r.get("acc") is not None]
     if depth is not None:
         rows = [r for r in rows if r["depth"] == depth]
@@ -436,9 +490,11 @@ CLAIMS = [
     ("pool=7 @128K depth 0.5", 1.0000,
      lambda: pk("pk_128k_pool7.json", 0.5), 5e-4, "1.00", "findings"),
     ("pool=7 floor: B=256 mean", 1.0000,
-     lambda: pk("pk_128k_pool7_B256_rf.json"), 5e-4, "1.00", "findings"),
+     lambda: pk("pk_128k_pool7_B256_rf.json",
+                require={"recent": 64, "pool": 7}), 5e-4, "1.00", "findings"),
     ("pool=7 floor: B=128 mean", 0.9722,
-     lambda: pk("pk_128k_pool7_B128_rf.json"), 5e-4, "0.972", "findings"),
+     lambda: pk("pk_128k_pool7_B128_rf.json",
+                require={"recent": 32, "pool": 7}), 5e-4, "0.972", "findings"),
     ("pool=7 exponent: e=0 mean", 0.5000,
      lambda: pk("pk_128k_pool7_e0.0.json"), 5e-4, "0.500", "findings"),
     ("pool=7 exponent: e=1 mean", 1.0000,
