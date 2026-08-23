@@ -500,6 +500,28 @@ CLAIMS = [
      lambda: pk("pk_128k_pool7_e0.0.json"), 5e-4, "0.500", "findings"),
     ("pool=7 exponent: e=1 mean", 1.0000,
      lambda: pk("pk_128k_pool7_e1.0.json"), 5e-4, "1.000", "findings"),
+    # --- stage 1: retrieval under competition --------------------------------
+    # P1 was pre-registered in docs/PLAN_LONG_REASONING.md before these ran. The
+    # k=16 contrast is the whole result, so it must not drift unpinned.
+    ("stage1: k=16 framed", 0.6111,
+     lambda: pk("pk_128k_B64_dist16_framed.json",
+                require={"distractors": 16, "distractor_style": "framed"}),
+     5e-4, "0.611", "p2"),
+    ("stage1: k=16 bare", 0.9722,
+     lambda: pk("pk_128k_B64_dist16_bare.json",
+                require={"distractors": 16, "distractor_style": "bare"}),
+     5e-4, "0.972", "p2"),
+    ("stage1: k=4 framed", 0.8889,
+     lambda: pk("pk_128k_B64_dist4_framed.json",
+                require={"distractors": 4, "distractor_style": "framed"}),
+     5e-4, "0.889", "p2"),
+    ("stage1: k=4 bare", 0.9444,
+     lambda: pk("pk_128k_B64_dist4_bare.json",
+                require={"distractors": 4, "distractor_style": "bare"}),
+     5e-4, "0.944", "p2"),
+    ("stage1: k=16 framed depth 0.9 unaffected", 1.0000,
+     lambda: pk("pk_128k_B64_dist16_framed.json", 0.9,
+                require={"distractors": 16}), 5e-4, "1.00", "p2"),
     # --- cornerstone 2: the pool window -------------------------------------
     # These were stated in FINDINGS_P2.md for hours with nothing checking them.
     # Twelve of eighteen figures in that file were unpinned, which is the same gap

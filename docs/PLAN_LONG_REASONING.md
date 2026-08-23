@@ -1,6 +1,6 @@
 # From passkey to hard reasoning: the next research programme
 
-Status: **planning, not started.** To begin after cornerstone 2 closes (P2.4
+Status: **stage 1 RUN (2026-08-23); stages 2-6 not started.** Stage 2 is built (`--needle-words`) and unrun. Written 2026-08-23 and revised the same day — see §8.
 disentanglement, the power run, and the paper). Written 2026-08-23.
 
 This document exists to be revised. Every section is dated and every claim it makes
@@ -131,7 +131,7 @@ the observation that would falsify it.
 
 | # | prediction | follows from | falsified by |
 |---|---|---|---|
-| P1 | Adding *k* query-shaped distractors degrades accuracy faster than adding *k* neutral distractors, at matched budget | P2.2: framing 54% vs payload 35% | no difference between query-shaped and neutral distractors |
+| **P1 ✅ CONFIRMED (stage 1, 2026-08-23)** | Adding *k* query-shaped distractors degrades accuracy faster than *k* neutral ones, at matched budget | P2.2: framing 54% vs payload 35% | *(not falsified)* — at k=16: framed **0.611** vs bare **0.972**, exact McNemar **p = 0.0010**. k=1 and k=4 show no separation. **But the assumed MECHANISM is refuted**: only 14% of failures are a decoy returned whole; 52% are the *true* span fragmented. Query-shaped decoys consume budget rather than substituting for the answer. |
 | P2 | Required budget grows roughly **linearly in the number of hops**, not in context length | span account: each hop needs one intact span | budget requirement flat in hop count, or growing with length instead |
 | P3 | The pool `back` reach needed for a span of length *L* scales **with L**, not with a constant | P2.3: back=6 suffices for a 5-token key | a fixed `back` works for all span lengths |
 | P4 | When query and evidence share few words, query-aware scoring loses most of its advantage over query-blind | P1: future attention unpredictable from content; the query is the only signal | query-aware retains its full margin at zero lexical overlap |
