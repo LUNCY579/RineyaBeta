@@ -454,3 +454,69 @@ never worse than the best fixed reach. It does not eliminate it.
 
 The residual long-span degradation from P2.5 also survives: d=7 reaches 0.889, not
 1.000, and remains unexplained.
+
+---
+
+# Stage 1 — retrieval under competition: P1 confirmed, its mechanism refuted
+
+The first measurement outside passkey's comfort zone. `--distractors k` adds *k* decoy
+keys; `--distractor-style` sets whether they are shaped like the question. Both styles
+draw the SAME decoy keys from one seed, so the contrast is paired on decoy identity and
+isolates query similarity from mere numeric competition. 128K, B=64, `grow=2.0`,
+5-digit keys, 12 paired needles per cell.
+
+| k | bare | framed | difference | exact McNemar |
+|---:|---:|---:|---:|---:|
+| 0 | 1.000 | 1.000 | — | — |
+| 1 | 1.000 | 1.000 | +0.000 | 1.0000 |
+| 4 | 0.944 | 0.889 | −0.056 | 0.6875 |
+| **16** | **0.972** | **0.611** | **−0.361** | **0.0010** |
+
+**Prediction P1 is confirmed.** It was pre-registered in `docs/PLAN_LONG_REASONING.md`
+before any of this ran, and it follows from P2.2's measurement that the score keeps text
+resembling the query. Sixteen *neutral* distractors cost almost nothing (0.972). Sixteen
+*query-shaped* distractors cost 0.389. Same count, same keys, same budget — the only
+difference is whether the decoy wears the question's sentence frame.
+
+Query similarity, not numeric competition, is the operative variable.
+
+## But the mechanism P1 assumed is wrong
+
+P1 predicted **crowding out**: decoys preferentially retained, so the model returns a
+decoy's key. Classifying all 21 failures by what was actually emitted
+(`scripts/design/distractor_failures.py`, which regenerates decoy keys from the seed):
+
+| failure mode | count | share |
+|---|---:|---:|
+| fragmented true span (truncated or corrupted) | 11 | **52%** |
+| crowded out by a decoy, returned whole | 3 | 14% |
+| other (degenerate repetition, e.g. `75526` → `555222`) | 7 | 33% |
+
+The model does not answer with a decoy. It answers with a **damaged version of the true
+key** — `70176` → `7017`, `85667` → `65667` — the same signature P2 recorded.
+
+So the causal path is not substitution but **budget consumption**: query-shaped decoys
+are preserved *because* they look like the query, which leaves too few of the 44 heavy
+slots to hold the true span intact, and it returns fragmented. The score still finds the
+right span; it can no longer afford to keep all of it.
+
+That distinction decides where the fix belongs. Substitution would be a **scoring**
+problem. This is a **capacity** problem created by a scoring bias — so the repair is
+either to stop rewarding query-shaped text that is not evidence, or to make span
+retention all-or-nothing so a partially affordable span is not kept at all.
+
+## Depth is untouched at 0.9
+
+At k=16 framed: 0.42 / 0.42 / **1.00** at depths 0.1 / 0.5 / 0.9. Late needles enter in
+a late chunk and survive few compression rounds, so they never face the competition. The
+same asymmetry the program measured for query-blind scoring.
+
+## What this costs the headline
+
+At B=64 with 16 query-shaped competitors, accuracy is 0.611 — against 1.000 with none.
+`docs/PLAN_LONG_REASONING.md` stated in advance that compression would fall sharply once
+distractors were present, and why: at these budgets there is no room for many spans. This
+is that prediction landing, and it is the correct result rather than a regression.
+
+The 7,864× figure remains true of passkey and should never be quoted without its
+condition: **a haystack containing no competitors at all.**
