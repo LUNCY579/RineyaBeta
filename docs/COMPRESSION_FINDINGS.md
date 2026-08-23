@@ -80,15 +80,12 @@ not truncation.
 `mean_quality_score` **0.0047** against R2's 0.6682, `intelligibility_pass_rate`
 **0.0652**, `contract_violation_case_rate` 0.9734. Not degradation — collapse:
 
-| gold | R2 | gqa4kv |
-|---|---|---|
-| `June 9, 2032.` | `June 9, 2032.` | `19761.299_ACTEMPLATE
-ABO
-EPICES…` |
-| `103 GB.` | `103 GB.` | `19241.199992*19	type…` |
-| `Wi-Fi 7.` | `Wi-Fi 7.` | `1996EJ
-EPONJESPECT
-19679661E…` |
+```
+gold          R2              gqa4kv
+June 9, 2032. "June 9, 2032." "19761.299_ACTEMPLATE\nABO\nEPICES…"
+103 GB.       "103 GB."       "19241.199992*19\ttype…"
+Wi-Fi 7.      "Wi-Fi 7."      "1996EJ\nEPONJESPECT\n19679661E…"
+```
 
 Token salad. Only 1 empty reply of 752 and 30.3 mean visible tokens, so it generates
 fluently and produces nonsense — a real model failure, not a harness artifact
