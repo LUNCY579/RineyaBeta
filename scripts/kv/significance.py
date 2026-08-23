@@ -34,6 +34,7 @@ import math
 from dataclasses import dataclass, field
 
 import torch
+import torch.nn.functional as F
 from transformers.cache_utils import Cache, DynamicLayer
 
 # layer_idx -> [batch, n_kv_heads, n_positions] accumulated significance
@@ -360,6 +361,81 @@ def _gather_counts(layer_idx: int, idx: torch.Tensor, n: int) -> None:
             f"reset_scores() between sequences.")
     _COUNTS[layer_idx] = cnt.gather(2, idx.to(cnt.device)).contiguous()
 
+_GROW_NOISE_MULT = 2.0   # a grown-into position must stand this far above
+                        # the stream's noise floor (its median). See grow_spans.
+
+
+def grow_spans(s: torch.Tensor, q: float, max_reach: int) -> torch.Tensor:
+    """Let each score flow forward through positions that are themselves alive.
+
+    WHY THIS EXISTS. P2.4 measured that the pool window's required BACKWARD REACH
+    equals the evidence span's length minus one: back=3 leaves a 5-digit key at
+    0.278, back=4 takes it to 1.000, and forward reach is inert (spread 0.000
+    across fwd in {0,4} at back=4). A fixed window therefore only works when the
+    span length is known in advance. Passkey grants that. Natural language does
+    not -- evidence spans there run 20-40 tokens and vary per instance.
+
+    So derive the reach instead of fixing it. The score enters a span at its HEAD,
+    because query-aware scoring rewards the query-shaped label that introduces the
+    payload (P2.2: framing survives in 54% of streams against 35% for the payload).
+    Growing that head's score forward through positions that are themselves above a
+    floor reproduces the span and stops where the score collapses to filler --
+    rather than always reaching a fixed distance, and so either falling short of a
+    long span or dragging filler into a short one.
+
+    This is geodesic dilation: the dual-threshold idea from Canny edge detection
+    applied to a 1-D score. A high seed, and a low gate deciding how far it spreads.
+
+    THE GATE IS A QUANTILE, NOT A FRACTION OF THE MAXIMUM. Gating at `tau * max`
+    was the first attempt and it is fragile: it presumes a known ratio between the
+    head's score and its payload's, which is precisely the prior knowledge this
+    function exists to avoid. With a head at 1.0 and a payload at 0.15, any tau
+    above 0.15 silently blocks the payload and growth becomes a no-op -- caught by
+    the CPU tests in test_grow_spans.py before it ever reached the card.
+
+    `q` is therefore a quantile in [0, 1): the top (1 - q) fraction of positions in
+    each stream may be grown into. It is scale-free, needs no knowledge of the
+    score distribution's shape, and reads directly as a compression setting --
+    q=0.99 admits one position in a hundred.
+    """
+    if q <= 0.0 or q >= 1.0:
+        return s
+    n = s.shape[-1]
+    k = max(1, min(n, int(round((1.0 - q) * n))))
+    finite = torch.where(torch.isinf(s), torch.full_like(s, float("-inf")), s)
+
+    # TWO thresholds, and a position must clear BOTH.
+    #
+    # The quantile alone is not enough, and the CPU tests caught why. It bounds HOW
+    # MANY positions may be grown into, but when a stream holds fewer interesting
+    # positions than the quantile admits, the k-th largest score IS the filler
+    # level, the gate opens on the whole sequence, and growth floods it -- every
+    # position inherits the global maximum and the subsequent top-k becomes
+    # arbitrary. On a 200-position stream holding one 5-token span, q=0.95 admits
+    # 10 positions, only 5 are above filler, and the gate let all 200 through.
+    #
+    # So also require a position to be signal rather than bulk. Filler dominates
+    # the distribution, so the median tracks the noise floor; a position must stand
+    # a factor above it. The multiplier is a property of the method rather than a
+    # tuned knob -- anything that separates payload from filler behaves alike, and
+    # test_grow_spans.py checks the separation directly.
+    valid = torch.isfinite(finite)
+    thresh_k = finite.topk(k, dim=-1).values[..., -1:]
+    filled = torch.where(valid, finite, torch.zeros_like(finite))
+    noise = filled.median(dim=-1, keepdim=True).values
+    thresh_noise = noise * _GROW_NOISE_MULT
+    thresh = torch.maximum(thresh_k, thresh_noise)
+    gate = (finite >= thresh) & valid & (finite > thresh_noise)
+    grown = finite
+    for _ in range(max(0, int(max_reach))):
+        shifted = F.pad(grown[..., :-1], (1, 0), value=float("-inf"))
+        nxt = torch.where(gate, torch.maximum(grown, shifted), grown)
+        if torch.equal(nxt, grown):
+            break
+        grown = nxt
+    return grown
+
+
 def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
     """Indices to keep: sinks + top-heavy + recent. Returns [b, n_kv, budget]."""
     b, n_kv = s.shape[0], s.shape[1]
@@ -407,10 +483,14 @@ def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
         # and the payload sits AFTER its label. Reaching further back than forward
         # therefore credits an answer for the label that introduces it. `back`
         # and `fwd` make that shape a parameter instead of an assumption.
-        back, fwd = policy.pool_window()
-        padded = F.pad(middle, (back, fwd), value=float("-inf"))
-        pooled = F.max_pool1d(padded, kernel_size=back + fwd + 1,
-                              stride=1, padding=0)[..., :n]
+        if policy.grow is not None:
+            # Derived reach: grow each head through its own span (P2.4).
+            pooled = grow_spans(middle, policy.grow, policy.grow_max)
+        else:
+            back, fwd = policy.pool_window()
+            padded = F.pad(middle, (back, fwd), value=float("-inf"))
+            pooled = F.max_pool1d(padded, kernel_size=back + fwd + 1,
+                                  stride=1, padding=0)[..., :n]
         # Re-assert the masks: max_pool1d propagates finite values into the
         # masked regions, which would make sinks/recent eligible for the heavy
         # top-k and let a position be selected twice.
@@ -468,6 +548,11 @@ class Policy:
     pool: int = 1              # max-pool width over scores before top-k (SnapKV)
     pool_back: int | None = None   # reach behind i; None = pool // 2 (centred)
     pool_fwd: int | None = None    # reach ahead of i;  None = pool // 2 (centred)
+    grow: float | None = None      # if set, DERIVE the reach: geodesic dilation
+                                   # gated at this QUANTILE of each stream's scores
+                                   # (0.99 = top 1% may be grown into), instead of
+                                   # a fixed pool_back. See grow_spans.
+    grow_max: int = 64             # iteration bound for growth
     normalize: bool = False    # shorthand for count_exponent = 1.0
     count_exponent: float | None = None   # rank on sum / count**e; 0 = sum, 1 = mean
     stats: dict = field(default_factory=dict)
