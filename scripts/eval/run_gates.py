@@ -79,6 +79,8 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--cap-mib", type=float, default=4096.0)
+    ap.add_argument("--device", default="auto", choices=("auto", "cpu", "cuda"),
+                    help="cpu lets a gate run share a machine whose GPU is busy")
     args = ap.parse_args()
 
     assets = json.loads((ROOT / "manifests" / "eval_assets.json").read_text(encoding="utf-8"))
@@ -106,8 +108,9 @@ def main() -> None:
         print(f"resuming: {len(done):,} of {len(records):,} cases already scored")
 
     from transformers import AutoModelForCausalLM, AutoTokenizer
-    cap = mem.apply_cap(args.cap_mib if torch.cuda.is_available() else None)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    use_cuda = torch.cuda.is_available() and args.device != "cpu"
+    cap = mem.apply_cap(args.cap_mib if use_cuda else None)
+    device = torch.device("cuda:0" if use_cuda else "cpu")
     dtype = torch.bfloat16 if device.type == "cuda" else torch.float32
 
     tokenizer = AutoTokenizer.from_pretrained(ROOT / args.model)

@@ -113,6 +113,7 @@ def probe(
     cap_mib: float | None,
     margin_mib: float = 1024.0,
     device: int = 0,
+    on_cuda: bool = True,
 ) -> ProbeReport:
     """Replay the plan's heaviest *optimizer step*, not just its widest micro-batch.
 
@@ -135,7 +136,11 @@ def probe(
     rows = max(r for r, _ in shapes)
     max_len = max(s for _, s in shapes)
     padded = sum(r * s for r, s in shapes)
-    if not torch.cuda.is_available():
+    # `on_cuda` is where the *model* is, which is not the same question as whether
+    # a GPU exists. Probing on cuda while the model sits on cpu builds the synthetic
+    # batches on the wrong device and dies in index_select -- and there is nothing
+    # to cap on a CPU run anyway.
+    if not on_cuda or not torch.cuda.is_available():
         return ProbeReport(ran=False, device="cpu", rows=rows, max_len=max_len,
                            padded_cost=padded, peak_alloc_mib=0.0,
                            peak_reserved_mib=0.0, cap_mib=0.0,
