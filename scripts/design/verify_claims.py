@@ -45,6 +45,7 @@ DOCS = {
     "paper": ROOT / "docs/PAPER_DRAFT_SIGNIFICANCE.md",
     "attention_shape": ROOT / "experiments/attention_shape/README.md",
     "kv_readme": ROOT / "experiments/kv_significance/README.md",
+    "p2": ROOT / "experiments/stabilizer/results/FINDINGS_P2.md",
 }
 
 
@@ -499,6 +500,55 @@ CLAIMS = [
      lambda: pk("pk_128k_pool7_e0.0.json"), 5e-4, "0.500", "findings"),
     ("pool=7 exponent: e=1 mean", 1.0000,
      lambda: pk("pk_128k_pool7_e1.0.json"), 5e-4, "1.000", "findings"),
+    # --- cornerstone 2: the pool window -------------------------------------
+    # These were stated in FINDINGS_P2.md for hours with nothing checking them.
+    # Twelve of eighteen figures in that file were unpinned, which is the same gap
+    # that let a 3x memory error survive earlier in this program.
+    ("causal: 128K B=64 centred (3,3)", 0.2778,
+     lambda: pk("pk_128k_B64_pool_b3f3.json",
+                require={"pool_back": 3, "pool_fwd": 3}), 5e-4, "0.278", "p2"),
+    ("causal: 128K B=64 causal (6,0)", 1.0000,
+     lambda: pk("pk_128k_B64_pool_b6f0.json",
+                require={"pool_back": 6, "pool_fwd": 0}), 5e-4, "1.000", "p2"),
+    ("causal: 128K B=16 causal (6,0)", 1.0000,
+     lambda: pk("pk_128k_B16_pool_b6f0.json",
+                require={"pool_back": 6, "pool_fwd": 0}), 5e-4, "1.000", "p2"),
+    ("causal: 32K B=16 centred", 0.0278,
+     lambda: pk("pk_32768_pool7_B16.json"), 5e-4, "0.028", "p2"),
+    ("causal: 32K B=32 centred", 0.3889,
+     lambda: pk("pk_32768_pool7_B32.json"), 5e-4, "0.389", "p2"),
+    ("causal: 64K B=16 causal (6,0)", 0.9722,
+     lambda: pk("pk_65536_B16_pool_b6f0.json",
+                require={"pool_back": 6, "pool_fwd": 0}), 5e-4, "0.972", "p2"),
+    # forward reach is inert: matched-back pairs must agree
+    ("reach: back=4 fwd=0", 1.0000,
+     lambda: pk("pk_128k_B64_pool_b4f0.json",
+                require={"pool_back": 4, "pool_fwd": 0}), 5e-4, "1.000", "p2"),
+    ("reach: back=4 fwd=4", 1.0000,
+     lambda: pk("pk_128k_B64_pool_b4f4.json",
+                require={"pool_back": 4, "pool_fwd": 4}), 5e-4, "1.000", "p2"),
+    ("reach: back=2 fwd=0", 0.0278,
+     lambda: pk("pk_128k_B64_pool_b2f0.json",
+                require={"pool_back": 2, "pool_fwd": 0}), 5e-4, "0.028", "p2"),
+    ("reach: back=2 fwd=2", 0.1389,
+     lambda: pk("pk_128k_B64_pool_b2f2.json",
+                require={"pool_back": 2, "pool_fwd": 2}), 5e-4, "0.139", "p2"),
+    ("reach: back=5 fwd=0", 0.9722,
+     lambda: pk("pk_128k_B64_pool_b5f0.json",
+                require={"pool_back": 5, "pool_fwd": 0}), 5e-4, "0.972", "p2"),
+    # the span law: the discriminating cell is d=7 at back=4
+    ("span law: d=7 back=4", 0.0000,
+     lambda: pk("pk_128k_B64_d7_b4f0.json",
+                require={"key_digits": 7, "pool_back": 4}), 5e-4, "0.000", "p2"),
+    ("span law: d=7 back=6", 0.7778,
+     lambda: pk("pk_128k_B64_d7_b6f0.json",
+                require={"key_digits": 7, "pool_back": 6}), 5e-4, "0.778", "p2"),
+    ("span law: d=4 back=2", 0.4444,
+     lambda: pk("pk_128k_B64_d4_b2f0.json",
+                require={"key_digits": 4, "pool_back": 2}), 5e-4, "0.444", "p2"),
+    ("span law: d=4 back=3", 0.9722,
+     lambda: pk("pk_128k_B64_d4_b3f0.json",
+                require={"key_digits": 4, "pool_back": 3}), 5e-4, "0.972", "p2"),
     ("pool=7 exponent: e=0 depth 0.9", 0.1667,
      lambda: pk("pk_128k_pool7_e0.0.json", 0.9), 5e-4, "0.17", "findings"),
 ]
