@@ -65,6 +65,7 @@ not background — §3 turns each row into an experiment.
 | query–evidence lexical overlap | framing appears **verbatim** in the needle | often **low**; question and answer share few words | query-aware scoring may lose its signal entirely |
 | evidence position | controlled (depth 0.1/0.5/0.9) | natural, uncontrolled | depth can no longer be a clean factor |
 | information density | ~1 bit per 25K tokens | high and uneven | budget must cover more genuinely-useful text |
+| **answer uniqueness** | the key is the **only digit sequence in the entire context** — verified: `FILLER`, `PREAMBLE` and `SUFFIX` contain no digits at all | the answer is one entity among thousands of the same type | **a `/\d{5}/` regex scores 1.000 on passkey with no model.** The task cannot distinguish "the mechanism preserved the span" from "the mechanism found the answer" |
 
 ### 2.3 Measurement
 
@@ -147,12 +148,48 @@ stage 5.
 
 ## 5. The two constraints that gate the design
 
-**The model's ceiling comes first.** If a 474M-parameter model cannot do multi-hop
-reasoning *uncompressed*, every compression number is a floor effect measuring the
-model, not the mechanism. **The first experiment is not a compression run.** It is:
-can this model do the task at 4K with a full cache? If it scores near zero, the task
-must be recalibrated downward until it does — or the programme moves to a larger
-model and a different card.
+**The model's ceiling comes first — and it has now been checked. The answer is bad.**
+
+Revised 2026-08-23 after auditing `Rineya_Long_Context_Demo_v1/`, the only real
+reasoning instrument in the tree: 256 rows, 64 four-variant scenario packs, contexts
+of only 1,130–1,504 tokens, scored with a **full cache** on stock Qwen3-0.6B
+(`outputs/qwen3_06b_all_report.json`).
+
+| endpoint | value | comparator |
+|---|---:|---:|
+| `strict_exact`, all 256 | **0.2031** | constant `"UNKNOWN"` scores **0.2500** |
+| `all_four_variants_correct` | **0.0000** | an endpoint at zero cannot degrade |
+| `base_paraphrase_prediction_agreement` | **0.3594** | this is the instrument's test–retest reliability |
+| `unanswerable_accuracy` | 0.1719 | |
+
+Verified directly: 64 of 256 gold answers are `UNKNOWN` (`data/all_answer_key.jsonl`,
+`answerable=False` on exactly 64 rows), so the constant policy "always abstain"
+scores 0.2500 while the model scores 0.2031.
+
+**The model performs worse than a trivial constant, at 1,300 tokens, uncompressed.**
+
+Two consequences that bind the whole programme:
+
+1. **This pack cannot be the endpoint.** Measuring "compression cost" against a 0.2031
+   denominator that a constant beats would be measuring nothing.
+2. **The aggregate metric is sign-inverted.** Because abstention is rewarded on 25% of
+   rows, degrading the context makes the model abstain more, which *raises* the score.
+   A compression ablation on this pack could show compression **improving** reasoning.
+   That artefact must be designed out — score answerable rows only, report abstention
+   separately, and never use the pooled number as the endpoint.
+
+So the first experiment remains "can the model do the task uncompressed" — but it must
+now be run on a task **recalibrated to be inside the model's competence**, not on this
+pack as it stands. Candidate recalibrations, in order of cost: restrict to the
+strongest task families (`multi_condition_identity` scores 0.375 against
+`count_with_exclusions` at 0.031, a 12× spread); score containment rather than exact
+match (0.4844 against 0.2135 on answerable rows — 27 points of the gap is *formatting*,
+not retrieval); or shorten the reasoning chain until the uncompressed arm clears 0.60.
+
+If none of those produce usable dynamic range, the honest conclusion is that this
+model is the wrong instrument for reasoning, and the programme should either move to a
+larger base model or restrict itself to *retrieval under competition* — stages 1–4,
+which do not require multi-hop inference at all.
 
 **There is no uncompressed reference above ~32K on this hardware.**
 `mem_64k_full.json` OOM'd at 6,425.6 MiB allocated with the cap at 8,100 of 8,187.5;
