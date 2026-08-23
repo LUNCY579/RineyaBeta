@@ -58,15 +58,45 @@ PREAMBLE = ("There is an important piece of information hidden inside a lot of "
             "irrelevant text. Find it and memorise it. I will quiz you about it.\n\n")
 SUFFIX = "\n\nWhat is the pass key? The pass key is"
 QUESTION = "What is the pass key? The pass key is"
+# STAGE 2 of the reasoning programme: SPAN LENGTH.
+#
+# P2.5 measured that the pool's required backward reach tracks the evidence span --
+# a d-digit key is a d-token span, and back=4 rescues d=5 while scoring 0.000 at d=7.
+# Digits cap the span at what a plausible key can be. Natural-language evidence runs
+# 20-40 tokens, an order of magnitude beyond anything measured, so the span axis has
+# to be extended with something other than digits.
+#
+# Every word below is ONE token for this tokeniser (verified against the vocabulary),
+# so W words is exactly a W-token span and span length stays exactly controllable --
+# which is the whole point of doing this synthetically before touching real prose.
+NEEDLE_WORDS = [
+    "amber", "anchor", "barrel", "basket", "beacon", "blanket", "bottle", "bridge",
+    "bucket", "button", "camera", "carpet", "ceiling", "cluster", "compass", "copper",
+    "cotton", "crystal", "desert", "diamond", "drawer", "engine", "fabric", "forest",
+    "garage", "garden", "granite", "hammer", "harbor", "harvest", "helmet", "island",
+    "jacket", "kitchen", "lantern", "market", "mirror", "mountain", "needle", "orange",
+    "packet", "parcel", "planet", "pocket", "quarry", "river", "rocket", "shadow",
+    "shelter", "signal", "silver", "socket", "station", "stream", "sugar", "summit",
+    "sunset", "temple", "thread", "ticket", "tomato", "tower", "tunnel", "window",
+    "winter", "yellow",
+]
+SUFFIX_WORDS = chr(10) * 2 + "What is the pass phrase? The pass phrase is"
+QUESTION_WORDS = "What is the pass phrase? The pass phrase is"
+
 QUERY_HINT = ("What is the pass key? Watch for it as you read." + chr(10)*2)
 
 
 
-def build_prompt(tok, target_tokens: int, depth: float, key: int,
+def build_prompt(tok, target_tokens: int, depth: float, key,
                  query_first: bool = False, n_distractors: int = 0,
                  distractor_style: str = "framed") -> tuple[str, int]:
     """Filler with the key at `depth` through it, padded to ~target_tokens."""
-    needle = f"\n\nThe pass key is {key}. Remember it. {key} is the pass key.\n\n"
+    # A string key means STAGE 2: the payload is a word phrase, not digits.
+    words = isinstance(key, str)
+    label = "pass phrase" if words else "pass key"
+    suffix = SUFFIX_WORDS if words else SUFFIX
+    needle = (chr(10) * 2 + f"The {label} is {key}. Remember it. "
+              + f"{key} is the {label}." + chr(10) * 2)
     # STAGE 1 of the reasoning programme: competition.
     #
     # Passkey's haystack contains no digits at all, so the real key is the only
@@ -82,9 +112,12 @@ def build_prompt(tok, target_tokens: int, depth: float, key: int,
         drng = random.Random(f"{key}:decoys")
         labels = ["door code", "locker number", "badge id", "vault code",
                   "seat number", "gate code", "room number", "case file"]
-        nd = len(str(key))
+        nd = 0 if words else len(str(key))
         for i in range(n_distractors):
-            dkey = drng.randint(10 ** (nd - 1), 10 ** nd - 1)
+            if words:
+                dkey = " ".join(drng.sample(NEEDLE_WORDS, len(key.split())))
+            else:
+                dkey = drng.randint(10 ** (nd - 1), 10 ** nd - 1)
             if distractor_style == "framed":
                 lab = labels[i % len(labels)]
                 decoys.append(f"\n\nThe {lab} is {dkey}. Remember it. "
@@ -93,7 +126,7 @@ def build_prompt(tok, target_tokens: int, depth: float, key: int,
                 decoys.append(f"\n\nThe reading that morning was {dkey}, "
                               f"noted and filed.\n\n")
     n_pre = len(tok(PREAMBLE)["input_ids"])
-    n_suf = len(tok(SUFFIX)["input_ids"])
+    n_suf = len(tok(suffix)["input_ids"])
     n_needle = len(tok(needle)["input_ids"])
     n_fill = max(0, target_tokens - n_pre - n_suf - n_needle)
     per = len(tok(FILLER)["input_ids"])
@@ -117,9 +150,9 @@ def build_prompt(tok, target_tokens: int, depth: float, key: int,
         for dec in decoys:
             text += FILLER * step + dec
             used += step
-        text += FILLER * max(0, tail_reps - used) + SUFFIX
+        text += FILLER * max(0, tail_reps - used) + suffix
     else:
-        text = head + FILLER * before + needle + FILLER * tail_reps + SUFFIX
+        text = head + FILLER * before + needle + FILLER * tail_reps + suffix
     return text, len(tok(text)["input_ids"])
 
 
@@ -184,6 +217,11 @@ def main() -> None:
                          "traced at 128K kept only 57-65%% of its tokens, i.e. "
                          "the span survived in fragments. Pooling exists to "
                          "stop exactly that.")
+    ap.add_argument("--needle-words", type=int, default=0,
+                    help="STAGE 2: payload is a W-word phrase, not digits. Every "
+                         "word is one token so W words is exactly a W-token span "
+                         "-- the axis P2.5 could only probe to 7 with digits. "
+                         "0 keeps the numeric key.")
     ap.add_argument("--distractors", type=int, default=0,
                     help="decoy keys competing with the real one. Passkey has "
                          "none, which is why 8 heavy slots suffice at B=16.")
@@ -291,8 +329,12 @@ def main() -> None:
                 rng = random.Random(args.seed)
                 hits, seen, ooms, peak, ex, trials = 0, 0, 0, 0.0, [], []
                 for _ in range(args.trials):
-                    key = rng.randint(10 ** (args.key_digits - 1),
-                                      10 ** args.key_digits - 1)
+                    if args.needle_words:
+                        key = " ".join(rng.sample(NEEDLE_WORDS,
+                                                  args.needle_words))
+                    else:
+                        key = rng.randint(10 ** (args.key_digits - 1),
+                                          10 ** args.key_digits - 1)
                     text, real_n = build_prompt(tok, n, depth, key,
                                                 query_first=args.query_first,
                                                 n_distractors=args.distractors,
@@ -311,11 +353,14 @@ def main() -> None:
                               if budget else None)
                     cache = sig.SignificanceCache(config=model.config, policy=None)
                     try:
-                        qids = (tok(QUESTION, return_tensors="pt")
+                        qtext = (QUESTION_WORDS if args.needle_words
+                                 else QUESTION)
+                        qids = (tok(qtext, return_tensors="pt")
                                 .to(args.device)["input_ids"]
                                 if args.query_aware else None)
                         got = answer(model, tok, ids, cache, args.chunk, policy,
-                                     args.window, query_ids=qids)
+                                     args.window, query_ids=qids,
+                                     max_new=max(12, 4 * args.needle_words + 6))
                     except torch.cuda.OutOfMemoryError:
                         # A trial that ran out of memory measured NOTHING. Scoring
                         # it as a miss is the difference between "the model could
@@ -371,6 +416,7 @@ def main() -> None:
          "pool_back": args.pool_back, "pool_fwd": args.pool_fwd,
          "key_digits": args.key_digits,
          "grow": args.grow, "grow_max": args.grow_max,
+         "needle_words": args.needle_words,
          "distractors": args.distractors,
          "distractor_style": args.distractor_style,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
