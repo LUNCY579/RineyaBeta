@@ -147,6 +147,12 @@ def main() -> None:
                          "traced at 128K kept only 57-65%% of its tokens, i.e. "
                          "the span survived in fragments. Pooling exists to "
                          "stop exactly that.")
+    ap.add_argument("--key-digits", type=int, default=5,
+                    help="digits in the pass key. Every digit is its own token, so "
+                         "this IS the evidence span length. P2.4 found the pool's "
+                         "backward reach must cover the span: back=4 rescues a "
+                         "5-digit key, back=3 does not. Varying this tests whether "
+                         "the threshold tracks span length.")
     ap.add_argument("--pool-back", type=int, default=None,
                     help="score-pool reach BEHIND a position; default pool//2. "
                          "Setting this alone gives a causal window, which credits "
@@ -233,7 +239,8 @@ def main() -> None:
                 rng = random.Random(args.seed)
                 hits, seen, ooms, peak, ex, trials = 0, 0, 0, 0.0, [], []
                 for _ in range(args.trials):
-                    key = rng.randint(10000, 99999)
+                    key = rng.randint(10 ** (args.key_digits - 1),
+                                      10 ** args.key_digits - 1)
                     text, real_n = build_prompt(tok, n, depth, key,
                                                 query_first=args.query_first)
                     ids = tok(text, return_tensors="pt").to(args.device)["input_ids"]
@@ -306,6 +313,7 @@ def main() -> None:
          "recent": args.recent, "trials": args.trials, "window": args.window,
          "pool": args.pool,
          "pool_back": args.pool_back, "pool_fwd": args.pool_fwd,
+         "key_digits": args.key_digits,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
          "count_exponent": args.count_exponent, "normalize": args.normalize,
          "query_aware": args.query_aware, "seed": args.seed,

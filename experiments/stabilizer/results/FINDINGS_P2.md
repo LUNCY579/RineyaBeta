@@ -280,3 +280,64 @@ python experiments/kv_significance/src/passkey.py --lengths 131072 --budgets 16 
   --recent 4 --pool 7 --pool-back 6 --pool-fwd 0 --trials 12 \
   --count-exponent 1.0 --yarn 4.0 --query-aware --cap-mib 7400
 ```
+
+---
+
+# P2.4 — it is not the shape and not the width: it is backward reach alone
+
+P2.3 left a confound. Two arms both rescued 128K/B=64: causal `(6,0)` at width 7 and
+centred `(7,7)` at width 15. "Reach backward" and "be wider" could not be separated.
+
+Matched-backward-reach pairs, 128K, B=64, 12 paired needles per cell:
+
+| back | fwd | width | d0.1 | d0.5 | d0.9 | acc |
+|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 0 | 3 | 0.08 | 0.00 | 0.00 | 0.028 |
+| 2 | 2 | 5 | 0.08 | 0.17 | 0.17 | 0.139 |
+| 3 | 3 | 7 | 0.42 | 0.00 | 0.42 | 0.278 |
+| **4** | **0** | **5** | 1.00 | 1.00 | 1.00 | **1.000** |
+| **4** | **4** | **9** | 1.00 | 1.00 | 1.00 | **1.000** |
+| 5 | 0 | 6 | 1.00 | 0.92 | 1.00 | 0.972 |
+| 5 | 1 | 7 | 1.00 | 1.00 | 1.00 | 1.000 |
+| 5 | 5 | 11 | 1.00 | 1.00 | 1.00 | 1.000 |
+| 6 | 0 | 7 | 1.00 | 1.00 | 1.00 | 1.000 |
+| 7 | 7 | 15 | 1.00 | 1.00 | 1.00 | 1.000 |
+| 12 | 2 | 15 | 1.00 | 1.00 | 1.00 | 1.000 |
+
+**Forward reach is inert.** At back=4 the spread across fwd ∈ {0,4} is **0.000**; at
+back=5 across fwd ∈ {0,1,5} it is 0.028 (one needle, p = 1.0); at back=2 it is 0.111
+(p = 0.125). No matched pair differs.
+
+**Width is not the variable.** `(4,0)` is width 5 and scores 1.000. `(3,3)` is width 7
+and scores 0.278. The wider window is worse.
+
+**The threshold is sharp and it is in backward reach:** 3 → 0.278, 4 → 1.000.
+
+So the centred `(7,7)` window did not win by being wide. It won because its backward
+reach happened to be 7.
+
+## Why backward, mechanistically
+
+P2.2 measured that survival within the digit run is U-shaped, highest at the digit
+*adjacent to the framing*. The score enters an evidence span at its **head**, because
+query-aware scoring rewards the query-shaped label and the label precedes the payload.
+Max-pooling propagates a score to neighbours. Therefore every payload token must be
+able to look **back** to the head. Forward reach points away from the score and buys
+nothing — which is exactly what the table shows.
+
+## The law this implies, and the test now running
+
+Every digit is one token (verified: `75526` → `'7','5','5','2','6'`), so a *d*-digit
+key is a *d*-token span. If the payload must reach its head, the requirement is
+
+> **back ≥ d − 1**
+
+which predicts a threshold at back=3 for a 4-digit key, back=4 for 5 digits (measured:
+3 fails, 4 works), and back=6 for 7 digits. P2.5 tests it with `--key-digits`. The
+discriminating cell is **a 7-digit key at back=4**: the law says it must fail. If it
+passes, the law is wrong and 4 is merely a constant that suited a 5-digit key.
+
+This matters well beyond passkey. If the requirement tracks span length, then the pool
+window is not a hyperparameter to tune but a **quantity to derive from the evidence
+structure of the task** — and for natural-language evidence, spans of 20–40 tokens
+would need a backward reach an order of magnitude larger than anything measured here.
