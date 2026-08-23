@@ -72,27 +72,36 @@ A static 25% prune with no correction discards **53% of the output in relative
 error** — far worse than `rho_static` = 0.80 suggests, because rho is a per-token
 norm ratio and misses directional error.
 
-## What survives
+## The layer-structure claim: retracted
 
-**Strong layer structure, and it is the useful part.** Uniform rank is the wrong
-shape for this problem:
+An earlier draft of this file reported "strong layer structure, and it is the useful
+part", citing layer 27 at rank 51 / 3.3% error against ~145 / ~34% mid-stack. Those
+were single layers from the **8-prompt** run. At 24 prompts the structure largely
+disappears:
 
-| layer | rho_static | rank @90% | err at r=64 |
-|---:|---:|---:|---:|
-| 0 | 0.7368 | 106 | 0.2874 |
-| 7 | 0.7314 | 148 | 0.3369 |
-| 14 | 0.8024 | 143 | 0.3361 |
-| 21 | 0.8736 | 147 | 0.2417 |
-| **27** | **0.9330** | **51** | **0.0327** |
+| layers | mean rank @90% | mean err @ r=64 |
+|---|---:|---:|
+| 0–6 | 144.6 | 0.3017 |
+| 7–13 | 160.1 | 0.3603 |
+| 14–20 | 153.3 | 0.3075 |
+| 21–27 | 138.7 | 0.2012 |
 
-The last layer needs rank 51 and reconstructs to 3.3% error; the middle band needs
-~145 and sits near 34%. That matches the independent finding in
-`manifests/weight_spectra_*.json` that effective rank falls with depth, and it means
-a **rank schedule** is a different hypothesis from the one tested here.
+A range of 138.7–160.1 is nearly flat. **The same undersampling artifact that made
+the rank look like 133 also manufactured the depth trend** — twice in one probe,
+which is worth recording as the more general lesson.
 
-Also worth keeping: ranking the static set by *mean |activation|* gives rho 0.80
-against P0.3's 0.7468 from top-k frequency. A small methodological improvement to
-the prune baseline, independent of whether the correction works.
+Tested anyway, since a schedule was the one surviving hypothesis. Greedy per-layer
+rank allocation at **equal total parameter cost**, marginal-error-per-parameter:
+
+| budget | uniform err | scheduled err | gain |
+|---|---:|---:|---:|
+| rank 64 equivalent | 0.2927 | 0.2847 | −2.7% |
+| rank 128 equivalent | 0.1935 | 0.1863 | −3.7% |
+| rank 256 equivalent | 0.0994 | 0.0947 | −4.7% |
+
+A schedule buys **2.7–4.7% relative** error reduction. Errors stay at 9.5–29%
+regardless. That is not the order of magnitude the idea needs, and it follows from
+the flat depth profile rather than being a separate surprise.
 
 ## Verdict
 
@@ -102,8 +111,8 @@ against a threshold set in advance, with the margin widening as data is added.
 Three things this does **not** refute, each needing its own pre-declared threshold
 rather than a rescue of this one:
 
-1. **A per-layer rank schedule.** Late layers are genuinely cheap (rank 51, 3.3%).
-   Whether a schedule beats uniform rank at equal total parameters is untested.
+1. ~~A per-layer rank schedule~~ — **tested and closed above**: 2.7–4.7% gain at
+   equal budget, because the depth profile is flat once properly sampled.
 2. **Rank 256 plus healing.** 7.5% per-layer reconstruction error still saves
    183.5M (R2 → 290.5M, −38.7%). Whether healing absorbs that is an empirical
    question needing a training run, and B0 recovering all 202 abstentions shows
@@ -117,3 +126,32 @@ On the "per-state versus global" question: this probe measured the **per-state
 oracle**, since the SVD is fitted per layer to the observed tokens. A single global
 fixed matrix is strictly weaker, so the global variant fails harder. That ordering
 is worth keeping — it means the cheap version never needed testing separately.
+
+## Why all four Phase 0 probes failed for one reason
+
+Worth stating together, because the shared cause is more informative than the
+verdicts:
+
+| probe | what failed | why |
+|---|---|---|
+| P0.2 speed | gather is 0.84× | per-token selection needs a gather; it costs more than the narrower matmul saves |
+| P0.3 static prune | ρ 0.9586 → 0.7468 | the union of per-token top-k sets over a corpus is far larger than any single top-k |
+| P0.4 low-rank | rank ≥149, rising | different tokens discard different directions, so the discarded subspace grows with the corpus |
+| P0.4b schedule | 2.7–4.7% | the variation is token-driven, not layer-driven, so per-layer budgeting has little to allocate |
+
+**The concentration is real and it is per-token.** Every attempt to freeze it into a
+persistent artifact — a fixed set, a fixed low-rank term, a fixed per-layer budget —
+fails because the structure being exploited is input-dependent, and compression
+requires input-independence. Those two requirements are in direct tension, and no
+variant of "make the stabilizer persistent" escapes it.
+
+That is a conclusive result rather than four inconclusive ones, and it is the
+argument for stopping rather than trying a fifth variant.
+
+## What the probe did buy
+
+It calibrated the ordinary width-pruning axis, which needs no stabilizer at all.
+A static 25% FFN keep costs **53% relative output error** — so 25% is far too
+aggressive, and the sane version of width pruning lives at much higher keep ratios
+with healing. That number did not exist before this probe and it constrains C2 in
+`docs/RESEARCH_PROGRAM.md` directly.
