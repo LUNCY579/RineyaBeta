@@ -520,3 +520,40 @@ is that prediction landing, and it is the correct result rather than a regressio
 
 The 7,864× figure remains true of passkey and should never be quoted without its
 condition: **a haystack containing no competitors at all.**
+
+## The budget control: capacity confirmed, and what competition costs
+
+Stage 1's collapse was read as capacity — decoys consuming slots — rather than the
+score being fooled. That reading predicts budget alone should undo it. It does.
+
+128K, 16 query-shaped decoys, `grow=2.0`, everything else held:
+
+| B | heavy slots | d0.1 | d0.5 | d0.9 | accuracy | peak |
+|---:|---:|---:|---:|---:|---:|---:|
+| 64 | 44 | 0.42 | 0.42 | 1.00 | 0.611 | 1,507 MiB |
+| 128 | 92 | 0.42 | 1.00 | 1.00 | 0.806 | 1,516 MiB |
+| 256 | 188 | 0.83 | 1.00 | 1.00 | 0.944 | 1,537 MiB |
+| **512** | **380** | **1.00** | **1.00** | **1.00** | **1.000** | 1,563 MiB |
+
+Monotonic, and fully restored. The score was never choosing the wrong span — it could
+not afford the right one. **Competition is a capacity cost, not a scoring failure.**
+
+**Early positions pay first.** Depth 0.9 is lossless at every budget; 0.5 recovers at
+B=128; 0.1 needs B=512. A late needle enters in a late chunk and survives few
+compression rounds, so it never faces the competition. The deficit is ordered by how
+many rounds a position must survive, which is the same asymmetry the program measured
+for query-blind scoring.
+
+**What competition costs, as a number.** Lossless at 128K needs B=16 with no
+competitors and **B=512 with sixteen** — a **32× loss of compression**, from 7,864×
+down to **246×**. Seventeen spans at ~22 tokens each is ~374 tokens, against the 380
+heavy slots B=512 provides, so the requirement tracks *total evidence mass* rather
+than anything subtler. One point on that curve is not a law, but the arithmetic is
+close enough to be worth testing directly.
+
+**This is the honest external-validity figure.** `docs/PLAN_LONG_REASONING.md`
+predicted in advance that compression would fall sharply once competitors existed, and
+by roughly an order of magnitude. Measured: 32×. The 7,864× headline is a property of
+a haystack with **no competitors at all**, and 246× is what the same mechanism delivers
+when sixteen plausible ones are present — still a large number, and a very different
+one.
