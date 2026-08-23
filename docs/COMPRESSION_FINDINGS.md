@@ -18,9 +18,9 @@ Reference model: **Qwen3-0.6B, 596,049,920 resident params**.
 | Qwen3-0.6B stock | 596,049,920 | — | 0.8334 | 0.6809 | reference |
 | **R2** (vocab 32,768) | **474,021,888** | **−20.5%** | 0.8336 | 0.6682 | measured |
 | **R2 + B0** (LoRA heal) | 474,021,888 | −20.5% | **0.8607** | **0.8306** | measured |
-| r2-gqa4kv | 444,661,760 | −25.4% | — | — | **unmeasured** |
-| r2-gqa2kv | 429,981,696 | −27.9% | — | — | **unmeasured** |
-| r2-gqa1kv | 422,641,664 | −29.1% | — | — | **unmeasured** |
+| r2-gqa4kv | 444,661,760 | −25.4% | — | **0.0047** | **collapsed, un-healed** |
+| r2-gqa2kv | 429,981,696 | −27.9% | — | — | not run (see §2.2) |
+| r2-gqa1kv | 422,641,664 | −29.1% | — | — | not run (see §2.2) |
 | retired 19L soup | ~461M | −22.6% | — | — | degenerate, rejected |
 
 **R2+B0 is the current Pareto point: 474M beating stock's 596M on both gates**
@@ -62,24 +62,59 @@ then some (179/202 → 202/202 correct abstentions).
 Also: −14.7% compute, and it is what made 4k-context training feasible at all on
 8 GB (logits tensor 4.98 GB → 1.07 GB).
 
-### 2.2 KV heads — **built, plausible, unmeasured**
+### 2.2 KV heads — **measured: catastrophic without healing**
 
 `artifacts/attn_shape/`, produced outside this line of work. Verified by
 least-squares as **contiguous-group mean-pooling** (pooling matrix recovered exactly,
 rows `[0.5, 0.5, 0, …]`, residual 4.9e-04 = bf16 rounding) — the principled method,
 not truncation.
 
-| kv heads | params | vs stock | KV cache/token |
-|---:|---:|---:|---:|
-| 8 (R2) | 474,021,888 | −20.5% | 114,688 B |
-| 4 | 444,661,760 | −25.4% | 57,344 B (50%) |
-| 2 | 429,981,696 | −27.9% | 28,672 B (25%) |
-| 1 | 422,641,664 | −29.1% | **14,336 B (12.5%)** |
+| kv heads | params | vs stock | KV cache/token | RAG DEV |
+|---:|---:|---:|---:|---:|
+| 8 (R2) | 474,021,888 | −20.5% | 114,688 B | 0.6682 |
+| **4** | 444,661,760 | −25.4% | 57,344 B (50%) | **0.0047** |
+| 2 | 429,981,696 | −27.9% | 28,672 B (25%) | not run |
+| 1 | 422,641,664 | −29.1% | 14,336 B (12.5%) | not run |
 
-The cache saving dwarfs the parameter saving, so this axis is really about
-deployment. Gate runs in progress (CPU). Prior: in-context grounding degrades first,
-since R2's 2% token shift alone cost 9 `conflict` abstentions and collapsing 8 KV
-heads to 1 is far larger.
+**8 → 4 KV heads, un-healed, destroys the model.** 752 cases:
+`mean_quality_score` **0.0047** against R2's 0.6682, `intelligibility_pass_rate`
+**0.0652**, `contract_violation_case_rate` 0.9734. Not degradation — collapse:
+
+| gold | R2 | gqa4kv |
+|---|---|---|
+| `June 9, 2032.` | `June 9, 2032.` | `19761.299_ACTEMPLATE
+ABO
+EPICES…` |
+| `103 GB.` | `103 GB.` | `19241.199992*19	type…` |
+| `Wi-Fi 7.` | `Wi-Fi 7.` | `1996EJ
+EPONJESPECT
+19679661E…` |
+
+Token salad. Only 1 empty reply of 752 and 30.3 mean visible tokens, so it generates
+fluently and produces nonsense — a real model failure, not a harness artifact
+(tokenizer sha verified identical to R2's beforehand).
+
+**The 2kv and 1kv runs were stopped rather than completed.** They are strictly more
+aggressive and quality is already at 0.0047 with no headroom to distinguish, so
+~1.5 h of shared CPU would have bought nothing. Recorded as a deliberate stop, not
+an omission.
+
+**Why this axis behaves so differently from the vocabulary trim.** Removing
+never-addressed embedding rows changes nothing the forward pass reads — logits came
+out bitwise identical. Averaging K and V breaks the learned correspondence between
+all 16 query heads and their key/value groups, simultaneously, in every layer. The
+GQA literature does mean-pooling **followed by uptraining** at roughly 5% of original
+pretraining compute; the uptraining is not polish, it is half the method.
+
+So these three are **not compressed models — they are initialisations for
+uptraining**, and the axis is unresolved rather than dead. The 12.5% cache figure at
+1 KV head remains the largest deployment prize on the board, and it now has a
+measured price: a real training run, not a surgical pass.
+
+**A prediction of mine that was wrong, instructively.** I expected "in-context
+grounding degrades first", reasoning from retrieval heads. Nothing degrades
+selectively — everything collapses at once. The per-category gate that localised the
+vocabulary trim's damage to nine `conflict` abstentions has nothing to localise here.
 
 ### 2.3 Low-rank factorization of weights — **rejected**
 
@@ -178,8 +213,9 @@ anything else available.
    excluding zero are safe. Any aggregate delta under ~0.02 is **not yet
    interpretable**, including B0's +0.027 on chat.
 2. **The frontier claim rests on an un-adaptered baseline.** stock+B0 is unrun.
-3. **Three checkpoints are un-gated.** `attn_shape` at −25.4% to −29.1% has no
-   quality number at all. In progress.
+3. **The KV axis needs a training run, not a gate.** gqa4kv measured at 0.0047
+   un-healed (§2.2); 2kv and 1kv were stopped as foregone. Whether uptraining
+   recovers them is the open question, and it needs the GPU.
 4. **Only 2 of 5 available eval sets are wired.** Puzzle validation (4,080), LCR-SFT
    dev (800) and LongContextDemo (256, frozen) are imported but unused, so every
    verdict above rests on two benchmarks.
