@@ -1,0 +1,239 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 8,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 32,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 1503.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "755. Remember to pass it. \n\nNow",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "8567. Remember to pass it to the",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "9987. \n\nRemember to pass it to",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "4264. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "6636. \n\nRemember to pass it to",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "901. Remember to pass it to the ",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "9669. Remember to pass it to the",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "6646. \n\nThe pass key is",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "701. Remember to pass it. \n\nNow",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "9272. Remember to pass it to the",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "6074. Remember to pass it to the",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "8469. Remember to pass it to the",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 32,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 1503.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "755. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "856. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "998. Remember that. Here we go.",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "4264. Here we go. The pass",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "6636. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "901. Remember that key. \n\nNow,",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "966. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "6646. There and back again. The",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "7017. \n\nWhat is the pass key",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "927. Here we go. The pass key",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "6074. Here we go. The pass",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "846. Here we go. There and back",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 32,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 1503.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "755. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "856. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "998. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "4264. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "6636. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "901. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "9669. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "6644. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "7017. So the answer is 7",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "9272. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "6074. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "8469. Here we go. There and",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

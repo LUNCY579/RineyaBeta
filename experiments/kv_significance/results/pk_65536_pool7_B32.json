@@ -1,0 +1,239 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 8,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 65536,
+      "real_tokens": 62898,
+      "budget": 32,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 1502.6,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "755. \n\nThe pass key is 7",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "856. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "998. \n\nThe pass key is 9",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "426. \n\nThe pass key is 4",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "6636. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "9019. \n\nThe pass key is",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "966. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "6644. \n\nThe pass key is",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "7017. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "927. \n\nThe pass key is 9",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "6074. \n\nThe pass key is",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "8469. \n\nThe pass key is",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 65536,
+      "real_tokens": 62898,
+      "budget": 32,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 1502.6,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "7552. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "8566. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "9987. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "4264. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "6636. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "9019. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "9665. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "6644. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "7017. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "9272. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "6074. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "8469. \n\nSo, the answer is",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 65536,
+      "real_tokens": 62898,
+      "budget": 32,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 1502.6,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "7552. There and back again. The",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "8566. 8566 is",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "9987. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "4264. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "6636. There and back again. The",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "9019. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "9665. 9665 is",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "6644. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "7017. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "9272. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "6074. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "8469. \n\nSo, the answer is",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 4,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 16,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 1500.5,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75757575757",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "85858585858",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "99999999999",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "42642642642",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "66666666666",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "901. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "96696696696",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "66666666666",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "70707070707",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "92792792792",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "6075. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "84678912345",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 16,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 1500.5,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75575575575",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "8567. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "99999999999",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "426. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "66666666666",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "901. Here we go. \n\nSo,",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "96696696696",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "66466466466",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "701. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "927. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "607. Here we go. There and back",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "8467. Here we go. There and",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 32768,
+      "real_tokens": 31458,
+      "budget": 16,
+      "depth": 0.9,
+      "acc": 0.08333333333333333,
+      "peak_mib": 1500.5,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "7575. Here we go. The pass",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "8565. Here we go. The pass",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "9999. Here we go. The pass",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "426. Here we go. The grass is",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "666. Here we go. The grass is",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "90190190190",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96969696. Here we",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "666. Here we go. The grass is",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "70707070. Here we",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "9272. Here we go. The pass",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "60645. Here we go. There",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "8469. Here we go. The pass",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}
