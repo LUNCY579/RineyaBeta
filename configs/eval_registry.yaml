@@ -1,0 +1,165 @@
+# Evaluation registry — the single declaration of every benchmark.
+#
+# Before this file, `run_gates.py` hardcoded three dataset paths and one scorer, so
+# every verdict in COMPRESSION_FINDINGS.md rested on two benchmarks while three more
+# sat imported and unused. Adding a benchmark should be an entry here, not code.
+#
+# Each entry declares:
+#   path            repo-relative, under artifacts/eval_sets/ after import
+#   rows            expected count; the importer refuses a mismatch
+#   source          upstream origin, for provenance
+#   role            gate | sealed   (sealed is refused by run_gates)
+#   scorer          quality_v45 | external
+#   protocol        generation settings, taken from what the anchors were produced
+#                   under -- inventing one silently voids the comparison
+#   anchors         prior measurements on the SAME set with the SAME scorer
+#
+# `quality_v45` scores response *quality* (contract, intelligibility, defects).
+# The three correctness sets ship their own scorers and those are used verbatim
+# rather than reimplemented, so the numbers stay comparable with their authors'.
+
+chat_dev:
+  path: artifacts/eval_sets/chat_dev.jsonl
+  rows: 510
+  source: short-response-model-phase-0-1-2/data/dev/dev.jsonl
+  sha256: e059e548f684c76e1520d98fb4184ea7b8eda2053c3c23eed46794bcadfef954
+  role: gate
+  scorer: quality_v45
+  category_key: category
+  protocol:
+    max_new_tokens: 32
+    response_control: eos_only
+    min_new_tokens_before_boundary: 1
+    do_sample: false
+  anchors:
+    teacher_baseline_mean_quality: 0.7983694117647058
+    teacher_post_sft_mean_quality: 0.8331960037348273
+    stock_qwen3_06b_mean_quality: 0.8334
+    r2_mean_quality: 0.8336
+    r2_b0_mean_quality: 0.8607
+
+rag_dev:
+  path: artifacts/eval_sets/rag_dev.jsonl
+  rows: 752
+  source: artifacts/phase_9_grounded_recovery_v1_7_5_qwen/dataset/dev.jsonl
+  role: gate
+  scorer: quality_v45
+  category_key: category
+  protocol:
+    max_new_tokens: 32
+    response_control: eos_only
+    min_new_tokens_before_boundary: 1
+    do_sample: false
+  anchors:
+    teacher_baseline_mean_quality: 0.38012686051693395
+    teacher_post_sft_mean_quality: 0.6931932854379661
+    stock_qwen3_06b_mean_quality: 0.6809
+    r2_mean_quality: 0.6682
+    r2_b0_mean_quality: 0.8306
+    r2_gqa4kv_mean_quality: 0.0047
+
+# --- correctness sets: their own scorers, invoked verbatim ---
+
+longctx_demo:
+  path: artifacts/eval_sets/longctx_demo.jsonl
+  rows: 256
+  source: Rineya_Long_Context_Demo_v1/data/rineya_long_context_demo_full.jsonl
+  role: gate
+  scorer: external
+  scorer_script: Rineya_Long_Context_Demo_v1/scripts/evaluate_predictions.py
+  # --key is the answer key; --predictions takes {id, prediction} rows
+  scorer_args: ["--key", "Rineya_Long_Context_Demo_v1/data/all_answer_key.jsonl"]
+  scorer_predictions_flag: "--predictions"
+  scorer_report_flag: "--json-report"
+  category_key: variant
+  # max_new_tokens 24 is what every prior run on this suite used
+  # (outputs/*_token_lengths.json). Deviating would void the anchors.
+  protocol:
+    max_new_tokens: 24
+    response_control: eos_only
+    min_new_tokens_before_boundary: 1
+    do_sample: false
+  anchors:
+    stock_qwen3_06b_strict_exact: 0.203125
+    aegis_454m_showcase_strict_exact: 0.0625
+    greedy_soup_v2_strict_exact: 0.0
+  note: >
+    Measures long-context reading, which no other wired gate touches. Its card
+    forbids TRAINING on the suite and then reporting test performance; evaluating
+    checkpoints against it is an explicitly intended use.
+
+puzzle_validation:
+  path: artifacts/eval_sets/puzzle_validation.jsonl
+  rows: 4080
+  source: Rineya-Puzzle-Reasoning-51k/data/validation.jsonl
+  role: gate
+  scorer: external
+  scorer_script: Rineya-Puzzle-Reasoning-51k/scripts/evaluate_predictions.py
+  scorer_args: ["--gold", "Rineya-Puzzle-Reasoning-51k/data/validation.jsonl"]
+  scorer_predictions_flag: "--predictions"
+  scorer_report_flag: "--report"
+  category_key: family
+  # Raw rows: prompt + final_answer, no chat template. Converted short_sft style at
+  # import, matching the decision in MINI_MODEL_ROADMAP §12.5 -- think_sft collides
+  # with the no-CoT target rule and enable_thinking=false.
+  convert: puzzle_short_sft
+  protocol:
+    max_new_tokens: 64
+    response_control: eos_only
+    min_new_tokens_before_boundary: 1
+    do_sample: false
+  anchors: {}
+  note: >
+    The bundle's own configs/recommended_curriculum.yaml names validation as the
+    checkpoint-selection split and test+challenge as final, which is why only
+    validation is a gate here.
+
+lcr_dev:
+  path: artifacts/eval_sets/lcr_dev.jsonl
+  rows: 800
+  source: Rineya_LCR_SFT_v1/.../data/lcr_sft_v1.jsonl (split == dev)
+  role: gate
+  scorer: external
+  scorer_script: Rineya_LCR_SFT_v1/Rineya_LCR_SFT_v1/scripts/score_predictions.py
+  # positional: dataset then predictions
+  scorer_positional: ["artifacts/eval_sets/lcr_dev.jsonl"]
+  scorer_report_flag: "--report"
+  category_key: task_type
+  # LCR targets are p50 28 / p99 44 tokens, so 32 would truncate the gold.
+  protocol:
+    max_new_tokens: 64
+    response_control: eos_only
+    min_new_tokens_before_boundary: 1
+    do_sample: false
+  anchors: {}
+  note: >
+    Prompts average ~2,577 tokens, so prefill dominates. Measured CPU eval cost on
+    RAG (~305-token prompts) was 5.5 s/case; this set is roughly 8x longer, so CPU
+    is impractical here and it is a GPU job. Wired now, run later.
+
+# --- sealed: run_gates refuses these ---
+
+rag_test_SEALED:
+  path: artifacts/eval_sets/rag_test_SEALED.jsonl
+  rows: 738
+  role: sealed
+  scorer: quality_v45
+  note: opens once, for one frozen release candidate.
+
+puzzle_test_SEALED:
+  path: artifacts/eval_sets/puzzle_test_SEALED.jsonl
+  rows: 4080
+  source: Rineya-Puzzle-Reasoning-51k/data/test.jsonl
+  role: sealed
+  scorer: external
+  convert: puzzle_short_sft
+  note: named a final split by the bundle's own curriculum config.
+
+puzzle_challenge_SEALED:
+  path: artifacts/eval_sets/puzzle_challenge_SEALED.jsonl
+  rows: 2040
+  source: Rineya-Puzzle-Reasoning-51k/data/challenge.jsonl
+  role: sealed
+  scorer: external
+  convert: puzzle_short_sft
+  note: named a final split by the bundle's own curriculum config.

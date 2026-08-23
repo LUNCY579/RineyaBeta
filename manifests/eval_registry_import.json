@@ -1,0 +1,60 @@
+{
+  "longctx_demo": {
+    "path": "artifacts/eval_sets/longctx_demo.jsonl",
+    "source": "Rineya_Long_Context_Demo_v1/data/rineya_long_context_demo_full.jsonl",
+    "rows": 256,
+    "expected_rows": 256,
+    "rows_match": true,
+    "role": "gate",
+    "converted": null,
+    "split_filter": null,
+    "sha256": "83c25347e55a13a7d0abcb0c002eaa262c763d439b7f0fcc01b87ce2fc0facfa"
+  },
+  "puzzle_validation": {
+    "path": "artifacts/eval_sets/puzzle_validation.jsonl",
+    "source": "Rineya-Puzzle-Reasoning-51k/data/validation.jsonl",
+    "rows": 4080,
+    "expected_rows": 4080,
+    "rows_match": true,
+    "role": "gate",
+    "converted": "puzzle",
+    "split_filter": null,
+    "sha256": "45097932c3e7486d2b9fd2d13b89a7867f2b3127ca6faf6f5fcb14e089e6d1d5"
+  },
+  "lcr_dev": {
+    "path": "artifacts/eval_sets/lcr_dev.jsonl",
+    "source": "Rineya_LCR_SFT_v1/Rineya_LCR_SFT_v1/data/lcr_sft_v1.jsonl",
+    "rows": 800,
+    "expected_rows": 800,
+    "rows_match": true,
+    "role": "gate",
+    "converted": null,
+    "split_filter": [
+      "split",
+      "dev"
+    ],
+    "sha256": "8e1efafd2c009b2899156848523cf0205d8859586cd2fb6f074a1e7e157ab9d9"
+  },
+  "puzzle_test_SEALED": {
+    "path": "artifacts/eval_sets/puzzle_test_SEALED.jsonl",
+    "source": "Rineya-Puzzle-Reasoning-51k/data/test.jsonl",
+    "rows": 4080,
+    "expected_rows": 4080,
+    "rows_match": true,
+    "role": "sealed",
+    "converted": "puzzle",
+    "split_filter": null,
+    "sha256": "332cfde11848ab082adaf1986736e1ae80ea08a3ee70374c0efe384fcf9aa117"
+  },
+  "puzzle_challenge_SEALED": {
+    "path": "artifacts/eval_sets/puzzle_challenge_SEALED.jsonl",
+    "source": "Rineya-Puzzle-Reasoning-51k/data/challenge.jsonl",
+    "rows": 2040,
+    "expected_rows": 2040,
+    "rows_match": true,
+    "role": "sealed",
+    "converted": "puzzle",
+    "split_filter": null,
+    "sha256": "1cb73f1cb49a8af4b8e8bea88ea4072b042710f014e41dcb0260bbe06ea9dac8"
+  }
+}

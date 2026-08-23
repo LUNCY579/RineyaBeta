@@ -91,3 +91,4 @@ artifacts/adapters/**/*.safetensors
 # the scripts. Summaries, per-category breakdowns and manifests ARE tracked.
 experiments/**/results/**/results.jsonl
 experiments/**/results/*.log
+artifacts/eval_sets/*.jsonl
