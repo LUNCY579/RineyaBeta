@@ -1,0 +1,239 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 512,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 256,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the key that is used to open the",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 256,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the key that is used to open the",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 256,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "the key that is used to open the",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the key that is used to open the",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

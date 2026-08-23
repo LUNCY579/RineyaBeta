@@ -947,6 +947,60 @@ The mechanism against exactly that is SnapKV-style max-pooling, adopted early he
 and measured worth +0.020 on rag_dev at keep 0.50 (§2.2). `Policy.pool` defaults
 to 1, and `passkey.py` never set it.
 
+### The floor, with pooling on
+
+128K, pool=7, 12 paired needles, e=1, YaRN ×4, query-aware. `recent` is scaled to
+`B/4` below 1,024, because a fixed `recent=512` consumes the whole budget at
+B=512 and drives `Policy.heavy()` to zero — at which point the policy is plain
+StreamingLLM and the measurement is of something else entirely. The mechanism's
+own warning caught that during this sweep.
+
+| budget | keep | recent | 0.1 | 0.5 | 0.9 | mean | peak | compression |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.56% | 512 | 1.00 | 1.00 | 1.00 | **1.00** | 1,743 MiB | 61× |
+| 1,024 | 0.78% | 512 | 1.00 | 1.00 | 1.00 | **1.00** | 1,621 MiB | 123× |
+| 512 | 0.39% | 128 | 1.00 | 1.00 | 1.00 | **1.00** | 1,563 MiB | 246× |
+| **256** | **0.195%** | 64 | **1.00** | **1.00** | **1.00** | **1.00** | **1,537 MiB** | **492×** |
+| 128 | 0.098% | 32 | 1.00 | 0.92 | 1.00 | 0.972 | 1,516 MiB | 983× |
+
+**Lossless 128K retrieval keeping 256 of 125,826 tokens — a 492× compression
+ratio, in 1,537 MiB.** B=128 is the first crack, at depth 0.5, which is where this
+program has always seen damage appear first.
+
+At `pool=1` lossless required B=16,384. This is a **64× reduction in the budget
+needed for the same 1.00**, from enabling a mechanism already present in the code.
+
+*One frame on the size of that number.* Passkey retrieves a contiguous literal
+span, and pooling is what keeps that span intact. A task whose answer is not
+contiguous would not compress this way. The caveat that attaches to every
+long-context result here attaches to this one.
+
+### Count normalisation survives pooling, and is larger under it
+
+The conclusion most at risk from §4f was §4c's: mean ranking beats sum ranking by
+0.31, measured when fragmentation was the dominant loss. Re-measured at pool=7 and
+B=256 — the tightest rung that still has headroom, since at B=2,048 every arm sits
+at 1.00 and the comparison would be blind:
+
+| e | depth 0.1 | 0.5 | 0.9 | mean |
+|---:|---:|---:|---:|---:|
+| 0.00 (raw sum) | 1.00 | 0.33 | 0.17 | 0.500 |
+| 0.50 | 1.00 | 0.92 | 1.00 | 0.972 |
+| **1.00 (mean)** | **1.00** | **1.00** | **1.00** | **1.000** |
+
+Pooled over 36 needle-positions, e=0 → e=1 is **+18/−0, exact McNemar
+p = 7.6 × 10⁻⁶**. The gap is **0.50**, against 0.31 at pool=1 — the effect is
+*larger* once fragmentation is removed, not smaller.
+
+**And the ratchet is now directly visible.** At e=0 the depth pattern is
+1.00 / 0.33 / 0.17: the raw sum keeps early positions perfectly and loses late
+ones, which is exactly what a score accumulating with survival time predicts. At
+pool=1 this was obscured; with spans intact, the mechanism's signature is legible.
+
+**The two mechanisms compound.** Pooling keeps a span contiguous; count
+normalisation keeps late arrivals competitive. Neither alone reaches 1.00 at
+B=256 — together they do.
+
 ### What still has to be re-measured
 
 The 32K, 64K and 128K keep-fraction ladders, the decay-exponent sweep, the budget

@@ -435,6 +435,16 @@ CLAIMS = [
      lambda: pk("pk_128k_pool15.json"), 5e-4, "1.00", "findings"),
     ("pool=7 @128K depth 0.5", 1.0000,
      lambda: pk("pk_128k_pool7.json", 0.5), 5e-4, "1.00", "findings"),
+    ("pool=7 floor: B=256 mean", 1.0000,
+     lambda: pk("pk_128k_pool7_B256_rf.json"), 5e-4, "1.00", "findings"),
+    ("pool=7 floor: B=128 mean", 0.9722,
+     lambda: pk("pk_128k_pool7_B128_rf.json"), 5e-4, "0.972", "findings"),
+    ("pool=7 exponent: e=0 mean", 0.5000,
+     lambda: pk("pk_128k_pool7_e0.0.json"), 5e-4, "0.500", "findings"),
+    ("pool=7 exponent: e=1 mean", 1.0000,
+     lambda: pk("pk_128k_pool7_e1.0.json"), 5e-4, "1.000", "findings"),
+    ("pool=7 exponent: e=0 depth 0.9", 0.1667,
+     lambda: pk("pk_128k_pool7_e0.0.json", 0.9), 5e-4, "0.17", "findings"),
 ]
 
 
