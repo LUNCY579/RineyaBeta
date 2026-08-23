@@ -112,3 +112,94 @@ cell supports a one-sided 95% Clopper–Pearson lower bound of **0.779**, not th
 0.99 requires 299 — about 100 minutes per cell at 128K on this card. The word
 "lossless" in this file means "no failure in 12 needles", and should be read that
 way until that run is done.
+
+---
+
+# P2.2 — the mechanism keeps the label and discards the payload
+
+`src/trace_span_positions.py`. Original position identities carried through every
+gather; after the final compression, per-token survival inside the needle across
+all 28×8 = 224 (layer, KV head) streams. 128K, pool=7, e=1, recent=B/4,
+query-aware, key 75526, six cells (depths 0.1/0.5/0.9 × B=64/128). The prompt is
+built by importing `passkey.build_prompt`, so it cannot drift from the harness.
+
+## Both pre-registered explanations are refuted
+
+| prediction | expected | observed | |
+|---|---|---|---|
+| tie-break at the budget boundary | survival ≈ equal across the span | 19-point gap | **refuted** |
+| scoring gradient along the span | survival falls toward the span's end | offsets 20–25 rise to 62–70% | **refuted** |
+
+The shape is neither flat nor a ramp. It is a **trough**.
+
+## What actually happens
+
+| depth | B | framing tokens | digit tokens | gap |
+|---:|---:|---:|---:|---:|
+| 0.1 | 64 | 41% | 25% | +16 |
+| 0.1 | 128 | 55% | 41% | +14 |
+| 0.5 | 64 | 45% | 23% | +22 |
+| 0.5 | 128 | 60% | 42% | +18 |
+| 0.9 | 64 | 57% | 31% | +26 |
+| 0.9 | 128 | 66% | 50% | +16 |
+| | | **54%** | **35%** | **+19** |
+
+Six cells out of six, in the same direction. The words `The pass key is` survive
+at 54%; the digits they introduce survive at 35%.
+
+**The reason is the query.** Query-aware scoring runs `What is the pass key? The
+pass key is` against the cache before compressing. The framing tokens are
+lexically the query. The digits are what the query is *asking for*, and they look
+nothing like it. So the score rewards the label and not the answer.
+
+This is worth stating plainly: query-aware scoring produced the largest single
+quality gain in this program (0.33 → 0.78 at 32K), and it carries a systematic
+bias toward evicting the very thing being retrieved.
+
+## Pooling works by contagion, which is why payload interiors starve
+
+Within the five-digit run, survival is U-shaped in **all six cells**:
+
+| depth | B | d1 | d2 | d3 | d4 | d5 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.5 | 64 | 34% | **22%** | 31% | 30% | 28% |
+| 0.5 | 128 | 52% | **44%** | 46% | 48% | 49% |
+| 0.9 | 128 | 59% | **49%** | 56% | 55% | 54% |
+
+d1 is adjacent to the framing and does best; d2 is interior and does worst. The
+same effect appears at offset 19 — the last digit of the *second* key copy, sitting
+next to ` is the pass key` — which jumps back to 41–56% while its interior
+neighbours sit at 15–29%.
+
+So max-pooling does not protect spans as such. It propagates high scores to
+*neighbours of high scorers*. A payload whose neighbours are all payload receives
+nothing. That is why pooling rescued the 128K result (the span gets lifted by its
+framing) and why it still leaves a hole in the middle of the payload.
+
+## The fix this points at
+
+Not a wider pool — width does not help a token whose entire neighbourhood is low.
+Two candidates, both cheap and both untested:
+
+1. **All-or-nothing spans.** If any token of a contiguous run is kept, keep the
+   run. Turns eviction's unit from the position into the span, which is what the
+   whole cornerstone argues it should be.
+2. **Forward-biased query credit.** The query matches the *label*; the answer sits
+   immediately after it. Crediting positions i+1…i+k when i matches the query is a
+   one-line change to the pooling direction and targets the observed bias exactly.
+
+## Limitations
+
+One key (75526), one length, one pool width, six cells. Survival is measured per
+(layer, KV head) stream, and a digit present in half the streams may still be
+readable — so this trace establishes the *eviction preference* cleanly but does
+not by itself explain the 4-of-5 prefix pattern in P2. The single-token decode in
+this tool reports the space preceding the digits, so it cannot cross-check the
+harness's accuracy; use `passkey.py` for that.
+
+## Reproduce
+
+```bash
+python experiments/stabilizer/src/trace_span_positions.py \
+  --length 131072 --budgets 64 128 --depths 0.1 0.5 0.9
+```
