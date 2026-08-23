@@ -64,7 +64,7 @@ def main() -> None:
     rnd = torch.rand(2, 8, 300)
     p_fixed = Policy(budget=64, sinks=4, recent=16, pool=7, pool_back=4, pool_fwd=0)
     p_grow = Policy(budget=64, sinks=4, recent=16, pool=7, pool_back=4, pool_fwd=0,
-                    grow=0.95)
+                    grow=2.0)
     a = select_keep(rnd.clone(), 300, p_fixed, torch.device("cpu"))
     b = select_keep(rnd.clone(), 300, Policy(budget=64, sinks=4, recent=16, pool=7,
                                              pool_back=4, pool_fwd=0),
@@ -74,7 +74,7 @@ def main() -> None:
     # --- span coverage ------------------------------------------------------
     n, start, length = 200, 50, 5
     s = span_scores(n, [(start, length)])
-    g = grow_spans(s, 0.95, 64)[0, 0]
+    g = grow_spans(s, 2.0, 64)[0, 0]
     body = g[start:start + length]
     check("head score reaches the whole payload",
           bool((body >= 1.0 - 1e-6).all()),
@@ -93,7 +93,7 @@ def main() -> None:
 
     # --- two spans do not merge --------------------------------------------
     s2 = span_scores(200, [(50, 5), (70, 5)])
-    g2 = grow_spans(s2, 0.95, 64)[0, 0]
+    g2 = grow_spans(s2, 2.0, 64)[0, 0]
     gap = g2[55:70]
     check("two spans separated by filler do not merge",
           bool((gap <= 0.02).all()),
@@ -108,7 +108,7 @@ def main() -> None:
     padded = torch.nn.functional.pad(s3, (fixed_back, 0), value=float("-inf"))
     fixed = torch.nn.functional.max_pool1d(padded, kernel_size=fixed_back + 1,
                                            stride=1)[..., :n][0, 0]
-    grown = grow_spans(s3, 0.90, 64)[0, 0]
+    grown = grow_spans(s3, 2.0, 64)[0, 0]
 
     short_fixed = bool((fixed[50:55] >= 1.0 - 1e-6).all())
     long_fixed = bool((fixed[150:170] >= 1.0 - 1e-6).all())
@@ -123,7 +123,7 @@ def main() -> None:
           f"covered {int((grown[150:170] >= 1.0 - 1e-6).sum())}/20 positions")
 
     # --- convergence --------------------------------------------------------
-    g_short = grow_spans(s3, 0.90, 4)[0, 0]
+    g_short = grow_spans(s3, 2.0, 4)[0, 0]
     check("max_reach bounds the growth",
           not bool((g_short[150:170] >= 1.0 - 1e-6).all()),
           "reach=4 cannot cross a 20-token span, as expected")

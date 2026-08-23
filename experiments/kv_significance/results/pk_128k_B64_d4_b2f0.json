@@ -1,0 +1,242 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 16,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": 2,
+  "pool_fwd": 0,
+  "key_digits": 4,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125824,
+      "budget": 64,
+      "depth": 0.1,
+      "acc": 0.6666666666666666,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 9190,
+          "got": "919091. Remember the pass key",
+          "hit": true
+        },
+        {
+          "key": 5081,
+          "got": "50819. Here we go.",
+          "hit": true
+        },
+        {
+          "key": 8045,
+          "got": "8045. Here we go. \n\nThe",
+          "hit": true
+        },
+        {
+          "key": 8055,
+          "got": "8051. \n\nRemember to memorize it",
+          "hit": false
+        },
+        {
+          "key": 8522,
+          "got": "8521. Here we go. \n\nThe",
+          "hit": false
+        },
+        {
+          "key": 7343,
+          "got": "7341. Remember the pass key:",
+          "hit": false
+        },
+        {
+          "key": 9651,
+          "got": "9651. Remember that key.\n\nThe pa",
+          "hit": true
+        },
+        {
+          "key": 2182,
+          "got": "21821821821",
+          "hit": true
+        },
+        {
+          "key": 7785,
+          "got": "7785. \n\nRemember the pass key:",
+          "hit": true
+        },
+        {
+          "key": 4170,
+          "got": "4170. Here we go. \n\nThe",
+          "hit": true
+        },
+        {
+          "key": 7381,
+          "got": "7381. \n\nRemember the pass key:",
+          "hit": true
+        },
+        {
+          "key": 6462,
+          "got": "646464. Here we go.",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125824,
+      "budget": 64,
+      "depth": 0.5,
+      "acc": 0.4166666666666667,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 9190,
+          "got": "919. \n\nRemember: The pass key is",
+          "hit": false
+        },
+        {
+          "key": 5081,
+          "got": "508. \n\nRemember: The pass key is",
+          "hit": false
+        },
+        {
+          "key": 8045,
+          "got": "8045. Remember it. \n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 8055,
+          "got": "8055. \n\nRemember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 8522,
+          "got": "852. \n\nRemember the pass key.",
+          "hit": false
+        },
+        {
+          "key": 7343,
+          "got": "7345. \n\nRemember the pass key.",
+          "hit": false
+        },
+        {
+          "key": 9651,
+          "got": "9651. Remember it. \n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 2182,
+          "got": "218. Remember it. \n\nThe grass is",
+          "hit": false
+        },
+        {
+          "key": 7785,
+          "got": "7777. Remember that. Here is the",
+          "hit": false
+        },
+        {
+          "key": 4170,
+          "got": "417. Remember that. Here we go.",
+          "hit": false
+        },
+        {
+          "key": 7381,
+          "got": "7381. \n\nRemember the pass key.",
+          "hit": true
+        },
+        {
+          "key": 6462,
+          "got": "6462. \n\nThe pass key is",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125824,
+      "budget": 64,
+      "depth": 0.9,
+      "acc": 0.25,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 9190,
+          "got": "9192. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 5081,
+          "got": "508. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 8045,
+          "got": "8040. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 8055,
+          "got": "8050. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 8522,
+          "got": "852. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 7343,
+          "got": "7343. \n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 9651,
+          "got": "9651. \n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 2182,
+          "got": "218. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 7785,
+          "got": "777. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 4170,
+          "got": "417. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 7381,
+          "got": "7381. \n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 6462,
+          "got": "6464. \n\nSo, the answer is",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

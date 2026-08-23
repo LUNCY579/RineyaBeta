@@ -361,71 +361,48 @@ def _gather_counts(layer_idx: int, idx: torch.Tensor, n: int) -> None:
             f"reset_scores() between sequences.")
     _COUNTS[layer_idx] = cnt.gather(2, idx.to(cnt.device)).contiguous()
 
-_GROW_NOISE_MULT = 2.0   # a grown-into position must stand this far above
-                        # the stream's noise floor (its median). See grow_spans.
+def grow_spans(s: torch.Tensor, mult: float, max_reach: int) -> torch.Tensor:
+    """Let each score flow forward through positions that are above the noise floor.
 
+    WHY THIS EXISTS. P2.5 measured that a FIXED backward reach cannot serve variable
+    span lengths: back=4 scores 1.000 on a 5-digit key and 0.000 on a 7-digit one,
+    and at the law's own threshold (back = d-1) the margin narrows as spans grow --
+    0.972 at d=4, 1.000 at d=5, 0.778 at d=7. Passkey lets you tune the reach because
+    the span length is known. Natural language does not; spans there run 20-40 tokens
+    and vary per instance. So derive the reach instead of tuning it.
 
-def grow_spans(s: torch.Tensor, q: float, max_reach: int) -> torch.Tensor:
-    """Let each score flow forward through positions that are themselves alive.
+    The score enters a span at its HEAD, because query-aware scoring rewards the
+    query-shaped label introducing the payload (P2.2: framing survives in 54% of
+    streams against 35% for the payload). Growing that head forward through
+    positions that are themselves above the noise floor reproduces the span and
+    stops where the score collapses to filler.
 
-    WHY THIS EXISTS. P2.4 measured that the pool window's required BACKWARD REACH
-    equals the evidence span's length minus one: back=3 leaves a 5-digit key at
-    0.278, back=4 takes it to 1.000, and forward reach is inert (spread 0.000
-    across fwd in {0,4} at back=4). A fixed window therefore only works when the
-    span length is known in advance. Passkey grants that. Natural language does
-    not -- evidence spans there run 20-40 tokens and vary per instance.
+    HYSTERESIS NEEDS A SELECTIVE SEED AND A PERMISSIVE GATE, and getting that
+    backwards is the error this docstring exists to prevent. An earlier version
+    required a position to be in the top-k to be grown INTO. That is exactly wrong:
+    a payload position is individually weak -- that is the whole problem -- so the
+    top-k requirement excluded precisely the positions the mechanism is meant to
+    rescue. It scored 0.00 at 16K/B=64 and emitted degenerate '77777777777'.
 
-    So derive the reach instead of fixing it. The score enters a span at its HEAD,
-    because query-aware scoring rewards the query-shaped label that introduces the
-    payload (P2.2: framing survives in 54% of streams against 35% for the payload).
-    Growing that head's score forward through positions that are themselves above a
-    floor reproduces the span and stops where the score collapses to filler --
-    rather than always reaching a fixed distance, and so either falling short of a
-    long span or dragging filler into a short one.
+    Nor can the gate be a quantile. When signal is sparse the quantile lands inside
+    the filler, the gate opens on everything, and growth floods the sequence so that
+    the top-k after it is arbitrary. On a 200-position stream holding one 5-token
+    span, a 0.95 quantile admitted all 200 positions.
 
-    This is geodesic dilation: the dual-threshold idea from Canny edge detection
-    applied to a 1-D score. A high seed, and a low gate deciding how far it spreads.
-
-    THE GATE IS A QUANTILE, NOT A FRACTION OF THE MAXIMUM. Gating at `tau * max`
-    was the first attempt and it is fragile: it presumes a known ratio between the
-    head's score and its payload's, which is precisely the prior knowledge this
-    function exists to avoid. With a head at 1.0 and a payload at 0.15, any tau
-    above 0.15 silently blocks the payload and growth becomes a no-op -- caught by
-    the CPU tests in test_grow_spans.py before it ever reached the card.
-
-    `q` is therefore a quantile in [0, 1): the top (1 - q) fraction of positions in
-    each stream may be grown into. It is scale-free, needs no knowledge of the
-    score distribution's shape, and reads directly as a compression setting --
-    q=0.99 admits one position in a hundred.
+    The gate is therefore relative to each stream's MEDIAN, which tracks the noise
+    floor because filler dominates the distribution. `mult` is how far above it a
+    position must stand to be grown into. It is scale-free, independent of sequence
+    length and of how sparse the signal is, and it needs no prior knowledge of the
+    head-to-payload ratio -- only that evidence outscores filler, which is what
+    "evidence" means.
     """
-    if q <= 0.0 or q >= 1.0:
+    if mult is None or mult <= 0.0:
         return s
-    n = s.shape[-1]
-    k = max(1, min(n, int(round((1.0 - q) * n))))
     finite = torch.where(torch.isinf(s), torch.full_like(s, float("-inf")), s)
-
-    # TWO thresholds, and a position must clear BOTH.
-    #
-    # The quantile alone is not enough, and the CPU tests caught why. It bounds HOW
-    # MANY positions may be grown into, but when a stream holds fewer interesting
-    # positions than the quantile admits, the k-th largest score IS the filler
-    # level, the gate opens on the whole sequence, and growth floods it -- every
-    # position inherits the global maximum and the subsequent top-k becomes
-    # arbitrary. On a 200-position stream holding one 5-token span, q=0.95 admits
-    # 10 positions, only 5 are above filler, and the gate let all 200 through.
-    #
-    # So also require a position to be signal rather than bulk. Filler dominates
-    # the distribution, so the median tracks the noise floor; a position must stand
-    # a factor above it. The multiplier is a property of the method rather than a
-    # tuned knob -- anything that separates payload from filler behaves alike, and
-    # test_grow_spans.py checks the separation directly.
     valid = torch.isfinite(finite)
-    thresh_k = finite.topk(k, dim=-1).values[..., -1:]
     filled = torch.where(valid, finite, torch.zeros_like(finite))
     noise = filled.median(dim=-1, keepdim=True).values
-    thresh_noise = noise * _GROW_NOISE_MULT
-    thresh = torch.maximum(thresh_k, thresh_noise)
-    gate = (finite >= thresh) & valid & (finite > thresh_noise)
+    gate = valid & (finite > noise * mult)
     grown = finite
     for _ in range(max(0, int(max_reach))):
         shifted = F.pad(grown[..., :-1], (1, 0), value=float("-inf"))
@@ -549,9 +526,9 @@ class Policy:
     pool_back: int | None = None   # reach behind i; None = pool // 2 (centred)
     pool_fwd: int | None = None    # reach ahead of i;  None = pool // 2 (centred)
     grow: float | None = None      # if set, DERIVE the reach: geodesic dilation
-                                   # gated at this QUANTILE of each stream's scores
-                                   # (0.99 = top 1% may be grown into), instead of
-                                   # a fixed pool_back. See grow_spans.
+                                   # gated at this MULTIPLE of the stream's median
+                                   # score, instead of a fixed pool_back. 2.0 means
+                                   # "twice the noise floor". See grow_spans.
     grow_max: int = 64             # iteration bound for growth
     normalize: bool = False    # shorthand for count_exponent = 1.0
     count_exponent: float | None = None   # rank on sum / count**e; 0 = sum, 1 = mean

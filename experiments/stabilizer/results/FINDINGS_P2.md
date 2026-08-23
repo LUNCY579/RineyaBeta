@@ -341,3 +341,78 @@ This matters well beyond passkey. If the requirement tracks span length, then th
 window is not a hyperparameter to tune but a **quantity to derive from the evidence
 structure of the task** — and for natural-language evidence, spans of 20–40 tokens
 would need a backward reach an order of magnitude larger than anything measured here.
+
+---
+
+# P2.5 — the required reach tracks the span, so it cannot be a constant
+
+`--key-digits` on `passkey.py`. Every digit is one token (verified:
+`75526` → `'7','5','5','2','6'`), so a *d*-digit key is a *d*-token evidence span.
+P2.4's threshold sat at back=4 for d=5; the law `back ≥ d − 1` predicts it moves
+with *d*. 128K, B=64, 12 paired needles per cell.
+
+| digits | back | d−1 | predicted | measured | agrees |
+|---:|---:|---:|---|---:|---|
+| 4 | 2 | 3 | fail | 0.444 | yes |
+| 4 | 3 | 3 | pass | 0.972 | yes |
+| 5 | 3 | 4 | fail | 0.278 | yes |
+| 5 | 4 | 4 | pass | **1.000** | yes |
+| **7** | **4** | 6 | **fail** | **0.000** | **yes** |
+| 7 | 6 | 6 | pass | 0.778 | no |
+
+**The discriminating cell settles it.** A 7-digit key at back=4 scores **0.000**
+where a 5-digit key at the same reach scores **1.000**. Backward reach is not a
+constant that happened to suit passkey; the requirement moves with the span.
+
+**But `d − 1` is approximate, not exact.** At the threshold itself the margin
+narrows as spans lengthen: 0.972 at d=4, 1.000 at d=5, **0.778** at d=7. The d=7
+failures are again one-token truncations (`9387353` → `938735`), the same signature
+P2 recorded. So reach ≥ d−1 is necessary and, for short spans, sufficient; for
+longer spans something further degrades it. Not yet explained.
+
+## Why this matters more than the accuracy numbers
+
+A fixed reach is a hyperparameter that can only be tuned when the evidence span
+length is known in advance. Passkey grants that. **No real task does.** Natural
+language evidence runs 20–40 tokens and varies per instance, so any single fixed
+reach is wrong for most of the distribution — and being wrong is not graceful: d=7
+at back=4 is 0.000, not degraded.
+
+---
+
+# P2.6 — deriving the reach instead of tuning it (in progress)
+
+`grow_spans()` in `scripts/kv/significance.py`, opt-in via `Policy.grow`, exposed as
+`--grow`. Geodesic dilation: the score enters a span at its head and is grown forward
+through positions that are themselves above the stream's noise floor, so it stops at
+the span boundary rather than at a fixed distance. `grow=None` leaves every committed
+result on the unchanged fixed-window path, and the 93 pinned numbers still reproduce.
+
+**Two design errors, both caught before the card.** `test_grow_spans.py` runs on CPU
+with no model.
+
+*Gating at a fraction of the stream maximum* presumes a known head-to-payload ratio —
+the exact prior knowledge the function exists to avoid. Head 1.0, payload 0.15, any
+threshold above 0.15 makes growth a silent no-op.
+
+*Gating on a quantile* fails the other way. A quantile bounds how many positions may
+be grown into, but when signal is sparse the k-th largest score **is** the filler
+level: on a 200-position stream holding one 5-token span, a 0.95 quantile admitted
+all 200 positions and growth flooded the sequence.
+
+**And one error the CPU tests did not catch.** Requiring a position to be in the
+top-k *to be grown into* inverts hysteresis, which needs a selective seed and a
+**permissive** gate. A payload position is individually weak — that is the entire
+problem — so the top-k requirement excluded precisely the positions the mechanism
+exists to rescue. It scored 0.00 at 16K/B=64 and emitted degenerate `77777777777`.
+Caught by a 2-trial 16K smoke run costing about a minute, not by a 128K sweep.
+
+The gate is now relative to each stream's **median**, which tracks the noise floor
+because filler dominates. After the fix, 16K/B=64 scores 1.00 at both `grow=2.0` and
+`grow=5.0`, matching the fixed `back=4` reference — and the insensitivity to the
+multiplier is the point: the knob is not doing the work the span structure is.
+
+**The test now running** puts one policy, never told the key length, against the best
+fixed reach at d ∈ {4, 5, 7}. The cell that decides it is d=7, where the best fixed
+reach manages only 0.778. If growth needs a different multiplier per *d*, it has
+merely moved the hyperparameter rather than removed it.

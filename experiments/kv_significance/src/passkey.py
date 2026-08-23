@@ -147,6 +147,14 @@ def main() -> None:
                          "traced at 128K kept only 57-65%% of its tokens, i.e. "
                          "the span survived in fragments. Pooling exists to "
                          "stop exactly that.")
+    ap.add_argument("--grow", type=float, default=None,
+                    help="DERIVE the pool reach instead of fixing it: geodesic "
+                         "dilation gated at this quantile (0.99 = top 1%% may be "
+                         "grown into). P2.5 showed a fixed reach cannot serve "
+                         "variable span lengths -- back=4 gives 1.000 on a 5-digit "
+                         "key and 0.000 on a 7-digit one.")
+    ap.add_argument("--grow-max", type=int, default=64,
+                    help="iteration bound for --grow.")
     ap.add_argument("--key-digits", type=int, default=5,
                     help="digits in the pass key. Every digit is its own token, so "
                          "this IS the evidence span length. P2.4 found the pool's "
@@ -250,6 +258,8 @@ def main() -> None:
                                          pool=args.pool,
                                          pool_back=args.pool_back,
                                          pool_fwd=args.pool_fwd,
+                                         grow=args.grow,
+                                         grow_max=args.grow_max,
                                          normalize=args.normalize,
                                          count_exponent=args.count_exponent)
                               if budget else None)
@@ -314,6 +324,7 @@ def main() -> None:
          "pool": args.pool,
          "pool_back": args.pool_back, "pool_fwd": args.pool_fwd,
          "key_digits": args.key_digits,
+         "grow": args.grow, "grow_max": args.grow_max,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
          "count_exponent": args.count_exponent, "normalize": args.normalize,
          "query_aware": args.query_aware, "seed": args.seed,
