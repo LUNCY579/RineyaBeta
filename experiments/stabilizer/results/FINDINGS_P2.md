@@ -412,7 +412,39 @@ because filler dominates. After the fix, 16K/B=64 scores 1.00 at both `grow=2.0`
 `grow=5.0`, matching the fixed `back=4` reference — and the insensitivity to the
 multiplier is the point: the knob is not doing the work the span structure is.
 
-**The test now running** puts one policy, never told the key length, against the best
-fixed reach at d ∈ {4, 5, 7}. The cell that decides it is d=7, where the best fixed
-reach manages only 0.778. If growth needs a different multiplier per *d*, it has
-merely moved the hyperparameter rather than removed it.
+## The result: deriving beats tuning, but does not remove the knob
+
+One policy, never told the key length, against the best *tuned* fixed reach:
+
+| digits | grow=2.0 | grow=5.0 | best fixed reach | grow=2.0 vs fixed |
+|---:|---:|---:|---:|---:|
+| 4 | **1.000** | 1.000 | back=3 → 0.972 | **+0.028** |
+| 5 | **1.000** | 1.000 | back=4 → 1.000 | +0.000 |
+| 7 | **0.889** | 0.611 | back=6 → 0.778 | **+0.111** |
+
+At `grow=2.0` the derived reach **matches or beats the best hand-tuned fixed reach at
+every span length**, without being told the span length. That is the claim this
+mechanism was built for.
+
+**But the multiplier is not inert, and the earlier claim that it was is withdrawn.**
+Exact McNemar between the two multipliers:
+
+| digits | 2.0 vs 5.0 | p | |
+|---:|---:|---:|---|
+| 4 | +0.000 | 1.0000 | inert |
+| 5 | +0.000 | 1.0000 | inert |
+| **7** | **+0.278** | **0.0020** | **the multiplier matters** |
+
+The insensitivity claim came from a 16K smoke run at d=5 — a cell where both settings
+saturate, and therefore the wrong cell to test it on. At d=7 they differ by 0.278.
+
+Mechanically this is what the design predicts: a stricter gate excludes weak payload
+positions, so growth cannot traverse a long span. The failure direction is therefore
+known — too strict, not too loose — and the setting should err low.
+
+So the honest claim is weaker than *hyperparameter-free*. Growth **reduces** the
+tuning problem: one setting spans d ∈ {4, 5, 7} where no fixed reach does, and it is
+never worse than the best fixed reach. It does not eliminate it.
+
+The residual long-span degradation from P2.5 also survives: d=7 reaches 0.889, not
+1.000, and remains unexplained.

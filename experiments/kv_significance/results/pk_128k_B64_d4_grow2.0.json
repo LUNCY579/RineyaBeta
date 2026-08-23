@@ -1,0 +1,244 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 16,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": null,
+  "pool_fwd": null,
+  "key_digits": 4,
+  "grow": 2.0,
+  "grow_max": 64,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125824,
+      "budget": 64,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 9190,
+          "got": "9190. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 5081,
+          "got": "5081. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 8045,
+          "got": "8045. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 8055,
+          "got": "8055. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 8522,
+          "got": "8522. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 7343,
+          "got": "7343. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 9651,
+          "got": "9651. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 2182,
+          "got": "2182. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 7785,
+          "got": "7785. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 4170,
+          "got": "4170. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 7381,
+          "got": "7381. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 6462,
+          "got": "6462. \n\nSo the answer is",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125824,
+      "budget": 64,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 9190,
+          "got": "9190. Remember it. 91",
+          "hit": true
+        },
+        {
+          "key": 5081,
+          "got": "5081. \n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 8045,
+          "got": "8045. Remember it. 80",
+          "hit": true
+        },
+        {
+          "key": 8055,
+          "got": "8055. \n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 8522,
+          "got": "8522. Remember it. \n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 7343,
+          "got": "7343. Remember it. 73",
+          "hit": true
+        },
+        {
+          "key": 9651,
+          "got": "9651. Remember it. 96",
+          "hit": true
+        },
+        {
+          "key": 2182,
+          "got": "2182. Remember it. 21",
+          "hit": true
+        },
+        {
+          "key": 7785,
+          "got": "7785. Remember it. 77",
+          "hit": true
+        },
+        {
+          "key": 4170,
+          "got": "4170. Remember it. 41",
+          "hit": true
+        },
+        {
+          "key": 7381,
+          "got": "7381. Remember it. 73",
+          "hit": true
+        },
+        {
+          "key": 6462,
+          "got": "6462. Remember it. 64",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125824,
+      "budget": 64,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 9190,
+          "got": "9190. So the answer is 9",
+          "hit": true
+        },
+        {
+          "key": 5081,
+          "got": "5081. So the answer is 5",
+          "hit": true
+        },
+        {
+          "key": 8045,
+          "got": "8045. So the answer is 8",
+          "hit": true
+        },
+        {
+          "key": 8055,
+          "got": "8055. So the answer is 8",
+          "hit": true
+        },
+        {
+          "key": 8522,
+          "got": "8522. So the answer is 8",
+          "hit": true
+        },
+        {
+          "key": 7343,
+          "got": "7343. So the answer is 7",
+          "hit": true
+        },
+        {
+          "key": 9651,
+          "got": "9651. So the answer is 9",
+          "hit": true
+        },
+        {
+          "key": 2182,
+          "got": "2182. So the answer is 2",
+          "hit": true
+        },
+        {
+          "key": 7785,
+          "got": "7785. So the answer is 7",
+          "hit": true
+        },
+        {
+          "key": 4170,
+          "got": "4170. So the answer is 4",
+          "hit": true
+        },
+        {
+          "key": 7381,
+          "got": "7381. So the answer is 7",
+          "hit": true
+        },
+        {
+          "key": 6462,
+          "got": "6462. So the answer is 6",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}

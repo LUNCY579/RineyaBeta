@@ -63,9 +63,35 @@ QUERY_HINT = ("What is the pass key? Watch for it as you read." + chr(10)*2)
 
 
 def build_prompt(tok, target_tokens: int, depth: float, key: int,
-                 query_first: bool = False) -> tuple[str, int]:
+                 query_first: bool = False, n_distractors: int = 0,
+                 distractor_style: str = "framed") -> tuple[str, int]:
     """Filler with the key at `depth` through it, padded to ~target_tokens."""
     needle = f"\n\nThe pass key is {key}. Remember it. {key} is the pass key.\n\n"
+    # STAGE 1 of the reasoning programme: competition.
+    #
+    # Passkey's haystack contains no digits at all, so the real key is the only
+    # thing of its kind in the entire context and localising it is trivial. P2.2
+    # measured that the score keeps text RESEMBLING THE QUERY -- framing survives
+    # in 54% of streams against 35% for the payload -- which predicts decoys shaped
+    # like the question should be preferentially retained and crowd the answer out.
+    # `framed` decoys share the question's sentence frame under a DIFFERENT label,
+    # so the true answer stays unambiguous; `bare` decoys carry a number with no
+    # frame overlap, isolating mere numeric competition from query similarity.
+    decoys = []
+    if n_distractors:
+        drng = random.Random(f"{key}:decoys")
+        labels = ["door code", "locker number", "badge id", "vault code",
+                  "seat number", "gate code", "room number", "case file"]
+        nd = len(str(key))
+        for i in range(n_distractors):
+            dkey = drng.randint(10 ** (nd - 1), 10 ** nd - 1)
+            if distractor_style == "framed":
+                lab = labels[i % len(labels)]
+                decoys.append(f"\n\nThe {lab} is {dkey}. Remember it. "
+                              f"{dkey} is the {lab}.\n\n")
+            else:
+                decoys.append(f"\n\nThe reading that morning was {dkey}, "
+                              f"noted and filed.\n\n")
     n_pre = len(tok(PREAMBLE)["input_ids"])
     n_suf = len(tok(SUFFIX)["input_ids"])
     n_needle = len(tok(needle)["input_ids"])
@@ -82,7 +108,18 @@ def build_prompt(tok, target_tokens: int, depth: float, key: int,
         # exactly that mechanism and nothing else: the needle, the budget, the
         # depth and the length are unchanged.
         head = QUERY_HINT + PREAMBLE
-    text = head + FILLER * before + needle + FILLER * (reps - before) + SUFFIX
+    tail_reps = reps - before
+    if decoys:
+        # Spread decoys through the remaining filler rather than co-locating them.
+        text = head + FILLER * before + needle
+        step = max(1, tail_reps // (len(decoys) + 1))
+        used = 0
+        for dec in decoys:
+            text += FILLER * step + dec
+            used += step
+        text += FILLER * max(0, tail_reps - used) + SUFFIX
+    else:
+        text = head + FILLER * before + needle + FILLER * tail_reps + SUFFIX
     return text, len(tok(text)["input_ids"])
 
 
@@ -147,6 +184,13 @@ def main() -> None:
                          "traced at 128K kept only 57-65%% of its tokens, i.e. "
                          "the span survived in fragments. Pooling exists to "
                          "stop exactly that.")
+    ap.add_argument("--distractors", type=int, default=0,
+                    help="decoy keys competing with the real one. Passkey has "
+                         "none, which is why 8 heavy slots suffice at B=16.")
+    ap.add_argument("--distractor-style", choices=("framed", "bare"),
+                    default="framed",
+                    help="framed decoys share the question sentence frame under "
+                         "a different label; bare ones do not.")
     ap.add_argument("--grow", type=float, default=None,
                     help="DERIVE the pool reach instead of fixing it: geodesic "
                          "dilation gated at this quantile (0.99 = top 1%% may be "
@@ -250,7 +294,9 @@ def main() -> None:
                     key = rng.randint(10 ** (args.key_digits - 1),
                                       10 ** args.key_digits - 1)
                     text, real_n = build_prompt(tok, n, depth, key,
-                                                query_first=args.query_first)
+                                                query_first=args.query_first,
+                                                n_distractors=args.distractors,
+                                                distractor_style=args.distractor_style)
                     ids = tok(text, return_tensors="pt").to(args.device)["input_ids"]
                     torch.cuda.empty_cache()
                     torch.cuda.reset_peak_memory_stats()
@@ -325,6 +371,8 @@ def main() -> None:
          "pool_back": args.pool_back, "pool_fwd": args.pool_fwd,
          "key_digits": args.key_digits,
          "grow": args.grow, "grow_max": args.grow_max,
+         "distractors": args.distractors,
+         "distractor_style": args.distractor_style,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
          "count_exponent": args.count_exponent, "normalize": args.normalize,
          "query_aware": args.query_aware, "seed": args.seed,
