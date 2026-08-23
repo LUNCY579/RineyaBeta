@@ -66,4 +66,4 @@ resume:
   # a JSON heartbeat file. It touches no tensor, RNG, optimizer or plan, and no
   # other training module changed.
   # Return this to false once B0 completes; the guard should be strict by default.
-  allow_code_drift: true
+  allow_code_drift: false   # B0 is complete; the override was scoped to that one resume
