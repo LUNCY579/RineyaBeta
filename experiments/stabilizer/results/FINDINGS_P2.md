@@ -31,6 +31,12 @@ Interpolating the 0.5-accuracy crossing in log₂(B):
 
 A least-squares fit gives **B_half = 0.141 · L^0.535**.
 
+> **RETRACTED by P2.3, below.** This law was fitted from the *centred* pool window.
+> With a backward-reaching window every length is lossless at or below B=16, so
+> B_half falls outside the sampled range at all three lengths and no exponent can be
+> fitted at all. What survives is the negative half — the linear keep-fraction law is
+> excluded. It is left here as the record of what was measured, not as a live claim.
+
 The comparison that matters is against the alternative the first cornerstone
 implied. A fixed keep fraction means B_half doubles when L doubles: from 38 at
 32K it would predict 76 at 64K and 152 at 128K. Observed: 49 and 80. At 128K the

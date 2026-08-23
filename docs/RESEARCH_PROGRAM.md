@@ -152,7 +152,12 @@ then prune with and without protection at matched parameter count.
 This is also the direct follow-up to §16: `conflict` abstention was the one thing
 the vocab trim cost, and it is an in-context discrimination task.
 
-### C4. Low-rank factorization **[S]** — not yet attempted
+### C4. Low-rank factorization **[S]** — ~~not yet attempted~~ **REJECTED ON MEASUREMENT (2026-08-23)**
+
+> Measured and withdrawn: rank@99 sits *above* the factorization break-even for every
+> projection type sampled, so 99% energy costs parameters rather than saving them.
+> `surgery.factorize` was never built and is not needed. The hypothesis below is the
+> record of what was predicted, not a live plan.
 Replace `W (d×k)` with `U(d×r) V(r×k)` where the spectrum permits. Unlike
 pruning, this removes parameters without removing *units*, so it degrades
 differently — and it composes with C2.

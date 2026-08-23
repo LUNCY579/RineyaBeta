@@ -3,7 +3,7 @@
 A pre-registration. Written before any number in it exists, so that the design
 cannot be revised into agreement with its own results (P5).
 
-**Status:** design frozen pending Phase 0. Nothing here has been run.
+**Status:** design frozen; **partially executed.** The feasibility audit is done, and several endpoints were built and measured to 128K outside this design — see [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4b–§4f and `experiments/stabilizer/results/FINDINGS_P2.md`. The GQA-surgery arms and the multi-key, perplexity and multi-hop endpoints have **not** been run.
 **Companion tools:** `scripts/design/kv_budget.py`, `scripts/design/power_analysis.py`.
 All numbers quoted below are reproduced by those two scripts on this host.
 

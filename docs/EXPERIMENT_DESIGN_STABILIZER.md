@@ -1,6 +1,18 @@
 # The Stabilizer Matrix — pre-registration
 
-**Status: designed, not started. Branch `exp/stabilizer-matrix`.**
+**Status: Phase 0 RUN AND CLOSED (2026-08-23). The pre-registration below is
+preserved verbatim — do not edit it to match results.**
+
+Outcome: P0.1 **passed** (ρ(25%) = 0.9586 ≥ 0.95). P0.2 **failed** the speed criterion
+on this host. P0.3 is a qualified negative — a global selector reaches 0.70 recall, but
+the significance matrix adds **+0.0002** over the hidden state alone. The stabilizer
+hypothesis was abandoned.
+
+The branch then turned to the KV axis and produced **cornerstone 2**, which is *not*
+this document's subject and was never pre-registered: span-aware selection, an
+asymmetric max-pool over the significance scores before top-k. See
+`experiments/stabilizer/results/FINDINGS_P1.md` and `FINDINGS_P2.md`.
+Branch `exp/stabilizer-matrix`.
 Written before any measurement, deliberately including the ways it can fail.
 
 ---
