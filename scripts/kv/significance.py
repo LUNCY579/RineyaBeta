@@ -313,11 +313,7 @@ class SignificanceLayer(DynamicLayer):
             kept = s.gather(2, idx)
         _SCORES[self.layer_idx] = torch.where(
             torch.isfinite(kept), kept, torch.zeros_like(kept)).contiguous()
-        cnt = _COUNTS.get(self.layer_idx)
-        if cnt is not None and cnt.shape[-1] == n:
-            _COUNTS[self.layer_idx] = cnt.gather(2, idx).contiguous()
-        else:
-            _COUNTS.pop(self.layer_idx, None)
+        _gather_counts(self.layer_idx, idx, n)
         self.evictions += 1
 
     def get_seq_length(self) -> int:
@@ -331,6 +327,38 @@ class SignificanceLayer(DynamicLayer):
             return 0
         return self.keys.shape[-2]
 
+
+def _gather_counts(layer_idx: int, idx: torch.Tensor, n: int) -> None:
+    """Carry the observation counts through an eviction.
+
+    This used to drop `_COUNTS` whenever its length did not match the cache, and
+    that is the NORMAL case on the self-compressing path: `_evict` pads the score
+    vector to cover the decode lag but the counts were left short, so the shape
+    test failed on every eviction, the counts were popped, and `ranked_scores`
+    silently fell back to the raw sum. `Policy.count_exponent` was therefore inert
+    on that path -- a wrong ranking with no error, which is the failure mode this
+    module exists to avoid.
+
+    An un-scored position has been observed zero times, so the lag is padded with
+    zeros; `ranked_scores` clamps the divisor to 1, giving score 0 / 1 = 0, which
+    is correct for a position no query has looked at yet.
+    """
+    cnt = _COUNTS.get(layer_idx)
+    if cnt is None:
+        return
+    have = cnt.shape[-1]
+    if have < n:
+        pad = torch.zeros(cnt.shape[0], cnt.shape[1], n - have,
+                          device=cnt.device, dtype=cnt.dtype)
+        cnt = torch.cat([cnt, pad], dim=-1)
+    elif have > n:
+        # More counts than cache. Dropping them would restart the ranking, so
+        # fail rather than quietly resetting the exponent to zero.
+        raise RuntimeError(
+            f"layer {layer_idx}: {have} observation counts against a cache of "
+            f"{n}. Silently dropping them makes count_exponent inert. Call "
+            f"reset_scores() between sequences.")
+    _COUNTS[layer_idx] = cnt.gather(2, idx.to(cnt.device)).contiguous()
 
 def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
     """Indices to keep: sinks + top-heavy + recent. Returns [b, n_kv, budget]."""
@@ -505,11 +533,7 @@ def compress(cache, policy: Policy, scores: dict[int, torch.Tensor] | None = Non
         raw = _SCORES.get(li)
         scores[li] = ((raw if raw is not None and raw.shape[-1] == n else s)
                       .gather(2, idx).contiguous())
-        cnt = _COUNTS.get(li)
-        if cnt is not None and cnt.shape[-1] == n:
-            _COUNTS[li] = cnt.gather(2, idx).contiguous()
-        else:
-            _COUNTS.pop(li, None)
+        _gather_counts(li, idx, n)
 
         report["layers"] += 1
         report["after"] += idx.shape[-1]
@@ -528,5 +552,20 @@ def cache_bytes(cache) -> int:
 
 
 def score_bytes(scores: dict[int, torch.Tensor] | None = None) -> int:
+    """Bytes held by the SCORE tensors alone.
+
+    This is NOT the mechanism's full overhead. `_COUNTS` is a second tensor of
+    identical shape and dtype, and count normalisation -- the part that makes the
+    ranking work at long context -- cannot run without it. Reporting this number
+    as "the significance matrix costs X" understates it by exactly 2x, which is
+    what happened: 0.78% was published where the mechanism as used costs 1.56%.
+    Use `matrix_bytes()` for the whole thing.
+    """
     scores = scores if scores is not None else _SCORES
     return sum(t.numel() * t.element_size() for t in scores.values())
+
+
+def matrix_bytes() -> int:
+    """Bytes held by the whole significance matrix: scores AND observation counts."""
+    return (sum(t.numel() * t.element_size() for t in _SCORES.values())
+            + sum(t.numel() * t.element_size() for t in _COUNTS.values()))

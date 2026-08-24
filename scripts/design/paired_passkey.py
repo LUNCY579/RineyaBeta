@@ -133,6 +133,13 @@ def main() -> None:
     ap.add_argument("paths", nargs="+")
     ap.add_argument("--by", default="budget", choices=AXES,
                     help="the axis to compare along; every other axis is held fixed")
+    ap.add_argument("--ignore", nargs="*", default=[], choices=list(AXES),
+                    help="axes to EXCLUDE from grouping. Use only when an axis is "
+                         "structurally tied to the contrast rather than being a "
+                         "confound: an uncompressed arm has rank_exponent None "
+                         "because it does no ranking, so holding that axis fixed "
+                         "would refuse the one comparison you want. Everything "
+                         "else stays paired, and the loosening is printed.")
     ap.add_argument("--perm", type=int, default=200000)
     ap.add_argument("--seed", type=int, default=20260821)
     args = ap.parse_args()
@@ -154,8 +161,15 @@ def main() -> None:
     for c in sorted(cells, key=lambda c: [str(c[a]) for a in AXES]):
         print(f"{label(c):<40}{c['acc']:>7.2f}{len(c['hits']):>5}")
 
-    # Group by everything except the comparison axis.
-    other = [a for a in AXES if a != args.by]
+    # Group by everything except the comparison axis, and except any axis the
+    # caller has declared structurally tied to it. The default of holding
+    # everything fixed is what makes this tool refuse bad comparisons, so
+    # loosening it is explicit and gets printed.
+    other = [a for a in AXES if a != args.by and a not in args.ignore]
+    if args.ignore:
+        print("")
+        print("NOT holding fixed: " + ", ".join(args.ignore)
+              + " (declared structurally tied to `" + args.by + "`)")
     groups: dict[tuple, list[dict]] = {}
     for c in cells:
         groups.setdefault(tuple(c[a] for a in other), []).append(c)

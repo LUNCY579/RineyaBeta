@@ -1,0 +1,80 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "budget": 1024,
+  "chunk": 4096,
+  "recent": 256,
+  "window": 16,
+  "steps": 48,
+  "warmup": 8,
+  "rounds": 4,
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "results": [
+    {
+      "length": 32768,
+      "arm": "full",
+      "oom": false,
+      "ms_per_token": 259.569,
+      "ms_per_token_median": 273.044,
+      "tok_per_s": 3.85,
+      "round_medians_ms": [
+        264.12,
+        259.569,
+        281.969,
+        282.684
+      ],
+      "round_spread_pct": 8.9,
+      "budget": 0,
+      "cache_resident_mib": 3590.1,
+      "stored_kv": 32824,
+      "reserved_mib": 7368.0,
+      "temp_c_before": 80.0,
+      "temp_c_after": 85.0,
+      "pressure_pct_of_cap": 99.6
+    },
+    {
+      "length": 32768,
+      "arm": "evict",
+      "oom": false,
+      "ms_per_token": 47.944,
+      "ms_per_token_median": 48.303,
+      "tok_per_s": 20.86,
+      "round_medians_ms": [
+        48.644,
+        48.982,
+        47.961,
+        47.944
+      ],
+      "round_spread_pct": 2.2,
+      "budget": 1024,
+      "cache_resident_mib": 118.1,
+      "stored_kv": 1080,
+      "reserved_mib": 1914.0,
+      "temp_c_before": 82.0,
+      "temp_c_after": 80.0,
+      "pressure_pct_of_cap": 25.9
+    },
+    {
+      "length": 32768,
+      "arm": "evict_noscore",
+      "oom": false,
+      "ms_per_token": 39.008,
+      "ms_per_token_median": 39.558,
+      "tok_per_s": 25.64,
+      "round_medians_ms": [
+        39.656,
+        39.46,
+        40.123,
+        39.008
+      ],
+      "round_spread_pct": 2.9,
+      "budget": 1024,
+      "cache_resident_mib": 118.1,
+      "stored_kv": 1080,
+      "reserved_mib": 1914.0,
+      "temp_c_before": 80.0,
+      "temp_c_after": 81.0,
+      "pressure_pct_of_cap": 25.9
+    }
+  ]
+}

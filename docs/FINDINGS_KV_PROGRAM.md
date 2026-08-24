@@ -287,8 +287,9 @@ attributable to eviction. Subtracting them is the same class of error as the
 unmatched depth sets above.
 
 What is needed is one run: the full cache at 32K **with YaRN ×4**, at `--cap-mib`
-above the 6144 default. Until then the eviction cost at 32K remains uncontrolled,
-as it was before — the baseline exists but is not yet comparable.
+above the 6144 default. **That run has since been done** and is reported later in
+this section: 0.97 uncompressed against 0.78 at 6.25% keep, so eviction costs
+0.19 at 32K against a matched control.
 
 **64K remains out of reach, and now for a stated reason rather than a guess.**
 Its cache alone is exactly 7,168 MiB (28 × 8 × 128 × 2 × 2 bytes × 65,536)
@@ -614,24 +615,101 @@ Keep fractions are budget ÷ *nominal* length, so 64K/B=4096 and 128K/B=8192 are
 both exactly 6.25% and the two rows are matched by construction. Against real
 token counts (62,898 and 125,826) they are 6.51%.
 
-**Doubling the context costs about 0.05. Quadrupling the keep fraction gains about
+**Doubling the context costs about 0.05 between 64K and 128K, but the 32K cell at
+the same keep fraction is the LOWEST of the three (0.78 against 0.97 and 0.92), so
+this is no systematic length effect — the spread is sampling at 12 needles.
+Quadrupling the keep fraction gains about
 0.36.** The keep fraction is the controlling variable and the length is nearly a
 free parameter — which is the strongest form the compression claim has taken in
 this program, and the first time it has been checked at two lengths with matched
 needles.
 
-Missing from that table: 32K under the paired design. The 0.89 quoted for 32K
-elsewhere in this document is a 6-trial unpaired run and is not comparable with
-these rows.
+32K under the paired design is now measured and appears in the next subsection:
+0.78 at 6.25% keep, against an uncompressed control of 0.97. The 0.89 previously
+quoted for that cell was a 6-trial unpaired run at e=0 and is withdrawn.
+#### The matched control at 32K: eviction costs 0.19
+
+Until now this program had no uncompressed arm that was comparable with its
+eviction arms. The 32K reference existed but ran with `rope_scaling: null` while
+every eviction arm used YaRN x4, so their difference was a model change plus an
+eviction change. That gap is now closed: the reference was re-run **with YaRN x4**,
+12 needles, identical to the eviction arm's
+(`results/pk_32k_reference_yarn.json` and `pk_32k_paired.json`, merged into
+`pk_32k_control.json`).
+
+| depth | no eviction | B=2048 (6.25% keep) | cost |
+|---:|---:|---:|---:|
+| 0.1 | 1.00 | 0.75 | 0.25 |
+| 0.5 | 0.92 | 0.58 | 0.33 |
+| 0.9 | 1.00 | 1.00 | **0.00** |
+| **mean** | **0.97** | **0.78** | **0.19** |
+
+Peak memory 4,699 MiB against 1,742 MiB.
+
+**Eviction to 6.25% of the cache costs 0.19 accuracy at 32K, against a measured
+control.** Pooled over all 36 needle-positions, 7 needles were lost to eviction
+and **0 were gained** (exact p = 0.0156). Per depth the contrasts are +0/-3
+(p = 0.2500), +0/-4 (p = 0.1250) and +0/-0 -- individually short of significance
+at 12 needles, uniform in direction, and unanimous pooled.
+
+The depth pattern is the compression-rounds story again: the needle nearest the
+end costs nothing, because it entered in a late chunk and survived few rounds.
+
+**This also corrects a number.** The 32K cell previously reported 0.89 for
+B=2048. That was a 6-trial *unpaired* run ranked on the raw sum (e=0), sitting in
+tables whose other rows are 12-needle paired at e=1. Re-measured under the matched
+design it is **0.78**, and the keep-fraction row for 32K changes with it.
+
+#### Lossless at 12.5% keep, at BOTH lengths — which closes the bound without the impossible run
+
+The uncompressed arm does not fit at 64K -- 7,168 MiB of cache against an 8,188
+MiB card -- so the eviction cost there had no reference. It does not need one.
+Accuracy **saturates**: at 12.5% keep the model retrieves the needle at every
+depth, and accuracy cannot exceed 1.00, so the uncompressed value IS 1.00 and
+every cost below it follows.
+
+12 paired needles, e = 1, YaRN x4, query-aware:
+
+| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak | cost vs reference |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB | 0.39 |
+| 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB | 0.19 |
+| 4,096 | 6.25% | 1.00 | 1.00 | 0.92 | 0.97 | 2,002 MiB | 0.03 |
+| **8,192** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **2,196 MiB** | **0.00** |
+
+The same holds one doubling later. **128K, 12 paired needles:**
+
+| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak | cost |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB | 0.47 |
+| 4,096 | 3.12% | 0.75 | 0.67 | 0.92 | 0.78 | 2,002 MiB | 0.22 |
+| 8,192 | 6.25% | 1.00 | 0.83 | 0.92 | 0.92 | 2,521 MiB | 0.08 |
+| **16,384** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **3,202 MiB** | **0.00** |
+
+**Lossless retrieval at 8× compression at 64K (2,196 MiB) and at 128K
+(3,202 MiB)** — on a card that holds neither uncompressed cache (7,168 and
+14,336 MiB). The saturating keep fraction is **the same at both lengths**, which
+is a far stronger statement than the earlier "no systematic length effect": the
+keep fraction, not the length, is what the mechanism is a function of. This is
+the strongest result in the program and it required no baseline, because
+saturation is the baseline.
+
+Two cautions. Saturation bounds the reference from above only for **this task** --
+a harder task could separate 12.5% keep from uncompressed where passkey cannot.
+And 12 needles cannot distinguish 1.00 from, say, 0.98; what is established is
+that no needle was lost, not that none ever would be.
+
 ### Where this leaves long context
 
 | n | budget | keep | accuracy | peak | needles |
 |---:|---:|---:|---:|---:|---:|
-| 32,768 | 0 (full cache) | 100% | **1.00** | 4699 MiB | 3, unpaired, **no YaRN** |
-| 32,768 | 2048 | 6.25% | 0.89 | 1744 MiB | 6, unpaired, YaRN ×4 |
+| 32,768 | 0 (full cache) | 100% | 1.00 | 4699 MiB | 3, unpaired, **no YaRN** — superseded |
+| 32,768 | 0 (full cache) | 100% | **0.97** | 4699 MiB | **12, paired, YaRN ×4** |
+| 32,768 | 2048 | 6.25% | **0.78** | 1742 MiB | **12, paired, YaRN ×4** |
 | 65,536 | 1024 | 1.56% | 0.61 | 1621 MiB | **12, paired** |
 | 65,536 | 2048 | 3.12% | 0.81 | 1742 MiB | **12, paired** |
-| 65,536 | 4096 | 6.25% | **0.97** | 2002 MiB | **12, paired** |
+| 65,536 | 4096 | 6.25% | 0.97 | 2002 MiB | **12, paired** |
+| 65,536 | 8192 | 12.5% | **1.00** | 2196 MiB | **12, paired** |
 | 131,072 | 2048 | 1.56% | 0.53 | 1743 MiB | **12, paired** |
 | 131,072 | 8192 | 6.25% | **0.92** | 2521 MiB | **12, paired** |
 
@@ -641,11 +719,12 @@ fraction itself moves accuracy by 0.36. Read the 32K rows together for the one
 place an uncompressed control exists at all. Note what that pair does **not**
 give: the 1.00 row is `rope_scaling: null` and the 0.89 row is YaRN ×4, so their
 difference is a model change plus an eviction change and is not the cost of
-eviction. The matched control — full cache at 32K *with* YaRN — has not been run.
+eviction. The matched control — full cache at 32K *with* YaRN — **has since been
+run**, and is the row above: 0.97 against 0.78, a cost of 0.19.
 
-The two 32K rows are the weakest in the table — 3 and 6 unpaired needles against
-12 paired ones below them. They are not comparable with the 64K and 128K rows and
-are marked accordingly rather than quietly averaged in.
+The first 32K row is the weakest in the table — 3 unpaired needles without YaRN —
+and is kept only to mark what it superseded. The two rows below it are 12-needle
+paired with YaRN ×4 and are the ones to read.
 
 All of it is *retrieval*; multi-hop reasoning at length remains untested, and the
 frozen demo suite indicates that is where this checkpoint is genuinely weak.
@@ -724,6 +803,91 @@ The calibration makes them interpretable; it does not make them equivalent. See
 
 
 ---
+
+---
+
+## 4e. Decode throughput, and the operating point it moves
+
+Cache compression is a memory result until someone times it. Two things were
+measured: what actually sets decode latency (`src/probe_decode_floor.py`), and
+what the mechanism is worth against an uncompressed baseline
+(`src/measure_decode.py`).
+
+#### Decode latency is a floor with a knee, not a line
+
+Cache size swept with everything else fixed, minimum of 2 rounds x 40 steps:
+
+| cache | ms/token |
+|---:|---:|
+| 8 tokens (0.9 MiB) | 34.53 |
+| 1,024 tokens (112 MiB) | 34.70 |
+| 4,096 tokens (448 MiB) | **34.78** |
+| 8,192 tokens (896 MiB) | 45.25 |
+| 16,384 tokens (1.8 GiB) | 76.36 |
+
+Flat to within **1.04 ms across a 512x range of cache size**, then 3.384 us per
+extra token. The floor implies **27 GB/s** for a 904 MiB weight read and the slope
+**34 GB/s** for cache reads -- 11% and 13% of this card's ~256 GB/s. Neither term
+is bandwidth-saturated, so decode at batch 1 is dominated by per-step overhead
+(kernel launches across 28 layers, framework, Python) that no cache reduction can
+touch.
+
+**Two withdrawn claims.** It was first asserted that a 15x smaller cache could not
+exceed a 2.65x speedup because 904 MiB of weights must be read every step. That
+was arithmetic presented as physics, and it assumed full bandwidth. It was then
+asserted, from a single straight-line fit, that the fixed cost *is* a weights read
+and decode *is* bandwidth-bound -- an artifact of fitting one line through two
+regimes, where the two largest points set the intercept. Both are withdrawn. The
+ceiling is real and much higher than 2.65x, and its cause is the runtime.
+
+#### What the mechanism is worth
+
+From the measured curve, against an uncompressed cache at the same length:
+
+| context | full cache | compressed | gain |
+|---:|---:|---:|---:|
+| 16,384 | 76.3 ms | 34.7 ms | **2.20x** |
+| 32,768 | 131.7 ms | 34.7 ms | **3.80x** |
+| 65,536 | 242.6 ms | 34.7 ms | **6.99x** |
+| 131,072 | 464.4 ms | 34.7 ms | **13.39x** |
+
+Directly measured at 16K on clean per-process runs: 82.57 ms uncompressed against
+46.49 ms compressed, **1.78x**. Above 32K no uncompressed arm exists to compare
+against -- it does not fit -- so those rows are the curve's prediction, not a
+measured ratio.
+
+With eviction on, decode is **flat in context length**: 47.7 / 47.1 / 46.7 / 47.2
+/ 48.0 ms/token from 4K to 128K at a constant 118 MiB cache.
+
+#### The operating point was never chosen from a latency curve
+
+There was no latency curve. There is one now, and it changes the recommendation.
+128K, 12 paired needles, `e = 1`:
+
+| budget | keep | cache | depth 0.1 | 0.5 | 0.9 | mean | decode |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.56% | 224 MiB | 0.42 | 0.33 | 0.83 | 0.53 | 34.7 ms |
+| **4,096** | **3.12%** | **448 MiB** | **0.75** | **0.67** | **0.92** | **0.78** | **34.7 ms** |
+| 8,192 | 6.25% | 896 MiB | 1.00 | 0.83 | 0.92 | 0.92 | 48.6 ms |
+
+**B=2048 and B=4096 cost identical decode time**, because both sit on the floor.
+Moving from one to the other is **+0.25 mean accuracy for nothing**. Compressing
+below the knee trades accuracy away and buys no latency at all.
+
+Within-needle permutation trend across the three budgets: p = 0.0005 at depth 0.1,
+p = 0.0052 at depth 0.5, p = 0.3363 at depth 0.9 (already at ceiling). The
+2048 -> 8192 contrast is +7/-0 at depth 0.1 (p = 0.0156) and +6/-0 at depth 0.5
+(p = 0.0312), with **zero reversals anywhere in the ladder**.
+
+Beyond the knee the trade becomes explicit rather than free: B=8192 buys a further
++0.14 mean accuracy for +40% decode latency.
+
+**A note on which configuration is being timed.** Scoring during decode costs
+20-24%, but the query-aware configuration behind every headline accuracy number
+does not do it: `passkey.py` leaves recording off for the whole run, switching it
+on only inside `score_with_query` between prefill chunks. That overhead belongs to
+the query-blind setting, and an earlier plan to optimise it was optimising
+something already avoided.
 
 ---
 
@@ -809,7 +973,10 @@ What is genuinely not established:
   it is not measured.
 - **Whether an interior decay exponent helps at 128K.** Under measurement; the
   two endpoints are known and neither is uniformly good (§4c).
-- **No throughput claim below 2×**, per the thermal band.
+- **No throughput claim below 2× from a single unpaired run**, per the thermal
+  band. §4e measures throughput with rotated arms and minimum-of-rounds, which
+  is what makes its 2.20×–13.39× figures usable; the older single-shot numbers
+  elsewhere in this document are not.
 - **Generality.** The 46.3% sink share, the per-layer ρ curves and the
   sink-pinning rule are properties of *this* checkpoint, measured on 8 prompts.
 

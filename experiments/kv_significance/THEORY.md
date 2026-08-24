@@ -292,7 +292,9 @@ harmless.**
 A fourth observation from the buggy run is worth keeping as a methodological
 note: SnapKV pooling appeared to be a no-op on rag_dev (752/752 identical
 replies) while changing 299 of 510 on chat_dev. Pooling demonstrably alters
-selection (overlap 75/116 on a controlled input); it looked inert because the
+selection (an overlap of 75/116 was reported on a controlled input; that probe
+was never committed, so treat the specific ratio as unsourced); it looked inert
+because the
 model had already collapsed to a single stereotyped output — **732 of 752 replies
 were the identical abstention string**. A metric can be insensitive because the
 system is broken rather than because the intervention does nothing.
@@ -316,12 +318,28 @@ resident before anything can be compressed, exactly as predicted. Improving peak
 needs chunked prefill with compression between chunks; it cannot be claimed
 without that work.
 
-**S3 largely refuted.** A 16x smaller cache buys only **1.15x** decode, and at 4K
+**S3 largely refuted — and this paragraph is itself superseded; see the box below.**
+A 16x smaller cache buys only **1.15x** decode, and at 4K
 eviction is a net **0.68x slowdown**. Decode is bandwidth-bound on the cache, so
 the saving is real, but the machinery costs a per-step scoring matmul plus a
 top-k and a gather in every layer, and at these cache sizes that overhead eats
 almost all of it. The natural remedy is `slack` — amortise eviction over many
 steps instead of firing every step — which is measured separately.
+
+> **SUPERSEDED by a direct measurement.** "Decode is bandwidth-bound on the
+> cache" is wrong, and the 1.15x figure came from a run whose no-eviction
+> baseline was spilling to host RAM (362 s prefill against 2.4 s).
+> `src/probe_decode_floor.py` swept cache size with everything else fixed: decode
+> is **34.5–34.8 ms/token across a 512x range of cache size** (8 to 4,096 tokens)
+> and only rises past a knee at 4,096 tokens. The floor implies 27 GB/s for the
+> weight read and the slope 34 GB/s for cache reads — 11% and 13% of this card's
+> ~256 GB/s — so **neither term is bandwidth-saturated** and decode at batch 1 is
+> overhead-bound (kernel launches across 28 layers, framework, Python).
+>
+> Measured properly, the mechanism is **1.78x** at 16K (82.57 → 46.49 ms/token on
+> clean per-process runs) and the curve implies 13.39x at 128K. The 4K slowdown
+> stands: there the cache saving is worth nothing because 118 MiB and 454 MiB are
+> both on the floor. See FINDINGS §4e.
 
 This is the honest efficiency verdict at the lengths reachable here: **the
 cache shrinks enormously, and almost none of that converts into speed.**
@@ -454,8 +472,10 @@ That crossover is the finding; "+0.15 to +0.20 at every budget" is not.
 
 ## 11. Where this leaves the idea
 
-**The selection mechanism is validated.** Significance beats position decisively
-at matched budget, protects attention sinks with no special-casing, costs 0.78%
+**The selection mechanism is validated within a stated range.** Significance beats
+position at matched budget for keep >= 0.5 (+0.18132 at 0.75, +0.13719 at 0.50)
+and **loses to it at keep 0.25** (-0.08345) against the real positional control.
+It protects attention sinks with no special-casing, costs 0.78%
 of the cache it manages, and adds zero parameters. The premise was right.
 
 **The efficiency payoff is not yet there.** Peak memory is unchanged (S4), and a
@@ -500,7 +520,7 @@ Headline changes, all in `docs/FINDINGS_KV_PROGRAM.md`:
 | peak memory | unchanged (1.00×) | flat 1744 MiB, 16K → 128K |
 | longest measured | 330-token prompts | 128K |
 | 32K retrieval | not measurable | 0.33 blind → **0.78** query-aware (depth-matched) |
-| 64K retrieval | not measurable | **0.89** at keep 0.031 |
+| 64K retrieval | not measurable | **0.81** at keep 3.12% (12 paired needles); 0.97 at 6.25% |
 
 The efficiency and quality numbers in §§9–10 stand as measured; they are simply
 about short prompts and single-shot prefill, which is no longer the only

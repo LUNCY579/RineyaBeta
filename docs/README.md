@@ -19,6 +19,7 @@ rather than overwritten.
 | [`MINI_MODEL_ROADMAP.md`](MINI_MODEL_ROADMAP.md) | Execution log for the vocabulary trim, the size ladder and the healing harness. R2's provenance. | current |
 | [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) | **Consolidated findings** for KV compression and long context. Mechanism spec, all measurements, all nine bugs, all retractions, and an explicit "not established" list. | current |
 | [`NEGATIVE_RESULTS.md`](NEGATIVE_RESULTS.md) | Things that were tried and do not work, with the measurement that killed each. | current |
+| [`PAPER_DRAFT_SIGNIFICANCE.md`](PAPER_DRAFT_SIGNIFICANCE.md) | Paper-shaped draft scoped to the significance matrix as the single contribution: abstract, related work, method, experiments, limitations, retraction table. | current |
 | [`EXPERIMENT_DESIGN_KV_LONGCTX.md`](EXPERIMENT_DESIGN_KV_LONGCTX.md) | Pre-registration for the KV-head × long-context study. Written before any result, deliberately not revised into agreement with them. | **§2a superseded** — the asset gap it describes has since been partly filled |
 
 ## The experiments
@@ -35,6 +36,8 @@ rather than overwritten.
 |---|---|
 | `scripts/kv/significance.py` | The working mechanism. Significance-gated KV eviction: per-position, per-KV-head accumulated attention mass; keep = sinks + recent + top-B. Zero added parameters. |
 | `scripts/kv/chunked_prefill.py` | Chunked prefill with inter-chunk compression, so peak cache is `B + C` with prompt length eliminated. Also `score_with_query`, which makes eviction query-aware. |
+| `experiments/kv_significance/src/measure_decode.py` | Decode throughput against an uncompressed baseline, three arms, arms rotated per round and minimum-of-rounds reported because this host's thermal band is 2.17×. |
+| `experiments/kv_significance/src/probe_decode_floor.py` | What actually sets decode latency. Sweeps cache size with nothing else varying and fits a hinge; answers whether the runtime or memory traffic is the limit. |
 | `experiments/kv_significance/src/store_probe.py` | What to STORE each kept position as — quantisation, low-rank, cross-layer sharing — measured against three eviction settings whose end-to-end cost is known, so the relative errors have a scale. |
 | `experiments/kv_significance/src/mixed_precision.py` | Significance-gated mixed precision: bf16 sinks, int8 for the top-p by score, int4 for the rest. Lower error than pure int8 at 1.6× more compression. |
 | `scripts/design/kv_budget.py` | Feasibility and the iso-memory frontier, from a checkpoint's own config. |
@@ -67,8 +70,9 @@ python scripts/design/paired_passkey.py \
 ```
 
 Two flags in that command are not decoration. `--cap-mib 7400` overrides a 6144
-default that bounds *reserved* memory and silently blocked every uncompressed
-reference above 16K for most of this program. `--trials 12` is a power choice, not
+default that bounds *reserved* memory and silently blocked the **32K** uncompressed
+reference for most of this program. It is not what blocks 64K: there the cache
+alone is 7,168 MiB against a card of 8,188, so no cap setting reaches it. `--trials 12` is a power choice, not
 a minimum: exact McNemar gives p = 2/2^d on d discordant needles, so reaching 0.05
 needs d ≥ 6, and a 6-needle cell only gets there if every needle flips — see
 [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) §4c.
@@ -93,13 +97,20 @@ the keep *fraction*, not the length:
 
 | n | budget | keep | accuracy | peak |
 |---:|---:|---:|---:|---:|
-| 32,768 | 2048 | 6.25% | 0.89 | 1744 MiB |
+| 32,768 | 0 (no eviction) | 100% | 0.97 | 4699 MiB |
+| 32,768 | 2048 | 6.25% | 0.78 | 1742 MiB |
 | 65,536 | 2048 | 3.12% | 0.81 | 1742 MiB |
+| 65,536 | 8192 | 12.5% | **1.00** | 2196 MiB |
 | 131,072 | 2048 | 1.56% | 0.53 | 1743 MiB |
-| 131,072 | 8192 | 6.25% | **0.92** | 2521 MiB |
+| 131,072 | 8192 | 6.25% | 0.92 | 2521 MiB |
+| 131,072 | 16384 | 12.5% | **1.00** | 3202 MiB |
 
-At a constant 6.25% keep the accuracy is flat from 32K to 128K. The "128K is weak"
-reading that ran through this program for a while was about B=2048, which is 1.6%
+At a constant 6.25% keep there is no systematic degradation with length: 0.78 at
+32K, 0.97 at 64K, 0.92 at 128K — the shortest context is the *lowest* of the
+three, so the spread is sampling at 12 needles rather than a length effect. The
+32K rows also give the only matched eviction cost in the program: **0.19**
+against an uncompressed control run with the same RoPE scaling. The "128K is weak"
+reading that ran through this program for a while was about B=2048, which is 1.56%
 keep at that length — a different experiment wearing the same label.
 
 **This host fails silently in four specific ways**, all of which have produced
@@ -110,9 +121,10 @@ wrong published numbers at least once:
   too small". Workaround: `experiments/attention_shape/src/compat.py`.
 - Windows/WDDM does not OOM when VRAM runs out; it spills to host RAM and the run
   goes quiet at 0% GPU for minutes. Always set an allocator cap.
-- Processes that hit CUDA OOM may not exit. One pair held 2.3 GiB of GPU and a
-  full core for 27 minutes after its run had finished. Verify a kill against
-  system state, not against its return code (P3).
+- Processes that hit CUDA OOM may not exit. One pair held ~2.3 GiB of GPU and a
+  full core for ~27 minutes after its run had finished (an operator observation
+  from `nvidia-smi` during the session; no artefact records it). Verify a kill
+  against system state, not against its return code (P3).
 - `set_per_process_memory_fraction` caps **reserved** memory; `max_memory_allocated`
   reports **allocated**. A run OOMs with a peak far below its own cap — 4571 MiB
   against a 6144 MiB cap — because the caching allocator holds fragmentation the

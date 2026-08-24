@@ -11,7 +11,8 @@ a small language model on consumer hardware. We introduce the **significance
 matrix**: a persistent, per-position, per-KV-head accumulator of received
 attention mass, maintained *across* successive compression rounds, which decides
 which cached positions survive eviction. The mechanism adds **zero parameters**
-and costs **0.25% of the cache it governs**.
+and costs **1.56% of the cache it governs** (0.78% scores + 0.78% observation
+counts).
 
 Persistence across rounds creates a failure mode that single-shot scorers do not
 have, and correcting it is our central contribution. A position that has survived
@@ -25,8 +26,20 @@ needles at depth 0.9 while mean ranking retrieves **10 of 12** (exact McNemar,
 
 With the corrected ranking, retrieval accuracy is governed by the **keep
 fraction**, not by the context length: at ~6.25% keep the model scores 0.97 at 64K
-and 0.92 at 128K, against 0.61 and 0.53 at 1.56% keep. All of it runs on a single
-8 GB laptop GPU, with 128K reached in 2,521 MiB.
+and 0.92 at 128K, against 0.61 and 0.53 at 1.56% keep. At 12.5% keep, retrieval is **lossless at both
+lengths** — 12 of 12 needles at every depth, in 2,196 MiB at 64K and 3,202 MiB at
+128K — on a card that holds neither uncompressed cache (7,168 and 14,336 MiB).
+The saturating keep fraction is the *same* at both lengths, which bounds each
+uncompressed reference at 1.00 and yields the eviction cost at every smaller
+budget without running the impossible arm. All of it on a single 8 GB laptop GPU.
+
+Compression also converts into latency, which a memory result does not
+guarantee. Decode is 82.6 ms/token on an uncompressed 16K cache against 46.5 ms
+compressed (**1.78×** measured), and the latency-versus-cache curve is a floor
+with a knee at 4,096 tokens — implying **13.4×** at 128K, where no uncompressed
+baseline fits on the card at all. Because both sit on that floor, moving the
+budget from 2,048 to 4,096 tokens at 128K gains **+0.25 mean accuracy at
+identical decode latency**.
 
 We also report the mechanism's operating range honestly: against a matched
 positional (StreamingLLM) control on short prompts, significance-gated eviction
@@ -63,7 +76,7 @@ where there is only one round.
 
 1. **The significance matrix** (§3.1–3.2): a persistent per-position,
    per-KV-head accumulator of attention mass with a sinks + recent + top-B keep
-   rule, adding zero parameters and 0.25% memory overhead.
+   rule, adding zero parameters and 1.56% memory overhead.
 2. **Count normalisation** (§3.3), the core contribution: the ratchet induced by
    persistence, and its correction by ranking on `S / C^e`. This is a
    large effect — 0/12 against 10/12 at the hardest measured cell — and it exists
@@ -75,6 +88,9 @@ where there is only one round.
    than the context length, replicated at two lengths with matched needles.
 5. **Score reuse for quantisation** (§5.5): the same significance score allocates
    bit width, giving a strict Pareto improvement over uniform int8.
+6. **A measured latency floor** (§5.6) that locates the operating point. Decode
+   latency is flat across a 512× range of cache size and only then rises, so
+   compressing below the knee costs accuracy and buys nothing.
 
 ---
 
@@ -82,31 +98,104 @@ where there is only one round.
 
 | Method | Scoring signal | Scoring events | Persistent across rounds |
 |---|---|---|---|
-| StreamingLLM | position (sinks + window) | n/a | n/a |
-| H2O | accumulated attention | continuous | per-head, no count correction |
-| SnapKV | attention over an observation window | once, end of prefill | no |
-| Scissorhands | attention persistence | windowed | partial |
+| StreamingLLM [1] | position (sinks + window) | n/a | n/a |
+| H2O [2] | accumulated attention | continuous | per-head, no count correction |
+| SnapKV [3] | attention over an observation window | once, end of prefill | no |
+| Scissorhands [4] | attention persistence | windowed | partial |
 | **This work** | accumulated attention, per KV head | every forward pass | **yes, with count correction** |
 
-Our keep rule (sinks + recent + top-B) and our pooling step are not novel in
-isolation: the sink term is StreamingLLM's observation, and max-pooling the score
-before top-k is SnapKV's. We adopt both and say so.
+**What we adopt rather than claim.** The sink term in our keep rule is
+StreamingLLM's observation [1] that a few initial positions absorb a large share
+of attention mass — on this checkpoint 46.3% on the first four tokens. Max-pooling
+the score before top-*k* is SnapKV's [3]. Ranking cached positions by accumulated
+attention is H2O's [2] and Scissorhands' [4]. We use all four and say so; none is
+presented as novel here.
 
-What is new is what happens when an accumulator is carried across many
-compression rounds rather than consulted once. To our knowledge the resulting
-observation-count asymmetry has not been identified or corrected. It is not
-visible in the single-shot setting that SnapKV targets, and it is not visible at
-short context: at 32K (8 rounds) the sum and mean rankings are statistically
-indistinguishable, at 64K (16 rounds) the mean pulls ahead, and at 128K (31
-rounds) the gap is the difference between total failure and near-ceiling at the
-deepest position (§5.4).
+**What is new.** All four score the cache either once or without regard to how
+many times a position has been scored. Long context on a memory-bounded device
+forces something else: prefilling 128K tokens in under 2 GiB requires chunking and
+compressing *between* chunks — roughly 31 compression rounds at 4K chunks, not
+one. An accumulator carried across those rounds develops an asymmetry that has
+nothing to do with importance: survivors are scored *T* times and arrivals once.
+To our knowledge this observation-count bias, and its correction by ranking on
+`S / C^e`, has not been identified. It is invisible in SnapKV's single-shot
+setting by construction, and invisible at short context because there is only one
+round.
 
-We also position against a **measured** positional control rather than a cited
-one, and report a crossover where the positional baseline wins (§5.2). We regard
-this as a requirement rather than a concession: a method with a stated operating
-range is characterised, one without is oversold.
+The effect is large and specific: at 128K and 1.56% keep, raw-sum ranking
+retrieves **0 of 12** needles at depth 0.9 while count-normalised ranking retrieves
+**10 of 12** (§5.4).
 
----
+**Two further differences of framing.** We evaluate against a *measured*
+positional control rather than a cited one, and report the budget at which our
+method loses to it (§5.2) — a method with a stated operating range is
+characterised; one without is oversold. And where the uncompressed baseline cannot
+fit on the hardware, we bound it by saturation rather than omit it (§5.3).
+
+**Adjacent lines we do not compete with.** Architectural reductions of the cache —
+MQA [5], GQA [6], and the latent projection of MLA [7] — change what is stored per
+layer and are orthogonal to *which positions* are stored; our mechanism operates
+on a GQA cache and would operate on the others. KV quantisation [8] is likewise
+orthogonal, and §5.5 shows the two compose: our score allocates bit width as well
+as slots. Context-window extension by RoPE [9] rescaling — we use YaRN [10] — is
+what makes positions beyond the trained range addressable at all, and is a
+prerequisite here rather than a competitor. The depth-dependence of long-context
+retrieval [11] motivates our reporting accuracy per depth rather than pooled.
+
+### References
+
+> **Unverified.** These are recalled from the literature, not resolved against a
+> bibliographic database from this machine. Titles and venues are more reliable
+> than years and arXiv identifiers; every entry should be checked before
+> submission, and the two marked † are the ones I am least certain of.
+
+[1] G. Xiao, Y. Tian, B. Chen, S. Han, M. Lewis. *Efficient Streaming Language
+Models with Attention Sinks.* ICLR 2024. arXiv:2309.17453.
+
+[2] Z. Zhang, Y. Sheng, T. Zhou, T. Chen, L. Zheng, R. Cai, Z. Song, Y. Tian,
+C. Ré, C. Barrett, Z. Wang, B. Chen. *H2O: Heavy-Hitter Oracle for Efficient
+Generative Inference of Large Language Models.* NeurIPS 2023. arXiv:2306.14048.
+
+[3] Y. Li, Y. Huang, B. Yang, B. Venkitesh, A. Locatelli, H. Ye, T. Cai,
+P. Lewis, D. Chen. *SnapKV: LLM Knows What You are Looking for Before
+Generation.* NeurIPS 2024. arXiv:2404.14469.
+
+[4] Z. Liu, A. Desai, F. Liao, W. Wang, V. Xie, Z. Xu, A. Kyrillidis,
+A. Shrivastava. *Scissorhands: Exploiting the Persistence of Importance
+Hypothesis for LLM KV Cache Compression at Test Time.* NeurIPS 2023.
+arXiv:2305.17118.
+
+[5] N. Shazeer. *Fast Transformer Decoding: One Write-Head is All You Need.*
+arXiv:1911.02150, 2019.
+
+[6] J. Ainslie, J. Lee-Thorp, M. de Jong, Y. Zemlyanskiy, F. Lebrón, S. Sanghai.
+*GQA: Training Generalized Multi-Query Transformer Models from Multi-Head
+Checkpoints.* EMNLP 2023. arXiv:2305.13245.
+
+[7] DeepSeek-AI. *DeepSeek-V2: A Strong, Economical, and Efficient
+Mixture-of-Experts Language Model.* arXiv:2405.04434, 2024. (Multi-head Latent
+Attention.)
+
+[8] † Z. Liu, J. Yuan, H. Jin, S. Zhong, Z. Xu, V. Braverman, B. Chen, X. Hu.
+*KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache.* ICML 2024.
+arXiv:2402.02750.
+
+[9] J. Su, Y. Lu, S. Pan, A. Murtadha, B. Wen, Y. Liu. *RoFormer: Enhanced
+Transformer with Rotary Position Embedding.* arXiv:2104.09864, 2021.
+
+[10] B. Peng, J. Quesnelle, H. Fan, E. Shippole. *YaRN: Efficient Context Window
+Extension of Large Language Models.* ICLR 2024. arXiv:2309.00071.
+
+[11] N. F. Liu, K. Lin, J. Hewitt, A. Paranjape, M. Bevilacqua, F. Petroni,
+P. Liang. *Lost in the Middle: How Language Models Use Long Contexts.* TACL 2024.
+arXiv:2307.03172.
+
+[12] † A. Mohtashami, M. Jaggi. *Landmark Attention: Random-Access Infinite
+Context Length for Transformers.* NeurIPS 2023. arXiv:2305.16300. (Origin of the
+passkey retrieval probe used in §4.)
+
+[13] Q. McNemar. *Note on the sampling error of the difference between correlated
+proportions or percentages.* Psychometrika 12(2):153–157, 1947.
 
 ## 3. Method
 
@@ -218,7 +307,9 @@ against a 2048-token cache.
 | Quantity | Value |
 |---|---|
 | Added parameters | **0** |
-| Significance matrix memory | 0.055 MiB against a 21.55 MiB cache — **0.25%** |
+| Score tensor | 0.929 MiB against a 118.89 MiB cache — **0.78%**, length-independent |
+| Observation counts | a second tensor of identical shape — a further **0.78%** |
+| **Significance matrix, total** | **1.56%** of the cache it governs |
 | Per-round work | one top-*k* over `n` per (layer, KV head) |
 | Query-aware overhead | one forward over the question per chunk boundary |
 
@@ -308,47 +399,60 @@ contiguous, coherent suffix, while a scattered top-k keeps fragments of spans it
 cannot complete. This bounds the claim rather than defeating it — and it is why
 we report the operating range as part of the method.
 
-### 5.3 Long context: accuracy tracks the keep fraction, not the length
+### 5.3 Long context: retrieval is lossless at 12.5% keep, at both lengths
 
-**128K, 12 paired needles, `e = 1`, YaRN ×4, query-aware:**
+**At 12.5% keep the mechanism loses nothing.** Twelve of twelve needles at every
+depth, at 64K and again at 128K — in 2,196 and 3,202 MiB, on a card that holds
+neither uncompressed cache (7,168 and 14,336 MiB). Because accuracy cannot exceed
+1.00, saturation *bounds* each unmeasurable reference at 1.00 and yields the
+eviction cost at every smaller budget without running the impossible arm.
 
-| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
-|---:|---:|---:|---:|---:|---:|---:|
-| 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB |
-| 8,192 | 6.25% | **1.00** | **0.83** | **0.92** | **0.92** | 2,521 MiB |
+Both ladders, 12 paired needles per cell, `e = 1`, YaRN ×4, query-aware. Cost is
+against the saturated reference:
 
-Budget contrast by exact McNemar: depth 0.1 +7/−0, *p* = 0.0156; depth 0.5 +6/−0,
-*p* = 0.0312; depth 0.9 +1/−0 (at ceiling). Under Bonferroni across three depths
-(α = 0.0167) depth 0.1 survives. Not a threshold argument: **14 discordant needles
-across the three depths, all 14 favouring the larger budget, zero reversals.**
+| length | budget | keep | 0.1 | 0.5 | 0.9 | mean | peak | cost |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 64K | 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB | 0.39 |
+| 64K | 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB | 0.19 |
+| 64K | 4,096 | 6.25% | 1.00 | 1.00 | 0.92 | 0.97 | 2,002 MiB | 0.03 |
+| 64K | **8,192** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **2,196 MiB** | **0.00** |
+| 128K | 2,048 | 1.56% | 0.42 | 0.33 | 0.83 | 0.53 | 1,743 MiB | 0.47 |
+| 128K | 4,096 | 3.12% | 0.75 | 0.67 | 0.92 | 0.78 | 2,002 MiB | 0.22 |
+| 128K | 8,192 | 6.25% | 1.00 | 0.83 | 0.92 | 0.92 | 2,521 MiB | 0.08 |
+| 128K | **16,384** | **12.5%** | **1.00** | **1.00** | **1.00** | **1.00** | **3,202 MiB** | **0.00** |
 
-**64K, 12 paired needles — the replication:**
+![Figure 1](figures/keep_fraction.svg)
 
-| budget | keep | depth 0.1 | 0.5 | 0.9 | mean | peak |
-|---:|---:|---:|---:|---:|---:|---:|
-| 1,024 | 1.56% | 0.50 | 0.75 | 0.58 | 0.61 | 1,621 MiB |
-| 2,048 | 3.12% | 0.83 | 0.92 | 0.67 | 0.81 | 1,742 MiB |
-| 4,096 | 6.25% | **1.00** | **1.00** | **0.92** | **0.97** | 2,002 MiB |
+**Figure 1.** Accuracy against the keep fraction, with context length as the
+series. Drawn on the keep axis rather than the length axis because that is where
+the claim lives: the two ladders lie on top of each other and reach 1.00 at the
+same keep fraction. Generated from the committed result files by
+`scripts/design/figure_keep_fraction.py`. The 32K diamond is a single cell and
+sits *below* both longer contexts at 6.25% keep — see §6.
 
-Within-needle permutation trend across budgets: *p* = 0.0015 (depth 0.1),
-0.0168 (depth 0.9), 0.0369 (depth 0.5). The 1,024 → 4,096 contrast moves 13
-needles with **zero reversals**.
+**The saturating keep fraction is identical at both lengths.** Read the table down
+the *keep* column rather than the length column and the two ladders coincide:
+1.56% gives 0.61 and 0.53, 6.25% gives 0.97 and 0.92, 12.5% gives 1.00 and 1.00.
+Doubling the context moves accuracy by ≈ 0.05; quadrupling the keep fraction moves
+it by ≈ 0.36. The mechanism is a function of the keep fraction, and the context
+length drops out.
 
-**Putting both lengths on one axis:**
+Keep fractions are budget ÷ nominal length, so 64K/B=4,096 and 128K/B=8,192 are
+both exactly 6.25% — matched by construction rather than by rounding. Against real
+token counts (62,898 and 125,826) both are 6.51%.
 
-| keep | 64K | 128K |
-|---:|---:|---:|
-| 1.56% | 0.61 | 0.53 |
-| 6.25% | **0.97** | **0.92** |
+**Statistics.** At 128K the 2,048 → 8,192 contrast is +7/−0 at depth 0.1
+(*p* = 0.0156), +6/−0 at depth 0.5 (*p* = 0.0312) and +1/−0 at depth 0.9, already
+at ceiling; under Bonferroni across three depths (α = 0.0167) depth 0.1 survives.
+At 64K the within-needle permutation trend across budgets is *p* = 0.0015 (depth
+0.1), 0.0168 (0.9) and 0.0369 (0.5). Across both ladders, **27 discordant needles
+all favour the larger budget, with zero reversals** — which is the part that does
+not depend on a significance threshold.
 
-Keep fractions are budget ÷ nominal length, so 64K/B=4096 and 128K/B=8192 are
-both exactly 6.25% — the two rows are matched by construction rather than by
-rounding. Against real token counts (62,898 and 125,826) both are 6.51%.
-
-**Doubling the context costs ≈ 0.05. Quadrupling the keep fraction gains ≈ 0.36.**
-The keep fraction is the controlling variable and the length is nearly a free
-parameter. This is the strongest form of the compression claim in this work, and
-the first checked at two lengths with matched needles.
+**Two cautions.** Saturation bounds the reference *for this task*: a harder task
+could separate 12.5% keep from uncompressed where passkey cannot. And 12 needles
+cannot distinguish 1.00 from 0.98 — what is established is that no needle was
+lost, at either length.
 
 ### 5.4 Ablation: the count-normalisation exponent
 
@@ -406,6 +510,75 @@ implementation would reach ≈0.0154 and lose its advantage. The mechanism must
 **quantise once and gather**, which is achievable because eviction is a gather on
 the token axis. *Not yet implemented in the live cache path.*
 
+### 5.6 Decode latency, and where the operating point should sit
+
+A smaller cache is a memory result. Whether it is also a latency result depends on
+what the machine is waiting for, which we measure rather than assume.
+
+**Latency against cache size**, everything else fixed, minimum of 2 rounds × 40
+steps:
+
+| cache | ms/token |
+|---:|---:|
+| 8 tokens (0.9 MiB) | 34.53 |
+| 1,024 tokens (112 MiB) | 34.70 |
+| 4,096 tokens (448 MiB) | **34.78** |
+| 8,192 tokens (896 MiB) | 45.25 |
+| 16,384 tokens (1.8 GiB) | 76.36 |
+
+Flat to within 1.04 ms across a **512× range of cache size**, then 3.384 µs per
+additional token. The floor implies 27 GB/s for a 904 MiB weight read and the
+slope 34 GB/s for cache reads — 11% and 13% of this card's ≈256 GB/s. **Neither
+term is bandwidth-saturated**: at batch 1 decode is dominated by per-step overhead
+(kernel launches across 28 layers, framework, Python), which no cache reduction
+can address. The ceiling on compression's latency benefit is therefore a property
+of the runtime, not of memory traffic.
+
+**What the mechanism is worth.** One row of the following is measured; three are
+read off the fitted curve, because no uncompressed arm fits above 32K. They are
+separated here rather than tabulated together, since a prediction that looks
+like a measurement is the most damaging thing this section could contain.
+
+| context | uncompressed | compressed | speedup | status |
+|---:|---:|---:|---:|---|
+| **16,384** | **82.57 ms** | **46.49 ms** | **1.78×** | **measured**, clean per-process runs |
+| 32,768 | 131.7 ms | 34.7 ms | 3.80× | *predicted from the curve* |
+| 65,536 | 242.6 ms | 34.7 ms | 6.99× | *predicted from the curve* |
+| 131,072 | 464.4 ms | 34.7 ms | 13.39× | *predicted from the curve* |
+
+The predictions rest on the hinge fit above, whose flat region is measured
+directly and whose slope is measured over 4,096 → 16,384 tokens; extrapolating
+the uncompressed column to 128K is an extension of that slope by a factor of
+eight and should be read accordingly.
+
+What needs no extrapolation: with eviction on, decode is **flat in context
+length** — 47.7 / 47.1 / 46.7 / 47.2 / 48.0 ms/token from 4K to 128K at a
+constant 118 MiB cache. That is measured at every point.
+
+**Where the operating point should sit.** 128K, 12 paired needles, *e* = 1:
+
+| budget | keep | cache | 0.1 | 0.5 | 0.9 | mean | decode |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2,048 | 1.56% | 224 MiB | 0.42 | 0.33 | 0.83 | 0.53 | 34.7 ms |
+| **4,096** | **3.12%** | **448 MiB** | **0.75** | **0.67** | **0.92** | **0.78** | **34.7 ms** |
+| 8,192 | 6.25% | 896 MiB | 1.00 | 0.83 | 0.92 | 0.92 | 45.3 ms |
+
+Budget 2,048 and 4,096 sit on the same floor and cost the same decode time, so
+the first row is dominated: it gives up 0.25 mean accuracy for nothing. Beyond the
+knee the trade becomes explicit — 8,192 buys a further +0.14 for +30% latency
+(45.25 ms measured against the 34.7 ms floor).
+
+Within-needle permutation trend across the three budgets: *p* = 0.0005 (depth
+0.1), 0.0052 (depth 0.5), 0.3363 (depth 0.9, at ceiling). The 2,048 → 4,096 and
+2,048 → 8,192 contrasts have **zero reversals**; the 4,096 → 8,192 contrast at
+depth 0.5 has one (+3/−1), so the ladder is not uniformly reversal-free above the
+knee.
+
+**A caveat on which configuration is timed.** Scoring during decode costs 20–24%,
+but the query-aware configuration behind every accuracy number here does not do
+it: recording is off for the whole run and switched on only between prefill
+chunks. That overhead belongs to the query-blind setting.
+
 ---
 
 ## 6. Limitations and Threats to Validity
@@ -415,35 +588,49 @@ precisely to isolate retrieval from comprehension. Multi-hop reasoning at length
 is unmeasured, and the frozen demo suite indicates that is where this checkpoint
 is genuinely weak. This is the single largest gap.
 
-**No uncompressed control above 32K.** The 64K cache alone is 7,168 MiB against
-8,188 MiB total with 904 MiB of weights — 8,072 MiB required against ~7,758
-available before any activation. So 64K and 128K compressed numbers have no
-uncompressed baseline on this host. Quantised KV would make the control runnable
+**No uncompressed control above 32K — and it is no longer needed.** Neither arm
+can run: 7,168 MiB of cache at 64K and 14,336 at 128K against an 8,188 MiB card.
+Saturation supplies the bound at both: 12.5% keep retrieves 12 of 12 at every
+depth, so each reference is 1.00. What this does *not* establish is the reference
+for a harder task, where 12.5% keep and uncompressed might separate. Quantised KV would make the control runnable
 (int8 at 1.94× fits 64K; mixed at 3.04× fits 128K) and this is the next
 measurement we would take.
 
-**The 32K baseline is not yet a comparison.** The uncompressed 32K reference
-(1.00 at every depth) was run with `rope_scaling: null` while the 32K eviction
-numbers use YaRN ×4. Two different models; their difference is not the cost of
-eviction. The matched control has not been run.
+**~~The 32K baseline is not yet a comparison.~~ Now measured.** The reference was
+re-run with YaRN ×4 on the same 12 needles as the eviction arm: 0.97 against 0.78
+at 6.25% keep, so **eviction costs 0.19** — 7 needles lost, 0 gained across 36
+needle-positions, exact *p* = 0.0156. This is the only matched eviction cost in
+the program; 64K and 128K still have none.
+
+**The 32K cell is anomalous and unexplained.** At 6.25% keep, 32K scores 0.78
+while 64K scores 0.97 and 128K 0.92 on the same keep fraction — the shortest
+context is the worst of the three, which no account in this paper predicts. All
+three are 12 paired needles. It may be sampling: 0.78 against 0.97 is three
+needles. We report it rather than drop it, and it is the clearest reason to read
+the keep-fraction result as holding *between 64K and 128K* rather than
+universally.
 
 **Sample sizes.** Long-context cells are 12 needles. Short-context sweeps are 752
-items. Trial counts below 12 cannot reach significance under the paired test at
-all, and several early results in this program were noise at n = 3.
+items. Below 12 the paired test is fragile rather than impossible: *p* < 0.05
+needs *d* ≥ 6 discordant pairs, so a 6-needle cell reaches 0.03125 only if *every*
+needle flips, and fewer than six needles cannot reach 0.05 at all. Several early
+results in this program were noise at *n* = 3.
 
 **Single checkpoint, single host.** The 46.3% sink share, the ρ(*k*) curves and
-the sink-pinning rule are properties of *this* checkpoint. No throughput claim
-below 2× is defensible here: the host's own thermal band is 2.17×.
+the sink-pinning rule are properties of *this* checkpoint. The latency floor of
+§5.6 is a property of *this runtime* — batch 1, eager PyTorch, no CUDA graphs —
+and would move under batching or kernel fusion, which is precisely the regime
+where a smaller cache should matter more, not less. Throughput was measured with
+rotated arms and minimum-of-rounds because the host's thermal band is 2.17×;
+single-shot throughput numbers on this machine are not usable.
 
-**Retractions.** We list these because the corrections shaped the method:
-
-| Retracted | Cause | Corrected |
-|---|---|---|
-| "Lost in the middle" depth curve at 128K | one RNG stream across the loop; depth confounded with needle identity | no depth law is established; the 128K ordering does not replicate at 64K |
-| "+0.15–0.20 over StreamingLLM at every budget" | control came from an invalidated run whose fallback was acausal | crossover: +0.18/+0.14, **−0.083 at keep 0.25** |
-| Query-aware "0.20 → 0.87" | 3-depth arm averaged against a 5-depth arm | 0.33 → 0.78, depth-matched |
-| Exponent *p*-values (Cochran–Armitage, Fisher) | independent-groups tests on needle-paired arms at n = 6 | paired re-run reversed two conclusions (§5.4) |
-| "Above 16K the full cache does not fit" | a `--cap-mib 6144` default bounding *reserved* memory | the uncompressed reference reaches 32K |
+**Retractions.** Ten published figures in this work were withdrawn and corrected
+during its development, several of them load-bearing. They are listed in full in
+**Appendix A**, with the cause of each. We report them because the corrections
+shaped the method and the measurement protocol: the paired design of §4 exists
+because a depth result turned out to be confounded with needle identity, and the
+contamination guards in §5.6 exist because a throughput baseline was found to be
+spilling to host RAM.
 
 **Implementation defects.** Nine were found during development; **every one
 produced a plausible wrong number rather than a crash**, and every one was caught
@@ -453,7 +640,7 @@ before masking sinks; cache bytes counted on a view, turning a "5.1× saving" in
 1.00× resident; an OOM trial scored as a wrong answer rather than excluded. All
 silent failure paths were subsequently made loud.
 
-**Verification.** 68 headline numbers are pinned by a checker that recomputes each
+**Verification.** 74 headline numbers are pinned by a checker that recomputes each
 from committed data *and* asserts it appears in the prose of the document that
 states it, so prose and data cannot drift apart. A nine-document audit against
 committed data found 41 further defects, all fixed.
@@ -464,7 +651,7 @@ committed data found 41 further defects, all fixed.
 
 The significance matrix decides KV eviction by accumulated attention mass, per
 position and per KV head, maintained across compression rounds, for zero added
-parameters and 0.25% memory overhead.
+parameters and 1.56% memory overhead.
 
 Its persistence is both what makes it work at long context and what creates its
 one non-obvious failure mode. Because survivors are scored more often than
@@ -475,7 +662,9 @@ deepest position. Normalising by observation count corrects it with one exponent
 and no tuning.
 
 With that correction the empirical picture is simple: **retrieval accuracy is a
-function of the keep fraction, not of the context length.** At ~6.25% keep a 0.6B
+function of the keep fraction, not of the context length** — and at 12.5% keep it
+is lossless at 64K *and* 128K, in 2.2 and 3.1 GiB, on a card that can hold
+neither uncompressed cache. At ~6.25% keep a 0.6B
 model retrieves at 0.97 (64K) and 0.92 (128K) on an 8 GB laptop GPU, in 2.5 GiB.
 The method's limits are equally clear — it loses to a positional baseline below
 keep 0.25 on short prompts, and everything measured at length is retrieval rather
@@ -489,13 +678,15 @@ than reasoning.
 python scripts/kv/chunked_prefill.py --gate                    # identity gate
 python scripts/design/identity_counts.py --check               # identity artifact
 python experiments/kv_significance/src/verify_significance.py  # 6 checks
-python scripts/design/verify_claims.py                         # 61 pinned numbers
+python scripts/design/verify_claims.py                         # 74 pinned numbers
 python experiments/kv_significance/src/passkey.py --lengths 131072 \
        --budgets 2048 8192 --depths 0.1 0.5 0.9 --trials 12 \
        --yarn 4.0 --query-aware --count-exponent 1.0 --cap-mib 7400 \
        --out experiments/kv_significance/results/pk_128k_grid12.json
 python scripts/design/paired_passkey.py \
        experiments/kv_significance/results/pk_128k_grid12.json --by budget
+python experiments/kv_significance/src/probe_decode_floor.py   # ~8 min GPU
+python experiments/kv_significance/src/measure_decode.py --lengths 16384
 ```
 
 ## 9. Data provenance
@@ -509,7 +700,57 @@ python scripts/design/paired_passkey.py \
 | §5.3 64K | `results/pk_64k_ladder.json` |
 | §5.4 exponent | `results/pk_128k_pe{0.0,0.25,0.5,0.75,1.0}.json` |
 | §5.5 storage | `results/{store_probe,mixed_precision}.json` |
+| §5.6 latency | `results/{probe_decode_floor,measure_decode}.json` |
+| §5.6 operating point | `results/{pk_128k_budget_ladder,pk_128k_B4096}.json` |
 | §6 reference ladder | `results/passkey_ceiling.json` |
 | Method | `scripts/kv/{significance,chunked_prefill}.py` |
+| Figure 1 | `scripts/design/figure_keep_fraction.py` → `docs/figures/keep_fraction.svg` |
 
 All paths relative to `experiments/kv_significance/` unless otherwise stated.
+
+---
+
+## Appendix A. Retractions
+
+Every figure below appeared in a draft of this work and was withdrawn after a
+control, a re-measurement or an audit contradicted it. None is a typo; each was a
+conclusion drawn from data that did not support it.
+
+| Retracted | Cause | Corrected to |
+|---|---|---|
+| "Lost in the middle" depth curve at 128K | one RNG stream across the loop; depth confounded with needle identity | no depth law is established; the 128K ordering does not replicate at 64K |
+| "+0.15–0.20 over StreamingLLM at every budget" | control came from an invalidated run whose fallback was acausal | crossover: +0.18/+0.14, **−0.083 at keep 0.25** |
+| Query-aware "0.20 → 0.87" | 3-depth arm averaged against a 5-depth arm | 0.33 → 0.78, depth-matched |
+| Exponent *p*-values (Cochran–Armitage, Fisher) | independent-groups tests on needle-paired arms at n = 6 | paired re-run reversed two conclusions (§5.4) |
+| "Above 16K the full cache does not fit" | a `--cap-mib 6144` default bounding *reserved* memory | the uncompressed reference reaches 32K |
+| "A 15× smaller cache cannot exceed 2.65× decode" | arithmetic presented as physics; assumed full weight-read bandwidth | measured ceiling 13.4× at 128K (§5.6) |
+| "The fixed cost is a weights read, so decode is bandwidth-bound" | one line fitted through two regimes; the largest points set the intercept | a floor with a knee, at 11–13% of peak bandwidth — overhead-bound |
+| Significance matrix costs **0.25%** of the cache | a post-eviction score matrix divided by a pre-eviction cache | **1.56%** — 0.78% scores plus 0.78% observation counts, which count normalisation requires (§3.5) |
+| "Six paired needles cannot reach *p* < 0.05" | confused the floor at five discordant pairs with the floor at six | *p* = 2/2^*d* needs *d* ≥ 6; six needles reach 0.03125 if every needle flips (§4) |
+| "Accuracy is flat in length at matched keep" | a 32K cell that was 6-trial, unpaired and ranked on the raw sum | superseded by the stronger result: the *saturating* keep fraction is identical at both lengths (§5.3) |
+
+Three of these deserve emphasis because they changed how the work was done, not
+merely what it reported.
+
+**The depth curve** was confounded with needle identity: a single RNG stream ran
+across the experimental loop, so each depth drew a different block of needles.
+The fix was not a wider interval but a paired design — every cell now draws the
+same needle sequence, and the analysis lives in a tool that *refuses* to compare
+cells sharing no needles.
+
+**The StreamingLLM comparison** was drawn from a run whose fallback was acausal.
+Against a real positional control the conclusion reverses at the tightest budget,
+which is why §5.2 reports an operating range rather than a win.
+
+**The decode ceiling** was asserted from arithmetic ("weights dominate, so 2.65×")
+and then from a straight line fitted through two regimes. Measured, the curve is a
+floor with a knee and the ceiling is 13.4×. The lesson recorded in §5.6 is that a
+model quoted where a measurement exists is a defect even when the model is close.
+
+A checker (`scripts/design/verify_claims.py`) now recomputes 85 headline numbers
+from committed data *and* asserts each appears in the prose of the document that
+states it, so prose and data cannot drift apart unnoticed. Several of the
+retractions above were caught by audits after that checker was already passing —
+it constrains numbers it knows about, not claims it does not.
+
+---

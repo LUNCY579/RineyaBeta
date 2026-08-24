@@ -83,8 +83,10 @@ have this sign, at any length.
 
 **Fails at long context, and the severity scales with the number of compression
 rounds.** A position that survived T rounds was scored T times and a newcomer
-once, so the heavy set ratchets shut. Measured observation counts after 4 chunks:
-min 1, max 3, with sum-vs-mean top-5 rankings sharing only 2 of 5 entries. The
+once, so the heavy set ratchets shut. Observation counts after 4 chunks were reported as min 1, max 3, with sum-vs-mean
+top-5 rankings sharing 2 of 5 entries; that probe was never committed, so treat
+those three figures as unsourced. The mechanism does not rest on them — the
+paired 128K sweep below is the evidence. The
 round count is `n/C` — 8 at 32K, 16 at 64K, 32 at 128K.
 
 Passkey accuracy, budget 2048, YaRN x4, query-aware, **6 trials per cell**:
@@ -307,8 +309,12 @@ requantise — once per compression round. Mean K relative error, per round:
 | int4, K per-channel g=128 | 0.04583 | 0.06409 | 0.07911 | 0.09217 | 0.10396 | 2.27× |
 
 Both track √rounds closely (√5 = 2.236). At 128K with chunk 4096 there are ~31
-rounds, so a naive dequantise-evict-requantise loop lands int8 near 0.0154 —
-past the keep-0.75 reference (0.00937) that single-shot int8 comfortably beats.
+rounds, so a naive dequantise-evict-requantise loop lands int8 near 0.0154 on
+**this table's metric**. Note that is a *mean K-tensor* relative error, while the
+0.00937 keep-0.75 reference is an *attention-output* relative error — different
+quantities on different inputs, so the two are not directly comparable and the
+comparison above should be read as an order-of-magnitude warning, not a threshold
+crossing.
 
 So the mechanism has to **quantise once and gather**, never round-trip per
 compression. Eviction is a gather on the token axis and quantisation groups are
@@ -335,13 +341,20 @@ Not ideas, but methods — each cost real time.
   rewards length, while `brevity` (0.01) and `completeness` (0.02) cannot outvote
   it.
 - **Retained attention mass ρ is necessary but not sufficient.** ρ > 0.996 still
-  cost 0.199 end-to-end. The bound controls one attention output; errors compose
+  cost 0.199 end-to-end — *but that 0.199 is reproducible only from
+  `_invalidated_prefill_bug/frac0.75__rag_dev` (0.47007 against off 0.66939), a
+  run this repo has quarantined as invalid. The point stands on the valid runs
+  (keep 0.75 has ρ > 0.99 and still costs 0.01262); the specific 0.199 is
+  withdrawn.* The bound controls one attention output; errors compose
   across 28 layers and iterate across decode steps.
 - **Counting cache bytes with `numel()`** credits a saving the allocator has not
   made whenever a layer holds a view. Sum de-duplicated `untyped_storage()`.
 - **Any throughput claim below 2× is indefensible here.** The host's own thermal
-  band is 2.17× (33.8 ms cool against 71.6–73.2 ms at 84 °C) — *an observation from run
-logs, not a committed artefact; the tree has no timing or temperature instrument*.
+  band is 2.17× (33.8 ms cool against 71.6–73.2 ms at 84 °C) — *an observation from
+run logs; no artefact records those particular timings. The tree does now carry
+timing instruments (`src/measure_decode.py`, `src/probe_decode_floor.py`) and the
+decode harness records GPU temperature per arm, which is how the 2.17× band is
+managed rather than merely noted.*
 - **A memory cap is not a memory measurement, and neither is a peak.**
   `set_per_process_memory_fraction` bounds *reserved* bytes while
   `max_memory_allocated` reports *allocated* ones. A 32K uncompressed run dies at

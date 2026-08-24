@@ -42,6 +42,7 @@ ATS = ROOT / "experiments/attention_shape/results"
 DOCS = {
     "findings": ROOT / "docs/FINDINGS_KV_PROGRAM.md",
     "negative": ROOT / "docs/NEGATIVE_RESULTS.md",
+    "paper": ROOT / "docs/PAPER_DRAFT_SIGNIFICANCE.md",
     "attention_shape": ROOT / "experiments/attention_shape/README.md",
     "kv_readme": ROOT / "experiments/kv_significance/README.md",
 }
@@ -366,6 +367,64 @@ CLAIMS = [
     ("mem: 64K full cache peak at OOM", 6426.0,
      lambda: measured(KVS / "mem_64k_full.json", "peak_mib", length=65536),
      1.0, "6,426", "findings"),
+
+    # --- decode throughput and the latency floor ----------------------------
+    # The operating point rests on these: B=2048 and B=4096 sit on the same floor,
+    # so if the floor or the knee moves, the recommendation moves with it.
+    ("decode: floor ms", 34.70,
+     lambda: probe("probe_decode_floor.json", "fit", "floor_ms"),
+     5e-3, "34.70", "findings"),
+    ("decode: knee tokens", 4096,
+     lambda: probe("probe_decode_floor.json", "fit", "knee_tokens"),
+     0.5, "4,096 tokens (448 MiB)", "findings"),
+    ("decode: 16K uncompressed", 76.36,
+     lambda: next((r["ms_per_token"] for r in
+                   (probe("probe_decode_floor.json", "results") or [])
+                   if r["cache_tokens"] == 16384), None),
+     5e-3, "76.36", "findings"),
+    ("128K B=4096 mean", 0.7778,
+     lambda: pk("pk_128k_B4096.json"), 5e-4, "0.78", "findings"),
+    ("128K B=4096 depth 0.1", 0.7500,
+     lambda: pk("pk_128k_B4096.json", 0.1), 5e-4, "0.75", "findings"),
+    ("128K B=4096 depth 0.5", 0.6667,
+     lambda: pk("pk_128k_B4096.json", 0.5), 5e-4, "0.67", "findings"),
+
+    # --- the matched 32K control: the only measured eviction cost -----------
+    # Reference and eviction arm share seed, needles, trial count AND RoPE
+    # scaling. The older 32K pair did not share the last of those, so its
+    # difference was a model change plus an eviction change.
+    ("32K matched reference (YaRN)", 0.9722,
+     lambda: pk("pk_32k_reference_yarn.json"), 5e-4, "0.97", "findings"),
+    ("32K B=2048 paired", 0.7778,
+     lambda: pk("pk_32k_paired.json"), 5e-4, "0.78", "findings"),
+    ("32K reference depth 0.5", 0.9167,
+     lambda: pk("pk_32k_reference_yarn.json", 0.5), 5e-4, "0.92", "findings"),
+    ("32K B=2048 depth 0.5", 0.5833,
+     lambda: pk("pk_32k_paired.json", 0.5), 5e-4, "0.58", "findings"),
+
+    # --- the mechanism's own memory overhead --------------------------------
+    # Unpinned until now, which is how 0.25% survived in the paper abstract while
+    # 74/74 passed. The committed measurement is 0.78% for the score tensor; the
+    # mechanism as used also carries _COUNTS, so 1.56% is the honest figure.
+    ("overhead: score tensor pct", 0.781,
+     lambda: measured(KVS / "measure_sig.json", "score_pct_of_cache", budget=1024),
+     5e-4, "0.78%", "findings"),
+    ("overhead: score MiB at B=1024", 0.929,
+     lambda: measured(KVS / "measure_sig.json", "score_mib", budget=1024),
+     5e-4, "0.929", "paper"),
+    ("overhead: full matrix pct", 1.5625,
+     lambda: 2 * (measured(KVS / "measure_sig.json", "score_pct_of_cache",
+                           budget=1024) or 0), 1e-3, "1.56%", "paper"),
+
+    # --- 64K saturation: the bound that replaces an impossible baseline -----
+    ("64K B=8192 mean (saturated)", 1.0000,
+     lambda: pk("pk_ladder_65536_B8192.json"), 5e-4, "1.00", "findings"),
+    ("64K B=8192 depth 0.9", 1.0000,
+     lambda: pk("pk_ladder_65536_B8192.json", 0.9), 5e-4, "1.00", "findings"),
+    ("128K B=16384 mean (saturated)", 1.0000,
+     lambda: pk("pk_ladder_131072_B16384.json"), 5e-4, "1.00", "findings"),
+    ("128K B=16384 depth 0.5", 1.0000,
+     lambda: pk("pk_ladder_131072_B16384.json", 0.5), 5e-4, "1.00", "findings"),
 ]
 
 
