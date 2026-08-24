@@ -4,6 +4,32 @@ All paths relative to `C:/Users/clclc/RineyaExperiment`. C1 = branch `main`, C2 
 
 ---
 
+## 0. What changed after this document was generated
+
+This ledger was assembled before P2.3–P2.6 and stage 1 existed. Rather than regenerate
+it — a generated document that silently goes stale is how the "directional pooling is
+untested" error got in here — the corrections are listed once, here, and the sections
+below are left as the record of what was known at the time.
+
+| # | then | now |
+|---|---|---|
+| 1 | floor law `B_half = 0.141·L^0.535` | **retracted.** Fitted from the centred window; with a backward-reaching window every length is lossless at or below B=16, so no exponent can be fitted |
+| 2 | lossless 128K at B=256 (492×) | **B=16 (7,864×)**, peak 1,501 MiB — with a backward-reaching pool window |
+| 3 | directional pooling listed as an untested open direction | **it is cornerstone 2.** 21 committed files set it; its pre-declared kill test was run and failed to kill it |
+| 4 | pool window a tuned constant | **backward reach alone decides** (forward reach inert, spread 0.000), and the requirement **tracks span length**: back=4 gives 1.000 at d=5 and 0.000 at d=7 |
+| 5 | — | **derived reach** (`grow_spans`) matches or beats the best *tuned* fixed reach at every span length without being told it: 1.000 / 1.000 / 0.889 at d=4/5/7 against 0.972 / 1.000 / 0.778 |
+| 6 | no result outside passkey | **stage 1 run.** 16 query-shaped decoys take B=64 from 1.000 to **0.611**; 16 neutral ones cost nothing (0.972); exact McNemar **p = 0.0010** |
+| 7 | — | that collapse is **capacity, not scoring**: budget alone restores it (B=512 → 1.000). Competition costs **32×** of compression — 7,864× down to **246×** |
+
+**The single most important line for planning:** 7,864× is a property of a haystack
+with **no competitors at all**, and passkey's filler contains no digits whatsoever, so
+a regex scores 1.000 on it with no model. 246× is what the same mechanism delivers
+against sixteen plausible competitors. Quote whichever fits the claim, never the first
+without its condition.
+
+---
+
+
 ## 1. The one-paragraph difference
 
 Cornerstone 1 asks a **ranking** question — "given B slots, which B cached positions are the most important?" — and its whole apparatus is downstream of that: a per-position, per-KV-head accumulated attention score, count-normalised as `S/C^e`, spent on a `sinks + recent + top-B` keep rule, evaluated by end-to-end accuracy at a budget. Importance is a property of a single position, and top-k is a per-position order statistic with no notion of adjacency. Cornerstone 2 opened on a different axis entirely (a persistent projector selecting FFN neurons), killed that on this host in three cheap probes, and then **reversed the direction of its own question** — from "does the significance matrix help a new predictor?" to "does anything help the significance matrix?" — which turned it into a **sufficiency-and-audit** question: what must survive *together* for the answer to be reconstructible, and what is the score actually selecting? The methodological invariant behind the shift is that C1 measures **endpoints** (accuracy at a cell) while C2 measures **identity through the transformation** (original position IDs carried alongside the cache through every gather; a prompt split so attention received *before* can be separated from attention received *after*). That single change of instrument produced every C2 finding, including the discovery that C1's own span-protection switch (`Policy.pool`) had been off in every long-context result it ever published.
