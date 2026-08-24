@@ -1,0 +1,202 @@
+{
+  "trace": "experiments/csgqr/results/trace_L20_int4",
+  "layer": 20,
+  "n_groups": 24,
+  "dataset": "chat_dev",
+  "n_positions": 798,
+  "n_prompts": 96,
+  "train_prompts": 48,
+  "val_prompts": 19,
+  "test_prompts": 29,
+  "train_positions": 394,
+  "val_positions": 150,
+  "test_positions": 254,
+  "hidden_width": 1024,
+  "lambdas": [
+    1.0,
+    10.0,
+    100.0,
+    1000.0,
+    10000.0
+  ],
+  "static_ranking_fitted_on_train": [
+    23,
+    8,
+    4,
+    17,
+    1,
+    10,
+    5,
+    12,
+    6,
+    15,
+    22,
+    0,
+    14,
+    2,
+    3,
+    7,
+    13,
+    20,
+    16,
+    18,
+    19,
+    9,
+    11,
+    21
+  ],
+  "remnant_needed": {
+    "delta": 0.1,
+    "base_rate_train": 0.6243654822335025,
+    "base_rate_val": 0.6533333333333333,
+    "base_rate_test": 0.5905511811023622,
+    "raw_lens_features": {
+      "max_prob": {
+        "auroc": 0.5932692307692308,
+        "auprc": 0.6599194314033696
+      },
+      "neg_entropy": {
+        "auroc": 0.6003205128205128,
+        "auprc": 0.6593784421555038
+      },
+      "prob_margin": {
+        "auroc": 0.5903205128205128,
+        "auprc": 0.6840809836820309
+      },
+      "logit_margin": {
+        "auroc": 0.5791025641025641,
+        "auprc": 0.6815639122993946
+      }
+    },
+    "fitted": {
+      "logistic on 4 lens features": {
+        "lam": 1.0,
+        "val_auroc": 0.5294348508634223,
+        "auroc": 0.5796794871794871,
+        "auprc": 0.6481673086017117
+      },
+      "logistic on hidden state": {
+        "lam": 10.0,
+        "val_auroc": 0.9313186813186813,
+        "auroc": 0.9358333333333333,
+        "auprc": 0.9492150950357219
+      }
+    },
+    "controls": {
+      "permuted_labels": {
+        "lam": 100.0,
+        "val_auroc": 0.48777777777777775,
+        "auroc": 0.5064679230415654,
+        "auprc": 0.6306546787695267
+      },
+      "position_only": {
+        "lam": 1.0,
+        "val_auroc": 0.43347723704866564,
+        "auroc": 0.60125,
+        "auprc": 0.6759326965013837
+      },
+      "prompt_mean_oracle": {
+        "auroc": 0.6975641025641026,
+        "auprc": 0.7714442366488948,
+        "note": "an oracle: uses the test prompt's own mean label"
+      }
+    }
+  },
+  "probe_lambda": {
+    "hidden": 100.0,
+    "lens_features": 1.0,
+    "permuted": 1000.0
+  },
+  "topk_capture": [
+    {
+      "k": 3,
+      "rho": 0.125,
+      "random": 0.0393164855393436,
+      "permuted_probe": 0.08395800046076426,
+      "static": 0.08936481248389372,
+      "probe_hidden": 0.2631871927333409,
+      "probe_lens_features": 0.1197329217010713,
+      "oracle": 0.32660467929104126,
+      "headroom_fraction_won": 0.7326862158068379,
+      "probe_beats_static": true,
+      "probe_beats_permuted": true
+    },
+    {
+      "k": 6,
+      "rho": 0.25,
+      "random": 0.07718859118655116,
+      "permuted_probe": 0.15510111830956266,
+      "static": 0.16085510846872733,
+      "probe_hidden": 0.39209125046966614,
+      "probe_lens_features": 0.18852375451050055,
+      "oracle": 0.4876812387617144,
+      "headroom_fraction_won": 0.7075203619540595,
+      "probe_beats_static": true,
+      "probe_beats_permuted": true
+    },
+    {
+      "k": 12,
+      "rho": 0.5,
+      "random": 0.15630213696120937,
+      "permuted_probe": 0.23317870154324186,
+      "static": 0.260817303547753,
+      "probe_hidden": 0.5199627482687952,
+      "probe_lens_features": 0.30751128978092285,
+      "oracle": 0.6511866126134331,
+      "headroom_fraction_won": 0.663846871930807,
+      "probe_beats_static": true,
+      "probe_beats_permuted": true
+    },
+    {
+      "k": 18,
+      "rho": 0.75,
+      "random": 0.2340623010421129,
+      "permuted_probe": 0.2855116017547795,
+      "static": 0.3111566801942284,
+      "probe_hidden": 0.5320375941640617,
+      "probe_lens_features": 0.35227213922235384,
+      "oracle": 0.6384829567446498,
+      "headroom_fraction_won": 0.6748034905648913,
+      "probe_beats_static": true,
+      "probe_beats_permuted": true
+    }
+  ],
+  "environment": {
+    "python": "3.11.15",
+    "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "cpu_count": 32,
+    "git_sha": "8627c71af663ee709af648e02d45dbf76f83d5ce",
+    "git_branch": "research/csgqr-quantized-remnant",
+    "git_dirty": true,
+    "torch": "2.13.0+cu130",
+    "torch_cuda_build": "13.0",
+    "cuda_available": true,
+    "cudnn": 92000,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "capability": "8.9",
+      "total_vram_mib": 8187.5,
+      "multi_processor_count": 36,
+      "free_mib_at_start": 7010.0,
+      "used_by_others_mib": 1177.5
+    },
+    "nvidia_smi": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "memory.total": "8188",
+      "memory.used": "5149",
+      "memory.free": "2800",
+      "driver_version": "610.62",
+      "compute_cap": "8.9"
+    },
+    "transformers": "5.15.0",
+    "peft": "0.20.0",
+    "accelerate": "1.14.0",
+    "numpy": "2.4.6",
+    "scipy": null,
+    "datasets": null,
+    "safetensors": "0.8.0"
+  }
+}

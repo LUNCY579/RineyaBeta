@@ -154,7 +154,11 @@ def main() -> None:
 
         dense_lp = logprobs_at(model, ids, b)
         residual = capture_residual(model, args.layer, ids, b)
-        feats = features_from_logits(head.logits(residual), head.vocab_size)
+        # no_grad matters here: lm_head's weights require grad, so without it the
+        # projection builds a graph over a [positions, 32768] tensor and holds it
+        # for the whole prompt.
+        with torch.no_grad():
+            feats = features_from_logits(head.logits(residual), head.vocab_size)
 
         # -- deleted path
         inst = install_csgqr(model, args.layer,
@@ -170,33 +174,40 @@ def main() -> None:
         kl_del = kl_rows(dense_lp, del_lp)
 
         # -- remnant paths
+        # Installed ONCE and the policy swapped between forwards. Re-installing
+        # per configuration would re-quantize the same three matrices 27 times
+        # per prompt, and -- worse than being slow -- would make each group's
+        # measurement depend on a freshly built remnant rather than on exactly
+        # the same packed weights the other groups were measured against.
         inst = install_csgqr(model, args.layer, spec=spec, n_groups=n_groups,
                              policy=RoutingPolicy(mode="all", n_groups=n_groups),
                              keep_donor_resident=True)
-        full_lp = logprobs_at(model, ids, b)
-        kl_full = kl_rows(dense_lp, full_lp)
-        inst.remove()
+        module = inst.module
+
+        def subset_policy(groups: list[int]) -> RoutingPolicy:
+            rest = [k for k in range(n_groups) if k not in groups]
+            return RoutingPolicy(mode="fixed_fraction",
+                                 fraction=len(groups) / n_groups,
+                                 selector="static_topk", n_groups=n_groups,
+                                 ranking=list(groups) + rest)
+
+        module.policy = RoutingPolicy(mode="all", n_groups=n_groups)
+        kl_full = kl_rows(dense_lp, logprobs_at(model, ids, b))
+
 
         per_group_kl = []
         for g in range(n_groups):
-            pol = RoutingPolicy(mode="fixed_fraction", fraction=1.0 / n_groups,
-                                selector="static_topk", n_groups=n_groups,
-                                ranking=[g] + [k for k in range(n_groups) if k != g])
-            inst = install_csgqr(model, args.layer, spec=spec, n_groups=n_groups,
-                                 policy=pol, keep_donor_resident=True)
+            module.policy = subset_policy([g])
             per_group_kl.append(kl_rows(dense_lp, logprobs_at(model, ids, b)))
-            inst.remove()
 
         pair_kl = {}
         for (a, bb) in pair_list:
-            rest = [k for k in range(n_groups) if k not in (a, bb)]
-            pol = RoutingPolicy(mode="fixed_fraction", fraction=2.0 / n_groups,
-                                selector="static_topk", n_groups=n_groups,
-                                ranking=[a, bb] + rest)
-            inst = install_csgqr(model, args.layer, spec=spec, n_groups=n_groups,
-                                 policy=pol, keep_donor_resident=True)
+            module.policy = subset_policy([a, bb])
             pair_kl[(a, bb)] = kl_rows(dense_lp, logprobs_at(model, ids, b))
-            inst.remove()
+
+        module.policy = RoutingPolicy(mode="all", n_groups=n_groups)
+        full_lp = logprobs_at(model, ids, b)
+        inst.remove()
 
         dense_top1 = dense_lp.argmax(-1)
         del_top1 = del_lp.argmax(-1)

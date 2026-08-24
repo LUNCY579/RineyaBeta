@@ -101,7 +101,7 @@ class ModelShape:
     def model_macs(self, tokens: int = 1, *, include_lm_head: bool = True) -> int:
         """Weight-matmul MACs per token, ignoring the O(T^2) attention scores.
 
-        Attention score/΅value products are excluded because they depend on
+        Attention score/value products are excluded because they depend on
         context length rather than on weights, and every arm here shares them
         exactly -- including them would shrink the reported *share* of the MLP
         by an amount that says nothing about CSGQR.

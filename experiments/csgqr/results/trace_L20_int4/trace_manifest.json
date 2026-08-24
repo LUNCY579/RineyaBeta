@@ -1,0 +1,213 @@
+{
+  "layer": 20,
+  "arm": "int4",
+  "spec": "int4-b128-asym",
+  "n_groups": 24,
+  "dataset": "chat_dev",
+  "prompts": 96,
+  "positions": 798,
+  "lens_rank": 0,
+  "seed": 20260823,
+  "pairs": [
+    [
+      4,
+      23
+    ],
+    [
+      7,
+      13
+    ],
+    [
+      0,
+      13
+    ],
+    [
+      10,
+      15
+    ],
+    [
+      10,
+      17
+    ],
+    [
+      9,
+      20
+    ],
+    [
+      12,
+      23
+    ],
+    [
+      15,
+      16
+    ],
+    [
+      8,
+      14
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      5,
+      17
+    ],
+    [
+      13,
+      17
+    ],
+    [
+      6,
+      10
+    ],
+    [
+      14,
+      15
+    ],
+    [
+      3,
+      6
+    ],
+    [
+      14,
+      23
+    ],
+    [
+      1,
+      6
+    ],
+    [
+      10,
+      22
+    ],
+    [
+      11,
+      22
+    ],
+    [
+      3,
+      15
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      13,
+      15
+    ],
+    [
+      19,
+      20
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      0,
+      23
+    ],
+    [
+      0,
+      21
+    ],
+    [
+      6,
+      14
+    ],
+    [
+      15,
+      21
+    ],
+    [
+      8,
+      18
+    ],
+    [
+      10,
+      19
+    ],
+    [
+      6,
+      8
+    ],
+    [
+      3,
+      13
+    ],
+    [
+      18,
+      22
+    ],
+    [
+      11,
+      13
+    ],
+    [
+      5,
+      14
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      4,
+      8
+    ],
+    [
+      4,
+      12
+    ],
+    [
+      8,
+      21
+    ]
+  ],
+  "residual_invariance_max_abs": 0.0,
+  "elapsed_s": 612.7,
+  "environment": {
+    "python": "3.11.15",
+    "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "cpu_count": 32,
+    "git_sha": "8627c71af663ee709af648e02d45dbf76f83d5ce",
+    "git_branch": "research/csgqr-quantized-remnant",
+    "git_dirty": true,
+    "torch": "2.13.0+cu130",
+    "torch_cuda_build": "13.0",
+    "cuda_available": true,
+    "cudnn": 92000,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "capability": "8.9",
+      "total_vram_mib": 8187.5,
+      "multi_processor_count": 36,
+      "free_mib_at_start": 5938.0,
+      "used_by_others_mib": 2249.5
+    },
+    "nvidia_smi": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "memory.total": "8188",
+      "memory.used": "6255",
+      "memory.free": "1694",
+      "driver_version": "610.62",
+      "compute_cap": "8.9"
+    },
+    "transformers": "5.15.0",
+    "peft": "0.20.0",
+    "accelerate": "1.14.0",
+    "numpy": "2.4.6",
+    "scipy": null,
+    "datasets": null,
+    "safetensors": "0.8.0"
+  }
+}

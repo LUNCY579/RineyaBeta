@@ -20,8 +20,8 @@ decides whether the dynamic branch of the method is worth building.
 
 **Are group utilities additive?** The *outputs* are exactly additive
 (``F = sum_g F_g``), but utility is a difference of KL divergences and KL is not
-linear, so ``U(A∪B) = U(A) + U(B)`` is a genuine empirical question. The
-interaction ``I(A,B) = U(A∪B) - U(A) - U(B)`` is measured on sampled pairs. Large
+linear, so ``U(A union B) = U(A) + U(B)`` is a genuine empirical question. The
+interaction ``I(A,B) = U(A union B) - U(A) - U(B)`` is measured on sampled pairs. Large
 interactions would mean independent top-k ranking is the wrong selection rule,
 and that finding would matter more than any threshold sweep.
 """
@@ -206,7 +206,7 @@ def main() -> None:
             "pairs_with_interaction_excluding_zero": n_sig,
             "pairs": recs,
         }
-        print("\ngroup-utility interaction I(A,B) = U(A∪B) - U(A) - U(B) over "
+        print("\ngroup-utility interaction I(A,B) = U(A+B) - U(A) - U(B) over "
               + str(len(recs)) + " sampled pairs:")
         print("  |I| relative to |U(A)|+|U(B)|:  mean "
               + format(rel.mean().item(), ".4f") + "   median "
