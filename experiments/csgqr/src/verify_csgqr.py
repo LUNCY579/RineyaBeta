@@ -1103,6 +1103,152 @@ def verify_budget() -> None:
 
 
 # ==========================================================================
+# H. Regression tests for ledger rows that previously had none
+# ==========================================================================
+def verify_ledger_gaps() -> None:
+    """One executable test per BUG_LEDGER row that was marked FIXED on prose.
+
+    An audit of the ledger found ten rows claiming ``FIXED`` whose "regression
+    test" column named no runnable check -- so the claim "every defect has a
+    regression test" was not true. These are the missing ones. A fix that is only
+    described is a fix that can silently regress.
+    """
+    section("H. Regression tests for ledger rows that previously had none")
+
+    # -- S11: the residual must be released on paths that never read it ----
+    from surgery import CSGQRMlp
+    from router import RoutingPolicy
+    from remnant import QuantizedMlpRemnant, RemnantConfig
+
+    donor = toy_mlp(seed=41)
+    rem = QuantizedMlpRemnant(donor, RemnantConfig(0, 8, QuantSpec(4, 128, False),
+                                                   torch.float32))
+    x = torch.randn(4, donor.gate_proj.in_features)
+    for mode, kw in (("all", {}), ("none", {}),
+                     ("fixed_fraction", {"fraction": 0.5,
+                                         "selector": "static_topk"})):
+        mod = CSGQRMlp(rem, None, RoutingPolicy(mode=mode, n_groups=8, **kw))
+        mod.set_residual(torch.randn_like(x))
+        mod.forward(x)
+        check("S11: mode=" + mode + " releases the captured residual",
+              mod._residual is None)
+
+    # -- S12: no-signal arms record NaN, and the summary says so -----------
+    from router import RoutingTrace
+    tr = RoutingTrace(8)
+    mod = CSGQRMlp(rem, None, RoutingPolicy(mode="all", n_groups=8), trace=tr)
+    mod.forward(x)
+    s = tr.summary()
+    check("S12: an arm with no gate signal reports mean_confidence=None, "
+          "not 0.0", s["mean_confidence"] is None and s["gate_signal_tokens"] == 0,
+          "gate_signal_tokens=" + str(s["gate_signal_tokens"]))
+    check("S12: ...while its routing accounting is still correct",
+          abs(s["active_fraction"] - 1.0) < 1e-12 and s["tokens"] == x.shape[0])
+
+    # -- S16: select() must follow the utility's device and dtype ----------
+    pol = RoutingPolicy(mode="fixed_fraction", fraction=0.25,
+                        selector="significance", n_groups=8)
+    picks = []
+    for dt in (torch.float32, torch.float64, torch.bfloat16):
+        u = torch.tensor([0., 9., 0., 8., 0., 0., 0., 0.], dtype=dt)
+        picks.append(pol.select(0.5, utility=u))
+    check("S16: select() accepts any utility dtype and agrees across them",
+          picks[0] == picks[1] == picks[2] == [1, 3], str(picks[0]))
+
+    # -- S17: CUDA-context errors abort; a plain allocator OOM does not ----
+    from eval_forced import _is_cuda_context_error
+    poisoning = [RuntimeError("CUDA error: device-side assert triggered"),
+                 RuntimeError("CUBLAS_STATUS_EXECUTION_FAILED when calling ..."),
+                 RuntimeError("an illegal memory access was encountered")]
+    survivable = [RuntimeError("CUDA out of memory. Tried to allocate 2.00 GiB"),
+                  ValueError("unknown arm")]
+    check("S17: context-poisoning CUDA errors are classified as fatal",
+          all(_is_cuda_context_error(e) for e in poisoning))
+    check("S17: a plain allocator OOM is NOT treated as context-poisoning",
+          not any(_is_cuda_context_error(e) for e in survivable),
+          "an OOM should skip its arm, not abort the sweep")
+
+    # -- C3: remove() must refuse when the donor was freed -----------------
+    from surgery import InstalledCSGQR
+    inst = InstalledCSGQR(model=None, layer=0, module=mod, original_mlp=donor,
+                          hook_handle=None, donor_layer=0, donor_freed=True)
+    check("C3: remove() refuses when the full-precision donor was freed",
+          _raises(inst.remove, RuntimeError))
+
+    # -- C4: the confidence projection must not build an autograd graph ----
+    from confidence import AlignmentLens, ConfidenceHead, features_from_hidden
+    head_lin = nn.Linear(32, 128, bias=False)      # requires_grad=True, as in a model
+    check("C4: the borrowed LM head does require grad (the hazard is real)",
+          head_lin.weight.requires_grad)
+    feats = features_from_hidden(
+        ConfidenceHead(nn.LayerNorm(32), head_lin, AlignmentLens(32, 0), 128),
+        torch.randn(6, 32))
+    check("C4: no confidence feature carries a grad_fn",
+          all(v.grad_fn is None and not v.requires_grad for v in feats.values()),
+          "checked " + str(len(feats)) + " features")
+
+    # -- C5: sources must stay ASCII-only (Windows cp1252 console) ---------
+    offenders = []
+    for f in sorted(HERE.glob("*.py")):
+        try:
+            f.read_text(encoding="ascii")
+        except UnicodeDecodeError:
+            offenders.append(f.name)
+    check("C5: every source file under src/ is ASCII-only",
+          not offenders, "non-ASCII in: " + ", ".join(offenders) if offenders
+          else str(len(list(HERE.glob("*.py")))) + " files")
+
+    # -- C6: a ranking of the wrong length must be refused -----------------
+    check("C6: a ranking that is not a permutation of 0..n-1 is refused",
+          _raises(lambda: RoutingPolicy(n_groups=24, ranking=list(range(8))),
+                  ValueError))
+    check("C6: ...and a correctly sized ranking is accepted",
+          RoutingPolicy(n_groups=8, ranking=[7, 6, 5, 4, 3, 2, 1, 0]).ranking[0] == 7)
+
+    # -- C2: alpha must not be fitted against the remnant's own output -----
+    # The original defect returned exactly 1.0 by construction and looked like a
+    # working calibration. Both halves are asserted: the wrong reference IS
+    # degenerate, and the real function does not behave that way.
+    from remnant import calibrate_alpha
+    mlp_c2 = toy_mlp(seed=43)
+    r_c2 = QuantizedMlpRemnant(mlp_c2, RemnantConfig(0, 8, QuantSpec(4, 128, False),
+                                                     torch.float64))
+    mlp_c2 = mlp_c2.to(torch.float64)
+    x_c2 = torch.randn(256, mlp_c2.gate_proj.in_features, dtype=torch.float64)
+    own = r_c2.forward_groups(x_c2, list(range(8))).to(torch.float64)
+    self_fit = ((own * own).sum() / own.pow(2).sum()).item()
+    check("C2: fitting alpha against the remnant's OWN output is degenerate "
+          "(returns exactly 1.0)", abs(self_fit - 1.0) < 1e-12,
+          "the defect looked like a working calibration")
+    real = calibrate_alpha(r_c2, mlp_c2, x_c2)[0].item()
+    check("C2: the real calibration fits against the DONOR and does not "
+          "return 1.0 for a lossy remnant", abs(real - 1.0) > 1e-6,
+          "alpha = " + format(real, ".6f"))
+
+    # -- S20: modes that never select a subset must not demand a router ----
+    # budget() returns 0 or n_groups under none/all, and select() short-circuits
+    # before it looks at the selector -- so no utility vector is consulted and
+    # requiring one is over-strict. The dataclass default IS selector=
+    # "significance", so without this a bare RoutingPolicy(mode="all") could not
+    # be installed at all.
+    check("S20: mode=all does not require a per-state utility predictor",
+          RoutingPolicy(mode="all", n_groups=8).needs_group_utility is False)
+    check("S20: mode=none does not require one either",
+          RoutingPolicy(mode="none", n_groups=8).needs_group_utility is False)
+    check("S20: but a subset-selecting mode with selector=significance does",
+          RoutingPolicy(mode="fixed_fraction", fraction=0.5,
+                        selector="significance",
+                        n_groups=8).needs_group_utility is True)
+    for m in ("none", "all"):
+        pol_m = RoutingPolicy(mode=m, n_groups=8)
+        got = pol_m.select(0.5)
+        want = [] if m == "none" else list(range(8))
+        check("S20: ...and mode=" + m + " selects " + ("nothing" if m == "none"
+              else "everything") + " without consulting the selector",
+              got == want, str(got[:4]) + ("..." if len(got) > 4 else ""))
+
+
+# ==========================================================================
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", type=Path, default=None)
@@ -1120,6 +1266,7 @@ def main() -> None:
     verify_significance()
     verify_routing()
     verify_budget()
+    verify_ledger_gaps()
 
     failed = [r for r in RESULTS if not r["ok"]]
     print("\n" + "=" * 66)

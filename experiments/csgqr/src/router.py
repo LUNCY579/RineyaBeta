@@ -180,12 +180,24 @@ class RoutingPolicy:
     def needs_group_utility(self) -> bool:
         """Does group *selection* need a per-state utility vector?
 
-        True only for the dynamic-significance selector. Every other selector
-        works from the static ``ranking``, which is precisely the
-        static-versus-dynamic contrast the ablation rests on -- so this must be
-        an explicit property and not an accident of whether a utility function
-        happens to have been passed in.
+        True only for the dynamic-significance selector, and only in a mode that
+        can actually select a proper subset. Every other selector works from the
+        static ``ranking``, which is precisely the static-versus-dynamic contrast
+        the ablation rests on -- so this must be an explicit property and not an
+        accident of whether a utility function happens to have been passed in.
+
+        The mode guard matters. Under ``none`` and ``all``, ``budget()`` returns
+        0 or ``n_groups`` and ``select()`` short-circuits before it ever looks at
+        the selector, so no utility vector is consulted. Without the guard, the
+        dataclass's own default (``selector="significance"``) made a bare
+        ``RoutingPolicy(mode="all")`` unconstructible in ``CSGQRMlp`` -- it
+        demanded a trained router for an arm that runs every group
+        unconditionally. That never fired in the campaign only because
+        ``variants.Arm`` defaults to ``static_topk`` and always passes the
+        selector explicitly.
         """
+        if self.mode in ("none", "all"):
+            return False
         return self.selector == "significance"
 
     def name(self) -> str:

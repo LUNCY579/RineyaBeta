@@ -1,9 +1,9 @@
 {
   "torch": "2.13.0+cu130",
-  "total": 123,
-  "passed": 123,
+  "total": 144,
+  "passed": 144,
   "failed": 0,
-  "elapsed_s": 0.62,
+  "elapsed_s": 0.65,
   "checks": [
     {
       "name": "4-bit pack/unpack is a bijection at even and odd widths",
@@ -619,6 +619,111 @@
       "name": "analytic remnant byte model matches the built module",
       "ok": true,
       "detail": "measured=4,939,872 predicted=4,939,872"
+    },
+    {
+      "name": "S11: mode=all releases the captured residual",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "S11: mode=none releases the captured residual",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "S11: mode=fixed_fraction releases the captured residual",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "S12: an arm with no gate signal reports mean_confidence=None, not 0.0",
+      "ok": true,
+      "detail": "gate_signal_tokens=0"
+    },
+    {
+      "name": "S12: ...while its routing accounting is still correct",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "S16: select() accepts any utility dtype and agrees across them",
+      "ok": true,
+      "detail": "[1, 3]"
+    },
+    {
+      "name": "S17: context-poisoning CUDA errors are classified as fatal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "S17: a plain allocator OOM is NOT treated as context-poisoning",
+      "ok": true,
+      "detail": "an OOM should skip its arm, not abort the sweep"
+    },
+    {
+      "name": "C3: remove() refuses when the full-precision donor was freed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C4: the borrowed LM head does require grad (the hazard is real)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C4: no confidence feature carries a grad_fn",
+      "ok": true,
+      "detail": "checked 6 features"
+    },
+    {
+      "name": "C5: every source file under src/ is ASCII-only",
+      "ok": true,
+      "detail": "27 files"
+    },
+    {
+      "name": "C6: a ranking that is not a permutation of 0..n-1 is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C6: ...and a correctly sized ranking is accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C2: fitting alpha against the remnant's OWN output is degenerate (returns exactly 1.0)",
+      "ok": true,
+      "detail": "the defect looked like a working calibration"
+    },
+    {
+      "name": "C2: the real calibration fits against the DONOR and does not return 1.0 for a lossy remnant",
+      "ok": true,
+      "detail": "alpha = 0.996453"
+    },
+    {
+      "name": "S20: mode=all does not require a per-state utility predictor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "S20: mode=none does not require one either",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "S20: but a subset-selecting mode with selector=significance does",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "S20: ...and mode=none selects nothing without consulting the selector",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "S20: ...and mode=all selects everything without consulting the selector",
+      "ok": true,
+      "detail": "[0, 1, 2, 3]..."
     }
   ]
 }

@@ -200,7 +200,7 @@
       "expected": true,
       "actual": true,
       "tol": 0.0,
-      "note": "expected at least 80 checks; got 123"
+      "note": "expected at least 80 checks; got 144"
     },
     {
       "claim": "all 28 layers scanned",

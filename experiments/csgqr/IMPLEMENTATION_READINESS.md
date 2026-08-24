@@ -2,7 +2,7 @@
 
 Assessed against the campaign brief §26. Every requirement is marked `PASS`,
 `PARTIAL` or `FAIL`, with the evidence that decides it. Evidence names a check in
-`src/verify_csgqr.py` (**122 checks, all passing**), a committed result file, or a
+`src/verify_csgqr.py` (**144 checks, all passing**), a committed result file, or a
 measurement recorded in this session.
 
 ---
@@ -114,7 +114,7 @@ Reported separately, as the brief requires.
 
 | Aspect | Grade | Justification |
 | --- | --- | --- |
-| **Reference backend** | **A — high confidence** | 122 deterministic checks pass. The load-bearing invariants are *exact*, not approximate: additivity < 1e-14 in float64, row-slice dequantization bit-identical, coalesced gather bit-identical, deployment reload bit-exact, and on the primary endpoint the FP-passthrough arm is numerically identical to dense (KL −0.00000, CI ±1e-5, argmax agreement 1.0000) — a **zero** noise floor. Eight rows that were `INCORRECT` at the start of this session are fixed with a regression test each. |
+| **Reference backend** | **A — high confidence** | 144 deterministic checks pass. The load-bearing invariants are *exact*, not approximate: additivity < 1e-14 in float64, row-slice dequantization bit-identical, coalesced gather bit-identical, deployment reload bit-exact, and on the primary endpoint the FP-passthrough arm is numerically identical to dense (KL −0.00000, CI ±1e-5, argmax agreement 1.0000) — a **zero** noise floor. Eight rows that were `INCORRECT` at the start of this session are fixed with a regression test each. |
 | **Optimized backend** | **C — partial** | There is no optimized backend. Contiguous-run coalescing is the only optimisation and it is bit-identical, so it is not a second numerical path. No Triton, no fused dequantize-GEMM, no CUDA graphs. The one measured cost — 16× for per-token bucketing versus a fixed group set — is a reference-backend number and must not be read as the algorithm's limit. |
 | **Experimental interpretability** | **B — substantial, with one bounded limitation** | The primary endpoint is paired at the reply position with prompt-clustered intervals, and its power is demonstrated rather than assumed: it separates INT8 (KL 0.00088 [0.00085, 0.00090]) from INT4 (0.01049 [0.01009, 0.01090]) with non-overlapping intervals, where the generation scorer could not separate deletion from dense. The bounded limitation is that the *generation* endpoint has no power here and its Tier-1 table cannot be used as evidence about routing — established with the arithmetic, not asserted. |
 

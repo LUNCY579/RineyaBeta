@@ -5,7 +5,7 @@ asks for, what the code actually does, and the evidence. Status is one of
 `CORRECTLY_IMPLEMENTED`, `PARTIALLY_IMPLEMENTED`, `MISSING`, `INCORRECT`,
 `AMBIGUOUS`, `UNVERIFIED`.
 
-Evidence names a check in `src/verify_csgqr.py` (112 checks, all passing), a
+Evidence names a check in `src/verify_csgqr.py` (144 checks, all passing), a
 committed result file, or a source location. "Asserted" means a runtime check
 refuses the wrong behaviour rather than a test observing the right one.
 

@@ -39,7 +39,7 @@ three-level ramp until multi-layer evidence justifies re-testing them.
 
 | gate | status | basis |
 | --- | --- | --- |
-| **A** — implementation | **PASS** | 123 checks; `READY_FOR_SCIENTIFIC_EXPERIMENTS`; reference backend graded A. |
+| **A** — implementation | **PASS** | 144 checks; `READY_FOR_SCIENTIFIC_EXPERIMENTS`; reference backend graded A. |
 | **B** — quantized donor viability | **PASS** | INT8 recovers 99.7%, INT4 96.3% of deletion damage. |
 | **C** — confidence usefulness | **PASS**, redirected | Beats random at matched compute (H2), but only via the state probe or a lens whose cost forbids deployment. |
 | **D** — significance usefulness | **PASS** | Beats random and magnitude at matched budget; order-dependent. |
@@ -58,7 +58,10 @@ the local implementation, though substantial and serious, could not run the
 dynamic half of its own method.
 
 **2. What major bugs were found?**
-Nineteen, in `BUG_LEDGER.md`. The four that mattered:
+Twenty-one this session, in `BUG_LEDGER.md` (plus six carried forward from
+the previous campaign). Twenty are code defects; **D1** is a defect in my
+own documentation. Twenty-six of the twenty-seven rows are `FIXED` with a
+test that runs and passes; **S15** remains `OPEN`. The five that mattered:
 
 * **S1 (CRITICAL)** — an arm requesting dynamic per-state significance silently
   executed the **static** ranking, with no error and correct-looking activation
@@ -71,13 +74,17 @@ Nineteen, in `BUG_LEDGER.md`. The four that mattered:
 * **S19 (MAJOR)** — the FP passthrough remnant **aliased** the donor's storage
   instead of copying it, breaking both the byte accounting (3×) and the freezing
   guarantee for the arm that exists to be the clean reference.
+* **D1 (MAJOR, documentation)** — the GPU microbenchmark table mixed figures
+  from two different benchmark runs, and two of the three derived claims
+  flattered the method. Found by re-deriving every quoted number from the
+  committed JSON.
 
 **3. What was changed?**
 Bug fixes plus four genuinely missing components: a **powered evaluation
 endpoint** (the existing one cannot resolve the question), the **trained probe
 artifacts** that make the dynamic half executable, the **partial-execution gain**,
 and the **matched random-token gate** without which H2 was untestable.
-`verify_csgqr.py` grew 86 → 123 checks.
+`verify_csgqr.py` grew 86 → 144 checks.
 
 **4. What implementation-confidence grade?**
 Reference backend **A**; optimized backend **C** (there isn't one); experimental
