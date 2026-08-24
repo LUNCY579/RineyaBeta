@@ -12,6 +12,13 @@
   "grow": 2.0,
   "grow_max": 64,
   "needle_words": 20,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
   "distractors": 0,
   "distractor_style": "framed",
   "cap_mib": 7400.0,
@@ -35,62 +42,62 @@
       "trials": [
         {
           "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage mirror kitchen beacon granite shadow parcel river tomato",
-          "got": "window island summit thread oran",
+          "got": "window island summit thread orange planet hammer harvest packet shelter sunset garage mirror kitchen beacon granite shadow parcel river tomato. \n\nRemember it. \n\nRemem",
           "hit": true
         },
         {
           "key": "garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain engine silver summit market garden lantern hammer tower",
-          "got": "garage signal planet helmet gran",
+          "got": "garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain engine silver summit. \n\nRemember it. \n\nThe pass phrase is garage signal planet ",
           "hit": false
         },
         {
           "key": "blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer crystal hammer carpet cluster",
-          "got": "blanket orange sugar diamond des",
+          "got": "blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer crystal hammer carpet cluster. Remember it. \n\nThe pas",
           "hit": true
         },
         {
           "key": "forest mountain diamond thread anchor desert signal tomato winter cluster stream granite bridge garage drawer amber blanket quarry basket garden",
-          "got": "forest mountain diamond thread a",
+          "got": "forest mountain diamond thread anchor desert signal tomato winter cluster stream granite bridge garage drawer amber blanket quarry basket garden. Remember it. forest mo",
           "hit": true
         },
         {
           "key": "blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle",
-          "got": "blanket window anchor sunset jac",
+          "got": "blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle. \n\nRemember it. \n\nRemem",
           "hit": true
         },
         {
           "key": "tunnel beacon shadow packet market quarry button signal tomato orange granite helmet cotton hammer kitchen jacket mountain rocket temple harbor",
-          "got": "tunnel beacon shadow packet mark",
+          "got": "tunnel beacon shadow packet market quarry button signal tomato orange granite helmet cotton hammer kitchen jacket mountain rocket temple harbor. Remember it. \n\nSo the ",
           "hit": true
         },
         {
           "key": "blanket amber jacket quarry sugar engine station anchor temple shadow silver granite sunset island cotton carpet planet harbor needle cluster",
-          "got": "blanket amber jacket quarry suga",
+          "got": "blanket amber jacket quarry sugar engine station anchor temple shadow silver granite sunset island cotton carpet planet harbor needle cluster. Remember it. blanket a",
           "hit": true
         },
         {
           "key": "drawer socket forest beacon shadow thread parcel sugar tower needle hammer stream rocket barrel bucket carpet desert tunnel crystal engine",
-          "got": "drawer socket forest beacon shad",
+          "got": "drawer socket forest beacon shadow thread parcel sugar tower needle hammer stream rocket barrel bucket carpet desert tunnel crystal engine. \n\nThe pass phrase is d",
           "hit": true
         },
         {
           "key": "bucket sunset bottle garage harbor ticket hammer planet yellow carpet barrel tomato ceiling tunnel parcel station needle orange fabric compass",
-          "got": "bucket sunset bottle garage harb",
+          "got": "bucket sunset bottle garage harbor ticket hammer planet yellow carpet barrel tomato ceiling tunnel parcel station needle orange fabric compass. \n\nThe pass phrase is b",
           "hit": true
         },
         {
           "key": "basket granite pocket shadow shelter river helmet copper hammer drawer harvest bridge tunnel signal mirror stream forest barrel cluster bottle",
-          "got": "basket granite pocket shadow she",
+          "got": "basket granite pocket shadow shelter river helmet copper hammer drawer harvest bridge tunnel signal mirror stream forest barrel cluster bottle. Remember it. basket gr",
           "hit": true
         },
         {
           "key": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato compass stream mirror shelter anchor",
-          "got": "orange carpet river forest plane",
+          "got": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato tomato tomato tomato tomato tomato tomato tomato tomato toma",
           "hit": false
         },
         {
           "key": "window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit carpet",
-          "got": "window crystal needle tower fabr",
+          "got": "window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit carpet. Remember it. window cr",
           "hit": true
         }
       ]
@@ -109,62 +116,62 @@
       "trials": [
         {
           "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage mirror kitchen beacon granite shadow parcel river tomato",
-          "got": "window island summit thread oran",
+          "got": "window island summit thread orange planet hammer harvest packet shelter sunset garage mirror kitchen beacon granite shadow parcel river. Remember it.\n\nThe pass phrase",
           "hit": false
         },
         {
           "key": "garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain engine silver summit market garden lantern hammer tower",
-          "got": "garage signal planet helmet gran",
+          "got": "garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain. Remember it. \n\nThe pass phrase is garage signal planet helmet granite tomato t",
           "hit": false
         },
         {
           "key": "blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer crystal hammer carpet cluster",
-          "got": "blanket orange sugar diamond des",
+          "got": "blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer drawer drawer drawer drawer drawer drawer drawer draw",
           "hit": false
         },
         {
           "key": "forest mountain diamond thread anchor desert signal tomato winter cluster stream granite bridge garage drawer amber blanket quarry basket garden",
-          "got": "forest mountain diamond thread a",
+          "got": "forest mountain diamond thread anchor desert signal tomato winter cluster stream granite bridge garage drawer amber blanket. Remember it. \n\nThe grass is green. The sky ",
           "hit": false
         },
         {
           "key": "blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle",
-          "got": "blanket window anchor sunset jac",
+          "got": "blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle. Remember it. \n\nThe pas",
           "hit": true
         },
         {
           "key": "tunnel beacon shadow packet market quarry button signal tomato orange granite helmet cotton hammer kitchen jacket mountain rocket temple harbor",
-          "got": "tunnel beacon shadow packet mark",
+          "got": "tunnel beacon shadow packet market quarry button signal tomato orange granite helmet cotton hammer kitchen jacket mountain rocket temple harbor. Remember it. \n\nThe pas",
           "hit": true
         },
         {
           "key": "blanket amber jacket quarry sugar engine station anchor temple shadow silver granite sunset island cotton carpet planet harbor needle cluster",
-          "got": "blanket amber jacket quarry suga",
+          "got": "blanket amber jacket quarry sugar engine station anchor temple shadow. Remember it. \n\nThe pass phrase is blanket amber jacket quarry sugar engine station anchor temp",
           "hit": false
         },
         {
           "key": "drawer socket forest beacon shadow thread parcel sugar tower needle hammer stream rocket barrel bucket carpet desert tunnel crystal engine",
-          "got": "drawer socket forest beacon shad",
+          "got": "drawer socket forest beacon shadow thread parcel sugar tower. Remember it. \n\nThe grass is green. The sky is blue. The sun is yellow. Here we go. There and back ag",
           "hit": false
         },
         {
           "key": "bucket sunset bottle garage harbor ticket hammer planet yellow carpet barrel tomato ceiling tunnel parcel station needle orange fabric compass",
-          "got": "bucket sunset bottle garage harb",
+          "got": "bucket sunset bottle garage harbor ticket hammer planet yellow carpet barrel tomato ceiling tunnel parcel station needle orange fabric compass. Remember it. \n\nThe pas",
           "hit": true
         },
         {
           "key": "basket granite pocket shadow shelter river helmet copper hammer drawer harvest bridge tunnel signal mirror stream forest barrel cluster bottle",
-          "got": "basket granite pocket shadow she",
+          "got": "basket granite pocket shadow shelter river helmet copper hammer drawer harvest bridge tunnel signal mirror stream forest barrel cluster bottle. Remember it. \n\nThe gra",
           "hit": true
         },
         {
           "key": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato compass stream mirror shelter anchor",
-          "got": "orange carpet river forest plane",
+          "got": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato. Remember it. \n\nThe pass phrase is orange carpet river fores",
           "hit": false
         },
         {
           "key": "window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit carpet",
-          "got": "window crystal needle tower fabr",
+          "got": "window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit carpet. Remember it. \n\nThe gra",
           "hit": true
         }
       ]
@@ -183,62 +190,62 @@
       "trials": [
         {
           "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage mirror kitchen beacon granite shadow parcel river tomato",
-          "got": ": \"The grass is green. The sky i",
+          "got": ": \"The grass is green. The sky is blue. The sun is yellow. Here we go. There and back again.\" \n\nSo, the answer is: \"The grass is green. The sky is blue. The sun is ye",
           "hit": false
         },
         {
           "key": "garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain engine silver summit market garden lantern hammer tower",
-          "got": ": \"The pass phrase is: garage si",
+          "got": ": \"The pass phrase is: garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain engine.\" \n\nSo, the answer is: \"The pass phrase is: garag",
           "hit": false
         },
         {
           "key": "blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer crystal hammer carpet cluster",
-          "got": ": \"The pass phrase is: blanket o",
+          "got": ": \"The pass phrase is: blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer crystal hammer carpet cluster.",
           "hit": true
         },
         {
           "key": "forest mountain diamond thread anchor desert signal tomato winter cluster stream granite bridge garage drawer amber blanket quarry basket garden",
-          "got": ": \"The grass is green. The sky i",
+          "got": ": \"The grass is green. The sky is blue. The sun is yellow. Here we go. There and back again. The grass is green. The sky is blue. The sun is yellow. Here we go. There a",
           "hit": false
         },
         {
           "key": "blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle",
-          "got": ": \"blanket window anchor sunset ",
+          "got": ": \"blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle.\" \n\nSo, the answer i",
           "hit": true
         },
         {
           "key": "tunnel beacon shadow packet market quarry button signal tomato orange granite helmet cotton hammer kitchen jacket mountain rocket temple harbor",
-          "got": ": \"tunnels are green. The sky is",
+          "got": ": \"tunnels are green. The sky is blue. The sun is yellow.\" \n\nSo, the answer is: \"tunnels are green. The sky is blue. The sun is yellow.\" \n\nBut wait, the original text ",
           "hit": false
         },
         {
           "key": "blanket amber jacket quarry sugar engine station anchor temple shadow silver granite sunset island cotton carpet planet harbor needle cluster",
-          "got": ": \"The pass phrase is: blanket a",
+          "got": ": \"The pass phrase is: blanket amber jacket quarry sugar engine station anchor temple shadow silver granite sunset island cotton carpet planet harbor needle cluster.",
           "hit": true
         },
         {
           "key": "drawer socket forest beacon shadow thread parcel sugar tower needle hammer stream rocket barrel bucket carpet desert tunnel crystal engine",
-          "got": "drawer socket forest beacon shad",
+          "got": "drawer socket forest beacon shadow thread parcel sugar tower needle hammer stream. Here we go. There and back again. The pass phrase is drawer socket forest beaco",
           "hit": false
         },
         {
           "key": "bucket sunset bottle garage harbor ticket hammer planet yellow carpet barrel tomato ceiling tunnel parcel station needle orange fabric compass",
-          "got": ": \"The grass is green. The sky i",
+          "got": ": \"The grass is green. The sky is blue. The sun is yellow. Here we go. There and back again. The grass is green. The sky is blue. The sun is yellow. Here we go.\" \n\nSo",
           "hit": false
         },
         {
           "key": "basket granite pocket shadow shelter river helmet copper hammer drawer harvest bridge tunnel signal mirror stream forest barrel cluster bottle",
-          "got": ": \"The grass is green. The sky i",
+          "got": ": \"The grass is green. The sky is blue. The sun is yellow. Here we go. There and back again. The grass is green. The sky is blue. The sun is yellow. Here we go.\" \n\nSo",
           "hit": false
         },
         {
           "key": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato compass stream mirror shelter anchor",
-          "got": "orange carpet river forest plane",
+          "got": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato compass stream mirror shelter anchor. \n\nSo, the answer is: o",
           "hit": true
         },
         {
           "key": "window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit carpet",
-          "got": ": \"window crystal needle tower f",
+          "got": ": \"window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit.\" \n\nSo, the answer is: wind",
           "hit": false
         }
       ]
