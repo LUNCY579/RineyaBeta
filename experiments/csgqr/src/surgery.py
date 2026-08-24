@@ -271,6 +271,7 @@ def install_csgqr(model: nn.Module, layer: int, *,
                   lens_rank: int = 0,
                   temperature: float = 1.0,
                   utility_fn: Callable[[Tensor], Tensor] | None = None,
+                  gate_fn: Callable[[Tensor], Tensor] | None = None,
                   trace: RoutingTrace | None = None,
                   keep_donor_resident: bool = False) -> InstalledCSGQR:
     """Replace ``model.model.layers[layer].mlp`` with a gated quantized remnant.
@@ -306,8 +307,11 @@ def install_csgqr(model: nn.Module, layer: int, *,
         raise ValueError("policy.n_groups " + str(policy.n_groups)
                          + " disagrees with remnant n_groups " + str(n_groups))
 
+    # Only an arm whose policy actually gates on the exact vocabulary lens pays
+    # for a ConfidenceHead. A probe-gated arm must not construct one, or it would
+    # be charged the |V|/(3*d_ff) monitor cost it exists to avoid.
     head = None
-    if policy.mode not in ("none", "all", "fixed_fraction"):
+    if policy.needs_lens:
         head = ConfidenceHead(
             final_norm=model.model.norm,
             lm_head=model.lm_head,
@@ -315,7 +319,8 @@ def install_csgqr(model: nn.Module, layer: int, *,
             vocab_size=int(model.config.vocab_size),
             temperature=temperature)
 
-    module = CSGQRMlp(remnant, head, policy, utility_fn=utility_fn, trace=trace)
+    module = CSGQRMlp(remnant, head, policy, utility_fn=utility_fn,
+                      gate_fn=gate_fn, trace=trace)
     original = target.mlp
     target.mlp = module
 

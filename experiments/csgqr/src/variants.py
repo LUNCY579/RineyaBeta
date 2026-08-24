@@ -115,21 +115,69 @@ CATALOGUE: dict[str, Arm] = {
         "b7-conf-whole", "B7 confidence-only whole-remnant gate",
         "the simplest confidence method", INT4, "confidence_whole",
         tau_skip=0.9),
+    "b9-entropy-whole": Arm(
+        "b9-entropy-whole", "B9 entropy gate, whole remnant",
+        "confidence alternative: is the failure specific to max_prob?",
+        INT4, "confidence_whole", feature="neg_entropy", tau_skip=0.9),
+    "b10-margin-whole": Arm(
+        "b10-margin-whole", "B10 probability-margin gate, whole remnant",
+        "confidence alternative", INT4, "confidence_whole",
+        feature="prob_margin", tau_skip=0.9),
+    "b11-logitmargin-whole": Arm(
+        "b11-logitmargin-whole", "B11 logit-margin gate, whole remnant",
+        "confidence alternative; note logit_margin is not confined to [0,1] so "
+        "its threshold is in different units", INT4, "confidence_whole",
+        feature="logit_margin", tau_skip=4.0),
+    "b7-conf-whole-95": Arm(
+        "b7-conf-whole-95", "B7b confidence-only whole-remnant gate, tau=0.95",
+        "a stricter confidence threshold", INT4, "confidence_whole",
+        tau_skip=0.95),
     "b8-conf-random": Arm(
         "b8-conf-random", "B8 confidence + random groups",
         "isolates the confidence contribution from the significance one",
         INT4, "three_level", selector="random"),
-    "b9-sig-only": Arm(
-        "b9-sig-only", "B9 significance routing without confidence",
-        "isolates the significance contribution", INT4, "fixed_fraction",
-        selector="static_topk", fraction=0.5),
     "b10-csgqr": Arm(
-        "b10-csgqr", "B10 full CSGQR", "the proposed method",
-        INT4, "three_level", selector="static_topk"),
+        "b10-csgqr", "B10 CSGQR with a STATIC ranking",
+        "confidence-gated budget over a fixed global ranking; NOT the dynamic "
+        "form -- see b16-csgqr-dyn", INT4, "three_level", selector="static_topk"),
     "b13-wrong-layer": Arm(
-        "b13-wrong-layer", "B13 wrong-layer donor, always on",
+        "b13-wrong-layer", "B19 wrong-layer donor, always on",
         "does preserved donor identity matter at a matched byte budget?",
         INT4, "all", donor_offset=6),
+
+    # ----------------------------------------------------------------------
+    # Arms that require a trained probe. Until train_router.py produced an
+    # artifact these were unrunnable, and the campaign's dynamic-significance
+    # and probe-gate findings were offline analyses of traces rather than
+    # measurements of a model. Each of these needs --router and/or --probe;
+    # CSGQRMlp refuses to construct them without one rather than silently
+    # falling back to the static ranking, which is what it used to do.
+    # ----------------------------------------------------------------------
+    "b9-sig-dyn-25": Arm(
+        "b9-sig-dyn-25", "B14 dynamic per-state significance at rho=0.25",
+        "significance routing with NO confidence gate: isolates the "
+        "'which groups' decision at a matched budget", INT4, "fixed_fraction",
+        selector="significance", fraction=0.25),
+    "b9-sig-dyn-50": Arm(
+        "b9-sig-dyn-50", "B14b dynamic per-state significance at rho=0.50",
+        "the same contrast at a wider budget", INT4, "fixed_fraction",
+        selector="significance", fraction=0.50),
+    "b12-probe-whole": Arm(
+        "b12-probe-whole", "B13 hidden-state need probe, whole-remnant gate",
+        "the deployment gate: replaces the |V|/(3 d_ff) vocabulary projection "
+        "with a d_model linear readout", INT4, "confidence_whole",
+        feature="probe_need", tau_skip=0.5),
+    "b16-csgqr-dyn": Arm(
+        "b16-csgqr-dyn", "B16 full CSGQR: probe gate + dynamic significance",
+        "the proposed method in the only form the evidence supports -- probe "
+        "for how much, per-state utility for which groups",
+        INT4, "three_level", feature="probe_need", selector="significance",
+        tau_skip=0.7, tau_full=0.3),
+    "b16-csgqr-lens-dyn": Arm(
+        "b16-csgqr-lens-dyn", "B16b CSGQR with the exact lens gate",
+        "same dynamic significance, but gated on the exact vocabulary lens: "
+        "isolates the gate source from the group selector",
+        INT4, "three_level", feature="max_prob", selector="significance"),
 }
 
 
@@ -156,4 +204,22 @@ def matched_static(fraction: float, spec: QuantSpec = INT4,
 TIER1 = ("b0-dense", "b1-delete", "b2-fp-all", "b3-int8-all", "b4-int4-all",
          "b5-random-25", "b6-static-25", "b7-conf-whole", "b10-csgqr")
 TIER2 = ("b5-random-50", "b6-static-50", "b6-magnitude-25", "b6-shuffled-25",
-         "b6-reversed-25", "b8-conf-random", "b9-sig-only", "b13-wrong-layer")
+         "b6-reversed-25", "b8-conf-random", "b13-wrong-layer")
+
+#: Arms that cannot run without a trained artifact from ``train_router.py``.
+#: Listed explicitly so a sweep driver can fail early with a useful message
+#: instead of at install time, and so it is impossible to lose track of which
+#: arms are the dynamic ones.
+NEEDS_ROUTER = ("b9-sig-dyn-25", "b9-sig-dyn-50", "b16-csgqr-dyn",
+                "b16-csgqr-lens-dyn")
+NEEDS_PROBE = ("b12-probe-whole", "b16-csgqr-dyn")
+
+#: The dynamic half of the method, which was analysed offline but never executed
+#: before the probes existed.
+TIER3_DYNAMIC = ("b9-sig-dyn-25", "b9-sig-dyn-50", "b12-probe-whole",
+                 "b16-csgqr-dyn", "b16-csgqr-lens-dyn")
+
+#: Confidence-feature alternatives, to establish whether the raw-lens failure is
+#: specific to max_prob or general to the vocabulary projection.
+TIER2_FEATURES = ("b9-entropy-whole", "b10-margin-whole",
+                  "b11-logitmargin-whole", "b7-conf-whole-95")

@@ -76,15 +76,26 @@ ARMS = {
 }
 
 
-def load_prompts(path: Path, tokenizer, limit: int, max_len: int) -> list[dict]:
+def load_prompts(path: Path, tokenizer, limit: int, max_len: int,
+                 skip: int = 0) -> list[dict]:
     """Templated prompt+reply pairs with the reply boundary recorded.
 
     The boundary is computed from the *prompt-only* rendering with
     ``add_generation_prompt=True``, which is exactly how ``run_gates.py`` builds
     its input, so "reply positions" here are the positions that arm would have
     been generating under the real protocol.
+
+    ``skip`` discards the first ``skip`` *usable* prompts before collecting, so a
+    caller can take a slice disjoint from an earlier run's. This is what keeps a
+    probe's evaluation honest: the L20 trace was built from the first 96 usable
+    ``chat_dev`` prompts and the probes were fitted on a split of those, so
+    evaluating a probe-gated arm on prompts 0.. would score it partly on its own
+    training data. Counting *usable* rather than raw lines matters -- the filters
+    below reject records, so a raw-line offset would not line up with the earlier
+    run's prompt indices.
     """
     out: list[dict] = []
+    seen = 0
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip() or len(out) >= limit:
             break
@@ -102,6 +113,9 @@ def load_prompts(path: Path, tokenizer, limit: int, max_len: int) -> list[dict]:
         ids = tokenizer(full_text, return_tensors="pt").input_ids
         boundary = tokenizer(prompt_text, return_tensors="pt").input_ids.shape[1]
         if ids.shape[1] > max_len or boundary >= ids.shape[1]:
+            continue
+        seen += 1
+        if seen <= skip:
             continue
         out.append({"id": rec.get("id"), "ids": ids, "boundary": boundary,
                     "reply_tokens": ids.shape[1] - boundary})

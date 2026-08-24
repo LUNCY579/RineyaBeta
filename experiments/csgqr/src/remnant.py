@@ -272,7 +272,8 @@ def reference_group_output(mlp: nn.Module, x: Tensor, lo: int, hi: int) -> Tenso
 @torch.no_grad()
 def calibrate_alpha(remnant: QuantizedMlpRemnant, reference_mlp: nn.Module,
                     inputs: Tensor, *, per_group: bool = False,
-                    subset: list[int] | None = None) -> Tensor:
+                    subset: list[int] | None = None,
+                    against: str = "rows") -> Tensor:
     """Least-squares output gain for the quantized remnant.
 
     Scalar form, as specified::
@@ -297,14 +298,33 @@ def calibrate_alpha(remnant: QuantizedMlpRemnant, reference_mlp: nn.Module,
     ``verify_csgqr.py``: a bit-exact (bits=16) remnant must return alpha = 1 for
     every group, which the old form failed.
 
-    ``subset`` fits a *scalar* gain for the specific active group set, against
-    the donor's output restricted to the same rows. This is the gain a
-    partial-execution arm actually needs: at ``rho < 1`` the remnant reproduces
-    only part of ``F``, and the right question is not "how do I rescale a partial
-    sum to look like the whole MLP" -- it is "given that I am spending k groups,
-    what scalar makes those k groups' output closest to what those same k donor
-    channels would have produced". Fitting a partial sum against the *whole*
-    donor output would inflate the gain by roughly ``1/rho`` and is not offered.
+    ``subset`` fits a *scalar* gain for a specific active group set. ``against``
+    chooses the target, and the choice is a real modelling decision rather than a
+    detail:
+
+    ``"rows"``   the donor's output restricted to the **same** rows,
+                 ``sum_{g in A} F_g``. Answers "reproduce faithfully the channels
+                 I chose to spend". Conservative; converges to 1 for a lossless
+                 remnant.
+    ``"whole"``  the **whole** donor output ``F``. Answers "use the channels I
+                 chose to best approximate the entire layer", and it is the
+                 objective that actually minimises the perturbation to the
+                 residual stream, since the surviving model receives
+                 ``h + alpha F_A`` and would have received ``h + F``.
+
+    ``"whole"`` is the least-squares optimum for output fidelity, and its
+    magnitude is informative in its own right:
+
+        alpha = <F_A, F> / ||F_A||^2 = 1 + <F_A, F - F_A> / ||F_A||^2
+
+    so it is exactly 1 when the active groups are orthogonal to the inactive
+    ones, and rises toward ``1/rho`` as the groups become positively correlated
+    (in the degenerate case of identical groups, ``<6 F_g, 24 F_g> / ||6 F_g||^2
+    = 4 = 1/0.25``). An earlier version of this docstring asserted the ``1/rho``
+    inflation as though it were unconditional and used that to refuse the option;
+    that was wrong -- the inflation is a *measurement* of cross-group correlation,
+    not an artefact, and refusing to fit it left every routed arm running at
+    ``alpha = 1``. Both targets are offered and the difference is measured.
 
     Numerics. The design writes the denominator as ``E||F^Q(h)||^2 + eps``. An
     *absolute* eps is wrong here and measurably so: MLP output magnitudes depend
@@ -333,11 +353,18 @@ def calibrate_alpha(remnant: QuantizedMlpRemnant, reference_mlp: nn.Module,
     remnant.alpha.fill_(1.0)
     try:
         if subset is not None:
+            if against not in ("rows", "whole"):
+                raise ValueError("against must be 'rows' or 'whole'; got "
+                                 + str(against))
             groups = sorted(set(subset))
             if not groups:
                 return saved
-            ref = sum(reference_group_output(reference_mlp, flat,
-                                             *remnant.bounds[g]) for g in groups)
+            if against == "whole":
+                ref = reference_mlp(flat)
+            else:
+                ref = sum(reference_group_output(reference_mlp, flat,
+                                                 *remnant.bounds[g])
+                          for g in groups)
             value = gain(remnant.forward_groups(flat, groups), ref)
             return torch.full((remnant.n_groups,), value, dtype=torch.float32)
 
