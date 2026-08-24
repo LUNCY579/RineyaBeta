@@ -178,6 +178,44 @@ CATALOGUE: dict[str, Arm] = {
         "same dynamic significance, but gated on the exact vocabulary lens: "
         "isolates the gate source from the group selector",
         INT4, "three_level", feature="max_prob", selector="significance"),
+
+    # ----------------------------------------------------------------------
+    # The matched control for the "how much" gate. Skips a fixed fraction of
+    # tokens chosen at RANDOM, whole-remnant. Without this, comparing a gate at
+    # 79% activation against always-on at 100% conflates the gate's skill with
+    # the compute it spent, and H2 is untestable. tau_skip = t skips 1 - t of
+    # tokens, so these are set to match the measured activation of the gate arms
+    # they partner: 0.87, 0.84, 0.79, 0.68, 0.65.
+    # ----------------------------------------------------------------------
+    "r-tok-87": Arm(
+        "r-tok-87", "Random token gate at 87% activation",
+        "matched control for b11-logitmargin-whole", INT4,
+        "confidence_whole", feature="random_token", tau_skip=0.8702),
+    "r-tok-84": Arm(
+        "r-tok-84", "Random token gate at 84% activation",
+        "matched control for b10-margin-whole", INT4,
+        "confidence_whole", feature="random_token", tau_skip=0.8356),
+    "r-tok-79": Arm(
+        "r-tok-79", "Random token gate at 79% activation",
+        "matched control for b7-conf-whole", INT4,
+        "confidence_whole", feature="random_token", tau_skip=0.7889),
+    "r-tok-68": Arm(
+        "r-tok-68", "Random token gate at 68% activation",
+        "matched control for b12-probe-whole", INT4,
+        "confidence_whole", feature="random_token", tau_skip=0.6772),
+    "r-tok-65": Arm(
+        "r-tok-65", "Random token gate at 65% activation",
+        "matched control for b9-entropy-whole", INT4,
+        "confidence_whole", feature="random_token", tau_skip=0.6494),
+}
+
+#: Random-token-gate controls, and the arm each one is matched to.
+MATCHED_TOKEN_GATES = {
+    "r-tok-87": "b11-logitmargin-whole",
+    "r-tok-84": "b10-margin-whole",
+    "r-tok-79": "b7-conf-whole",
+    "r-tok-68": "b12-probe-whole",
+    "r-tok-65": "b9-entropy-whole",
 }
 
 

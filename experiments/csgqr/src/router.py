@@ -72,13 +72,24 @@ SELECTORS = ("significance", "random", "magnitude", "shuffled", "reversed",
 # remnant needed) before it reaches any threshold, so one policy implementation
 # serves both and a tau means the same kind of thing in each.
 FEATURES = ("max_prob", "neg_entropy", "prob_margin", "logit_margin",
-            "probe_need")
+            "probe_need", "random_token")
 
 # Features that come from the trained probe rather than the vocabulary lens.
 # Listing them here rather than testing a string at each call site keeps the
 # "does this arm need the LM-head projection?" question answerable in one place,
 # which is what decides whether an arm pays the |V|/(3*d_ff) monitor cost.
 PROBE_FEATURES = ("probe_need",)
+
+# Features that need no monitor at all. ``random_token`` draws a per-token
+# uniform, so ``confidence_whole`` with ``tau_skip = t`` skips a ``1 - t``
+# fraction of tokens chosen at random.
+#
+# This is the matched control the "how much" gate must beat, and without it H2
+# ("confidence gating beats random activation at matched compute") is untestable:
+# comparing a gate at 79% activation against always-on at 100% conflates the
+# gate's *skill* with the compute it spent. Every group-level arm already had a
+# random partner; the token-level gate did not.
+SYNTHETIC_FEATURES = ("random_token",)
 
 
 @dataclass
@@ -141,7 +152,24 @@ class RoutingPolicy:
     @property
     def needs_lens(self) -> bool:
         """Does it need the exact LM-head vocabulary projection?"""
-        return self.needs_gate_signal and self.feature not in PROBE_FEATURES
+        return (self.needs_gate_signal
+                and self.feature not in PROBE_FEATURES
+                and self.feature not in SYNTHETIC_FEATURES)
+
+    @property
+    def is_synthetic_gate(self) -> bool:
+        """Is the gate signal generated rather than measured?"""
+        return self.needs_gate_signal and self.feature in SYNTHETIC_FEATURES
+
+    def synthetic_confidence(self, token_index: int) -> float:
+        """A seeded per-token uniform draw, for the ``random_token`` control.
+
+        Keyed on the token index so the arm is reproducible, and on a different
+        multiplier from the ``random`` *selector* so a run that uses both does not
+        correlate its "whether" and "which" decisions.
+        """
+        g = torch.Generator().manual_seed(self.seed * 2_654_435_761 + token_index)
+        return float(torch.rand(1, generator=g).item())
 
     @property
     def needs_probe(self) -> bool:

@@ -201,13 +201,34 @@ with no power (§2.3). **Withdrawn.** It is recorded rather than deleted because
 the shape of the error is instructive: two independent measurements agreed, and
 both were noise.
 
-**2.4′ What replaced it.** At matched budget, per-state dynamic significance beats
-the static global ranking, which beats random — the ordering the method predicts.
-And the full method reaches a genuine **interior** operating point: 16.6% of
-tokens skipped, 55.5% at full remnant, 27.9% partial, at *lower* divergence than
-the binary whole-remnant probe gate for a *lower* active fraction. Whether that
-survives at full `n` is what the held-out run settles; unlike 2.4 it is at least
-predicted by the method rather than against it.
+**2.4′ And two more small-sample claims that also did not survive.** I recorded
+both at n=24 prompts; at n=414 held-out prompts neither holds.
+
+*"Dynamic significance beats static at matched budget."* It does not. At ρ=0.25
+static is 0.17822 [0.16990, 0.18710] and dynamic is 0.18253 [0.17356, 0.19252];
+at ρ=0.50 the order reverses (0.13565 vs 0.12943). Both intervals overlap at both
+budgets. The router is genuinely state-dependent — per-group selection rates run
+0.548 down to 0.018 where random is flat at 0.25 — so this is not a degenerate
+router. It works and buys nothing over a fixed global ranking.
+
+*"The three-level interior point beats the binary gate."* It does not. The full
+method (probe gate + dynamic significance, 17.5% skip / 52.2% full / 30.3%
+partial) reaches KL 0.05839 at 0.6819 active, against the binary probe gate's
+0.05703 at 0.6772 active. Slightly worse for slightly more compute — a tie.
+
+**What does survive** is narrower and is about the *selector*, not the routing
+policy: at matched ρ=0.25 the interventional significance ranking beats random
+(0.17822 vs 0.21563, non-overlapping), beats the **magnitude** heuristic (0.23719
+— itself worse than random), and **reversing** it is worse than random (0.24338).
+So the ranking carries real, order-dependent information that a weight-norm proxy
+does not. That is a genuine result about interventional utility labels, and it is
+the part of the Deja Vu comparison in §1.2 that this campaign can actually speak
+to.
+
+The pattern across 2.4, 2.4′ is worth naming: **every claim that favoured the
+method at small n dissolved at large n, while the claims that favoured the
+controls survived.** That asymmetry is what an honest sample-size discipline looks
+like from the inside.
 
 ---
 

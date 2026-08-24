@@ -165,7 +165,13 @@ class CSGQRMlp(nn.Module):
         n = flat_x.shape[0]
 
         # -- the "how much" signal ----------------------------------------
-        if self.policy.needs_probe:
+        if self.policy.is_synthetic_gate:
+            # The matched random-token control. No monitor is consulted, which is
+            # the point: it isolates how much of a gate's benefit is skill and
+            # how much is simply having spent that much compute.
+            conf = [self.policy.synthetic_confidence(self._token_counter + i)
+                    for i in range(n)]
+        elif self.policy.needs_probe:
             # The probe predicts *need*; the policy thresholds *maturity*. One
             # subtraction puts them in the same orientation so a single
             # three-level implementation serves the lens and the probe, and a
