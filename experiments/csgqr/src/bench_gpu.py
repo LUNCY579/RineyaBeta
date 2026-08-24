@@ -253,6 +253,10 @@ def main() -> None:
     ap.add_argument("--iters", type=int, default=15)
     ap.add_argument("--micro-tokens", type=int, default=512)
     ap.add_argument("--cap-mib", type=float, default=7000.0)
+    ap.add_argument("--router", default=None,
+                    help="trained group-utility router, for dynamic arms")
+    ap.add_argument("--probe", default=None,
+                    help="trained need probe, for probe-gated arms")
     ap.add_argument("--out", default="experiments/csgqr/results/gpu_bench.json")
     args = ap.parse_args()
 
@@ -264,6 +268,14 @@ def main() -> None:
     for a in arms:
         if a not in CATALOGUE:
             raise SystemExit("unknown arm " + a)
+
+    utility_fn = gate_fn = None
+    if args.router:
+        from probe_runtime import load_group_router                # noqa: PLC0415
+        utility_fn, _ = load_group_router(REPO / args.router, device)
+    if args.probe:
+        from probe_runtime import load_need_probe                  # noqa: PLC0415
+        gate_fn, _ = load_need_probe(REPO / args.probe, device)
 
     idle_smi = smi_used_mib()
     print("idle nvidia-smi used: " + str(idle_smi) + " MiB")
@@ -354,11 +366,19 @@ def main() -> None:
                                  n_groups=n_groups,
                                  policy=arm.policy(n_groups=n_groups),
                                  donor_layer=donor_layer, trace=trace,
+                                 utility_fn=utility_fn, gate_fn=gate_fn,
                                  keep_donor_resident=False)
             sync()
             install_report = inst.report()
             install_report["memory_delta_mib"] = \
                 (torch.cuda.memory_allocated() - before) / MIB
+
+        if install_report is not None:
+            print("  {:<16s} post-install allocated delta {:>+8.3f} MiB   "
+                  "(packed {:.3f} MiB, dense donor was {:.3f} MiB)".format(
+                      key, install_report["memory_delta_mib"],
+                      install_report["packed_bytes"]["total"] / MIB,
+                      install_report["dense_bytes"] / MIB))
 
         entry: dict = {
             "arm": key, "label": arm.label,

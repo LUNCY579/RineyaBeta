@@ -208,6 +208,20 @@ def verify_decomposition() -> None:
     r16 = QuantizedMlpRemnant(mlp, RemnantConfig(0, 24, QuantSpec(16, 0, True),
                                                  torch.float32))
     ref = mlp(x)
+    # The FP passthrough must COPY, not alias. If it aliases, the arm that exists
+    # to be the clean reference shares storage with the thing it references, the
+    # byte accounting overstates by 3x, and "the donor was freed" is false.
+    _fpsrc = toy_mlp(seed=31)
+    _fp = QuantizedMlpRemnant(_fpsrc, RemnantConfig(0, 8, QuantSpec(16, 0, True),
+                                                    torch.float32))
+    _before = _fp.gate_q.dense.clone()
+    with torch.no_grad():
+        _fpsrc.gate_proj.weight.mul_(2.0)
+    check("the FP passthrough remnant copies the donor rather than aliasing it",
+          torch.equal(_fp.gate_q.dense, _before)
+          and _fp.gate_q.dense.data_ptr() != _fpsrc.gate_proj.weight.data_ptr(),
+          "mutating the donor after construction does not change the remnant")
+
     check("fp passthrough remnant reproduces the source MLP bit-exactly",
           torch.equal(r16.forward(x), ref))
 

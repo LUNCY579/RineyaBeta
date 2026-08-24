@@ -214,7 +214,24 @@ class PackedMatrix(nn.Module):
 
         if spec.is_passthrough:
             # The FP donor arm. Stored at compute dtype, still a buffer.
-            self.register_buffer("dense", weight.detach().to(compute_dtype).contiguous())
+            #
+            # `.clone()` is load-bearing, not defensive. When the source weight is
+            # already `compute_dtype` on the target device -- which is the normal
+            # case -- `.to()` and `.contiguous()` are both no-ops that return the
+            # *same tensor*, so the buffer would alias the donor's storage. Two
+            # things then break, and the second is worse than the first:
+            #
+            #   1. Byte accounting. `packed_bytes()` reports 18 MiB for this arm
+            #      while `torch.cuda.memory_allocated` sees only the 6 MiB that
+            #      the transposed down_proj genuinely allocates -- measured, as a
+            #      ratio of 0.3334 against the analytic model in `bench_gpu.py`.
+            #   2. The freezing guarantee. An aliased buffer is not a frozen
+            #      copy: mutating the donor would change the remnant, and
+            #      `keep_donor_resident=False` would not actually free anything,
+            #      so the arm whose whole job is to be the clean reference would
+            #      be sharing storage with the thing it is a reference for.
+            self.register_buffer(
+                "dense", weight.detach().to(compute_dtype).contiguous().clone())
             self.block = self.cols
             self.n_blocks = 1
             return
