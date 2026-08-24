@@ -212,7 +212,7 @@ Three things are worth continuing, and they are all specific:
 2. **The interventional-utility label beats the magnitude proxy**, and the
    magnitude proxy is what the contextual-sparsity line uses. That is a
    contribution to someone else's method, not just this one.
-3. **Hard group skipping demonstrably works** (FP at ρ=0.25 in 55% of dense
+3. **Hard group skipping demonstrably works** (FP at ρ=0.25 in 70% of dense
    time). The systems failure is entirely dequantization overhead, which is a
    kernel problem with a known shape of solution.
 

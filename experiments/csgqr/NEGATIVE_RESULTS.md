@@ -345,8 +345,9 @@ the interior exists and is not worth occupying.** H6 falsified as "useful".
 ### N16. The quantized remnant is 5× slower than the layer it replaces
 
 Remnant sub-block alone, 512 tokens: dense `nn.Linear` 0.4649 ms, INT4 all groups
-**2.3221 ms** (5.00×), INT8 2.2656 ms (4.87×), FP passthrough 0.6592 ms (1.42×).
-At ρ=0.125 INT4 is still 2.39× dense.
+**2.3221 ms** (4.99×), INT8 2.2656 ms (4.87×), FP passthrough 0.6592 ms (1.42×).
+At ρ=0.125 INT4 is still 2.39× dense, so halving the groups does not halve the
+cost — the dequantization term is closer to fixed-per-call than proportional.
 
 Dequantization costs about **3.5×** what the saved matmul buys, and no routing
 policy addresses that — it is the price of reconstructing weights every forward.
@@ -413,11 +414,13 @@ share understates its latency by nearly three orders of magnitude. The deploymen
 argument survives at **~110×**; the magnitude was a FLOPs claim presented as a
 latency claim.
 
-Also: the closed form predicts the *projection* well (3.04× measured against
-3.556× predicted) and understates the **full** monitor by 4.6×, because the fp32
-log-softmax, entropy and top-2 over 32,768 classes is memory-bound and costs 3.6×
-the projection itself. A design budgeting for the projection alone under-budgets
-by 4.6×.
+Also: the closed form is wrong in **both** directions. It **over**states the
+projection alone (3.556× predicted, **2.20×** measured — the LM head is one large
+efficient GEMM while the MLP is three smaller ones) and **under**states the full
+monitor (**13.96×** measured), because the fp32 log-softmax, entropy and top-2
+over 32,768 classes is memory-bound and costs **6.35×** the projection itself.
+Overall it is out by **3.9×**. It remains the right tool for *rejecting* the exact
+gate — model-independent, no hardware needed — but it is not a cost model.
 
 ### N22. Two of three mechanisms have close prior art
 

@@ -44,7 +44,7 @@ Remnant sub-block alone, 512 tokens, bf16 activations. Ratios are within-run.
 | dense `nn.Linear` MLP | 0.4649 ms | 1.00× |
 | FP passthrough remnant, all groups | 0.6592 ms | **1.42×** |
 | INT8 remnant, all groups | 2.2656 ms | **4.87×** |
-| INT4 remnant, all groups | 2.3221 ms | **5.00×** |
+| INT4 remnant, all groups | 2.3221 ms | **4.99×** |
 
 **Dequantization costs about 3.5× what the matmul saves.** The INT4 remnant is
 five times slower than simply running the dense bf16 layer. That is not a
@@ -58,24 +58,37 @@ The FP passthrough isolates the two contributions: the *code path* costs 1.42×
 
 From the same run:
 
-| ρ | FP passthrough | vs dense | INT4 | vs dense |
-| ---: | ---: | ---: | ---: | ---: |
-| 0.125 | 0.2279 ms | **0.49×** | 1.1105 ms | 2.39× |
-| 0.25 | 0.2570 ms | **0.55×** | 1.1241 ms | 2.42× |
-| 0.50 | 0.3687 ms | 0.79× | 1.3795 ms | 2.97× |
-| 0.75 | 0.5364 ms | 1.15× | 1.3357 ms | 2.87× |
-| 1.00 | 0.6592 ms | 1.42× | 2.3221 ms | 5.00× |
+| ρ | FP passthrough | vs dense | INT8 | vs dense | INT4 | vs dense |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0.125 | 0.3172 ms | **0.68×** | 0.8495 ms | 1.83× | 1.1131 ms | 2.39× |
+| 0.25 | 0.3263 ms | **0.70×** | 0.8732 ms | 1.88× | 1.1378 ms | 2.45× |
+| 0.50 | 0.4101 ms | 0.88× | 0.9542 ms | 2.05× | 1.2109 ms | 2.60× |
+| 0.75 | 0.5393 ms | 1.16× | 1.1546 ms | 2.48× | 1.2876 ms | 2.77× |
+| 1.00 | 0.6592 ms | 1.42× | 2.2656 ms | 4.87× | 2.3221 ms | 4.99× |
 
-The mechanism works: at ρ=0.25 the FP remnant runs in **55%** of the dense MLP's
-time, and the trend is monotone in ρ. So "execute only the selected groups" is a
-real compute saving and the hard-skip implementation delivers it.
+The mechanism works: at ρ=0.25 the FP remnant runs in **70%** of the dense MLP's
+time, and every column is **monotone in ρ**. So "execute only the selected
+groups" is a real compute saving and the hard-skip implementation delivers it.
+
+> **Provenance correction.** An earlier revision of this table quoted the ρ<1
+> rows from the *first* benchmark run while the ρ=1 row came from the committed
+> third run — mixing two runs in one table. The figures above are all from
+> `results/gpu_bench.json`, and `verify_claims.py` now pins each ratio to that
+> file so the two cannot drift again. The earlier revision also called the INT4
+> column "visibly non-monotone"; in the committed run it is monotone
+> (2.39 → 2.45 → 2.60 → 2.77), and that observation is withdrawn. It was an
+> artefact of contention in the run it came from, which is precisely the reason
+> §0 says absolute latencies from a shared card are not usable.
 
 But for the **quantized** remnant — the only version that saves storage — every
 operating point is 2.4–5.0× the dense layer. Routing down to an eighth of the
 groups still leaves it 2.4× slower than not compressing at all.
 
-The INT4 column is also visibly **non-monotone** (ρ=0.75 is faster than ρ=0.50),
-which is what a launch-bound, shape-sensitive workload looks like at this size.
+Note also how weakly INT4 scales with ρ: 2.39× at an eighth of the groups against
+4.99× at all of them. Halving the groups does not halve the cost, because the
+dequantization term is closer to fixed-overhead-per-call than to
+proportional-to-rows at this size. That is the shape of the problem a fused
+kernel would have to fix.
 
 ---
 
@@ -88,7 +101,7 @@ Per 512 tokens, against the dense MLP in the same run.
 | need probe (`d_model → 1`) | 0.0581 ms | **12.50%** | 0.0109% |
 | group router (`d_model → 24`) | 0.0571 ms | **12.28%** | 0.2604% |
 | need + router together | 0.0950 ms | **20.44%** | 0.2713% |
-| exact lens, projection only | 1.4120 ms | 303.7% | 355.6% |
+| exact lens, projection only | 1.0223 ms | 219.9% | 355.6% |
 | exact lens + feature reduction | 6.4890 ms | **1395.8%** | — |
 
 **This is a correction to a claim this campaign had been making.** The
@@ -106,12 +119,18 @@ The honest statement of the deployment argument:
 magnitude cheaper" is a FLOPs claim masquerading as a latency claim, and it is
 withdrawn.
 
-Note also that the closed form `|V|/(3·d_ff) = 3.556×` predicts the
-*projection-only* cost well (measured 3.04×, within contention noise) and
-badly understates the **full** monitor, because the feature reduction —
-log-softmax, entropy and top-2 over 32,768 classes in float32 — is memory-bound
-and costs 3.6× the projection itself. A design that budgeted for the projection
-alone would have under-budgeted by 4.6×.
+Note also what the closed form does and does not predict. `|V|/(3·d_ff) = 3.556×`
+**over**states the projection alone — measured **2.20×** — because the LM head is
+one large efficient GEMM while the MLP it is compared against is three smaller
+ones, so the MAC ratio does not translate into a time ratio even here. And it
+badly **under**states the *full* monitor, measured at **13.96×**, because the
+feature reduction — log-softmax, entropy and top-2 over 32,768 classes in float32
+— is memory-bound and costs **6.35×** the projection itself.
+
+So a design that budgeted from the closed form would have been wrong in both
+directions and out by **3.9×** overall. The closed form is still the right tool
+for ruling the exact gate out — it is model-independent and needs no hardware —
+but it is a *sufficiency* argument for rejection, not a cost model.
 
 ---
 
@@ -226,7 +245,7 @@ dequantization cost the analytic ceiling did not model.
 
 ### And one positive systems result worth keeping
 
-The FP passthrough at ρ=0.25 runs in **55%** of the dense MLP's time, monotone in
+The FP passthrough at ρ=0.25 runs in **70%** of the dense MLP's time, monotone in
 ρ. **Hard group skipping is real and it works** — the executed-sparsity
 implementation delivers genuine compute reduction. The problem is entirely that
 dequantization currently costs more than the sparsity saves. That separates a

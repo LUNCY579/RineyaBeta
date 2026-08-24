@@ -231,6 +231,51 @@ def add_checks(claim, section, load) -> None:
               "(FP at rho=0.25 is faster than dense)", "gpu_bench.json", True,
               r < 1.0, note=format(r, ".2f") + "x dense")
 
+    # Pin every ratio the documents quote to this file. A doc that quotes a
+    # number from a different run than the committed JSON is a provenance error,
+    # and it happened once: an earlier GPU_BENCHMARKS table mixed run-1 rho<1
+    # rows with the committed run-3 rho=1 row. These checks make that fail.
+    if dense:
+        documented = {
+            "fp_rho0.125": 0.68, "fp_rho0.250": 0.70, "fp_rho0.500": 0.88,
+            "fp_rho0.750": 1.16, "fp_all": 1.42,
+            "int8_rho0.125": 1.83, "int8_rho0.250": 1.88, "int8_all": 4.87,
+            "int4_rho0.125": 2.39, "int4_rho0.250": 2.45, "int4_rho0.500": 2.60,
+            "int4_rho0.750": 2.77, "int4_all": 4.99,
+        }
+        drift = {k: round(micro[k]["p50_s"] / dense, 2)
+                 for k, v in documented.items()
+                 if k in micro and abs(micro[k]["p50_s"] / dense - v) > 0.005}
+        claim("every microbenchmark ratio quoted in GPU_BENCHMARKS matches this "
+              "file", "gpu_bench.json", True, not drift,
+              note=("all " + str(len(documented)) + " ratios match")
+                   if not drift else "DRIFTED: " + str(drift))
+        # And the routing trend must be monotone in rho for each format, which
+        # is the claim the documents now make.
+        for fam in ("fp", "int8", "int4"):
+            seq = [micro[fam + "_rho" + f]["p50_s"]
+                   for f in ("0.125", "0.250", "0.500", "0.750")
+                   if fam + "_rho" + f in micro]
+            if len(seq) == 4:
+                claim(fam + " cost is monotone increasing in rho",
+                      "gpu_bench.json", True,
+                      all(seq[i] < seq[i + 1] for i in range(3)),
+                      note="  ".join(format(1000 * s, ".3f") for s in seq) + " ms")
+
+    cp = gb.get("confidence_projection") or {}
+    if dense and cp:
+        proj = cp["projection_only"]["p50_s"] / dense
+        full = cp["projection_plus_features"]["p50_s"] / dense
+        claim("the closed form OVERstates the projection-only cost "
+              "(3.556x predicted, ~2.2x measured)", "gpu_bench.json", True,
+              proj < 3.556, note=format(proj, ".2f") + "x dense")
+        claim("...and UNDERstates the full monitor including the fp32 reduction",
+              "gpu_bench.json", True, full > 3.556,
+              note=format(full, ".2f") + "x dense; reduction alone is "
+                   + format(cp["projection_plus_features"]["p50_s"]
+                            / cp["projection_only"]["p50_s"], ".2f")
+                   + "x the projection")
+
     share = gb.get("monitor_share_of_dense_mlp") or {}
     if share:
         claim("the exact-lens monitor costs MORE than the MLP it gates",

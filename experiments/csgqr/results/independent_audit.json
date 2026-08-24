@@ -1,0 +1,206 @@
+{
+  "total": 40,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "qweight dtype is uint8",
+      "ok": true,
+      "detail": "torch.uint8"
+    },
+    {
+      "name": "qweight holds exactly cols/2 bytes per row (two values per byte)",
+      "ok": true,
+      "detail": "(64, 128) for a (64, 256) matrix"
+    },
+    {
+      "name": "hand-decoded nibbles reproduce dequantize() exactly",
+      "ok": true,
+      "detail": "max abs diff = 0.000e+00"
+    },
+    {
+      "name": "every stored code fits in 4 bits",
+      "ok": true,
+      "detail": "max low nibble 15, max high nibble 15"
+    },
+    {
+      "name": "packed bytes equal rows*cols/2 exactly",
+      "ok": true,
+      "detail": "8,192 B for 16,384 weights"
+    },
+    {
+      "name": "4-bit reconstruction is lossy but close (0 < rel err < 0.15)",
+      "ok": true,
+      "detail": "rel_fro = 0.10103"
+    },
+    {
+      "name": "rows dequantized for groups [] == 3 x selected",
+      "ok": true,
+      "detail": "touched 0, expected 0, calls 0"
+    },
+    {
+      "name": "no row outside the selected groups is dequantized []",
+      "ok": true,
+      "detail": "stray rows: 0"
+    },
+    {
+      "name": "rows dequantized for groups [3] == 3 x selected",
+      "ok": true,
+      "detail": "touched 96, expected 96, calls 3"
+    },
+    {
+      "name": "no row outside the selected groups is dequantized [3]",
+      "ok": true,
+      "detail": "stray rows: 0"
+    },
+    {
+      "name": "rows dequantized for groups [0, 1, 2, 3] == 3 x selected",
+      "ok": true,
+      "detail": "touched 384, expected 384, calls 3"
+    },
+    {
+      "name": "no row outside the selected groups is dequantized [0, 1, 2, 3]",
+      "ok": true,
+      "detail": "stray rows: 0"
+    },
+    {
+      "name": "rows dequantized for groups [5, 7, 9, 11] == 3 x selected",
+      "ok": true,
+      "detail": "touched 384, expected 384, calls 12"
+    },
+    {
+      "name": "no row outside the selected groups is dequantized [5, 7, 9, 11]",
+      "ok": true,
+      "detail": "stray rows: 0"
+    },
+    {
+      "name": "rows dequantized for groups [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] == 3 x selected",
+      "ok": true,
+      "detail": "touched 2304, expected 2304, calls 3"
+    },
+    {
+      "name": "no row outside the selected groups is dequantized [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]",
+      "ok": true,
+      "detail": "stray rows: 0"
+    },
+    {
+      "name": "partial output equals a hand-built slice of the full weights",
+      "ok": true,
+      "detail": "max abs diff 0.000e+00"
+    },
+    {
+      "name": "additivity holds in float64 to < 1e-14 (raw-tensor derivation)",
+      "ok": true,
+      "detail": "rel err = 1.034e-15"
+    },
+    {
+      "name": "a down_proj bias WOULD break additivity (counted once per group)",
+      "ok": true,
+      "detail": "the constructor refuses a biased down_proj for this reason"
+    },
+    {
+      "name": "the remnant exposes ZERO trainable parameters",
+      "ok": true,
+      "detail": "0 parameters"
+    },
+    {
+      "name": "packed storage is registered as buffers",
+      "ok": true,
+      "detail": "10 buffers: alpha, gate_q.qweight, gate_q.scales, gate_q.zeros ..."
+    },
+    {
+      "name": "every qweight buffer is an integer dtype (autograd cannot track it)",
+      "ok": true,
+      "detail": "{'torch.uint8'}"
+    },
+    {
+      "name": "torch.optim.SGD(rem.parameters()) raises 'empty parameter list'",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a backward pass through the remnant leaves packed weights unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "...and gradient still flows to the INPUT (the remnant is not detached)",
+      "ok": true,
+      "detail": "grad norm 1.3835"
+    },
+    {
+      "name": "all five held-out batches are committed",
+      "ok": true,
+      "detail": "44 distinct arms"
+    },
+    {
+      "name": "INT4 recovery recomputed from raw KLs = 0.963",
+      "ok": true,
+      "detail": "(0.28055 - 0.01049) / 0.28055 = 0.9626"
+    },
+    {
+      "name": "wrong-layer donor is worse than deletion, recomputed",
+      "ok": true,
+      "detail": "0.78649 > 0.28055  ratio vs correct donor 75.0x"
+    },
+    {
+      "name": "at rho=0.25: static < random, and magnitude/reversed > random",
+      "ok": true,
+      "detail": "b6-static-25 0.17822  b9-sig-dyn-25 0.18253  b5-random-25 0.21563  b6-magnitude-25 0.23719  b6-reversed-25 0.24338"
+    },
+    {
+      "name": "every rho=0.25 arm has active_fraction EXACTLY 0.25",
+      "ok": true,
+      "detail": "{'b5-random-25': 0.25, 'b6-static-25': 0.25, 'b6-magnitude-25': 0.25, 'b6-reversed-25': 0.25, 'b9-sig-dyn-25': 0.25}"
+    },
+    {
+      "name": "H2 pair b7-conf-whole is activation-matched to r-tok-79",
+      "ok": true,
+      "detail": "0.7889 vs 0.7908"
+    },
+    {
+      "name": "H2 pair b7-conf-whole beats it with disjoint intervals",
+      "ok": true,
+      "detail": "0.04212 vs 0.06572"
+    },
+    {
+      "name": "H2 pair b12-probe-whole is activation-matched to r-tok-68",
+      "ok": true,
+      "detail": "0.6772 vs 0.6790"
+    },
+    {
+      "name": "H2 pair b12-probe-whole beats it with disjoint intervals",
+      "ok": true,
+      "detail": "0.05703 vs 0.09469"
+    },
+    {
+      "name": "the additive proxy overstates true utility for every selection",
+      "ok": true,
+      "detail": "random 1.14x  static 1.57x  dynamic 4.00x"
+    },
+    {
+      "name": "the overstatement grows with how per-token the selection is",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the proxy ORACLE at k=12 exceeds the true utility of all 24 groups",
+      "ok": true,
+      "detail": "0.63376 > 0.27006"
+    },
+    {
+      "name": "INT4 remnant is slower than the dense MLP it replaces",
+      "ok": true,
+      "detail": "4.99x"
+    },
+    {
+      "name": "FP remnant at rho=0.25 is FASTER than dense (so hard skipping does work)",
+      "ok": true,
+      "detail": "0.70x"
+    },
+    {
+      "name": "measured probe share is >100x its MAC share of 0.0109%",
+      "ok": true,
+      "detail": "measured 12.50%"
+    }
+  ]
+}

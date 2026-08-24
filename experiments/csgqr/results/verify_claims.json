@@ -1,6 +1,6 @@
 {
-  "total": 105,
-  "ok": 105,
+  "total": 111,
+  "ok": 111,
   "failed": 0,
   "missing": 0,
   "checks": [
@@ -903,6 +903,60 @@
       "actual": true,
       "tol": 0.0,
       "note": "0.70x dense"
+    },
+    {
+      "claim": "every microbenchmark ratio quoted in GPU_BENCHMARKS matches this file",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "all 13 ratios match"
+    },
+    {
+      "claim": "fp cost is monotone increasing in rho",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.317  0.326  0.410  0.539 ms"
+    },
+    {
+      "claim": "int8 cost is monotone increasing in rho",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.850  0.873  0.954  1.155 ms"
+    },
+    {
+      "claim": "int4 cost is monotone increasing in rho",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "1.113  1.138  1.211  1.288 ms"
+    },
+    {
+      "claim": "the closed form OVERstates the projection-only cost (3.556x predicted, ~2.2x measured)",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "2.20x dense"
+    },
+    {
+      "claim": "...and UNDERstates the full monitor including the fp32 reduction",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "13.96x dense; reduction alone is 6.35x the projection"
     },
     {
       "claim": "the exact-lens monitor costs MORE than the MLP it gates",

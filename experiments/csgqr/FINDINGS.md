@@ -264,15 +264,19 @@ Remnant sub-block alone, 512 tokens (`GPU_BENCHMARKS.md`):
 | path | P50 | vs dense MLP |
 | --- | ---: | ---: |
 | dense `nn.Linear` | 0.4649 ms | 1.00× |
-| FP passthrough, ρ=0.25 | **0.2570 ms** | **0.55×** |
+| FP passthrough, ρ=0.125 | **0.3172 ms** | **0.68×** |
+| FP passthrough, ρ=0.25 | **0.3263 ms** | **0.70×** |
 | FP passthrough, ρ=1.0 | 0.6592 ms | 1.42× |
-| INT4, ρ=0.125 | 1.1105 ms | 2.39× |
-| INT4, ρ=1.0 | 2.3221 ms | 5.00× |
+| INT4, ρ=0.125 | 1.1131 ms | 2.39× |
+| INT4, ρ=1.0 | 2.3221 ms | 4.99× |
 
 **The mechanism is vindicated and the compression is not.** Executed sparsity
-delivers a genuine compute reduction — the FP remnant at ρ=0.25 runs in 55% of
+delivers a genuine compute reduction — the FP remnant at ρ=0.25 runs in **70%** of
 the dense MLP's time, monotone in ρ — which confirms that inactive groups really
-are never dequantized and never enter a matmul. But dequantization costs ~3.5×
+are never dequantized and never enter a matmul. That confirmation is not only a
+timing inference: `independent_audit.py` instruments `PackedMatrix.dequantize` and
+counts **zero** rows touched for an empty selection, exactly `3 × selected` rows
+otherwise, and **zero** rows outside the selected groups. But dequantization costs ~3.5×
 what the saved matmul buys, so *every* quantized operating point is 2.4–5.0×
 slower than simply not compressing.
 
@@ -294,9 +298,11 @@ up.
 `|V| / (3·d_ff) = 32768 / 9216 = 3.556×`. A gate skipping on every token would
 still cost 3.56× what it saved. Viability needs `|V| < 3·d_ff`; for production
 models (`|V|` ≈ 128–256k, `d_ff` ≈ 8–28k) it is worse, not better. Measured: the
-projection alone is 3.04× (within contention noise of the closed form) and the
-full monitor including the fp32 feature reduction is **13.96×**, so a design that
-budgeted for the projection alone would have under-budgeted by 4.6×.
+projection alone is **2.20×** — the closed form *over*states it, because the LM
+head is one large efficient GEMM against the MLP's three smaller ones — while the
+full monitor including the fp32 feature reduction is **13.96×**. So the closed
+form is wrong in both directions and out by 3.9× overall. It remains the right
+tool for *rejecting* the exact gate, and it is not a cost model.
 
 **The single-layer systems ceiling is below measurement noise.** One MLP is 1.99%
 of the model. INT4 saves 13.29 MiB = 1.47% of model VRAM; `ρ = 0` removes 1.99% of

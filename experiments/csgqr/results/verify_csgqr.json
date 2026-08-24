@@ -3,7 +3,7 @@
   "total": 123,
   "passed": 123,
   "failed": 0,
-  "elapsed_s": 0.61,
+  "elapsed_s": 0.62,
   "checks": [
     {
       "name": "4-bit pack/unpack is a bijection at even and odd widths",
