@@ -144,3 +144,48 @@ programme leans on constantly or overturns it.
 State the cause, cite the measurement that demonstrates it, and move the entry to a
 **Resolved** section with the date. Do not delete it — a resolved anomaly is a record
 of how the mechanism actually behaves, and the reasoning is worth more than the verdict.
+
+---
+
+# Resolved
+
+## O5 — RESOLVED 2026-08-23: the exemption is real, the headline is not a free lunch
+
+**Cause found, in code.** `scripts/kv/chunked_prefill.py:120`:
+
+```python
+if compress_fn is not None and ci < n_chunks - 1:
+```
+
+The **final chunk is never compressed**. That is a genuine exemption and it was worth
+suspecting. But it does not reach the needles.
+
+At 128K the prompt is 125,826 real tokens in chunk=4096 → **31 chunks, 30
+compressions**, with the exempt chunk covering positions [122,880, 125,826). Needle
+positions, taken from the committed span trace rather than estimated:
+
+| depth | needle span | chunk | in the exempt chunk? | compressions faced |
+|---:|---|---:|---|---:|
+| 0.1 | [12,606, 12,632) | 3 | no | **27** |
+| 0.5 | [62,910, 62,936) | 15 | no | **15** |
+| 0.9 | [113,214, 113,240) | 27 | no | **3** |
+
+No needle lands in the exempt chunk at any depth, so no cell survives without the
+mechanism. The exempt region holds the question, which is where it belongs.
+
+**And the headline holds on the hardest depth alone.** 128K/B=16 causal scores 1.00 at
+depth 0.1 — 12/12 needles that each survived 27 compression rounds with 8 heavy slots.
+The claim does not depend on averaging in the easy depth.
+
+## O7 — RESOLVED 2026-08-23: the depth asymmetry, finally measured
+
+The findings repeated throughout that "a late needle enters in a late chunk and
+survives few compression rounds". It was never measured. It is now, in the table
+above: **27 rounds at depth 0.1 against 3 at depth 0.9 — a 9× difference in exposure.**
+
+**A methodological consequence that applies to every cell in this programme.** The
+three depths are *not* equally difficult, so the pooled three-depth mean overweights
+the easy one. A cell reported as 0.972 may be 12/12 at depth 0.9 and 11/12 at depth
+0.1, and those are not the same result. Depth-wise numbers are reported throughout and
+should be read in preference to the mean wherever the two disagree — and the depth-0.1
+column is the one that carries the claim.
