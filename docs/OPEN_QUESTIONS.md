@@ -283,3 +283,53 @@ Both clear a floor comfortably. This model *can* chain hops, unlike its performa
 `Rineya_Long_Context_Demo_v1` (0.2031 against a 0.2500 constant-abstention baseline),
 so stage 3's compression numbers will measure the mechanism rather than the model's
 incapacity. Stage 3 is viable and the hop ladder can proceed.
+
+## O8 — PARTLY RESOLVED 2026-08-24: the model does not degrade with span length
+
+Full cache, no compression, 16K:
+
+| span | d0.1 | d0.5 | d0.9 | accuracy |
+|---:|---:|---:|---:|---:|
+| 3 | 0.83 | 0.92 | 0.92 | 0.889 |
+| 12 | 0.67 | 0.92 | 0.83 | 0.806 |
+| 20 | 1.00 | 0.92 | 0.92 | **0.944** |
+
+Roughly **flat at ~0.88**, not monotonic, and W=20 is the *highest* of the three. At
+n=12 needles that spread is noise. There is no recitation ceiling falling with span
+length, and the suggestion that one might explain the stage 2 curve is **withdrawn**.
+
+**What changes.** At W=12 the compressed arm scores 0.861 against an uncompressed
+0.806 — no measurable compression cost — so "stage 2 declines monotonically with span
+length" is **wrong at its middle point and retracted**.
+
+**What does not.** At W=20 the compressed arm scores 0.528 against an uncompressed
+0.944. That is a real cost of −0.417, so **O1 stands** rather than dissolving.
+
+**The W=20 comparison is not matched and must not be quoted as if it were.** The gate
+is 16K uncompressed; the compressed arm is 128K, facing eight times the context and 27
+compression rounds. The gap mixes span length with context length. The matched cell —
+compressed W=20 at 16K — is queued and settles it: near 0.944 means the collapse is
+context-driven and the span account is wrong; near 0.528 means span length is the cause.
+
+**And the depth inversion is not a compression signal.** At W=12 *uncompressed* the
+depths run 0.67 / 0.92 / 0.83 with no compression at all, so the ordering that triggered
+O8 is a property of the word-phrase task. The alarm was right and its reason was wrong:
+the gate was necessary, but depth ordering carries no diagnostic information here,
+unlike on digit needles where it tracks compression rounds (O7).
+
+## Halo 16K full cache — OOM, and the cap was mine
+
+Recorded rather than hidden: the first Halo reference arm lost all 36 trials to OOM at
+a 3,500 MiB cap, reaching 3,147.8 MiB. My core's 16K full cache peaks at 3,013 MiB and
+Halo's weights are 233 MiB larger, so ~3,246 MiB was expected and 3,500 left only 11%
+headroom for transient allocations. Re-queued at 4,400.
+
+The harness behaved correctly throughout: trials excluded not scored, `ooms=12` per
+cell, `acc=None`, and the warning that an empty cell is not a failure. That guard exists
+because a 64K full-cache reference once became a "result" this way.
+
+**A properly sized 32K Halo reference would need ~6,164 MiB against a demonstrated-safe
+allocated ceiling of 4,972.9 MiB on this card.** If that arm also OOMs, the honest
+statement is not that compression is cheaper at 32K but that on this hardware a
+full-cache Halo run at 32K does not exist to be compared against — which is the
+practicability claim arriving as data.

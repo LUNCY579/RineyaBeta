@@ -1,0 +1,255 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 512,
+  "recent_flag": 512,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": null,
+  "pool_fwd": null,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 3,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 3500.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 16384,
+      "real_tokens": 15708,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 0.8333333333333334,
+      "peak_mib": 3007.3,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": "window island summit",
+          "got": "window island summit. \n\nThe pass phrase is w",
+          "hit": true
+        },
+        {
+          "key": "summit thread signal",
+          "got": "the phrase that is green. The sky is blue. T",
+          "hit": false
+        },
+        {
+          "key": "button stream garage",
+          "got": "button stream garage. \n\nThe grass is green. ",
+          "hit": true
+        },
+        {
+          "key": "signal planet tower",
+          "got": "signal planet tower. \n\nThe pass phrase is s",
+          "hit": true
+        },
+        {
+          "key": "station bucket planet",
+          "got": "station bucket planet. Remember it. \n\nstation",
+          "hit": true
+        },
+        {
+          "key": "socket summit stream",
+          "got": "socket summit stream. Remember it. \n\nOkay, s",
+          "hit": true
+        },
+        {
+          "key": "blanket orange sugar",
+          "got": "blanket orange sugar. Remember it. \n\nThe pas",
+          "hit": true
+        },
+        {
+          "key": "orange mirror bottle",
+          "got": "orange mirror bottle. \n\nThe pass phrase is o",
+          "hit": true
+        },
+        {
+          "key": "button mountain bottle",
+          "got": "button mountain bottle. \n\nThe pass phrase is b",
+          "hit": true
+        },
+        {
+          "key": "packet lantern summit",
+          "got": "packet lantern summit. Remember it. \n\nThe pas",
+          "hit": true
+        },
+        {
+          "key": "forest granite mountain",
+          "got": "the grass is green. The sky is blue. The sun is",
+          "hit": false
+        },
+        {
+          "key": "diamond basket mountain",
+          "got": "diamond basket mountain. Remember it. \n\nThe pas",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 16384,
+      "real_tokens": 15708,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 0.9166666666666666,
+      "peak_mib": 3007.3,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": "window island summit",
+          "got": "window island summit. Remember it.\n\nThe pass",
+          "hit": true
+        },
+        {
+          "key": "summit thread signal",
+          "got": "the grass is green. The sky is blue. The sun",
+          "hit": false
+        },
+        {
+          "key": "button stream garage",
+          "got": "button stream garage. Remember it. button st",
+          "hit": true
+        },
+        {
+          "key": "signal planet tower",
+          "got": "signal planet tower. Remember it. \n\nThe pas",
+          "hit": true
+        },
+        {
+          "key": "station bucket planet",
+          "got": "station bucket planet. Remember it. station b",
+          "hit": true
+        },
+        {
+          "key": "socket summit stream",
+          "got": "socket summit stream. Remember it. Socket su",
+          "hit": true
+        },
+        {
+          "key": "blanket orange sugar",
+          "got": "blanket orange sugar. Remember it.\n\nThe pass",
+          "hit": true
+        },
+        {
+          "key": "orange mirror bottle",
+          "got": "orange mirror bottle. Remember it.\n\nThe pass",
+          "hit": true
+        },
+        {
+          "key": "button mountain bottle",
+          "got": "button mountain bottle. Remember it. button mo",
+          "hit": true
+        },
+        {
+          "key": "packet lantern summit",
+          "got": "packet lantern summit. Remember it. \n\nThe pas",
+          "hit": true
+        },
+        {
+          "key": "forest granite mountain",
+          "got": "forest granite mountain.\n\nThe grass is green. T",
+          "hit": true
+        },
+        {
+          "key": "diamond basket mountain",
+          "got": "diamond basket mountain. Remember it. \n\nThe pas",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 16384,
+      "real_tokens": 15708,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 0.9166666666666666,
+      "peak_mib": 3007.3,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": "window island summit",
+          "got": "window island summit. Remember it. window is",
+          "hit": true
+        },
+        {
+          "key": "summit thread signal",
+          "got": "the sum of the thread. \n\nThe grass is green.",
+          "hit": false
+        },
+        {
+          "key": "button stream garage",
+          "got": "button stream garage. Remember it. button st",
+          "hit": true
+        },
+        {
+          "key": "signal planet tower",
+          "got": "signal planet tower. Remember it. signal pl",
+          "hit": true
+        },
+        {
+          "key": "station bucket planet",
+          "got": "station bucket planet. Remember it. station b",
+          "hit": true
+        },
+        {
+          "key": "socket summit stream",
+          "got": "socket summit stream. Remember it. Socket su",
+          "hit": true
+        },
+        {
+          "key": "blanket orange sugar",
+          "got": "blanket orange sugar. Remember it. blanket o",
+          "hit": true
+        },
+        {
+          "key": "orange mirror bottle",
+          "got": "orange mirror bottle. Remember it. orange mi",
+          "hit": true
+        },
+        {
+          "key": "button mountain bottle",
+          "got": "button mountain bottle.\n\nThe grass is green. T",
+          "hit": true
+        },
+        {
+          "key": "packet lantern summit",
+          "got": "packet lantern summit. Remember it. Packet la",
+          "hit": true
+        },
+        {
+          "key": "forest granite mountain",
+          "got": "forest granite mountain. \n\nThe grass is green. ",
+          "hit": true
+        },
+        {
+          "key": "diamond basket mountain",
+          "got": "diamond basket mountain. \n\nThe grass is green. ",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}
