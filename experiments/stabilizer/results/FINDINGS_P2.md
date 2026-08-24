@@ -336,7 +336,12 @@ nothing — which is exactly what the table shows.
 Every digit is one token (verified: `75526` → `'7','5','5','2','6'`), so a *d*-digit
 key is a *d*-token span. If the payload must reach its head, the requirement is
 
-> **back ≥ d − 1**
+> **back ≥ d − 1**  
+> **RETRACTED 2026-08-24 — see O2 in `docs/OPEN_QUESTIONS.md`.** Extending d=7
+> past the threshold gives 0.778 at back=6, 0.944 at back=7 and **1.000 only at
+> back=8**. This form was fitted on d=4 and d=5 and does not extrapolate. What
+> survives is that the requirement TRACKS THE SPAN and is not a constant, which
+> is what the mechanism rests on.
 
 which predicts a threshold at back=3 for a 4-digit key, back=4 for 5 digits (measured:
 3 fails, 4 works), and back=6 for 7 digits. P2.5 tests it with `--key-digits`. The

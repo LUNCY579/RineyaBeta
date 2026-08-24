@@ -333,3 +333,32 @@ allocated ceiling of 4,972.9 MiB on this card.** If that arm also OOMs, the hone
 statement is not that compression is cheaper at 32K but that on this hardware a
 full-cache Halo run at 32K does not exist to be compared against — which is the
 practicability claim arriving as data.
+
+## O2 — RESOLVED 2026-08-24: the law is not `back ≥ d − 1`, and it is retracted
+
+Extending d=7 past the threshold settles it:
+
+| digits | back | accuracy |
+|---:|---:|---:|
+| 7 | 4 | 0.000 |
+| 7 | 6 (= d−1) | 0.778 |
+| 7 | 7 (= d) | 0.944 |
+| 7 | **8** (= d+1) | **1.000** |
+
+Monotonic, reaching 1.000 only at **back = d + 1**. So `back ≥ d − 1` was fitted on
+d=4 and d=5 and does not extrapolate — **retracted**.
+
+**And the requirement grows faster than the span.** Full accuracy needs back=4 at d=5
+but back=8 at d=7: two extra tokens nearly doubled the required reach. Two points do
+not make a curve, which is why d=9 at back=8 and back=10 is queued.
+
+**The `d+1` shape has a natural reading that does not survive scrutiny.** The payload's
+last token must reach the query-shaped framing, which sits one token before the digits
+begin (` is`, then the space, then *d* digits) — that predicts back ≥ d+1 everywhere.
+But back=4 already gives 1.000 at d=5, where the same reading demands 6. So the
+mechanism is not simply "reach the label", and no replacement law is stated here.
+
+**What survives is the qualitative claim**, which is what the mechanism rests on: the
+required backward reach *tracks the evidence span* and is not a constant. d=7 at back=4
+scores 0.000 where d=5 at back=4 scores 1.000. That is why deriving the reach beats
+tuning it, and it does not depend on the exact form of the law.
