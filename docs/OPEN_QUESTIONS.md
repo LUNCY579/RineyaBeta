@@ -189,3 +189,59 @@ the easy one. A cell reported as 0.972 may be 12/12 at depth 0.9 and 11/12 at de
 0.1, and those are not the same result. Depth-wise numbers are reported throughout and
 should be read in preference to the mean wherever the two disagree — and the depth-0.1
 column is the one that carries the claim.
+
+## O4 — RESOLVED 2026-08-24: the asserted explanation is WRONG
+
+`FINDINGS_P2.md` explained the multiplier's effect at d=7 as "a stricter gate excludes
+weak payload positions, so growth cannot traverse a long span". That was asserted from
+the design and never demonstrated. `scripts/kv/probe_grow_gate.py` demonstrates it is
+**false**, on CPU, with no GPU needed — `grow_spans` is a pure function of a score
+tensor, so the question is fully determined by feeding it the score shape P2.2 measured.
+
+Payload positions carrying the head's score after growth, head 1.0 / payload 0.15 /
+filler 0.01:
+
+| span | mult 2.0 | mult 3.0 | mult 5.0 | mult 8.0 |
+|---:|---:|---:|---:|---:|
+| 4 | 100% | 100% | 100% | 100% |
+| 7 | 100% | 100% | 100% | 100% |
+| 20 | 100% | 100% | 100% | 100% |
+
+**No effect at any span, at any multiplier.** The gate sits at median × mult, the median
+*is* the filler level, and a payload at 15× filler clears even mult=8. Gate coverage
+cannot explain a difference that appears only at d=7.
+
+**And the gate is a cliff, not a gradient**, which sharpens what the real explanation
+must look like. Sweeping the payload level at span 7:
+
+| payload / filler | mult 2.0 | mult 3.0 | mult 5.0 | mult 8.0 |
+|---:|---:|---:|---:|---:|
+| 20× | 7/7 | 7/7 | 7/7 | 7/7 |
+| 5× | 7/7 | 7/7 | 7/7 | **0/7** |
+| 3× | 7/7 | **0/7** | 0/7 | 0/7 |
+| 2× | **0/7** | 0/7 | 0/7 | 0/7 |
+
+Coverage is all-or-nothing per stream: full until the payload drops below mult × filler,
+then zero. So if gate coverage *is* the mechanism, the real cache must contain streams
+whose payload sits between 2× and 5× the stream median, and raising the multiplier flips
+those streams from full coverage to none. Survival is measured over 224 streams, so a
+fraction flipping would produce exactly the observed 0.889 → 0.611.
+
+**That is a testable prediction about the real score distribution**, and a much sharper
+one than the claim it replaces. It needs a dump of real scores at d=7, which is O3's
+decisive test — the two are now the same experiment.
+
+## Stage 3 capability gate — PASSED 2026-08-24
+
+The reasoning plan requires the model's uncompressed ceiling to be established before
+any compression number on a task is meaningful. Multi-hop chains, 8K, no compression:
+
+| chain | accuracy | by depth |
+|---|---:|---|
+| 2 hops | **0.833** | 0.67 / 1.00 / 0.83 |
+| 3 hops | **0.722** | 0.75 / 0.58 / 0.83 |
+
+Both clear a floor comfortably. This model *can* chain hops, unlike its performance on
+`Rineya_Long_Context_Demo_v1` (0.2031 against a 0.2500 constant-abstention baseline),
+so stage 3's compression numbers will measure the mechanism rather than the model's
+incapacity. Stage 3 is viable and the hop ladder can proceed.

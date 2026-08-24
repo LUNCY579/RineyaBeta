@@ -1,0 +1,254 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 512,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": null,
+  "pool_fwd": null,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 3,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 3000.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 8192,
+      "real_tokens": 7861,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 0.75,
+      "peak_mib": 2012.0,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 99873,
+          "got": "99873. \n\nIf the code is",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "96659. \n\nIf the code is",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "84699. \n\nThe pass key is",
+          "hit": true
+        },
+        {
+          "key": 64283,
+          "got": "64283. \n\nThe pass key is",
+          "hit": true
+        },
+        {
+          "key": 35360,
+          "got": "96613. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 53698,
+          "got": "61053. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "19085. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 86434,
+          "got": "86434. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 82496,
+          "got": "82496. \n\nThe pass key is",
+          "hit": true
+        },
+        {
+          "key": 66573,
+          "got": "66573. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 86745,
+          "got": "86745. \n\nThe pass key is",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 8192,
+      "real_tokens": 7861,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 0.5833333333333334,
+      "peak_mib": 2012.0,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 99873,
+          "got": "99873. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "66445. \n\nThe grass is green",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "92722. Remember it.\n\nThe grass",
+          "hit": false
+        },
+        {
+          "key": 64283,
+          "got": "64283. \n\nThe grass is green",
+          "hit": true
+        },
+        {
+          "key": 35360,
+          "got": "96613. \n\nThe grass is green",
+          "hit": false
+        },
+        {
+          "key": 53698,
+          "got": "61053. \n\nThe pass key is",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "19085. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 86434,
+          "got": "88366. Remember it.\n\nThe grass",
+          "hit": false
+        },
+        {
+          "key": 82496,
+          "got": "82496. \n\nThe grass is green",
+          "hit": true
+        },
+        {
+          "key": 66573,
+          "got": "66573. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 86745,
+          "got": "86745. Remember it.\n\nThe grass",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 8192,
+      "real_tokens": 7860,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 0.8333333333333334,
+      "peak_mib": 2011.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 99873,
+          "got": "99873. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "92722. Remember it.\n\nThe grass",
+          "hit": false
+        },
+        {
+          "key": 64283,
+          "got": "64283. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 35360,
+          "got": "35360. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 53698,
+          "got": "61053. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "19085. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 86434,
+          "got": "86434. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 82496,
+          "got": "82496. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 66573,
+          "got": "66573. Remember it.\n\nThe grass",
+          "hit": true
+        },
+        {
+          "key": 86745,
+          "got": "86745. Remember it.\n\nThe grass",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}
