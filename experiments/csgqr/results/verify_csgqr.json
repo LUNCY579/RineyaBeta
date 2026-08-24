@@ -1,9 +1,9 @@
 {
   "torch": "2.13.0+cu130",
-  "total": 122,
-  "passed": 122,
+  "total": 123,
+  "passed": 123,
   "failed": 0,
-  "elapsed_s": 0.65,
+  "elapsed_s": 0.61,
   "checks": [
     {
       "name": "4-bit pack/unpack is a bijection at even and odd widths",
@@ -64,6 +64,11 @@
       "name": "group_bounds is an exact partition at every tested shape, including non-divisible",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "the FP passthrough remnant copies the donor rather than aliasing it",
+      "ok": true,
+      "detail": "mutating the donor after construction does not change the remnant"
     },
     {
       "name": "fp passthrough remnant reproduces the source MLP bit-exactly",

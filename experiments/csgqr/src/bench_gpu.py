@@ -351,6 +351,19 @@ def main() -> None:
     torch.cuda.empty_cache()
 
     # -- per-arm end-to-end -----------------------------------------------
+    # NOTE on the per-arm ``memory_delta_mib`` recorded below: it is measured as
+    # a memory_allocated delta around install_csgqr on a freshly loaded model,
+    # and it is only trustworthy for the FIRST installed arm. For later arms the
+    # baseline is contaminated by the previous iteration's model, which the
+    # allocator may release at any point during the install, and the delta then
+    # reads as roughly the whole model rather than the ~-13 MiB the surgery
+    # causes. Observed: b1-delete -12.414 MiB (correct; 18 MiB donor freed,
+    # 4.711 MiB packed added) against -891 to -913 MiB for every later arm.
+    #
+    # The authoritative resident-byte measurement is the ``resident_bytes``
+    # section above, which builds each PackedMatrix in isolation and compares
+    # against the analytic model. Latency and peak-reserved numbers here are
+    # unaffected by this and are the ones to read.
     for key in arms:
         arm = CATALOGUE[key]
         model, load_s, load_mib = load_model(device)
@@ -361,6 +374,8 @@ def main() -> None:
             trace = RoutingTrace(n_groups)
             donor_layer = None if arm.donor_offset is None else \
                 (args.layer + arm.donor_offset) % model.config.num_hidden_layers
+            gc.collect()
+            sync()
             before = torch.cuda.memory_allocated()
             inst = install_csgqr(model, args.layer, spec=arm.spec,
                                  n_groups=n_groups,
@@ -368,6 +383,7 @@ def main() -> None:
                                  donor_layer=donor_layer, trace=trace,
                                  utility_fn=utility_fn, gate_fn=gate_fn,
                                  keep_donor_resident=False)
+            gc.collect()
             sync()
             install_report = inst.report()
             install_report["memory_delta_mib"] = \
