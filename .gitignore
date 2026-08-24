@@ -91,3 +91,6 @@ artifacts/adapters/**/*.safetensors
 # the scripts. Summaries, per-category breakdowns and manifests ARE tracked.
 experiments/**/results/**/results.jsonl
 experiments/**/results/*.log
+
+# Copied published cores (2.3 GB each) -- provenance is in artifacts/halo_configs/
+artifacts/Rineya-Halo-*/model.safetensors

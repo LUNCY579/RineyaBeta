@@ -271,6 +271,13 @@ def main() -> None:
                          "traced at 128K kept only 57-65%% of its tokens, i.e. "
                          "the span survived in fragments. Pooling exists to "
                          "stop exactly that.")
+    ap.add_argument("--model", default=MODEL,
+                    help="model directory, relative to the repo root. The "
+                         "mechanism keys off the ATTENTION SHAPE (28 layers, "
+                         "16 query / 8 KV heads, head_dim 128), so any core "
+                         "sharing it runs unchanged -- the published Halo "
+                         "cores do. Vocabulary and dtype differ and do not "
+                         "matter to eviction.")
     ap.add_argument("--select", choices=("significance","random","streaming"),
                     default="significance",
                     help="BASELINE arms. `random` keeps the same number of "
@@ -356,7 +363,7 @@ def main() -> None:
     tot = torch.cuda.get_device_properties(0).total_memory / 2 ** 20
     torch.cuda.set_per_process_memory_fraction(min(args.cap_mib, tot) / tot)
 
-    path = REPO / MODEL
+    path = REPO / args.model
     tok = AutoTokenizer.from_pretrained(path)
     cfg = AutoConfig.from_pretrained(path)
     if args.yarn:
@@ -515,7 +522,7 @@ def main() -> None:
         # can OOM at an allocated peak far below it, and a result file that does
         # not record its cap cannot explain its own empty cells. Three memory
         # figures in this program had no recoverable source for exactly this.
-        {"model": MODEL, "yarn": args.yarn, "chunk": args.chunk,
+        {"model": args.model, "yarn": args.yarn, "chunk": args.chunk,
          # EFFECTIVE recent, not the flag. The streaming baseline overrides it
          # to budget-4 so heavy() reaches 0, and recording args.recent made the
          # manifest claim heavy=8 for a run that had heavy=0. The policy was
