@@ -91,3 +91,9 @@ artifacts/adapters/**/*.safetensors
 # the scripts. Summaries, per-category breakdowns and manifests ARE tracked.
 experiments/**/results/**/results.jsonl
 experiments/**/results/*.log
+
+# CSGQR per-case traces: bulky and regenerable from the scripts + a seed.
+# Summaries, manifests and derived tables ARE tracked.
+experiments/csgqr/results/**/traces.jsonl
+experiments/csgqr/results/**/results.jsonl
+experiments/csgqr/results/*.log

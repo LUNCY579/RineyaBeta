@@ -1,0 +1,172 @@
+{
+  "shape": {
+    "layers": 28,
+    "hidden": 1024,
+    "intermediate": 3072,
+    "vocab": 32768,
+    "tied_embeddings": true,
+    "dtype_bits": 16,
+    "total_parameters": 474021888,
+    "model_bytes_dense": 948043776.0,
+    "mlp_parameters_per_layer": 9437184
+  },
+  "block": 128,
+  "n_groups": 24,
+  "group_size": 128,
+  "storage": {
+    "fp16": {
+      "logical_parameters": 9437184,
+      "weight_bytes": 18874368.0,
+      "scale_bytes": 0.0,
+      "zero_bytes": 0.0,
+      "packed_bytes": 18874368.0,
+      "dense_bytes": 18874368.0,
+      "compression_vs_dense": 1.0,
+      "bytes_saved_vs_dense": 0.0,
+      "model_bytes_dense": 948043776.0,
+      "share_of_model_params": 0.019908751555371217,
+      "saving_as_share_of_model": 0.0
+    },
+    "int8-sym": {
+      "logical_parameters": 9437184,
+      "weight_bytes": 9437184.0,
+      "scale_bytes": 147456,
+      "zero_bytes": 0.0,
+      "packed_bytes": 9584640.0,
+      "dense_bytes": 18874368.0,
+      "compression_vs_dense": 1.9692307692307693,
+      "bytes_saved_vs_dense": 9289728.0,
+      "model_bytes_dense": 948043776.0,
+      "share_of_model_params": 0.019908751555371217,
+      "saving_as_share_of_model": 0.00979883865615927
+    },
+    "int8-asym": {
+      "logical_parameters": 9437184,
+      "weight_bytes": 9437184.0,
+      "scale_bytes": 147456,
+      "zero_bytes": 73728,
+      "packed_bytes": 9658368.0,
+      "dense_bytes": 18874368.0,
+      "compression_vs_dense": 1.9541984732824427,
+      "bytes_saved_vs_dense": 9216000.0,
+      "model_bytes_dense": 948043776.0,
+      "share_of_model_params": 0.019908751555371217,
+      "saving_as_share_of_model": 0.0097210700953961
+    },
+    "int4-sym": {
+      "logical_parameters": 9437184,
+      "weight_bytes": 4718592.0,
+      "scale_bytes": 147456,
+      "zero_bytes": 0.0,
+      "packed_bytes": 4866048.0,
+      "dense_bytes": 18874368.0,
+      "compression_vs_dense": 3.878787878787879,
+      "bytes_saved_vs_dense": 14008320.0,
+      "model_bytes_dense": 948043776.0,
+      "share_of_model_params": 0.019908751555371217,
+      "saving_as_share_of_model": 0.014776026545002074
+    },
+    "int4-asym": {
+      "logical_parameters": 9437184,
+      "weight_bytes": 4718592.0,
+      "scale_bytes": 147456,
+      "zero_bytes": 73728,
+      "packed_bytes": 4939776.0,
+      "dense_bytes": 18874368.0,
+      "compression_vs_dense": 3.8208955223880596,
+      "bytes_saved_vs_dense": 13934592.0,
+      "model_bytes_dense": 948043776.0,
+      "share_of_model_params": 0.019908751555371217,
+      "saving_as_share_of_model": 0.014698257984238905
+    },
+    "int3-asym": {
+      "logical_parameters": 9437184,
+      "weight_bytes": 3538944.0,
+      "scale_bytes": 147456,
+      "zero_bytes": 73728,
+      "packed_bytes": 3760128.0,
+      "dense_bytes": 18874368.0,
+      "compression_vs_dense": 5.019607843137255,
+      "bytes_saved_vs_dense": 15114240.0,
+      "model_bytes_dense": 948043776.0,
+      "share_of_model_params": 0.019908751555371217,
+      "saving_as_share_of_model": 0.015942554956449605
+    },
+    "int2-asym": {
+      "logical_parameters": 9437184,
+      "weight_bytes": 2359296.0,
+      "scale_bytes": 147456,
+      "zero_bytes": 73728,
+      "packed_bytes": 2580480.0,
+      "dense_bytes": 18874368.0,
+      "compression_vs_dense": 7.314285714285714,
+      "bytes_saved_vs_dense": 16293888.0,
+      "model_bytes_dense": 948043776.0,
+      "share_of_model_params": 0.019908751555371217,
+      "saving_as_share_of_model": 0.017186851928660308
+    }
+  },
+  "routing_ceiling": {
+    "0.000": {
+      "n_groups": 24,
+      "active_fraction": 0.0,
+      "mlp_macs_per_token": 18874368,
+      "model_macs_per_token": 947912704,
+      "mlp_share_of_model_macs": 0.01991150442477876,
+      "macs_skipped_per_token": 18874368.0,
+      "model_macs_saved_fraction": 0.01991150442477876
+    },
+    "0.125": {
+      "n_groups": 24,
+      "active_fraction": 0.125,
+      "mlp_macs_per_token": 18874368,
+      "model_macs_per_token": 947912704,
+      "mlp_share_of_model_macs": 0.01991150442477876,
+      "macs_skipped_per_token": 16515072.0,
+      "model_macs_saved_fraction": 0.017422566371681415
+    },
+    "0.250": {
+      "n_groups": 24,
+      "active_fraction": 0.25,
+      "mlp_macs_per_token": 18874368,
+      "model_macs_per_token": 947912704,
+      "mlp_share_of_model_macs": 0.01991150442477876,
+      "macs_skipped_per_token": 14155776.0,
+      "model_macs_saved_fraction": 0.014933628318584071
+    },
+    "0.500": {
+      "n_groups": 24,
+      "active_fraction": 0.5,
+      "mlp_macs_per_token": 18874368,
+      "model_macs_per_token": 947912704,
+      "mlp_share_of_model_macs": 0.01991150442477876,
+      "macs_skipped_per_token": 9437184.0,
+      "model_macs_saved_fraction": 0.00995575221238938
+    },
+    "0.750": {
+      "n_groups": 24,
+      "active_fraction": 0.75,
+      "mlp_macs_per_token": 18874368,
+      "model_macs_per_token": 947912704,
+      "mlp_share_of_model_macs": 0.01991150442477876,
+      "macs_skipped_per_token": 4718592.0,
+      "model_macs_saved_fraction": 0.00497787610619469
+    },
+    "1.000": {
+      "n_groups": 24,
+      "active_fraction": 1.0,
+      "mlp_macs_per_token": 18874368,
+      "model_macs_per_token": 947912704,
+      "mlp_share_of_model_macs": 0.01991150442477876,
+      "macs_skipped_per_token": 0.0,
+      "model_macs_saved_fraction": 0.0
+    }
+  },
+  "confidence_overhead": {
+    "lm_head_macs_per_token": 67108864,
+    "mlp_macs_per_token": 18874368,
+    "confidence_cost_ratio": 3.5555555555555554,
+    "logits_bytes_per_position": 65536.0,
+    "logits_bytes_per_1000_positions": 65536000.0
+  }
+}

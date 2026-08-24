@@ -1,0 +1,439 @@
+{
+  "torch": "2.13.0+cu130",
+  "total": 86,
+  "passed": 86,
+  "failed": 0,
+  "elapsed_s": 0.48,
+  "checks": [
+    {
+      "name": "4-bit pack/unpack is a bijection at even and odd widths",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "8-bit pack/unpack is a bijection",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "all-zero blocks and rows dequantize to exact zero (no div-by-zero)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "asymmetric form preserves an isolated exact zero",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "non-divisible input dim (1000 = 7x128 + 104) quantizes",
+      "ok": true,
+      "detail": "n_blocks=8 rel_err=0.0995"
+    },
+    {
+      "name": "row-slice dequantization equals the full dequantization on that slice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fidelity improves monotonically with bitwidth",
+      "ok": true,
+      "detail": "int8-b128-asym=0.0059 int4-b128-asym=0.1006 int4-b128-sym=0.1170 int2-b128-asym=0.5020"
+    },
+    {
+      "name": "smaller quantization blocks reduce error",
+      "ok": true,
+      "detail": "b32=0.0808 vs b128=0.1006"
+    },
+    {
+      "name": "quantized matrix retains no fp32/bf16 weight buffer and no parameters",
+      "ok": true,
+      "detail": "float_buffers=[] params=[]"
+    },
+    {
+      "name": "no gradient can be created for packed storage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "packed byte accounting is exact",
+      "ok": true,
+      "detail": "{'weight': 98304, 'scales': 3072, 'zeros': 1536, 'total': 102912}"
+    },
+    {
+      "name": "group_bounds is an exact partition at every tested shape, including non-divisible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fp passthrough remnant reproduces the source MLP bit-exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sum of group outputs equals the full MLP in float64 (exact algebra)",
+      "ok": true,
+      "detail": "rel_err=9.601e-16"
+    },
+    {
+      "name": "additivity holds in float32 to within float32 epsilon",
+      "ok": true,
+      "detail": "rel_err=2.731e-07"
+    },
+    {
+      "name": "partial group execution == explicit intermediate-neuron selection (float64)",
+      "ok": true,
+      "detail": "rel_err=2.904e-16"
+    },
+    {
+      "name": "empty group set returns exact zeros without touching any weight",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "duplicate group ids are deduplicated, not double-counted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "group order does not change the result",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "additivity also holds for the quantized remnant (float64)",
+      "ok": true,
+      "detail": "rel_err=8.780e-16"
+    },
+    {
+      "name": "a biased down_proj is refused (would break additivity)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "alpha matches the closed-form least-squares solution at every activation scale",
+      "ok": true,
+      "detail": "alphas=0.99555, 0.99408, 0.99407"
+    },
+    {
+      "name": "alpha never increases the reconstruction error",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a remnant that outputs exactly zero yields alpha=1, not NaN",
+      "ok": true,
+      "detail": "alpha=1.0"
+    },
+    {
+      "name": "per-group alpha returns one gain per group and all are finite",
+      "ok": true,
+      "detail": "min=0.9342 max=1.1006"
+    },
+    {
+      "name": "uniform logits give neg_entropy 0 and max_prob 1/|V|",
+      "ok": true,
+      "detail": "neg_entropy=-4.77e-07 max_prob=3.052e-05"
+    },
+    {
+      "name": "a near-one-hot distribution gives neg_entropy 1 and max_prob 1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "entropy is normalised by log|V| over the FULL vocabulary",
+      "ok": true,
+      "detail": "got 0.93333 expected 0.93333"
+    },
+    {
+      "name": "all four features rise with peakedness",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "probability features stay inside [0,1] and margins are non-negative",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "top1 != top2 always",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "calibration temperature preserves the top-1 token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "higher temperature lowers confidence, lower temperature raises it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a non-positive temperature is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fit_temperature recovers a synthetic miscalibration",
+      "ok": true,
+      "detail": "fitted=2.514 true=2.50"
+    },
+    {
+      "name": "ECE is near zero for a calibrated signal and large for a broken one",
+      "ok": true,
+      "detail": "calibrated=0.0100 broken=0.2481"
+    },
+    {
+      "name": "ECE skips empty bins rather than scoring them as perfect",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JS(p,p) == 0 and stability(p,p) == 1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "JS is symmetric and bounded by log 2",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a freshly initialised low-rank lens is exactly the identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a rank-0 lens has no parameters at all",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ConfidenceHead borrows the model's LM head rather than copying it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "KL(p||p) == 0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "KL is non-negative",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "utility is positive when the candidate helps, negative when it hurts",
+      "ok": true,
+      "detail": "helpful=3.0774 harmful=-10.6047"
+    },
+    {
+      "name": "utility is exactly zero when the candidate equals the deleted path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ranking recovers a known utility ordering",
+      "ok": true,
+      "detail": "[3, 0, 1, 2]"
+    },
+    {
+      "name": "mean utility is the arithmetic mean, not the sum",
+      "ok": true,
+      "detail": "got 0.500000"
+    },
+    {
+      "name": "positive rate is tracked separately from mean utility",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a frequently exposed weak group does not out-rank a rare strong one",
+      "ok": true,
+      "detail": "mean_utility=[0.0625, 0.875] exposure=[501.0, 1.0]"
+    },
+    {
+      "name": "a group-count mismatch is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shuffled ranking is a permutation with the same members",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shuffled ranking is deterministic for a fixed seed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "reversed ranking is exactly worst-first",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "magnitude ranking is a valid permutation of the groups",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rank correlation is +1 for identical and -1 for reversed orders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rank correlation handles exact ties without NaN",
+      "ok": true,
+      "detail": "spearman=1.0000 tau_b=1.0000"
+    },
+    {
+      "name": "confidence above tau_skip selects nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "confidence below tau_full selects everything",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the interior region selects a strict subset",
+      "ok": true,
+      "detail": "k(0.6)=12"
+    },
+    {
+      "name": "rho is 1 at tau_full and 0 at tau_skip",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "budget is monotonically non-increasing in confidence",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rho at the midpoint is 0.5 for gamma=1",
+      "ok": true,
+      "detail": "rho=0.500000"
+    },
+    {
+      "name": "gamma>1 spends less compute and gamma<1 spends more",
+      "ok": true,
+      "detail": "g3=0.1250 g1=0.5000 g0.4=0.7579"
+    },
+    {
+      "name": "tau_full >= tau_skip is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "every invalid policy field is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mode=none never selects a group",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mode=all always selects every group",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "confidence_whole is all-or-nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fixed_fraction activates ceil(fraction*n) groups",
+      "ok": true,
+      "detail": "k=6"
+    },
+    {
+      "name": "static_topk follows the supplied ranking",
+      "ok": true,
+      "detail": "[23, 22, 21, 20, 19, 18]"
+    },
+    {
+      "name": "random selection is reproducible per token and varies across tokens",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "dynamic significance picks the highest-utility groups",
+      "ok": true,
+      "detail": "[5, 9]"
+    },
+    {
+      "name": "dynamic significance falls back to the static ranking when no per-state utility is supplied",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cost-aware selection prefers the highest utility at equal cost",
+      "ok": true,
+      "detail": "[5]"
+    },
+    {
+      "name": "an expensive group is deselected in favour of a cheaper one",
+      "ok": true,
+      "detail": "[9]"
+    },
+    {
+      "name": "trace active_fraction is groups executed over groups available",
+      "ok": true,
+      "detail": "got 0.416667 expected 0.416667"
+    },
+    {
+      "name": "trace invocation and skip rates are complementary",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "trace full-invocation rate counts only fully active tokens",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "analytic parameter count matches the safetensors file size",
+      "ok": true,
+      "detail": "predicted=948,043,776 on_disk=948,078,864 err=0.004%"
+    },
+    {
+      "name": "one MLP layer is a small share of the model",
+      "ok": true,
+      "detail": "share=1.99%"
+    },
+    {
+      "name": "int4 compression against bf16 is between 3.5x and 4x",
+      "ok": true,
+      "detail": "x3.821"
+    },
+    {
+      "name": "quantization changes bytes, not logical parameter count",
+      "ok": true,
+      "detail": "9437184"
+    },
+    {
+      "name": "exact-confidence cost ratio equals |V|/(3*d_ff) in closed form",
+      "ok": true,
+      "detail": "ratio=3.5556 = 32768/(3*3072)"
+    },
+    {
+      "name": "the exact-confidence monitor costs MORE than the MLP it gates on this checkpoint",
+      "ok": true,
+      "detail": "3.556x"
+    },
+    {
+      "name": "analytic remnant byte model matches the built module",
+      "ok": true,
+      "detail": "measured=4,939,872 predicted=4,939,872"
+    }
+  ]
+}
