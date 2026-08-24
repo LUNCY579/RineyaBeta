@@ -507,6 +507,7 @@ def main() -> None:
                 print(f"{n:>8,}{budget:>8}{depth:>7.1f}{shown}{peak:>10.0f}{warn}  "
                       + "  ".join(ex))
 
+    b0 = next((r.get("budget") for r in rows if r.get("budget")), 0)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(
         # cap_mib and window belong in the manifest because they change the
@@ -515,7 +516,12 @@ def main() -> None:
         # not record its cap cannot explain its own empty cells. Three memory
         # figures in this program had no recoverable source for exactly this.
         {"model": MODEL, "yarn": args.yarn, "chunk": args.chunk,
-         "recent": args.recent, "trials": args.trials, "window": args.window,
+         # EFFECTIVE recent, not the flag. The streaming baseline overrides it
+         # to budget-4 so heavy() reaches 0, and recording args.recent made the
+         # manifest claim heavy=8 for a run that had heavy=0. The policy was
+         # right and the record was wrong, which is the harder failure to catch.
+         "recent": ((b0 - 4) if args.select == "streaming" else args.recent),
+         "recent_flag": args.recent, "trials": args.trials, "window": args.window,
          "pool": args.pool,
          "pool_back": args.pool_back, "pool_fwd": args.pool_fwd,
          "key_digits": args.key_digits,
