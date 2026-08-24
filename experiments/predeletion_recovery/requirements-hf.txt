@@ -1,0 +1,4 @@
+-r requirements-cpu.txt
+transformers>=4.51,<5
+safetensors>=0.4
+peft>=0.14

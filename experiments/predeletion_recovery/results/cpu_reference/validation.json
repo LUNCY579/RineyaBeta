@@ -1,0 +1,13 @@
+{
+  "all_validation_checks_pass": true,
+  "checks": {
+    "all_compact_parameter_frontiers_match_hard_pruning": true,
+    "all_gate_zero_physical_checks_pass": true,
+    "all_registered_arms_present": true,
+    "expected_arm_seed_cells": true,
+    "full_method_beats_gradual_kd_in_reference": true,
+    "full_method_beats_random_router_in_reference": true,
+    "hard_pruning_causes_quality_damage": true
+  },
+  "interpretation": "Passing validates executable distinctions and accounting only. It does not establish an LLM quality or novelty claim."
+}

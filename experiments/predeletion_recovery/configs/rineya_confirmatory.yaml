@@ -1,0 +1,23 @@
+base_config: experiments/predeletion_recovery/configs/rineya_pilot.yaml
+seeds: [20260823, 20260829, 20260905]
+arms:
+  - full
+  - hard_prune
+  - hard_prune_sft
+  - hard_prune_kd
+  - gradual_kd
+  - gradual_feature_kd
+  - matrix_no_recovery
+  - random_matrix_recovery
+  - uniform_matrix_recovery
+  - static_matrix_recovery
+  - state_matrix_recovery
+  - state_position_no_causal
+  - causal_state_position_recovery
+compute_match:
+  optimizer_steps: 1200
+  supervised_token_budget: null
+  enforce_same_data_order: true
+quality_max_followup:
+  enabled: true
+  max_steps: 3600

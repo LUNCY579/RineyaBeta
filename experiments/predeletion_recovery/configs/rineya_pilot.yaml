@@ -1,0 +1,40 @@
+seed: 20260823
+device: auto
+model:
+  path: artifacts/rineya-core-en32k-28L
+  dtype: bfloat16
+  teacher_device: cpu
+  attn_implementation: eager
+data:
+  train: artifacts/heal_mixes/B0/heal_mix_b0.jsonl
+  max_length: 384
+  max_rows: 4096
+training:
+  steps: 300
+  micro_batch_size: 1
+  gradient_accumulation: 32
+  learning_rate: 0.0001
+  warmup_fraction: 0.05
+  gradient_clip: 1.0
+  notice_fraction: 0.20
+  withdrawal_end_fraction: 0.70
+  compact_consolidation_fraction: 0.30
+  teacher_temperature: 2.0
+  lambda_lm: 0.35
+  lambda_kd: 0.65
+  lambda_feature: 0.20
+  lambda_recovery: 0.80
+  lambda_anchor: 0.10
+recipients:
+  radius: 2
+  max_count: 3
+routing:
+  top_k: 2
+  hidden_dim: 128
+  temperature: 0.8
+  entropy_weight: 0.002
+  load_balance_weight: 0.01
+checkpoint:
+  directory: artifacts/pdrr/pilot
+  save_every_steps: 25
+  keep_last: 3

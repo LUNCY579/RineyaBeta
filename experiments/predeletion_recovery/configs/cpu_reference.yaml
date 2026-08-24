@@ -1,0 +1,37 @@
+seed: 20260823
+seeds: [17, 29, 43]
+model:
+  input_dim: 24
+  hidden_dim: 32
+  ff_dim: 64
+  layers: 6
+  sequence_length: 6
+  output_classes: 19
+  target_layer: 3
+  recipients: [2, 4, 5]
+data:
+  train_examples: 128
+  eval_examples: 96
+train:
+  steps: 12
+  batch_size: 24
+  learning_rate: 0.003
+  weight_decay: 0.0
+  temperature: 2.0
+  gradient_clip: 1.0
+  notice_fraction: 0.20
+  withdrawal_end_fraction: 0.70
+  recovery_end_fraction: 0.78
+  lambda_supervised: 0.35
+  lambda_kd: 0.65
+  lambda_feature: 0.20
+  lambda_recovery: 0.80
+  lambda_anchor: 0.10
+routing:
+  top_k: 2
+  temperature: 0.8
+  entropy_weight: 0.002
+  load_balance_weight: 0.01
+analysis:
+  bootstrap_samples: 5000
+  permutation_samples: 10000

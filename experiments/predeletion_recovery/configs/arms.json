@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "arms": [
+    "full",
+    "hard_prune",
+    "hard_prune_sft",
+    "hard_prune_kd",
+    "gradual_kd",
+    "gradual_feature_kd",
+    "matrix_no_recovery",
+    "random_matrix_recovery",
+    "uniform_matrix_recovery",
+    "static_matrix_recovery",
+    "state_matrix_recovery",
+    "state_position_no_causal",
+    "causal_state_position_recovery"
+  ]
+}

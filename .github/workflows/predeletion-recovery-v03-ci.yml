@@ -1,0 +1,62 @@
+name: Pre-Deletion Recovery Routing v0.3
+
+on:
+  push:
+    branches:
+      - research/pre-deletion-recovery-routing-v0.3
+    paths:
+      - 'experiments/predeletion_recovery/**'
+      - '.github/workflows/predeletion-recovery-v03-ci.yml'
+  pull_request:
+    paths:
+      - 'experiments/predeletion_recovery/**'
+      - '.github/workflows/predeletion-recovery-v03-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: experiments/predeletion_recovery/requirements-cpu.txt
+
+      - name: Install CPU dependencies
+        run: python -m pip install -r experiments/predeletion_recovery/requirements-cpu.txt
+
+      - name: Compile experiment sources
+        run: python -m compileall -q experiments/predeletion_recovery
+
+      - name: Run contract suite
+        env:
+          PYTHONPATH: ${{ github.workspace }}/experiments/predeletion_recovery/src
+        run: python -m pytest -q experiments/predeletion_recovery/tests
+
+      - name: Run deterministic quick reference
+        env:
+          PYTHONPATH: ${{ github.workspace }}/experiments/predeletion_recovery/src
+        run: |
+          python experiments/predeletion_recovery/scripts/run_cpu_reference.py \
+            --quick \
+            --out /tmp/pdrr_cpu_reference_quick
+
+      - name: Validate quick reference gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('/tmp/pdrr_cpu_reference_quick/validation.json')
+          payload = json.loads(path.read_text(encoding='utf-8'))
+          failed = [name for name, passed in payload['checks'].items() if not passed]
+          if failed:
+              raise SystemExit(f'CPU reference validation failed: {failed}')
+          print(f"validated {len(payload['checks'])} CPU reference checks")
+          PY
