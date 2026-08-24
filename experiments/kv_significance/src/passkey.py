@@ -87,6 +87,60 @@ QUERY_HINT = ("What is the pass key? Watch for it as you read." + chr(10)*2)
 
 
 
+
+
+def build_chain_prompt(tok, target_tokens: int, depths, values, query_first=False):
+    """STAGE 3: a multi-hop chain, where the answer needs SEVERAL spans at once.
+
+    Cornerstone 2's claim is that evidence lives in contiguous spans and that ranking
+    positions independently fragments them. Passkey contains exactly ONE span, so the
+    claim has never been tested where it makes its sharpest prediction: N hops need N
+    intact spans held SIMULTANEOUSLY, which should make the required budget grow with
+    the number of hops rather than with the context length (prediction P2).
+
+    The chain is built so hop i is addressed by hop i-1's VALUE:
+
+        The pass key is 75526. Remember it.
+        If the code is 75526, then the next code is 41883. Remember it.
+        If the code is 41883, then the next code is 90210. Remember it.
+        -> What is the final code?  answer: 90210
+
+    That structure matters for a second reason. Only the FIRST segment is addressed by
+    words the question contains; every later one is addressed by a number the question
+    has never seen. P2.2 measured that query-aware scoring keeps text resembling the
+    query -- framing survived in 54% of streams against 35% for the payload -- so the
+    later hops have nothing query-shaped to earn score from. If budget alone cannot
+    rescue them, the binding resource is query-shaped access rather than capacity, and
+    that is a different mechanism from the one stage 1 found.
+
+    Segments are placed at the given depths in order, so hop distance through the
+    context is controlled rather than incidental.
+    """
+    segs = []
+    for i, v in enumerate(values):
+        if i == 0:
+            segs.append(chr(10) * 2 + f"The pass key is {v}. Remember it." + chr(10) * 2)
+        else:
+            segs.append(chr(10) * 2
+                        + f"If the code is {values[i - 1]}, then the next code "
+                          f"is {v}. Remember it." + chr(10) * 2)
+    suffix = chr(10) * 2 + "What is the final code? The final code is"
+    n_pre = len(tok(PREAMBLE)["input_ids"])
+    n_suf = len(tok(suffix)["input_ids"])
+    n_seg = sum(len(tok(s)["input_ids"]) for s in segs)
+    per = len(tok(FILLER)["input_ids"])
+    reps = max(1, (target_tokens - n_pre - n_suf - n_seg) // max(per, 1))
+    head = QUERY_HINT + PREAMBLE if query_first else PREAMBLE
+    text = head
+    placed = 0
+    for d, s in zip(depths, segs):
+        want = int(reps * d)
+        text += FILLER * max(0, want - placed) + s
+        placed = max(placed, want)
+    text += FILLER * max(0, reps - placed) + suffix
+    return text, len(tok(text)["input_ids"])
+
+
 def build_prompt(tok, target_tokens: int, depth: float, key,
                  query_first: bool = False, n_distractors: int = 0,
                  distractor_style: str = "framed") -> tuple[str, int]:
@@ -217,6 +271,15 @@ def main() -> None:
                          "traced at 128K kept only 57-65%% of its tokens, i.e. "
                          "the span survived in fragments. Pooling exists to "
                          "stop exactly that.")
+    ap.add_argument("--hops", type=int, default=1,
+                    help="STAGE 3: chain length. 1 is ordinary passkey. N>1 "
+                         "builds N segments where hop i is addressed by hop "
+                         "i-1's VALUE, so only the first is reachable from the "
+                         "question's wording. N hops need N intact spans at "
+                         "once -- the direct test of the span account.")
+    ap.add_argument("--hop-depths", type=float, nargs="+",
+                    default=[0.1, 0.4, 0.7],
+                    help="where each chain segment sits, in order.")
     ap.add_argument("--needle-words", type=int, default=0,
                     help="STAGE 2: payload is a W-word phrase, not digits. Every "
                          "word is one token so W words is exactly a W-token span "
@@ -329,16 +392,32 @@ def main() -> None:
                 rng = random.Random(args.seed)
                 hits, seen, ooms, peak, ex, trials = 0, 0, 0, 0.0, [], []
                 for _ in range(args.trials):
-                    if args.needle_words:
+                    if args.hops > 1:
+                        # The answer is the LAST link; every earlier value exists
+                        # only to be chased through.
+                        vals = [rng.randint(10 ** (args.key_digits - 1),
+                                            10 ** args.key_digits - 1)
+                                for _ in range(args.hops)]
+                        key = vals[-1]
+                    elif args.needle_words:
                         key = " ".join(rng.sample(NEEDLE_WORDS,
                                                   args.needle_words))
                     else:
                         key = rng.randint(10 ** (args.key_digits - 1),
                                           10 ** args.key_digits - 1)
-                    text, real_n = build_prompt(tok, n, depth, key,
-                                                query_first=args.query_first,
-                                                n_distractors=args.distractors,
-                                                distractor_style=args.distractor_style)
+                    if args.hops > 1:
+                        # `depth` shifts the whole chain, so the depth sweep still
+                        # varies how many compression rounds the chain must survive.
+                        ds = [min(0.95, d + depth - args.hop_depths[0])
+                              for d in args.hop_depths[:args.hops]]
+                        text, real_n = build_chain_prompt(
+                            tok, n, ds, vals, query_first=args.query_first)
+                    else:
+                        text, real_n = build_prompt(
+                            tok, n, depth, key,
+                            query_first=args.query_first,
+                            n_distractors=args.distractors,
+                            distractor_style=args.distractor_style)
                     ids = tok(text, return_tensors="pt").to(args.device)["input_ids"]
                     torch.cuda.empty_cache()
                     torch.cuda.reset_peak_memory_stats()
@@ -353,8 +432,12 @@ def main() -> None:
                               if budget else None)
                     cache = sig.SignificanceCache(config=model.config, policy=None)
                     try:
-                        qtext = (QUESTION_WORDS if args.needle_words
-                                 else QUESTION)
+                        if args.hops > 1:
+                            qtext = "What is the final code? The final code is"
+                        elif args.needle_words:
+                            qtext = QUESTION_WORDS
+                        else:
+                            qtext = QUESTION
                         qids = (tok(qtext, return_tensors="pt")
                                 .to(args.device)["input_ids"]
                                 if args.query_aware else None)
@@ -425,6 +508,7 @@ def main() -> None:
          "key_digits": args.key_digits,
          "grow": args.grow, "grow_max": args.grow_max,
          "needle_words": args.needle_words,
+         "hops": args.hops, "hop_depths": args.hop_depths,
          "distractors": args.distractors,
          "distractor_style": args.distractor_style,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
