@@ -333,3 +333,256 @@ matched arms exactly 0.250, `b7-conf-whole` 0.853 active / 0.147 skip,
 **Result:** 65/65 claims OK, 0 failed, 0 missing, at the point of the pivot
 (entry 9). Every headline number in the prose is derived from a committed result
 file; a claim whose source is absent reports MISSING rather than passing.
+
+---
+
+# Session 2 — 2026-08-24
+
+**Starting SHA:** `fb790a6` (local), remote branch at `1664f54`.
+**Machine:** unchanged, except that the GPU was **shared** for most of this
+session — see entry 2.5.
+
+---
+
+## 2.0 — Repository state audit *(before any implementation file was touched)*
+
+```bash
+git status --short --branch
+git rev-list --left-right --count origin/r2-healing-harness...origin/research/csgqr-quantized-remnant
+git diff --name-status origin/r2-healing-harness...origin/research/csgqr-quantized-remnant
+git ls-remote --heads origin
+```
+
+**Result.** `origin/research/csgqr-quantized-remnant` was **byte-identical to its
+base**: 0/0 ahead-behind, empty diff, both at `1664f54`. Fifteen commits of
+implementation existed only locally. Ten completed evaluation runs, three of the
+four audit documents and two analysis modules were **uncommitted**.
+
+**Action.** Wrote `REPOSITORY_STATE_AUDIT.md`, committed the at-risk evidence
+(`a347461`), pushed. Remote HEAD then matched local HEAD and the branch was 16
+ahead of base.
+
+**Artifacts:** `REPOSITORY_STATE_AUDIT.md`.
+
+---
+
+## 2.1 — Chasing the two Tier-1 anomalies
+
+Two Tier-1 results were unexplained: INT4-all scored above INT8-all *and* above
+dense, and static top-significance at rho=0.25 scored below exact deletion. Under
+this repository's standing rule an unexplained result is indistinguishable from a
+bug, so both were chased before anything else.
+
+```bash
+.venv/Scripts/python.exe experiments/csgqr/src/analyze_arms.py
+```
+
+**Result — both are the instrument.** After Holm-Bonferroni across the nine
+pre-registered contrasts, **not one was significant, including deletion damage
+itself** (delta -0.01135, CI [-0.02427, +0.00195]).
+
+Power analysis on the same file:
+
+| quantity | value |
+| --- | ---: |
+| paired sd of the per-case quality delta | **0.14901** |
+| deletion effect | 0.01135 |
+| t | -1.72 |
+| replies changed by deletion | 94.5% |
+| cases scoring **exactly** the same | **55.5%** |
+| n for 80% power on deletion damage | 1,352 |
+| n for 80% power on a 0.004 arm gap | **10,892** |
+
+`chat_dev` has 510 cases. The quality score is a coarse saturated rubric
+(p10 = median = 0.720).
+
+**Interpretation.** The Tier-1 sweep executed correctly and measured its own
+instrument. Every ordering in that table is inside the noise. This is the most
+consequential methodological finding of the campaign and it invalidated the
+*interpretation* — not the execution — of about 70 minutes of GPU time.
+
+**Artifact:** `results/arms_comparison.json`.
+
+---
+
+## 2.2 — Stage I: eighteen defects fixed
+
+Full line-by-line review of all 21 modules. `BUG_LEDGER.md` carries the ledger;
+three mattered for what the campaign could claim:
+
+* **S1 (CRITICAL)** — an arm asking for dynamic per-state significance silently
+  executed the **static** ranking. The `fixed_fraction` fast path was guarded by
+  `selector != "random"`, so `significance` fell into it and took the static
+  fallback in `select` with no error and correct-looking activation accounting.
+  The matched-budget dynamic-vs-static contrast was **unrunnable**.
+* **S2 (MAJOR)** — per-group alpha was fitted against the whole MLP output instead
+  of its own donor group output. On a **bit-exact** remnant that returned gains
+  spanning 0.978-1.024 and injected **1.32%** relative error into an exact
+  reconstruction.
+* **S8 (MAJOR)** — the confidence gate materialised `[T, |V|]` plus three float32
+  tensors of that shape for the whole prefill: about 1.6 GiB at 2048 tokens on an
+  8 GiB card. Fine on short dev prompts, OOM on long ones.
+
+`verify_csgqr.py` grew 86 -> **122** checks, each fix with a regression test.
+
+---
+
+## 2.3 — The partial-execution gain, and a hypothesis discarded
+
+```bash
+.venv/Scripts/python.exe experiments/csgqr/src/calibrate_partial.py \
+    --ranking-from experiments/csgqr/results/trace_L20_int4/significance_analysis.json \
+    --fit-prompts 32 --eval-prompts 32 --random-draws 8
+```
+
+Every routed arm had run at `alpha = 1`. I expected the missing partial-execution
+gain to explain static-25's apparent deficit.
+
+**Result — it does not.** Fitted against the whole donor output the gain is
+**0.99-1.10** across rho in [0.125, 1.0], never near `1/rho`, so the groups are
+near-orthogonal and calibration moves the relative output error by about **0.1%**
+(0.74543 -> 0.74471 at rho=0.25).
+
+Also corrected a wrong assertion of my own: `calibrate_alpha`'s docstring had
+claimed that fitting a partial sum against the whole donor output "would inflate
+the gain by roughly 1/rho" and used that to refuse the option. The inflation is
+conditional on cross-group correlation, and its magnitude is a *measurement* of
+that correlation. Both targets are now offered and measured.
+
+**Artifact:** `results/partial_gain_L20.json`.
+
+---
+
+## 2.4 — Making the dynamic half runnable
+
+```bash
+.venv/Scripts/python.exe experiments/csgqr/src/train_router.py \
+    --trace experiments/csgqr/results/trace_L20_int4 --delta 0.1
+```
+
+`probe_utility.py` had shown offline that both signals are learnable but produced
+no artifact a forward pass could load, so every "CSGQR" arm ran the static
+ranking. `train_router.py` now fits and serializes both probes with the same
+prompt-level splits; `probe_runtime.py` loads them with standardisation folded
+into the weights so inference is one matmul (fold exactness asserted).
+
+**Result.** Need gate test AUROC **0.9358** (permuted control 0.5065,
+prompt-mean oracle 0.6976). Group router wins **70.8%** of the static-to-oracle
+headroom at rho=0.25 on held-out prompts.
+
+Monitor cost per token, as a share of the MLP it gates:
+
+| monitor | share | bytes |
+| --- | ---: | ---: |
+| need gate | **0.0109%** | 4,100 |
+| group router | **0.2604%** | 98,400 |
+| exact lens | **355.6%** | 0 (borrowed) |
+
+**Artifacts:** `artifacts/csgqr_probes/need_L20_int4_g24.pt`,
+`artifacts/csgqr_probes/router_L20_int4_g24.pt`,
+`artifacts/csgqr_probes/probe_manifest_L20_int4_g24.json`.
+
+---
+
+## 2.5 — A shared GPU, and what it cost
+
+A **different** experiment
+(`experiments/kv_significance/src/passkey.py --lengths 131072`) was running
+concurrently on the same 8 GiB card for most of this session. It caused a
+`CUBLAS_STATUS_EXECUTION_FAILED` mid-sweep, which via **S17** cascaded into 21
+consecutive failures with a misleading message.
+
+My first hypothesis was that the S13 coalescing change was at fault, because it
+returns a view rather than a fresh `cat` for a single contiguous run. **Tested on
+the GPU across `fp`/`int8`/`int4`, five prompt lengths including the awkward
+`T=22`, and 2-D and 3-D inputs: every case passes.** The hypothesis was wrong; the
+remaining explanation is contention, and CUDA errors surface asynchronously at an
+arbitrary later launch so the reported call site need not be the faulting one.
+
+**Consequences.** `bench_gpu.py` is gated on an exclusive card — a latency or VRAM
+number taken under contention would look like evidence and not be one. And
+`eval_forced.py` now checkpoints per arm, restores the pristine MLP in a
+`finally`, and **aborts** on a context-poisoning CUDA error rather than
+fabricating failures for arms it never tested.
+
+---
+
+## 2.6 — The powered endpoint, batch A: baselines
+
+```bash
+.venv/Scripts/python.exe -u experiments/csgqr/src/eval_forced.py \
+    --arms b1-delete,b0-dense,b2-fp-all,b3-int8-all,b4-int4-all,b13-wrong-layer \
+    --ranking-from experiments/csgqr/results/trace_L20_int4/significance_analysis.json \
+    --prompts 512 --skip-prompts 96 --n-boot 4000 --cap-mib 5120
+```
+
+414 held-out prompts (disjoint from the probes' trace), 3,830 reply positions,
+prompt-clustered bootstrap.
+
+| arm | KL vs dense | 95% CI | agree | gold_top1 | seq flip |
+| --- | ---: | --- | ---: | ---: | ---: |
+| b0-dense | 0.00000 | [0.00000, 0.00000] | 1.0000 | 0.2822 | 0.0000 |
+| b2-fp-all | -0.00000 | [-0.00001, 0.00001] | 1.0000 | 0.2822 | 0.0000 |
+| b3-int8-all | 0.00088 | [0.00085, 0.00090] | 0.9883 | 0.2809 | 0.1063 |
+| b4-int4-all | 0.01049 | [0.01009, 0.01090] | 0.9439 | 0.2796 | 0.3961 |
+| b1-delete | 0.28055 | [0.26861, 0.29380] | 0.7342 | 0.2822 | 0.8865 |
+| b13-wrong-layer | 0.78649 | [0.75297, 0.81941] | 0.5898 | 0.2554 | 0.9686 |
+
+**Four results.**
+
+1. **The noise floor on this endpoint is zero.** `b2-fp-all` is numerically
+   identical to dense — against 0.00084 on the generation endpoint.
+2. **Precision is monotone.** The Tier-1 anomaly is fully accounted for.
+3. **Deleting the MLP costs zero reference-prediction accuracy.** delta gold_top1
+   = **+0.00000**, CI [-0.00751, +0.00758]; absolute NLL moves 0.1%. Yet KL is
+   0.28 nats and 88.7% of replies flip an argmax. At this layer the MLP
+   contributes model-specific behaviour and nothing measurable in
+   reference-predictive quality — so what the method recovers is **fidelity to
+   the original model, not quality**.
+4. **Donor identity matters, decisively.** The wrong-layer donor is worse than
+   deletion (0.786 vs 0.281) and is the **only** arm whose gold_top1 drops
+   significantly (-0.02689, CI [-0.03482, -0.01883]).
+
+**Caveat recorded:** `d_nll` is not a safe primary metric here. The wrong-layer
+arm scores *better* than dense on it (-0.08685) while being significantly worse on
+gold_top1, because flattening an overconfident distribution lowers average NLL —
+and this model is right only 28% of the time. `gold_top1` and `KL` are primary.
+
+**Artifact:** `results/forced_heldout_A_baselines.json`.
+
+---
+
+## 2.7 — Batch B: matched-budget group selection
+
+Same protocol, all arms at the same active fraction so the only difference is
+*which* groups run.
+
+At rho = 0.25 (6 of 24 groups), KL vs dense:
+
+| selection | KL | 95% CI |
+| --- | ---: | --- |
+| static significance | **0.17822** | [0.16990, 0.18710] |
+| random | 0.21563 | [0.20570, 0.22695] |
+| magnitude | 0.23719 | [0.22653, 0.24901] |
+| reversed significance | 0.24338 | [0.23270, 0.25507] |
+| deletion (rho=0) | 0.28055 | [0.26861, 0.29380] |
+
+**Interventional significance beats random with non-overlapping intervals**, and
+the full control set behaves as the method predicts: **reversing** the ranking is
+worse than random (the *order* carries the information), and the **magnitude**
+heuristic is *also worse than random* — so a causal marginal-utility label is
+carrying information that a weight-norm proxy does not.
+
+This is the direct reversal of the Tier-1 impression that static-25 scored below
+deletion, and it is what an endpoint with power buys.
+
+**Artifact:** `results/forced_heldout_B_matched.json`.
+
+**Also measured incidentally, and it is a systems number.** A per-token-varying
+selection costs far more than a fixed one in the reference backend: `b5-random-25`
+took **622 s** against **39 s** for `b1-delete` and about 27 s for
+`b6-static-25` on the same 414 prompts. Per-token bucketing means one
+dequantize-and-GEMM per distinct group set, and for a selection that changes every
+token the bucket count approaches the token count. This is the real cost of the
+dynamic branch, it is a reference-backend number, and it must not be read as the
+algorithm's speed limit.
