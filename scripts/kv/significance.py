@@ -477,6 +477,24 @@ def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
             pooled[..., n - n_recent:] = float("-inf")
         middle = pooled
 
+    # BASELINES. The mechanism has spent this whole programme being compared to
+    # earlier versions of itself -- centred against causal, fixed reach against
+    # derived. That establishes which variant is better and says nothing about
+    # whether the significance score is doing any work at all. These two arms are
+    # the missing controls.
+    #
+    #   random     keep the same NUMBER of positions, chosen uniformly among the
+    #              eligible ones. Isolates the score from the budget: if random
+    #              scores as well, the ranking is decorative. This control has
+    #              already caught two false results in this programme.
+    #   streaming  sinks + recent only, nothing ranked (heavy()==0, handled above).
+    #              The standard cheap baseline; anything that cannot beat it is not
+    #              worth its memory.
+    if policy.select == "random" and n_heavy:
+        r = torch.rand(middle.shape, device=middle.device, dtype=middle.dtype)
+        middle = torch.where(torch.isfinite(middle), r,
+                             torch.full_like(r, float("-inf")))
+
     parts = []
     if n_sink:
         parts.append(torch.arange(n_sink, device=device).view(1, 1, -1).expand(b, n_kv, -1))
@@ -525,6 +543,11 @@ class Policy:
     pool: int = 1              # max-pool width over scores before top-k (SnapKV)
     pool_back: int | None = None   # reach behind i; None = pool // 2 (centred)
     pool_fwd: int | None = None    # reach ahead of i;  None = pool // 2 (centred)
+    select: str = "significance"   # "significance" | "random" | "streaming".
+                                   # The last two are BASELINES, not policies to
+                                   # deploy: they exist so the mechanism can be
+                                   # compared against something other than earlier
+                                   # versions of itself. See select_keep.
     grow: float | None = None      # if set, DERIVE the reach: geodesic dilation
                                    # gated at this MULTIPLE of the stream's median
                                    # score, instead of a fixed pool_back. 2.0 means
@@ -564,6 +587,9 @@ class Policy:
 
     def heavy(self) -> int:
         """Slots chosen by significance. Zero means the policy is StreamingLLM.
+
+        The `streaming` baseline sets this to zero deliberately, so the budget goes
+        entirely to sinks plus a recent window and nothing is ranked at all.
 
         Deliberately warns rather than raising: a raise mid-sweep truncates the
         run and leaves a partial results.jsonl that the summarizer will happily

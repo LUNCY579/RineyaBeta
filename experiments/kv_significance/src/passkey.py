@@ -271,6 +271,13 @@ def main() -> None:
                          "traced at 128K kept only 57-65%% of its tokens, i.e. "
                          "the span survived in fragments. Pooling exists to "
                          "stop exactly that.")
+    ap.add_argument("--select", choices=("significance","random","streaming"),
+                    default="significance",
+                    help="BASELINE arms. `random` keeps the same number of "
+                         "positions chosen uniformly, isolating the score from "
+                         "the budget. `streaming` spends the budget on sinks "
+                         "plus recent and ranks nothing. Without these the "
+                         "mechanism is only ever compared to itself.")
     ap.add_argument("--hops", type=int, default=1,
                     help="STAGE 3: chain length. 1 is ordinary passkey. N>1 "
                          "builds N segments where hop i is addressed by hop "
@@ -391,7 +398,11 @@ def main() -> None:
                 # averaging over it.
                 rng = random.Random(args.seed)
                 hits, seen, ooms, peak, ex, trials = 0, 0, 0, 0.0, [], []
-                for _ in range(args.trials):
+                for ti in range(args.trials):
+                    # Seed torch per trial so the `random` baseline is
+                    # reproducible. A control that cannot be re-run is not a
+                    # control, and every other arm here is deterministic.
+                    torch.manual_seed(args.seed + ti)
                     if args.hops > 1:
                         # The answer is the LAST link; every earlier value exists
                         # only to be chased through.
@@ -421,8 +432,10 @@ def main() -> None:
                     ids = tok(text, return_tensors="pt").to(args.device)["input_ids"]
                     torch.cuda.empty_cache()
                     torch.cuda.reset_peak_memory_stats()
-                    policy = (sig.Policy(budget=budget, sinks=4, recent=args.recent,
+                    rec = (budget - 4) if args.select == 'streaming' else args.recent
+                    policy = (sig.Policy(budget=budget, sinks=4, recent=rec,
                                          pool=args.pool,
+                                         select=args.select,
                                          pool_back=args.pool_back,
                                          pool_fwd=args.pool_fwd,
                                          grow=args.grow,
@@ -509,6 +522,7 @@ def main() -> None:
          "grow": args.grow, "grow_max": args.grow_max,
          "needle_words": args.needle_words,
          "hops": args.hops, "hop_depths": args.hop_depths,
+         "select": args.select,
          "distractors": args.distractors,
          "distractor_style": args.distractor_style,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
