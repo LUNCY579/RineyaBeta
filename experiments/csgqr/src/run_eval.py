@@ -171,6 +171,14 @@ def main() -> None:
         if args.ranking_from:
             src = json.loads((REPO / args.ranking_from).read_text(encoding="utf-8"))
             ranking_source = src.get("ranking") or src.get("significance_ranking")
+            # An arm that collapses the remnant to a single group (b1-delete)
+            # cannot use a 24-group ranking, and silently truncating one would
+            # invent an ordering the significance run never measured. A ranking
+            # is used only when it matches this arm's group count.
+            if ranking_source is not None and len(ranking_source) != n_groups:
+                print("ranking    ignored: source has " + str(len(ranking_source))
+                      + " groups, this arm has " + str(n_groups))
+                ranking_source = None
 
         overrides = {}
         for name, val in (("tau_skip", args.tau_skip), ("tau_full", args.tau_full),

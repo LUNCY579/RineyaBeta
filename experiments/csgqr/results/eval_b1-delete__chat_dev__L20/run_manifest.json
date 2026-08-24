@@ -1,0 +1,117 @@
+{
+  "arm": "b1-delete",
+  "label": "B1 exact MLP deletion",
+  "purpose": "damage floor",
+  "dataset": "chat_dev",
+  "dataset_sha256": "e059e548f684c76e1520d98fb4184ea7b8eda2053c3c23eed46794bcadfef954",
+  "layer": 20,
+  "n_groups": 24,
+  "case_count": 510,
+  "protocol": {
+    "max_new_tokens": 32,
+    "response_control": "eos_only",
+    "min_new_tokens_before_boundary": 1,
+    "do_sample": false,
+    "temperature": null,
+    "top_p": null,
+    "source": "artifacts/teacher_dual_sft_v1/baseline_chat_dev/evaluation_manifest.json"
+  },
+  "quality_evaluation_version": "4.5",
+  "mean_quality_score": 0.8222428994426053,
+  "install": {
+    "layer": 20,
+    "donor_layer": 20,
+    "wrong_layer_donor": false,
+    "spec": "int4-b128-asym",
+    "bits": 4,
+    "block": 128,
+    "symmetric": false,
+    "n_groups": 1,
+    "group_size": 3072,
+    "packed_bytes": {
+      "gate": 1646592,
+      "up": 1646592,
+      "down": 1646592,
+      "alpha": 4,
+      "total": 4939780,
+      "scales": 147456,
+      "zeros": 73728
+    },
+    "dense_bytes": 18874368,
+    "compression_vs_dense": 3.820892428407743,
+    "policy": {
+      "mode": "none",
+      "feature": "max_prob",
+      "tau_skip": 0.9,
+      "tau_full": 0.3,
+      "gamma": 1.0,
+      "selector": "static_topk",
+      "fraction": 1.0,
+      "n_groups": 1,
+      "seed": 20260823,
+      "ranking": [
+        0
+      ],
+      "name": "delete"
+    },
+    "alpha": [
+      1.0
+    ]
+  },
+  "routing": {
+    "tokens": 85697,
+    "groups_executed": 0,
+    "active_fraction": 0.0,
+    "invocation_rate": 0.0,
+    "full_invocation_rate": 0.0,
+    "skip_rate": 1.0,
+    "mean_confidence": 0.0,
+    "median_confidence": 0.0,
+    "mean_groups_per_token": 0.0,
+    "group_selection_rate": [
+      0.0
+    ]
+  },
+  "peak_allocated_mib": 939.77734375,
+  "peak_reserved_mib": 960.0,
+  "elapsed_s": 375.0,
+  "seconds_per_case": 0.7354,
+  "environment": {
+    "python": "3.11.15",
+    "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "cpu_count": 32,
+    "git_sha": "fb790a63c34d5f50fa19bbf857fa853b7c09877a",
+    "git_branch": "research/csgqr-quantized-remnant",
+    "git_dirty": true,
+    "torch": "2.13.0+cu130",
+    "torch_cuda_build": "13.0",
+    "cuda_available": true,
+    "cudnn": 92000,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "capability": "8.9",
+      "total_vram_mib": 8187.5,
+      "multi_processor_count": 36,
+      "free_mib_at_start": 6072.0,
+      "used_by_others_mib": 2115.5
+    },
+    "nvidia_smi": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "memory.total": "8188",
+      "memory.used": "2216",
+      "memory.free": "5733",
+      "driver_version": "610.62",
+      "compute_cap": "8.9"
+    },
+    "transformers": "5.15.0",
+    "peft": "0.20.0",
+    "accelerate": "1.14.0",
+    "numpy": "2.4.6",
+    "scipy": null,
+    "datasets": null,
+    "safetensors": "0.8.0"
+  }
+}
