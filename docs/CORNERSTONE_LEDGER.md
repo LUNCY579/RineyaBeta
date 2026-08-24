@@ -21,6 +21,12 @@ below are left as the record of what was known at the time.
 | 6 | no result outside passkey | **stage 1 run.** 16 query-shaped decoys take B=64 from 1.000 to **0.611**; 16 neutral ones cost nothing (0.972); exact McNemar **p = 0.0010** |
 | 7 | — | that collapse is **capacity, not scoring**: budget alone restores it (B=512 → 1.000). Competition costs **32×** of compression — 7,864× down to **246×** |
 
+| 8 | no baseline existed | **the score is what works.** At 128K/B=16, significance 36/36 against random 0/36 and streaming 0/36 — both p = 2.9 × 10⁻¹¹. Neither baseline degrades; both retrieve nothing |
+| 9 | — | **the mechanism is purely inference-time**: 0 added parameters, no training, 1.5625% cache overhead, and it runs on the published Halo core with no code change |
+| 10 | — | **it preserves accuracy, it does not improve it.** Two hints (+0.056 at W=12, 1 needle at 32K) are both inside noise |
+| 11 | stage 2 ungated | **the model does not degrade with span length** (uncompressed 0.889 / 0.806 / 0.944 at 3 / 12 / 20 tokens), so "declines monotonically with span" is retracted at its middle point; the W=20 cost survives |
+| 12 | — | **stage 3 is viable**: 2-hop 0.833 and 3-hop 0.722 uncompressed, so chains measure the mechanism rather than the model's incapacity |
+
 **The single most important line for planning:** 7,864× is a property of a haystack
 with **no competitors at all**, and passkey's filler contains no digits whatsoever, so
 a regex scores 1.000 on it with no model. 246× is what the same mechanism delivers
