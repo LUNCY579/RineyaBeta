@@ -1,0 +1,146 @@
+{
+  "campaign": "sgqr_v2",
+  "endpoint": "teacher_forced_paired",
+  "retired_layers": [
+    13,
+    14,
+    24,
+    25
+  ],
+  "dataset": "chat_dev",
+  "prompts": 414,
+  "skip_prompts": 96,
+  "max_len": 256,
+  "n_boot": 4000,
+  "arms": {
+    "H-lora": {
+      "arm": "H-lora",
+      "label": "r18_lr1e-04_s300",
+      "kind": "lora",
+      "artifact": "artifacts/sgqr_v2_adapters/r18_lr1e-04_s300",
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 1.8561063646495266,
+        "lo": 1.808606190346253,
+        "hi": 1.9029852567319216,
+        "se": 0.024035901214106727,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.2780678851174935,
+        "lo": 0.26424955815211915,
+        "hi": 0.2924955547536085,
+        "se": 0.007213624671951856,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 4.241253946990726,
+        "lo": 4.123872672783759,
+        "hi": 4.35534806583603,
+        "se": 0.05863995304099683,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": -0.5683320178446175,
+        "lo": -0.6517048594720724,
+        "hi": -0.4848470659746729,
+        "se": 0.04251134463064562,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 0.3966057441253264,
+        "lo": 0.38077431023347813,
+        "hi": 0.4119341108670397,
+        "se": 0.007953807468335858,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 69.4949401963818,
+      "trainable_parameters": 9732096,
+      "stored_bytes_bf16": 19464192,
+      "remnant_budget_bytes": 19759488,
+      "budget_match_fraction": 0.9850554832189984,
+      "training": {
+        "arm": "H-lora",
+        "tag": "r18_lr1e-04_s300",
+        "retired_layers": [
+          13,
+          14,
+          24,
+          25
+        ],
+        "rank": 18,
+        "alpha": 36,
+        "lr": 0.0001,
+        "steps": 300,
+        "micro_batch": 4,
+        "grad_accum": 8,
+        "max_len": 384,
+        "rows_used": 128365,
+        "rows_available": 128365,
+        "mix": "artifacts/heal_mixes/B0/heal_mix_b0.jsonl",
+        "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+        "include_retired_attn": false,
+        "target_module_count": 168,
+        "trainable_parameters": 9732096,
+        "stored_bytes_bf16": 19464192,
+        "stored_bytes_on_disk": 19582751,
+        "remnant_budget_bytes": 19759488,
+        "budget_match_fraction": 0.9850554832189984,
+        "final_loss": 1.1606788234856293,
+        "first_loss": 5.3462818487366635,
+        "train_seconds": 1501.7,
+        "seed": 20260824
+      },
+      "elapsed_s": 29.7
+    }
+  },
+  "environment": {
+    "python": "3.11.15",
+    "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "cpu_count": 32,
+    "git_sha": "aa6b598a47768e49f6153bd67bded9b1b645513c",
+    "git_branch": "research/sgqr-v2-remnant-recovery",
+    "git_dirty": false,
+    "torch": "2.13.0+cu130",
+    "torch_cuda_build": "13.0",
+    "cuda_available": true,
+    "cudnn": 92000,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "capability": "8.9",
+      "total_vram_mib": 8187.5,
+      "multi_processor_count": 36,
+      "free_mib_at_start": 6044.0,
+      "used_by_others_mib": 2143.5
+    },
+    "nvidia_smi": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "memory.total": "8188",
+      "memory.used": "1513",
+      "memory.free": "6436",
+      "driver_version": "610.62",
+      "compute_cap": "8.9"
+    },
+    "transformers": "5.15.0",
+    "peft": "0.20.0",
+    "accelerate": "1.14.0",
+    "numpy": "2.4.6",
+    "scipy": null,
+    "datasets": null,
+    "safetensors": "0.8.0"
+  }
+}

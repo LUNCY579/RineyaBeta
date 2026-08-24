@@ -1,0 +1,1001 @@
+{
+  "campaign": "sgqr_v2",
+  "endpoint": "teacher_forced_paired",
+  "retired_layers": [
+    13,
+    14,
+    24,
+    25
+  ],
+  "layer_selection_rule": "four lowest deletion damage in experiments/csgqr/results/layer_scan.json, fixed before any four-layer measurement",
+  "dataset": "chat_dev",
+  "prompts": 414,
+  "reply_positions": 3830,
+  "skip_prompts": 96,
+  "max_len": 256,
+  "n_groups_per_layer": 24,
+  "budgets": [
+    0.1,
+    0.25,
+    0.5,
+    0.75
+  ],
+  "random_seeds": [
+    1,
+    2,
+    3
+  ],
+  "n_boot": 4000,
+  "significance": null,
+  "unit_of_analysis": "reply position, bootstrap clustered by prompt",
+  "donor_resident": true,
+  "memory_note": "donors stay resident so the dense reference is a pointer swap; VRAM must come from the profiling script",
+  "environment": {
+    "python": "3.11.15",
+    "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "cpu_count": 32,
+    "git_sha": "aa6b598a47768e49f6153bd67bded9b1b645513c",
+    "git_branch": "research/sgqr-v2-remnant-recovery",
+    "git_dirty": false,
+    "torch": "2.13.0+cu130",
+    "torch_cuda_build": "13.0",
+    "cuda_available": true,
+    "cudnn": 92000,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "capability": "8.9",
+      "total_vram_mib": 8187.5,
+      "multi_processor_count": 36,
+      "free_mib_at_start": 6078.0,
+      "used_by_others_mib": 2109.5
+    },
+    "nvidia_smi": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "memory.total": "8188",
+      "memory.used": "1479",
+      "memory.free": "6470",
+      "driver_version": "610.62",
+      "compute_cap": "8.9"
+    },
+    "transformers": "5.15.0",
+    "peft": "0.20.0",
+    "accelerate": "1.14.0",
+    "numpy": "2.4.6",
+    "scipy": null,
+    "datasets": null,
+    "safetensors": "0.8.0"
+  },
+  "arms": {
+    "A-dense": {
+      "arm": "A-dense",
+      "label": "A dense reference",
+      "spec": null,
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "se": 0.0,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.28224543080939946,
+        "lo": 0.2688978802225623,
+        "hi": 0.29653370292887027,
+        "se": 0.0070804417058626815,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 4.809585964835343,
+        "lo": 4.6655124030114985,
+        "hi": 4.951295763925738,
+        "se": 0.0717326653697069,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": 0.0,
+        "lo": 0.0,
+        "hi": 0.0,
+        "se": 0.0,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 1.0,
+        "lo": 1.0,
+        "hi": 1.0,
+        "se": 0.0,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 122.68081282998715,
+      "install": null,
+      "elapsed_s": 0.3
+    },
+    "B-delete4": {
+      "arm": "B-delete4",
+      "label": "B four-layer deletion",
+      "spec": "int4-b128-asym",
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 0.8455104401850098,
+        "lo": 0.8135648076655647,
+        "hi": 0.8791169988955991,
+        "se": 0.016505370584150008,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.24046997389033942,
+        "lo": 0.22734167483687057,
+        "hi": 0.25449369602646504,
+        "se": 0.006908040099346071,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 5.383556049420097,
+        "lo": 5.2380335229325725,
+        "hi": 5.523028121850484,
+        "se": 0.07248967123047126,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": 0.5739700845847538,
+        "lo": 0.5049245415357105,
+        "hi": 0.6441655218907331,
+        "se": 0.03496435743065126,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 0.5892950391644909,
+        "lo": 0.5735816984114468,
+        "hi": 0.604472672795015,
+        "se": 0.00785490243473169,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 217.7953911658097,
+      "install": {
+        "layers": [
+          13,
+          14,
+          24,
+          25
+        ],
+        "donor_map": {
+          "13": 13,
+          "14": 14,
+          "24": 24,
+          "25": 25
+        },
+        "wrong_layer": false,
+        "spec": "int4-b128-asym",
+        "bits": 4,
+        "n_groups_per_layer": 24,
+        "active_groups": 0,
+        "total_groups": 96,
+        "active_fraction": 0.0,
+        "per_layer_active": {
+          "13": 0,
+          "14": 0,
+          "24": 0,
+          "25": 0
+        },
+        "packed_bytes": 19759488,
+        "dense_bytes": 75497472,
+        "compression_vs_dense": 3.8208212682433875,
+        "active_flops_per_token": 0,
+        "dense_mlp_flops_per_token": 75497472,
+        "donor_freed": false
+      },
+      "elapsed_s": 18.2
+    },
+    "C-fp16-full": {
+      "arm": "C-fp16-full",
+      "label": "C four exact fp16 remnants, rho=1",
+      "spec": "fp16",
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": -5.126248658077644e-07,
+        "lo": -6.443526345261557e-06,
+        "hi": 5.509397106449472e-06,
+        "se": 3.096393163324527e-06,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.28224543080939946,
+        "lo": 0.2688978802225623,
+        "hi": 0.29653370292887027,
+        "se": 0.0070804417058626815,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 4.809572413409227,
+        "lo": 4.665505609180419,
+        "hi": 4.9512969592677605,
+        "se": 0.07173215850969286,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": -1.355142611592063e-05,
+        "lo": -5.5213554607176876e-05,
+        "hi": 2.861893304730782e-05,
+        "se": 2.1270872215514018e-05,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 1.0,
+        "lo": 1.0,
+        "hi": 1.0,
+        "se": 0.0,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 122.67915034128087,
+      "install": {
+        "layers": [
+          13,
+          14,
+          24,
+          25
+        ],
+        "donor_map": {
+          "13": 13,
+          "14": 14,
+          "24": 24,
+          "25": 25
+        },
+        "wrong_layer": false,
+        "spec": "fp16",
+        "bits": 16,
+        "n_groups_per_layer": 24,
+        "active_groups": 96,
+        "total_groups": 96,
+        "active_fraction": 1.0,
+        "per_layer_active": {
+          "13": 24,
+          "14": 24,
+          "24": 24,
+          "25": 24
+        },
+        "packed_bytes": 75497856,
+        "dense_bytes": 75497472,
+        "compression_vs_dense": 0.9999949137628491,
+        "active_flops_per_token": 75497472,
+        "dense_mlp_flops_per_token": 75497472,
+        "donor_freed": false
+      },
+      "elapsed_s": 18.9
+    },
+    "C-int8-full": {
+      "arm": "C-int8-full",
+      "label": "C four exact int8 remnants, rho=1",
+      "spec": "int8-b128-asym",
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 0.0012876976104025809,
+        "lo": 0.001250241808239356,
+        "hi": 0.0013280108871459896,
+        "se": 1.9876672301709428e-05,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.27963446475195824,
+        "lo": 0.2662432781870837,
+        "hi": 0.29366363729496164,
+        "se": 0.007026232130337477,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 4.811412873317227,
+        "lo": 4.6674617236546405,
+        "hi": 4.953370535708483,
+        "se": 0.07181667581852762,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": 0.0018269084818826721,
+        "lo": -0.00018011896789746408,
+        "hi": 0.003807751985362642,
+        "se": 0.0010185235831767668,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 0.9798955613577024,
+        "lo": 0.9753181041299708,
+        "hi": 0.9842799809285682,
+        "se": 0.0023072740864951155,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 122.90514430165088,
+      "install": {
+        "layers": [
+          13,
+          14,
+          24,
+          25
+        ],
+        "donor_map": {
+          "13": 13,
+          "14": 14,
+          "24": 24,
+          "25": 25
+        },
+        "wrong_layer": false,
+        "spec": "int8-b128-asym",
+        "bits": 8,
+        "n_groups_per_layer": 24,
+        "active_groups": 96,
+        "total_groups": 96,
+        "active_fraction": 1.0,
+        "per_layer_active": {
+          "13": 24,
+          "14": 24,
+          "24": 24,
+          "25": 24
+        },
+        "packed_bytes": 38633856,
+        "dense_bytes": 75497472,
+        "compression_vs_dense": 1.954179049588009,
+        "active_flops_per_token": 75497472,
+        "dense_mlp_flops_per_token": 75497472,
+        "donor_freed": false
+      },
+      "elapsed_s": 20.2
+    },
+    "C-int4-full": {
+      "arm": "C-int4-full",
+      "label": "C four exact int4 remnants, rho=1",
+      "spec": "int4-b128-asym",
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 0.0243123215607134,
+        "lo": 0.02336304151938349,
+        "hi": 0.025340377117711785,
+        "se": 0.0005078731614781755,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.2848563968668407,
+        "lo": 0.27204284507490456,
+        "hi": 0.2982187189672294,
+        "se": 0.006791775366809939,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 4.809066278400084,
+        "lo": 4.6683140823314595,
+        "hi": 4.947627347818311,
+        "se": 0.07010304780795812,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": -0.0005196864352599106,
+        "lo": -0.01066349965571308,
+        "hi": 0.009705606129680666,
+        "se": 0.005104621294606112,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 0.9127937336814621,
+        "lo": 0.9041023442140157,
+        "hi": 0.9208127942435447,
+        "se": 0.004230367374798829,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 122.61707383927175,
+      "install": {
+        "layers": [
+          13,
+          14,
+          24,
+          25
+        ],
+        "donor_map": {
+          "13": 13,
+          "14": 14,
+          "24": 24,
+          "25": 25
+        },
+        "wrong_layer": false,
+        "spec": "int4-b128-asym",
+        "bits": 4,
+        "n_groups_per_layer": 24,
+        "active_groups": 96,
+        "total_groups": 96,
+        "active_fraction": 1.0,
+        "per_layer_active": {
+          "13": 24,
+          "14": 24,
+          "24": 24,
+          "25": 24
+        },
+        "packed_bytes": 19759488,
+        "dense_bytes": 75497472,
+        "compression_vs_dense": 3.8208212682433875,
+        "active_flops_per_token": 75497472,
+        "dense_mlp_flops_per_token": 75497472,
+        "donor_freed": false
+      },
+      "elapsed_s": 20.9
+    },
+    "G-shift1-full": {
+      "arm": "G-shift1-full",
+      "label": "G-shift1 wrong-layer donors, rho=1",
+      "spec": "int4-b128-asym",
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 0.6543126029596948,
+        "lo": 0.6327414469480545,
+        "hi": 0.6778637910695917,
+        "se": 0.011524776267307158,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.2574412532637076,
+        "lo": 0.24420892009028095,
+        "hi": 0.27091736867737976,
+        "se": 0.006833617279643108,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 4.987511265826246,
+        "lo": 4.858745661403895,
+        "hi": 5.1194988166318804,
+        "se": 0.06663840407098195,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": 0.17792530099090234,
+        "lo": 0.12783228564773827,
+        "hi": 0.22797431737317347,
+        "se": 0.025670605852032485,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 0.6109660574412533,
+        "lo": 0.5945285684343766,
+        "hi": 0.6268421862038915,
+        "se": 0.008221590495793038,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 146.57119246715678,
+      "install": {
+        "layers": [
+          13,
+          14,
+          24,
+          25
+        ],
+        "donor_map": {
+          "13": 14,
+          "14": 15,
+          "24": 25,
+          "25": 26
+        },
+        "wrong_layer": true,
+        "spec": "int4-b128-asym",
+        "bits": 4,
+        "n_groups_per_layer": 24,
+        "active_groups": 96,
+        "total_groups": 96,
+        "active_fraction": 1.0,
+        "per_layer_active": {
+          "13": 24,
+          "14": 24,
+          "24": 24,
+          "25": 24
+        },
+        "packed_bytes": 19759488,
+        "dense_bytes": 75497472,
+        "compression_vs_dense": 3.8208212682433875,
+        "active_flops_per_token": 75497472,
+        "dense_mlp_flops_per_token": 75497472,
+        "donor_freed": false
+      },
+      "elapsed_s": 21.1
+    },
+    "G-shift6-full": {
+      "arm": "G-shift6-full",
+      "label": "G-shift6 wrong-layer donors, rho=1",
+      "spec": "int4-b128-asym",
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 1.5062592066150868,
+        "lo": 1.4604935352299937,
+        "hi": 1.5530008985377168,
+        "se": 0.02336670469250809,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.21671018276762402,
+        "lo": 0.2031494946542355,
+        "hi": 0.23089139918598134,
+        "se": 0.0070182982409700174,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 6.157371520752473,
+        "lo": 5.99156853846686,
+        "hi": 6.324124207059559,
+        "se": 0.08442349167396503,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": 1.3477855559171295,
+        "lo": 1.2587276531373293,
+        "hi": 1.4346817784198393,
+        "se": 0.04464241326399539,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 0.47885117493472584,
+        "lo": 0.46367534028480306,
+        "hi": 0.49425389384942325,
+        "se": 0.007787578578642201,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 472.18531296733414,
+      "install": {
+        "layers": [
+          13,
+          14,
+          24,
+          25
+        ],
+        "donor_map": {
+          "13": 19,
+          "14": 20,
+          "24": 2,
+          "25": 3
+        },
+        "wrong_layer": true,
+        "spec": "int4-b128-asym",
+        "bits": 4,
+        "n_groups_per_layer": 24,
+        "active_groups": 96,
+        "total_groups": 96,
+        "active_fraction": 1.0,
+        "per_layer_active": {
+          "13": 24,
+          "14": 24,
+          "24": 24,
+          "25": 24
+        },
+        "packed_bytes": 19759488,
+        "dense_bytes": 75497472,
+        "compression_vs_dense": 3.8208212682433875,
+        "active_flops_per_token": 75497472,
+        "dense_mlp_flops_per_token": 75497472,
+        "donor_freed": false
+      },
+      "elapsed_s": 21.3
+    },
+    "G-rev-full": {
+      "arm": "G-rev-full",
+      "label": "G-rev wrong-layer donors, rho=1",
+      "spec": "int4-b128-asym",
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 1.9192933404175727,
+        "lo": 1.8596584459539494,
+        "hi": 1.9826125439900477,
+        "se": 0.03167505740583478,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.19530026109660575,
+        "lo": 0.18399141607904496,
+        "hi": 0.20754716981132076,
+        "se": 0.006025420245546512,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_gold": {
+        "point": 5.904842929488393,
+        "lo": 5.768714699437282,
+        "hi": 6.0355763919314,
+        "se": 0.06919285764083176,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll_gold": {
+        "point": 1.09525696465305,
+        "lo": 1.0102164824563513,
+        "hi": 1.1821231628842257,
+        "se": 0.044470729380983856,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 0.39634464751958226,
+        "lo": 0.3812119503683614,
+        "hi": 0.4113962789697997,
+        "se": 0.007662548892212843,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "perplexity_gold": 366.80960628990096,
+      "install": {
+        "layers": [
+          13,
+          14,
+          24,
+          25
+        ],
+        "donor_map": {
+          "13": 25,
+          "14": 24,
+          "24": 14,
+          "25": 13
+        },
+        "wrong_layer": true,
+        "spec": "int4-b128-asym",
+        "bits": 4,
+        "n_groups_per_layer": 24,
+        "active_groups": 96,
+        "total_groups": 96,
+        "active_fraction": 1.0,
+        "per_layer_active": {
+          "13": 24,
+          "14": 24,
+          "24": 24,
+          "25": 24
+        },
+        "packed_bytes": 19759488,
+        "dense_bytes": 75497472,
+        "compression_vs_dense": 3.8208212682433875,
+        "active_flops_per_token": 75497472,
+        "dense_mlp_flops_per_token": 75497472,
+        "donor_freed": false
+      },
+      "elapsed_s": 21.3
+    }
+  },
+  "contrasts": [
+    {
+      "arm": "A-dense",
+      "baseline": "B-delete4",
+      "kl": {
+        "point": -0.8455104401850098,
+        "lo": -0.8791169988955991,
+        "hi": -0.8135648076655647,
+        "se": 0.016505370584150008,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.8635506071769978
+      },
+      "gold_top1": {
+        "point": 0.04177545691906005,
+        "lo": 0.031619537275064266,
+        "hi": 0.052442190518262786,
+        "se": 0.005393399577346936,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.126238903195559
+      },
+      "nll_gold": {
+        "point": -0.5739700845847538,
+        "lo": -0.6441655218907331,
+        "hi": -0.5049245415357104,
+        "se": 0.03496435743065126,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.30391666840577164
+      }
+    },
+    {
+      "arm": "C-fp16-full",
+      "baseline": "B-delete4",
+      "kl": {
+        "point": -0.8455109528098755,
+        "lo": -0.8791167023672304,
+        "hi": -0.8135671284617847,
+        "se": 0.01650516326992273,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.8635523839545953
+      },
+      "gold_top1": {
+        "point": 0.04177545691906005,
+        "lo": 0.031619537275064266,
+        "hi": 0.052442190518262786,
+        "se": 0.005393399577346936,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.126238903195559
+      },
+      "nll_gold": {
+        "point": -0.5739836360108697,
+        "lo": -0.6441888491031025,
+        "hi": -0.5049624028406141,
+        "se": 0.034962004980249484,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.30392803627784576
+      }
+    },
+    {
+      "arm": "C-int8-full",
+      "baseline": "B-delete4",
+      "kl": {
+        "point": -0.8442227425746072,
+        "lo": -0.8778050423942003,
+        "hi": -0.8122651461303938,
+        "se": 0.016499280830940884,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.8624725879462517
+      },
+      "gold_top1": {
+        "point": 0.0391644908616188,
+        "lo": 0.028915647235821487,
+        "hi": 0.04974903304664529,
+        "se": 0.005429517848468782,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.11880181998380773
+      },
+      "nll_gold": {
+        "point": -0.5721431761028711,
+        "lo": -0.642651481713125,
+        "hi": -0.5032562856517023,
+        "se": 0.03500589432865387,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.30282436183941386
+      }
+    },
+    {
+      "arm": "C-int4-full",
+      "baseline": "B-delete4",
+      "kl": {
+        "point": -0.8211981186242963,
+        "lo": -0.8542054657190171,
+        "hi": -0.7895377096474493,
+        "se": 0.016262469011161605,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.8479607341772454
+      },
+      "gold_top1": {
+        "point": 0.044386422976501305,
+        "lo": 0.03423214326056951,
+        "hi": 0.05510839298365226,
+        "se": 0.005395565932764155,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.1314690238310646
+      },
+      "nll_gold": {
+        "point": -0.5744897710200136,
+        "lo": -0.6440447146712226,
+        "hi": -0.5045005808328539,
+        "se": 0.03498645338008687,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.30997193955104885
+      }
+    },
+    {
+      "arm": "G-shift1-full",
+      "baseline": "B-delete4",
+      "kl": {
+        "point": -0.1911978372253149,
+        "lo": -0.21579117112832946,
+        "hi": -0.16697794723603693,
+        "se": 0.01240338043796434,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.24359698191413467
+      },
+      "gold_top1": {
+        "point": 0.016971279373368148,
+        "lo": 0.0075873036600380556,
+        "hi": 0.02641336855260815,
+        "se": 0.004812914041706718,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.05277961688902777
+      },
+      "nll_gold": {
+        "point": -0.3960447835938515,
+        "lo": -0.4554842855405256,
+        "hi": -0.3364164576718226,
+        "se": 0.03018651878551746,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.23465703782853528
+      }
+    },
+    {
+      "arm": "G-shift6-full",
+      "baseline": "B-delete4",
+      "kl": {
+        "point": 0.6607487664300772,
+        "lo": 0.6265874257542169,
+        "hi": 0.6951958449872085,
+        "se": 0.01738412513314117,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.5955341117904971
+      },
+      "gold_top1": {
+        "point": -0.023759791122715406,
+        "lo": -0.032782521071354064,
+        "hi": -0.014769136048879168,
+        "se": 0.004607961336707337,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.08339083971540602
+      },
+      "nll_gold": {
+        "point": 0.7738154713323756,
+        "lo": 0.7113691439634278,
+        "hi": 0.8357208205194602,
+        "se": 0.03171230982365986,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.36373654932893856
+      }
+    },
+    {
+      "arm": "G-rev-full",
+      "baseline": "B-delete4",
+      "kl": {
+        "point": 1.073782900232563,
+        "lo": 1.0194738518955888,
+        "hi": 1.1349644413457052,
+        "se": 0.029483960514065453,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.677804893770287
+      },
+      "gold_top1": {
+        "point": -0.045169712793733684,
+        "lo": -0.055672354076765844,
+        "hi": -0.03423417352662635,
+        "se": 0.005517004038120461,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": -0.12903800996667933
+      },
+      "nll_gold": {
+        "point": 0.521286880068296,
+        "lo": 0.44720481198537193,
+        "hi": 0.5987620921287377,
+        "se": 0.03886384994625323,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000,
+        "excludes_zero": true,
+        "cohens_d": 0.22411877416459436
+      }
+    }
+  ],
+  "baseline_for_contrasts": "B-delete4",
+  "failures": {},
+  "complete": true
+}

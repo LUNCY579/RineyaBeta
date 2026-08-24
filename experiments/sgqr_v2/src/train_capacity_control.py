@@ -131,6 +131,12 @@ def main() -> None:
                     help="cap training rows (0 = all); rows are taken in a fixed "
                          "seeded permutation so a cap is a sample, not a prefix")
     ap.add_argument("--include-retired-attn", action="store_true")
+    ap.add_argument("--no-retire", action="store_true",
+                    help="train on the UNPRUNED dense model. This is the control "
+                         "that disambiguates recovery from fine-tuning: if dense "
+                         "plus the same adapter reaches the same loss as pruned "
+                         "plus the same adapter, the adapter is not recovering "
+                         "anything, it is adapting to the training distribution.")
     ap.add_argument("--seed", type=int, default=20260824)
     ap.add_argument("--cap-mib", type=float, default=5120.0)
     ap.add_argument("--out-dir", default="artifacts/sgqr_v2_adapters")
@@ -152,11 +158,12 @@ def main() -> None:
     model.config.use_cache = False
 
     # -- retire the four layers, and actually free their weights -----------
-    plan = RetirementPlan(layers=RETIRED, spec=QuantSpec(4, 128, False))
-    inst = install_sgqr(model, plan, allocation={l: [] for l in RETIRED},
-                        keep_donor_resident=False)
-    for l in RETIRED:                       # drop the remnant too: this arm has none
-        model.model.layers[l].mlp = _ZeroMlp()
+    if not args.no_retire:
+        plan = RetirementPlan(layers=RETIRED, spec=QuantSpec(4, 128, False))
+        install_sgqr(model, plan, allocation={l: [] for l in RETIRED},
+                     keep_donor_resident=False)
+        for l in RETIRED:                   # drop the remnant too: this arm has none
+            model.model.layers[l].mlp = _ZeroMlp()
     n_layers = model.config.num_hidden_layers
 
     budget = len(RETIRED) * REMNANT_BYTES_PER_LAYER
@@ -164,8 +171,9 @@ def main() -> None:
     adapters: dict = {}
     bottleneck = 0
     if args.kind == "lora":
-        targets = lora_target_modules(n_layers, set(RETIRED),
-                                      args.include_retired_attn)
+        targets = lora_target_modules(
+            n_layers, set() if args.no_retire else set(RETIRED),
+            args.include_retired_attn)
         model = get_peft_model(model, LoraConfig(
             r=args.rank, lora_alpha=alpha, lora_dropout=0.0, bias="none",
             task_type="CAUSAL_LM", target_modules=targets))
@@ -269,7 +277,8 @@ def main() -> None:
     tag = ((("r" + str(args.rank)) if args.kind == "lora"
             else ("m" + str(bottleneck)))
            + "_lr" + format(args.lr, ".0e") + "_s" + str(args.steps)
-           + ("_attn" if args.include_retired_attn else ""))
+           + ("_attn" if args.include_retired_attn else "")
+           + ("_DENSE" if args.no_retire else ""))
     out = REPO / args.out_dir / (args.kind + "_" + tag)
     out.mkdir(parents=True, exist_ok=True)
     if args.kind == "lora":
@@ -290,7 +299,8 @@ def main() -> None:
     manifest = {
         "arm": "H-lora" if args.kind == "lora" else "I-adapter",
         "kind": args.kind, "bottleneck": bottleneck, "tag": tag,
-        "retired_layers": list(RETIRED),
+        "retired_layers": [] if args.no_retire else list(RETIRED),
+        "no_retire": args.no_retire,
         "rank": args.rank, "alpha": alpha, "lr": args.lr,
         "steps": args.steps, "micro_batch": args.micro_batch,
         "grad_accum": args.grad_accum, "max_len": args.max_len,
