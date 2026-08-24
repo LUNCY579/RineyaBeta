@@ -100,7 +100,8 @@ from measure_layers import DATASETS, load_prompts                  # noqa: E402
 from router import RoutingTrace                                    # noqa: E402
 from significance import (magnitude_ranking, reversed_ranking,     # noqa: E402
                           shuffled_ranking)
-from stats import cluster_bootstrap, cluster_bootstrap_pair        # noqa: E402
+from stats import (cluster_bootstrap_mean,                         # noqa: E402
+                   cluster_bootstrap_mean_pair)
 from surgery import install_csgqr                                  # noqa: E402
 from variants import CATALOGUE                                     # noqa: E402
 
@@ -296,8 +297,50 @@ def main() -> None:
                                    ("fraction", args.fraction),
                                    ("feature", args.feature)) if v is not None}
 
+    dest = REPO / (args.out or
+                   ("experiments/csgqr/results/forced_"
+                    + (args.tag or ("L" + str(args.layer) + "_" + args.dataset))
+                    + ".json"))
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    header = {
+        "endpoint": "teacher_forced_paired",
+        "dataset": args.dataset, "layer": args.layer,
+        "n_groups": args.n_groups,
+        "prompts": len(prompts), "reply_positions": n_pos,
+        "skip_prompts": args.skip_prompts, "max_len": args.max_len,
+        "unit_of_analysis": "reply position, bootstrap clustered by prompt",
+        "n_boot": args.n_boot,
+        "ranking_from": args.ranking_from,
+        "router": router_meta, "probe": probe_meta,
+        "overrides": overrides,
+        "baseline_for_contrasts": keys[0],
+        "donor_resident": True,
+        "memory_note": ("the donor is kept resident so the dense reference can "
+                        "be recomputed by a pointer swap; VRAM numbers must come "
+                        "from bench_gpu.py, not from this run"),
+        "environment": collect(),
+    }
+
     results: dict[str, dict] = {}
-    for key in keys:
+    failures: dict[str, str] = {}
+
+    def checkpoint() -> None:
+        """Write what has completed so far.
+
+        Called after every arm. A sweep that dies on arm 12 of 16 must not
+        discard the eleven arms that already ran -- the first version of this
+        script wrote once at the end and a device-mismatch bug in the router
+        threw away the whole run's GPU time.
+        """
+        clean = {k: {kk: vv for kk, vv in v.items()
+                     if not kk.startswith("_")} for k, v in results.items()}
+        dest.write_text(json.dumps(
+            {**header, "arms": clean, "contrasts": [], "failures": failures,
+             "complete": False}, indent=2) + "\n", encoding="utf-8")
+
+    def run_arm(key: str) -> None:
+        """Evaluate one arm and record it. Raises on failure."""
         arm = CATALOGUE[key]
         if overrides:
             from variants import Arm                               # noqa: PLC0415
@@ -355,8 +398,7 @@ def main() -> None:
         cl = clusters
 
         def boot(name: str) -> dict:
-            return cluster_bootstrap(flat[name], cl, lambda v: v.mean().item(),
-                                     n_boot=args.n_boot)
+            return cluster_bootstrap_mean(flat[name], cl, n_boot=args.n_boot)
 
         entry = {
             "arm": key, "label": arm.label, "purpose": arm.purpose,
@@ -388,16 +430,31 @@ def main() -> None:
         results[key]["_flat"] = flat        # kept in-process for the contrasts
         results[key]["_clusters"] = cl
 
+    for key in keys:
+        try:
+            run_arm(key)
+        except Exception as exc:                       # noqa: BLE001
+            # One arm's failure must not discard the sweep. It is
+            # recorded in the output so a missing arm is visibly a
+            # failure rather than silently absent, and the layer's mlp
+            # is restored so the next arm starts from a clean model.
+            failures[key] = repr(exc)
+            print("  [FAIL] " + key + ": " + repr(exc), flush=True)
+            results.pop(key, None)
+        checkpoint()
+
     # -- paired contrasts between every arm and the first one --------------
     base_key = keys[0]
     contrasts = []
-    if len(keys) > 1:
+    if len(keys) > 1 and base_key in results:
         print("\nPaired contrasts against " + base_key
               + " (same positions, prompt-clustered)")
         for key in keys[1:]:
+            if key not in results:
+                continue
             row = {"arm": key, "baseline": base_key}
             for metric in ("kl", "d_nll", "agree", "gold_top1"):
-                ci = cluster_bootstrap_pair(
+                ci = cluster_bootstrap_mean_pair(
                     results[key]["_flat"][metric],
                     results[base_key]["_flat"][metric],
                     results[key]["_clusters"], n_boot=args.n_boot)
@@ -414,31 +471,12 @@ def main() -> None:
         v.pop("_flat", None)
         v.pop("_clusters", None)
 
-    tag = args.tag or ("L" + str(args.layer) + "_" + args.dataset)
-    out = {
-        "endpoint": "teacher_forced_paired",
-        "dataset": args.dataset, "layer": args.layer,
-        "n_groups": args.n_groups,
-        "prompts": len(prompts), "reply_positions": n_pos,
-        "max_len": args.max_len,
-        "unit_of_analysis": "reply position, bootstrap clustered by prompt",
-        "n_boot": args.n_boot,
-        "ranking_from": args.ranking_from,
-        "router": router_meta, "probe": probe_meta,
-        "overrides": overrides,
-        "arms": results,
-        "contrasts": contrasts,
-        "baseline_for_contrasts": base_key,
-        "donor_resident": True,
-        "memory_note": ("the donor is kept resident so the dense reference can "
-                        "be recomputed by a pointer swap; VRAM numbers must come "
-                        "from bench_gpu.py, not from this run"),
-        "environment": collect(),
-    }
-    dest = REPO / (args.out or
-                   ("experiments/csgqr/results/forced_" + tag + ".json"))
-    dest.parent.mkdir(parents=True, exist_ok=True)
+    out = {**header, "arms": results, "contrasts": contrasts,
+           "failures": failures, "complete": not failures}
     dest.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+    if failures:
+        print("\n" + str(len(failures)) + " arm(s) FAILED: "
+              + ", ".join(sorted(failures)))
     print("\nwrote " + str(dest.relative_to(REPO)))
 
 

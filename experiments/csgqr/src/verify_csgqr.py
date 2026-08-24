@@ -910,6 +910,49 @@ def verify_routing() -> None:
           _raises(lambda: RoutingPolicy(mode="three_level", feature="vibes",
                                         n_groups=4), ValueError))
 
+    # -- the vectorized clustered bootstrap must be exact ------------------
+    # eval_forced uses cluster_bootstrap_mean, which computes the same
+    # distribution in closed form instead of by resampling index tensors. If it
+    # were only approximately equal, every interval in the primary endpoint
+    # would be subtly wrong, so equality is asserted rather than assumed.
+    from stats import (cluster_bootstrap, cluster_bootstrap_mean,   # noqa: PLC0415
+                       cluster_bootstrap_mean_pair, cluster_bootstrap_pair)
+    gb = torch.Generator().manual_seed(4)
+    cl: list[int] = []
+    parts = []
+    for c in range(40):
+        k = int(torch.randint(2, 12, (1,), generator=gb).item())
+        cl += [c] * k
+        parts.append(torch.randn(k, generator=gb, dtype=torch.float64))
+    vals = torch.cat(parts)
+    gen = cluster_bootstrap(vals, cl, lambda x: x.mean().item(), n_boot=300)
+    fast = cluster_bootstrap_mean(vals, cl, n_boot=300)
+    check("vectorized clustered bootstrap matches the general one exactly",
+          abs(gen["point"] - fast["point"]) < 1e-12
+          and abs(gen["lo"] - fast["lo"]) < 1e-12
+          and abs(gen["hi"] - fast["hi"]) < 1e-12,
+          "point/lo/hi all identical over " + str(vals.numel())
+          + " values in 40 clusters")
+
+    other = vals + torch.randn(vals.numel(), generator=gb, dtype=torch.float64) * 0.1
+    gp = cluster_bootstrap_pair(vals, other, cl, n_boot=300)
+    fp = cluster_bootstrap_mean_pair(vals, other, cl, n_boot=300)
+    check("vectorized paired clustered bootstrap matches the general one",
+          abs(gp["point"] - fp["point"]) < 1e-12
+          and abs(gp["lo"] - fp["lo"]) < 1e-12,
+          "paired difference formed per position before resampling")
+
+    # A clustered interval must be WIDER than one that pretends positions are
+    # independent. If it is not, the clustering is not doing anything.
+    flat_boot = cluster_bootstrap_mean(vals, list(range(vals.numel())),
+                                       n_boot=300)
+    w_cl = fast["hi"] - fast["lo"]
+    w_flat = flat_boot["hi"] - flat_boot["lo"]
+    check("clustering by prompt widens the interval versus treating positions "
+          "as independent", w_cl > w_flat,
+          "clustered " + format(w_cl, ".5f") + " vs unclustered "
+          + format(w_flat, ".5f"))
+
     # -- serialization round-trip ------------------------------------------
     pol = RoutingPolicy(mode="three_level", feature="probe_need", tau_skip=0.8,
                         tau_full=0.2, gamma=1.5, selector="significance",

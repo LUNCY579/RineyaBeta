@@ -190,13 +190,24 @@ generations is measuring its instrument. I have not seen this stated with the
 arithmetic attached, and it is the kind of finding that saves other people GPU
 time.
 
-**2.4 A candidate sign inversion between ranking metric and deployed behaviour.**
-Static top-k by singleton marginal utility reconstructs `F` strictly better than
+**2.4 A candidate sign inversion that did not survive.** I had flagged one here:
+static top-k by singleton marginal utility reconstructs `F` strictly better than
 random at every budget (relative output error 0.745 vs 0.841 at ρ=0.25) while
-producing a *worse* next-token distribution. If this holds at n, it says the
-obvious group-selection objective is misaligned with the actual objective, which
-would be a substantive caution for the Deja Vu line as well. **Not yet claimed** —
-the confirming run is in progress.
+appearing to produce a *worse* next-token distribution (KL 0.371 vs 0.287). On
+held-out prompts the ordering is the ordinary one — dynamic 0.137 < static 0.180 <
+random 0.213 at ρ=0.25 — so the inversion was small-sample noise: the KL figure
+came from 8 prompts, and the corroborating generation figure came from an endpoint
+with no power (§2.3). **Withdrawn.** It is recorded rather than deleted because
+the shape of the error is instructive: two independent measurements agreed, and
+both were noise.
+
+**2.4′ What replaced it.** At matched budget, per-state dynamic significance beats
+the static global ranking, which beats random — the ordering the method predicts.
+And the full method reaches a genuine **interior** operating point: 16.6% of
+tokens skipped, 55.5% at full remnant, 27.9% partial, at *lower* divergence than
+the binary whole-remnant probe gate for a *lower* active fraction. Whether that
+survives at full `n` is what the held-out run settles; unlike 2.4 it is at least
+predicted by the method rather than against it.
 
 ---
 

@@ -146,6 +146,75 @@ def cluster_bootstrap(values: Tensor, clusters: list[int], statistic,
             "n_clusters": n_c, "n": int(v.numel()), "n_boot": n_boot}
 
 
+def _cluster_totals(values: Tensor, clusters: list[int]) -> tuple[Tensor, Tensor]:
+    """Per-cluster sums and counts, in cluster-id order."""
+    c = torch.as_tensor(clusters, dtype=torch.long)
+    n_c = int(c.max().item()) + 1 if c.numel() else 0
+    v = values.to(torch.float64).flatten()
+    sums = torch.zeros(n_c, dtype=torch.float64).index_add_(0, c, v)
+    counts = torch.zeros(n_c, dtype=torch.float64).index_add_(
+        0, c, torch.ones_like(v))
+    keep = counts > 0
+    return sums[keep], counts[keep]
+
+
+def cluster_bootstrap_mean(values: Tensor, clusters: list[int], *,
+                           n_boot: int = 4000, seed: int = DEFAULT_SEED,
+                           alpha: float = 0.05) -> dict[str, float]:
+    """Prompt-clustered bootstrap CI for a **mean**, vectorized and exact.
+
+    Identical in distribution to :func:`cluster_bootstrap` with
+    ``statistic=mean``, but computed in closed form instead of by resampling
+    index tensors. The mean of a cluster-resample is
+
+        sum over drawn clusters of (cluster sum) / sum of (cluster sizes)
+
+    so only per-cluster sums and counts are needed. One gather over an
+    ``[n_boot, n_clusters]`` index matrix replaces ``n_boot`` Python iterations,
+    each of which was concatenating one index tensor per cluster.
+
+    This is not a micro-optimisation. At 416 prompts and 4000 draws the general
+    form performs 1.66M small tensor operations *per metric per arm*; across a
+    16-arm sweep with five metrics that dominated the wall time of a run whose
+    GPU work was a few minutes. Exactness is asserted against the general
+    implementation in ``verify_csgqr.py``.
+    """
+    sums, counts = _cluster_totals(values, clusters)
+    n_c = int(sums.numel())
+    point = (sums.sum() / counts.sum()).item() if n_c else float("nan")
+    if n_c < 2:
+        return {"point": point, "lo": float("nan"), "hi": float("nan"),
+                "n_clusters": n_c, "n": int(values.numel()), "n_boot": n_boot}
+    g = torch.Generator().manual_seed(seed)
+    pick = torch.randint(0, n_c, (n_boot, n_c), generator=g)
+    draws = sums[pick].sum(dim=1) / counts[pick].sum(dim=1)
+    finite = draws[torch.isfinite(draws)]
+    return {"point": point,
+            "lo": torch.quantile(finite, alpha / 2).item(),
+            "hi": torch.quantile(finite, 1 - alpha / 2).item(),
+            "se": finite.std().item(),
+            "n_clusters": n_c, "n": int(values.numel()), "n_boot": n_boot}
+
+
+def cluster_bootstrap_mean_pair(a: Tensor, b: Tensor, clusters: list[int], *,
+                                n_boot: int = 4000, seed: int = DEFAULT_SEED,
+                                alpha: float = 0.05) -> dict[str, float]:
+    """Clustered CI for ``mean(a) - mean(b)`` on paired observations.
+
+    Paired, so the difference is formed **per position** before any resampling.
+    Resampling ``a`` and ``b`` independently would discard the pairing and
+    inflate the interval by roughly the ratio of between- to within-position
+    variance -- which for two arms that agree on most tokens is large.
+    """
+    d = (a.to(torch.float64).flatten() - b.to(torch.float64).flatten())
+    out = cluster_bootstrap_mean(d, clusters, n_boot=n_boot, seed=seed,
+                                 alpha=alpha)
+    out["excludes_zero"] = bool(out["lo"] > 0 or out["hi"] < 0)
+    sd = d.std().item()
+    out["cohens_d"] = (out["point"] / sd) if sd > 0 else float("nan")
+    return out
+
+
 def cluster_bootstrap_pair(a: Tensor, b: Tensor, clusters: list[int],
                            *, n_boot: int = 2000, seed: int = DEFAULT_SEED,
                            alpha: float = 0.05) -> dict[str, float]:

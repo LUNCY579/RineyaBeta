@@ -252,7 +252,13 @@ class RoutingPolicy:
                                  + ". Checked before the division so the error "
                                  "names the real problem instead of surfacing "
                                  "as a broadcast failure.")
-            costs = torch.tensor(self.group_costs, dtype=torch.float64)
+            # Match the utility's device and dtype. The utility vector arrives
+            # from whatever produced it -- a trained router on the GPU, or a
+            # hand-built CPU tensor in a test -- and a CPU-only cost vector made
+            # this a device mismatch that only fired for the dynamic arms, i.e.
+            # after every static arm in a sweep had already run.
+            costs = torch.as_tensor(self.group_costs, dtype=flat_u.dtype,
+                                    device=flat_u.device)
             value = flat_u / (costs + 1e-12)
             # stable=True so equal-utility groups always resolve to ascending
             # group id. Quantization creates exact ties more often than

@@ -186,6 +186,11 @@ class CSGQRMlp(nn.Module):
                 raise RuntimeError(
                     "utility_fn returned " + str(utilities.shape[0]) + " rows for "
                     + str(n) + " positions")
+            # One transfer for the whole batch rather than one per token. The
+            # selection below is a 24-element argsort per token; doing it on the
+            # GPU means a launch and a synchronising .tolist() per token, which
+            # dominates the routing cost at prefill lengths.
+            utilities = utilities.detach().to("cpu", torch.float64)
 
         buckets: dict[tuple[int, ...], list[int]] = defaultdict(list)
         for i in range(n):

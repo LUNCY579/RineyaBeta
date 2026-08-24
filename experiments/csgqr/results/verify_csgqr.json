@@ -1,9 +1,9 @@
 {
   "torch": "2.13.0+cu130",
-  "total": 112,
-  "passed": 112,
+  "total": 115,
+  "passed": 115,
   "failed": 0,
-  "elapsed_s": 0.62,
+  "elapsed_s": 0.98,
   "checks": [
     {
       "name": "4-bit pack/unpack is a bijection at even and odd widths",
@@ -524,6 +524,21 @@
       "name": "an unknown gate feature is refused rather than KeyError'd later",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "vectorized clustered bootstrap matches the general one exactly",
+      "ok": true,
+      "detail": "point/lo/hi all identical over 263 values in 40 clusters"
+    },
+    {
+      "name": "vectorized paired clustered bootstrap matches the general one",
+      "ok": true,
+      "detail": "paired difference formed per position before resampling"
+    },
+    {
+      "name": "clustering by prompt widens the interval versus treating positions as independent",
+      "ok": true,
+      "detail": "clustered 0.27693 vs unclustered 0.23923"
     },
     {
       "name": "to_dict serializes every field that changes selection, group_costs included",
