@@ -557,3 +557,80 @@ by roughly an order of magnitude. Measured: 32×. The 7,864× headline is a prop
 a haystack with **no competitors at all**, and 246× is what the same mechanism delivers
 when sixteen plausible ones are present — still a large number, and a very different
 one.
+
+---
+
+# The baselines: the score is doing the work
+
+Every comparison in this document until now put the mechanism against an earlier
+version of itself — centred against causal, fixed reach against derived, one multiplier
+against another. That establishes which *variant* wins. It says nothing about whether
+the significance score does any work at all, which is the question a practicability
+claim actually rests on. Thirty-eight causal and derived-reach result files existed
+before either of these arms ran.
+
+128K, B=16 — eight heavy slots after sinks and recent — identical budget, seed, and the
+same twelve needles at every depth:
+
+| arm | d0.1 | d0.5 | d0.9 | accuracy |
+|---|---:|---:|---:|---:|
+| significance + causal reach | 1.00 | 1.00 | 1.00 | **36/36** |
+| **random**, same number of slots | 0.00 | 0.00 | 0.00 | **0/36** |
+| **streaming**, sinks + recent only | 0.00 | 0.00 | 0.00 | **0/36** |
+
+Both contrasts: **36 discordant pairs, all in favour, none against, exact McNemar
+p = 2.9 × 10⁻¹¹.**
+
+Neither baseline degrades. Both retrieve *nothing*, emitting `the key that is used to
+pa` — a paraphrase of the question containing no digits at all. With eight slots and no
+ranking, the needle is simply not in the cache.
+
+So **7,864× is a property of the score, not of the budget**, and not of "any eviction
+policy works at this scale". That was genuinely open until these two cells ran.
+
+A note on the streaming arm's provenance. Its policy overrides `recent` to `budget − 4`
+so `heavy()` reaches 0, but the manifest recorded `args.recent`, so a run that genuinely
+had `heavy=0` was recorded as `heavy=8`. The policy was right and the record was wrong,
+which is the harder failure to catch — the result is valid while its provenance lies
+about it, and `verify_claims.py` asserts manifest fields. The manifest now records the
+effective value with `recent_flag` alongside.
+
+# Stage 3 is viable: the model can chain hops
+
+The reasoning plan requires an uncompressed ceiling before any compression number on a
+task means anything. Multi-hop chains, 8K, no compression:
+
+| chain | accuracy | by depth |
+|---|---:|---|
+| 2 hops | **0.833** | 0.67 / 1.00 / 0.83 |
+| 3 hops | **0.722** | 0.75 / 0.58 / 0.83 |
+
+Both clear a floor comfortably, unlike this model on `Rineya_Long_Context_Demo_v1`
+where it scores 0.2031 against a 0.2500 constant-abstention baseline. Stage 3 will
+measure the mechanism rather than the model's incapacity.
+
+The failure mode is the informative one: `want 42649, got 99873` — a *different chain
+value*, so the model stops mid-chain rather than hallucinating.
+
+# Span length, and a gate this stage should have had
+
+| span | policy | d0.1 | d0.5 | d0.9 | accuracy |
+|---:|---|---:|---:|---:|---:|
+| 12 tokens | grow=2.0 | 1.00 | 0.92 | 0.67 | 0.861 |
+| 20 tokens | grow=2.0 | 0.83 | 0.42 | 0.33 | 0.528 |
+| 20 tokens | fixed back=4 | 0.00 | 0.00 | 0.00 | 0.000 |
+
+Accuracy falls monotonically with span length, which is what the fragmentation account
+predicts. But **depth 0.9 is the worst** at both W=12 and W=20, inverting every other
+cell in this programme, where depth 0.9 is easiest because it faces 3 compression rounds
+against 27 at depth 0.1.
+
+Depth ordering is a property of the compression schedule, so an inversion means the
+thing being measured may not be compression. The failure text agrees: at W=12 depth 0.9
+the model paraphrases, restates the frame with wrong words, and in one case recites the
+*filler* back verbatim. That is a recitation failure, not a retrieval failure.
+
+Stage 2 was never given the capability gate stage 3 got. See **O8** in
+`docs/OPEN_QUESTIONS.md`; the uncompressed reference at W=3/12/20 is running, and until
+it reports, the fall from 1.000 at five tokens to 0.528 at twenty cannot be attributed
+to the mechanism.
