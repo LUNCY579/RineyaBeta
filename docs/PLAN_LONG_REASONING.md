@@ -1,7 +1,6 @@
 # From passkey to hard reasoning: the next research programme
 
 Status: **stage 1 RUN (2026-08-23); stages 2-6 not started.** Stage 2 is built (`--needle-words`) and unrun. Written 2026-08-23 and revised the same day — see §8.
-disentanglement, the power run, and the paper). Written 2026-08-23.
 
 This document exists to be revised. Every section is dated and every claim it makes
 about the future is a *prediction* that later measurement is expected to overturn.
