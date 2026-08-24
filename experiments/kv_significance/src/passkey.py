@@ -379,7 +379,15 @@ def main() -> None:
                     hits += hit
                     # Per-trial records, so a paired analysis is possible after the
                     # fact. Cell-level accuracy alone cannot support one.
-                    trials.append({"key": key, "got": got.strip()[:32], "hit": hit})
+                    # Keep enough of the reply to DIAGNOSE a failure, not just
+                    # score it. 32 characters suffices for a 5-digit key and
+                    # truncates a 20-word phrase (142 chars) to nothing usable,
+                    # which made stage 2's failures unclassifiable -- the same
+                    # class of defect as the pool=1 default: correct for the case
+                    # it was written for, silently wrong for the next one.
+                    keep = max(32, len(str(key)) + 24)
+                    trials.append({"key": key, "got": got.strip()[:keep],
+                                   "hit": hit})
                     if len(ex) < 2:
                         ex.append(f"{key}->{got.strip()[:18]!r}")
                     del cache, ids
