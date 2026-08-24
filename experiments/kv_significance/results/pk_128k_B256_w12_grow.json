@@ -1,0 +1,255 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 64,
+  "recent_flag": 64,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": null,
+  "pool_fwd": null,
+  "key_digits": 5,
+  "grow": 2.0,
+  "grow_max": 64,
+  "needle_words": 12,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 3000.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125814,
+      "budget": 256,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage",
+          "got": "window island summit thread orange planet hammer harvest packet shelter sunset garage. Remember it. window is",
+          "hit": true
+        },
+        {
+          "key": "button stream garage window ticket mountain engine helmet granite rocket beacon needle",
+          "got": "button stream garage window ticket mountain engine helmet granite rocket beacon needle. \n\nRemember it. button ",
+          "hit": true
+        },
+        {
+          "key": "planet socket summit granite barrel mountain stream diamond pocket parcel kitchen hammer",
+          "got": "planet socket summit granite barrel mountain stream diamond pocket parcel kitchen hammer. Remember it. planet so",
+          "hit": true
+        },
+        {
+          "key": "orange mirror bottle ticket beacon sugar silver desert yellow shadow pocket stream",
+          "got": "orange mirror bottle ticket beacon sugar silver desert yellow shadow pocket stream. Remember it. orange mi",
+          "hit": true
+        },
+        {
+          "key": "bottle packet lantern hammer carpet cluster tower desert button anchor thread signal",
+          "got": "bottle packet lantern hammer carpet cluster tower desert button anchor thread signal. Remember it.\n\nThe gras",
+          "hit": true
+        },
+        {
+          "key": "mountain hammer station bridge garage drawer amber blanket quarry silver sunset basket",
+          "got": "mountain hammer station bridge garage drawer amber blanket quarry silver sunset basket. \n\nRemember it. mountai",
+          "hit": true
+        },
+        {
+          "key": "socket blanket window rocket amber sunset jacket mountain needle shelter packet anchor",
+          "got": "socket blanket window rocket amber sunset jacket mountain needle shelter packet anchor. Remember it. socket bl",
+          "hit": true
+        },
+        {
+          "key": "sunset needle garden yellow orange sugar silver lantern bottle kitchen island barrel",
+          "got": "sunset needle garden yellow orange sugar silver lantern bottle kitchen island barrel. Remember it.\n\nThe pass",
+          "hit": true
+        },
+        {
+          "key": "shadow desert station helmet cotton sugar temple hammer kitchen jacket mountain rocket",
+          "got": "shadow desert station helmet cotton sugar temple hammer kitchen jacket mountain rocket ship. \n\nRemember it. sh",
+          "hit": true
+        },
+        {
+          "key": "sunset blanket amber market signal pocket cotton quarry sugar engine station anchor",
+          "got": "sunset blanket amber market signal pocket cotton quarry sugar engine station anchor. Remember it. \n\nSo the ",
+          "hit": true
+        },
+        {
+          "key": "station tunnel jacket carpet planet harbor needle cluster camera garden winter beacon",
+          "got": "station tunnel jacket carpet planet harbor needle cluster camera garden winter beacon. Remember it.\n\nstation ",
+          "hit": true
+        },
+        {
+          "key": "sugar blanket crystal carpet desert beacon socket sunset window stream engine tomato",
+          "got": "sugar blanket crystal carpet desert beacon socket sunset window stream engine tomato. \n\nRemember it. \n\nRemem",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125814,
+      "budget": 256,
+      "depth": 0.5,
+      "acc": 0.9166666666666666,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage",
+          "got": "window island summit thread orange planet hammer harvest packet shelter sunset garage. Remember it. window is",
+          "hit": true
+        },
+        {
+          "key": "button stream garage window ticket mountain engine helmet granite rocket beacon needle",
+          "got": "button stream garage window ticket mountain engine helmet granite rocket beacon needle. Remember it. \n\nThe pas",
+          "hit": true
+        },
+        {
+          "key": "planet socket summit granite barrel mountain stream diamond pocket parcel kitchen hammer",
+          "got": "planet socket summit granite barrel mountain stream diamond pocket parcel kitchen hammer. Remember it. \n\nThe pas",
+          "hit": true
+        },
+        {
+          "key": "orange mirror bottle ticket beacon sugar silver desert yellow shadow pocket stream",
+          "got": "orange mirror bottle ticket beacon sugar silver desert yellow shadow pocket stream. Remember it. \n\nThe pas",
+          "hit": true
+        },
+        {
+          "key": "bottle packet lantern hammer carpet cluster tower desert button anchor thread signal",
+          "got": "bottle packet lantern hammer carpet cluster tower desert button anchor thread signal.\n\nSo, the answer is: bo",
+          "hit": true
+        },
+        {
+          "key": "mountain hammer station bridge garage drawer amber blanket quarry silver sunset basket",
+          "got": "mountain hammer station bridge garage drawer amber blanket quarry silver sunset basket. \n\nRemember it. \n\nThe p",
+          "hit": true
+        },
+        {
+          "key": "socket blanket window rocket amber sunset jacket mountain needle shelter packet anchor",
+          "got": "socket blanket window rocket amber sunset jacket mountain needle shelter packet anchor. Remember it. \n\nThe pas",
+          "hit": true
+        },
+        {
+          "key": "sunset needle garden yellow orange sugar silver lantern bottle kitchen island barrel",
+          "got": "sunset needle garden yellow orange sugar silver lantern bottle kitchen island barrel. Remember it. Remember ",
+          "hit": true
+        },
+        {
+          "key": "shadow desert station helmet cotton sugar temple hammer kitchen jacket mountain rocket",
+          "got": "shadow desert station helmet cotton sugar temple hammer kitchen jacket mountain rocket. \n\nRemember it. \n\nThe p",
+          "hit": true
+        },
+        {
+          "key": "sunset blanket amber market signal pocket cotton quarry sugar engine station anchor",
+          "got": "sunset blanket amber market signal pocket cotton. \n\nRemember it. \n\nThe grass is green. The sky is blue. The",
+          "hit": false
+        },
+        {
+          "key": "station tunnel jacket carpet planet harbor needle cluster camera garden winter beacon",
+          "got": "station tunnel jacket carpet planet harbor needle cluster camera garden winter beacon. Remember it. \n\nThe gra",
+          "hit": true
+        },
+        {
+          "key": "sugar blanket crystal carpet desert beacon socket sunset window stream engine tomato",
+          "got": "sugar blanket crystal carpet desert beacon socket sunset window stream engine tomato. Remember it. \n\nThe pas",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125814,
+      "budget": 256,
+      "depth": 0.9,
+      "acc": 0.6666666666666666,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage",
+          "got": "\"window island summit thread orange planet hammer harvest packet shelter sunset garage.\" \n\nSo, the answer is:",
+          "hit": true
+        },
+        {
+          "key": "button stream garage window ticket mountain engine helmet granite rocket beacon needle",
+          "got": "\"The pass phrase is button stream garage window ticket mountain engine helmet granite rocket beacon needle.\" \n",
+          "hit": true
+        },
+        {
+          "key": "planet socket summit granite barrel mountain stream diamond pocket parcel kitchen hammer",
+          "got": "\"planet socket summit granite barrel mountain stream diamond pocket parcel kitchen hammer.\" \n\nSo, the answer is:",
+          "hit": true
+        },
+        {
+          "key": "orange mirror bottle ticket beacon sugar silver desert yellow shadow pocket stream",
+          "got": "\"The pass phrase is orange mirror bottle ticket beacon sugar silver desert yellow shadow pocket stream.\" \n",
+          "hit": true
+        },
+        {
+          "key": "bottle packet lantern hammer carpet cluster tower desert button anchor thread signal",
+          "got": "\"bottles and packets\" and \"lantern\" and \"signal\". So the answer is \"bottles and packets lantern signal\". \n\nB",
+          "hit": false
+        },
+        {
+          "key": "mountain hammer station bridge garage drawer amber blanket quarry silver sunset basket",
+          "got": "\"The pass phrase is mountain hammer station bridge garage drawer amber blanket quarry.\" \n\nSo, the answer is: \"",
+          "hit": false
+        },
+        {
+          "key": "socket blanket window rocket amber sunset jacket mountain needle shelter packet anchor",
+          "got": "\"socket blanket window rocket amber sunset jacket mountain needle shelter packet anchor.\" \n\nSo, the answer is:",
+          "hit": true
+        },
+        {
+          "key": "sunset needle garden yellow orange sugar silver lantern bottle kitchen island barrel",
+          "got": "\"The pass phrase is sunset needle garden yellow orange sugar silver lantern bottle kitchen island barrel.\" \n",
+          "hit": true
+        },
+        {
+          "key": "shadow desert station helmet cotton sugar temple hammer kitchen jacket mountain rocket",
+          "got": "\"The pass phrase is shadow desert station helmet cotton sugar temple hammer kitchen jacket mountain rocket.\" \n",
+          "hit": true
+        },
+        {
+          "key": "sunset blanket amber market signal pocket cotton quarry sugar engine station anchor",
+          "got": "\"The grass is green. The sky is blue. The sun is yellow. Here we go. There and back again.\" \n\nSo, the answe",
+          "hit": false
+        },
+        {
+          "key": "station tunnel jacket carpet planet harbor needle cluster camera garden winter beacon",
+          "got": "\"The pass phrase is station tunnel jacket carpet planet harbor needle cluster camera garden winter beacon.\" \n",
+          "hit": true
+        },
+        {
+          "key": "sugar blanket crystal carpet desert beacon socket sunset window stream engine tomato",
+          "got": "\"sugar blanket crystal crystal desert beacon socket sunset window stream engine tomato\". \n\nSo, the answer is",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

@@ -139,6 +139,44 @@ programme leans on constantly or overturns it.
 
 ---
 
+## O8 — stage 2 has no capability gate, and the depth pattern says it needs one
+
+**Observed.** At W=12 (128K, B=256, grow=2.0) accuracy by depth is
+**1.00 / 0.92 / 0.67** — depth 0.9 is the *worst*. That inverts every other cell in
+this programme, where depth 0.9 is easiest because it faces 3 compression rounds
+against 27 at depth 0.1 (resolved as O7).
+
+**Why an inversion is alarming.** The depth ordering is a property of the compression
+schedule. If it reverses, the thing being measured is probably not compression.
+
+**The failures are not retrieval failures.** At W=12, depth 0.9:
+
+| emitted | reading |
+|---|---|
+| `"bottles and packets" and "lantern" and "signal"` | paraphrasing, not reciting |
+| `"The pass phrase is mountain hammer station bridge` | restating the frame with wrong words |
+| `"The grass is green. The sky is blue.` | **reciting the filler** |
+
+The model produces narrative rather than verbatim recall. A 12- or 20-word phrase is a
+recitation task; a 5-digit key is not.
+
+**The design gap is mine.** Stage 3 was gated — 2-hop and 3-hop were measured
+uncompressed first, scoring 0.833 and 0.722, before any compressed number was believed.
+**Stage 2 was never gated.** So the W=12 and W=20 numbers have no uncompressed
+reference, and the drop from 1.000 at 5 tokens to 0.528 at 20 could be the mechanism
+fragmenting a longer span, the model failing to recite a longer phrase, or both.
+
+**Decisive test.** Run W=3, W=12 and W=20 with a FULL CACHE (`--budgets 0`) at a length
+where it fits. If uncompressed accuracy also falls with span length, that fraction of
+the drop is the model and not the mechanism, and O1's numbers must be restated against
+that reference rather than against 1.000.
+
+**This also puts O1 in question**, since O1 concluded "mechanism, not bug" from the
+fact that failures were legible truncations. That reasoning ruled out a *harness* bug.
+It did not rule out a *model capability* ceiling, which this entry is about.
+
+---
+
 ## Closing an entry
 
 State the cause, cite the measurement that demonstrates it, and move the entry to a
