@@ -203,3 +203,250 @@ wrong one to deploy at INT4.
 - Not claimed: anything about attention remnants, KV-cache behaviour, or
   request-level residency. Not implemented.
 - Not claimed: anything about the sealed test sets. Untouched.
+
+---
+
+# Session 2 revisions and additions — 2026-08-24
+
+Measured on the **teacher-forced paired endpoint**, 414 held-out `chat_dev`
+prompts / 3,830 reply positions, prompt-clustered intervals. Several entries above
+were written from the generation endpoint, which turned out to have no power here
+(N11), and three of them are **revised** below rather than left standing.
+
+## Revisions to entries above
+
+### N3 revised — H1 is falsified as a classifier, but H2 is SUPPORTED
+
+N3 concluded that intermediate confidence does not predict remnant need, from
+AUROC 0.54–0.57 against a binary `1[U > 0.1]` label, and the campaign treated
+that as "confidence gating does not work". **The first half stands; the conclusion
+was too strong.**
+
+Against a matched **random-token** gate at the same activation, every gate wins
+with non-overlapping 95% intervals:
+
+| activation | gate | gate KL | random-token KL | advantage |
+| ---: | --- | ---: | ---: | ---: |
+| 0.8702 | logit-margin | 0.02988 | 0.04778 | 1.60× |
+| 0.8356 | prob-margin | 0.03410 | 0.05701 | 1.67× |
+| 0.7889 | max_prob | 0.04212 | 0.06572 | 1.56× |
+| 0.6772 | probe | 0.05703 | 0.09469 | 1.66× |
+| 0.6494 | entropy | 0.07128 | 0.09975 | 1.40× |
+
+Both hold at once because they are different questions. Spearman(1−C, U) is small
+but *consistently positive* across all four features (+0.1104 to +0.1313) while
+Pearson is ≈ 0. A weak monotone signal on a heavily skewed utility distribution is
+a poor binary classifier and a useful **compute allocator**.
+
+**The matched control did not exist before this session.** Every group-level arm
+had a random partner; the token-level gate did not, so H2 was untestable and the
+gap was filled with an inference from the classifier metric. That was the error.
+
+### N7 withdrawn — measured with the wrong estimator
+
+N7 recorded "per-group α calibration is worse than a single scalar α"
+(relative error 0.1246 vs 0.1148). That was measured with an estimator that fits
+each group against the **whole** MLP output, which is inflated by the cross-group
+inner product and does not return 1 even for a lossless remnant — on a bit-exact
+remnant it gave gains spanning 0.978–1.024 and injected 1.32% relative error into
+an exact reconstruction (`BUG_LEDGER.md` **S2**).
+
+**It is not evidence about per-group α.** The scalar form is still used, on the
+different and better ground that α ≈ 0.997 at asymmetric INT4 makes the whole
+question inert at this bitwidth.
+
+### N6 revised — the headroom it reported was a metric artefact
+
+N6 recorded that a static global ranking captures only a third of the per-token
+oracle's utility (66.7% unclaimed at ρ=0.25), and treated that as the positive
+case for the dynamic branch. **The headroom does not exist.** See N14.
+
+## New negative results
+
+### N11. The repository's generation endpoint cannot resolve this question. Structural for this model scale.
+
+Paired sd of the per-case quality delta is **0.14901** against a deletion effect
+of **0.01135** — a factor of 13. Deletion changed **94.5%** of replies while
+**55.5%** of cases scored *exactly* the same, because the rubric moves in discrete
+steps (p10 = median = 0.720).
+
+Required n for 80% power: **1,352** for deletion damage, **2,292** for the
+static-vs-random gap, **10,892** for typical arm-vs-arm gaps of ~0.004. `chat_dev`
+has 510.
+
+After Holm–Bonferroni across nine pre-registered contrasts, **not one was
+significant — including deletion damage itself** (CI [−0.02427, +0.00195]).
+
+**Consequence.** The entire Tier-1 sweep measured its own instrument. Its arm
+ordering — INT4-all above dense, static-25 below deletion — is noise, and both
+"anomalies" recorded in `REPOSITORY_STATE_AUDIT.md` §12 are resolved as such. No
+amount of GPU time on that endpoint would have helped. Any single-layer
+compression study using a coarse rubric on a few hundred generations is measuring
+its instrument, and that generalises beyond this campaign.
+
+### N12. Deleting this MLP costs zero reference-prediction accuracy
+
+`gold_top1` is **0.2822** for dense and **0.2822** for full deletion —
+Δ = **+0.00000**, CI [−0.00751, +0.00758] — while KL is 0.28 nats, argmax
+disagreement 26.6%, and 88.7% of replies change. Absolute NLL on the gold token
+moves 0.1%.
+
+**Consequence.** The Recovery Ratio as the brief defines it, on quality, has a
+denominator of approximately **zero** at this layer. There is no quality damage to
+recover; what the method recovers is fidelity to the original model's behaviour.
+That is a legitimate objective but it is not the one the metric assumes, and
+reporting a fidelity result as a quality result would be a category error.
+
+### N13. The per-state dynamic router works and buys nothing
+
+| ρ | static | dynamic | verdict |
+| ---: | ---: | ---: | --- |
+| 0.25 | **0.17822** | 0.18253 | static ahead, overlapping |
+| 0.50 | 0.13565 | **0.12943** | dynamic ahead, overlapping |
+
+Neither difference is significant and the sign flips with budget. The router is
+**not** degenerate: its per-group selection rates run 0.548 → 0.018 across all 24
+groups, against `random`'s flat 0.246–0.254. It is genuinely state-conditioned,
+clearly better than random and magnitude, and no better than a fixed ranking.
+
+### N14. The additive utility proxy overstates by 4× for exactly the method that optimises it
+
+`capture_at_k` sums singleton marginal utilities. Additivity was verified at
+`k = 2` (interaction 2.1%) and `k = 24` (sum within 1.7% of whole-remnant utility)
+and **assumed in between**. Against true utility at ρ=0.25:
+
+| selection | true `U` | proxy | overstatement |
+| --- | ---: | ---: | ---: |
+| random | 0.06492 | 0.07398 | 1.14× |
+| static significance | 0.10234 | 0.16097 | 1.57× |
+| dynamic (probe) | 0.09802 | 0.39209 | **4.00×** |
+
+And the proxy's per-token oracle at `k = 12` is **0.63376**, larger than the true
+utility of **all 24 groups** (0.27006) — impossible for a real utility.
+
+Per-token cherry-picking exploits non-additivity, so the bias grows with how
+tailored the selection is: **the proxy flatters precisely the method that
+optimises it hardest**. H8 is falsified for intermediate `k`.
+
+The transferable lesson: a surrogate objective validated at the *ends* of its range
+can be badly non-predictive in the middle, with a selection-dependent bias.
+
+### N15. No interior operating point is useful
+
+| arm | active | skip | full | partial | KL |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| binary probe gate | 0.6772 | 0.3228 | 0.6772 | 0.0000 | **0.05703** |
+| three-level, dynamic | 0.6819 | 0.1745 | 0.5218 | 0.3037 | 0.05839 |
+
+Interior points exist across the whole frontier (0 < ρ < 1 everywhere), and none
+beats a binary all-or-nothing gate at matched compute. **Gate E is half-passed:
+the interior exists and is not worth occupying.** H6 falsified as "useful".
+
+### N16. The quantized remnant is 5× slower than the layer it replaces
+
+Remnant sub-block alone, 512 tokens: dense `nn.Linear` 0.4649 ms, INT4 all groups
+**2.3221 ms** (5.00×), INT8 2.2656 ms (4.87×), FP passthrough 0.6592 ms (1.42×).
+At ρ=0.125 INT4 is still 2.39× dense.
+
+Dequantization costs about **3.5×** what the saved matmul buys, and no routing
+policy addresses that — it is the price of reconstructing weights every forward.
+`REFERENCE_BACKEND_LIMITATION`: a fused dequantize-GEMM is the untested repair, and
+H12 is `NOT_ESTABLISHED` rather than supported.
+
+### N17. Peak VRAM goes up, not down
+
+End-to-end peak reserved: dense **956 MiB**, full method **1226 MiB** (+28%).
+`b1-delete` matches dense at 956 MiB, so packed storage is not the cause — the
+entire increase is **execution transient** (dequantized blocks, per-bucket gathers,
+monitor workspace).
+
+What the method saves is persistent (13.3 MiB, donor freeing confirmed at
+−12.414 MiB) and what it adds is transient (~200 MiB). Peak is what the card
+actually gives up.
+
+### N18. Per-token routing costs 16× in the reference backend
+
+`b5-random-25` took **622 s** against **39 s** for `b1-delete` and ~27 s for
+`b6-static-25` over the same 414 prompts. Per-token bucketing issues one
+dequantize-and-GEMM per distinct group set, and for a selection that changes every
+token the bucket count approaches the token count. Visible end-to-end as the full
+method's 1.90× prefill latency.
+
+### N19. Measured resident bytes exceed the analytic model by 32%, unexplained
+
+| format | measured | analytic | ratio |
+| --- | ---: | ---: | ---: |
+| INT8 | 10.211 MiB | 9.211 MiB | 1.1086 |
+| INT4 | 6.211 MiB | 4.711 MiB | **1.3185** |
+
+Investigated and **not** resolved. On a clean allocator the accounting is exact to
+the byte (diff +0, no buffer is a view into a larger storage). The excess appears
+only with the 904 MiB model resident, and is exactly one third of each `qweight`.
+It is **not** allocator power-of-two rounding — a direct 1,572,864-byte allocation
+reports exactly that.
+
+No explanation is offered, so the **measured** figure is quoted: INT4's effective
+compression against bf16 is **2.90×**, not the accounted 3.82×.
+
+### N20. Latency on a shared GPU varies 3.7×, so absolute timings are not usable
+
+A different experiment (`experiments/kv_significance/src/passkey.py --lengths
+131072`) ran concurrently on the same 8 GiB card for most of this session. Across
+three runs of the *same* benchmark the dense MLP measured **0.4649, 0.4782 and
+1.7218 ms**, and the exact-lens monitor's share moved between **391% and 1396%**.
+One run died with `CUBLAS_STATUS_EXECUTION_FAILED`.
+
+Orderings and same-run ratios reproduced across all three runs and are used;
+absolute latencies are not quoted. Memory is unaffected (`memory_allocated` tracks
+this process only). Recorded because a latency number taken opportunistically
+under contention would have looked exactly like evidence.
+
+### N21. The probe's cost advantage is ~110×, not ~32,000×
+
+The campaign repeatedly quoted "the need probe costs 0.0109% of the MLP it gates,
+against 355.6% for the exact lens". Those are **FLOP and byte ratios** and are
+correct as such. Measured in wall-clock per 512 tokens: need probe **12.50%**,
+group router 12.28%, exact lens + features **1395.8%**.
+
+A `[512, 1024] × [1024, 1]` GEMM is small enough to be launch-bound, so its MAC
+share understates its latency by nearly three orders of magnitude. The deployment
+argument survives at **~110×**; the magnitude was a FLOPs claim presented as a
+latency claim.
+
+Also: the closed form predicts the *projection* well (3.04× measured against
+3.556× predicted) and understates the **full** monitor by 4.6×, because the fp32
+log-softmax, entropy and top-2 over 32,768 classes is memory-bound and costs 3.6×
+the projection itself. A design budgeting for the projection alone under-budgets
+by 4.6×.
+
+### N22. Two of three mechanisms have close prior art
+
+`NOVELTY_AND_RELATED_WORK.md`. Deja Vu (ICML 2023) already trains a predictor on
+the pre-block hidden state to select which MLP neurons to compute per token, at
+85% structured sparsity and 2× speedup. QTALE (2026) already gates token-adaptive
+layer execution on confidence, studied for quantization robustness. The
+residual-gate line (Laitenberger et al. 2025) is a learned residual readout gating
+branches per token — structurally the need probe.
+
+What survives as distinct is the **interventional** utility label (a KL-difference
+obtained by intervening, not an activation-magnitude proxy) applied to a
+**structurally retired** component, and the donor-identity control. The mechanism
+is a recombination.
+
+### N23. Claims withdrawn after larger samples
+
+Recorded because the pattern matters more than the individual items. Each was
+first observed at n=8 or n=24 prompts and did not survive n=414:
+
+* "static top-k reconstructs `F` better than random yet produces a worse
+  next-token distribution" — a sign inversion. **Withdrawn**: on held-out prompts
+  the ordering is ordinary (dynamic 0.137 < static 0.180 < random 0.213 at n=24;
+  static < dynamic at n=414). The n=8 KL and the corroborating generation figure
+  were both noise.
+* "dynamic significance beats static at matched budget" — **withdrawn** (N13).
+* "the three-level interior point beats the binary gate" — **withdrawn** (N15).
+
+**Every claim that favoured the method at small n dissolved at large n, while
+every claim that favoured the controls survived.** That asymmetry is what sample-size
+discipline looks like from the inside, and it is the reason the held-out design
+with `--skip-prompts` enforcement exists.

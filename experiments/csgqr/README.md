@@ -108,6 +108,66 @@ It means:
 - `|B0 − B2|` is the **noise floor**. Any quality difference smaller than that
   is not attributable to CSGQR.
 
+## Documents
+
+Read in this order. Where two documents disagree, the later one in this list wins,
+and the earlier one says so at the point of disagreement.
+
+| file | what it is |
+| --- | --- |
+| `REPOSITORY_STATE_AUDIT.md` | what existed before anything was changed, including the finding that the remote branch was empty |
+| `METHOD_SPECIFICATION.md` | the algorithm from first principles, and the three places it departs from the brief |
+| `SPEC_TO_CODE_MATRIX.md` | every requirement classified against the code |
+| `BUG_LEDGER.md` | 19 defects, each with a regression test |
+| `METHOD_AND_CODE_AUDIT.md` | session-1 audit, with its superseded conclusions flagged at the top |
+| `IMPLEMENTATION_READINESS.md` | the Stage II gate and the confidence grades |
+| `EXPERIMENT_PLAN.md` | the design, and which choices were pre-registered |
+| `EXPERIMENT_LOG.md` | chronological, command by command |
+| **`FINDINGS.md`** | **the results** |
+| `NEGATIVE_RESULTS.md` | what did not go the method's way, including three revisions of earlier negatives |
+| `GPU_BENCHMARKS.md` | measured latency and memory, and why Gate F fails |
+| `CALIBRATION_AND_ROUTING.md` | every fitted quantity and whether it earned its place |
+| `CONFIDENTLY_WRONG_ANALYSIS.md` | the gate's failure mode, and why temperature cannot fix it |
+| `STATISTICAL_ANALYSIS.md` | units of analysis, clustering, and where the inference is weak |
+| `NOVELTY_AND_RELATED_WORK.md` | primary-source review; two of three mechanisms are anticipated |
+| `LIMITATIONS.md` | ordered by how much each constrains the conclusions |
+| `MAXIMUM_POTENTIAL_ROADMAP.md` | what to try next, gated, with predeclared budgets |
+| **`RESEARCH_VERDICT.md`** | **H1–H12, the eighteen questions, and the next experiment** |
+
+## Headline result
+
+The mechanism is real; the composite as specified is not.
+
+* A packed INT4 remnant recovers **96.3%** of the KL divergence that deleting the
+  MLP causes, and the preservation is **donor-specific**: the same byte budget
+  filled with a *different* layer's weights is **2.8× worse than installing
+  nothing**.
+* Gating beats random skipping at matched compute (**1.40–1.67×**), and a linear
+  state probe matches the best vocabulary-lens feature at **~110×** lower measured
+  monitor cost.
+* Interventional significance beats random at matched budget, and the **magnitude
+  heuristic is worse than random**.
+* But: per-state routing buys nothing over a fixed ranking; no interior operating
+  point beats a binary gate; and every arm is **slower** and uses **more** peak
+  VRAM than dense, because dequantization costs ~3.5× what the saved matmul buys.
+
+Verdict: **`CONTINUE_WITH_REDIRECTION`** — multi-layer scope, binary probe gate,
+static ranking; drop the exact lens, the per-state router and the three-level ramp.
+
+## Two warnings for anyone reading the numbers
+
+**Use the teacher-forced endpoint, not the generation sweep.** The generation
+scorer has no power at this scale: paired sd 0.14901 against a deletion effect of
+0.01135, and after Holm-Bonferroni none of nine pre-registered contrasts was
+significant, *including deletion damage itself*. The Tier-1 table in
+`results/eval_*` is kept as provenance and is evidence of nothing.
+
+**Recovery is on fidelity, not quality.** Deleting this MLP costs **zero**
+reference-prediction accuracy (delta gold-top-1 = +0.00000, CI [-0.0075, +0.0076])
+while diverging 0.28 nats and changing 88.7% of replies. There is no quality damage
+to recover at this layer; what the method recovers is fidelity to the original
+model.
+
 ## Layout
 
 ```
