@@ -137,6 +137,13 @@ def main() -> None:
                          "plus the same adapter reaches the same loss as pruned "
                          "plus the same adapter, the adapter is not recovering "
                          "anything, it is adapting to the training distribution.")
+    ap.add_argument("--unmatched-dense", action="store_true",
+                    help="with --no-retire, target all 28 layers instead of the "
+                         "24 the pruned arm gets. That gives the dense control "
+                         "16.7%% MORE trainable capacity (196 modules / 11,354,112 "
+                         "params against 168 / 9,732,096), which makes the "
+                         "comparison uninterpretable. Off by default; present "
+                         "only as a sensitivity check.")
     ap.add_argument("--seed", type=int, default=20260824)
     ap.add_argument("--cap-mib", type=float, default=5120.0)
     ap.add_argument("--out-dir", default="artifacts/sgqr_v2_adapters")
@@ -171,9 +178,41 @@ def main() -> None:
     adapters: dict = {}
     bottleneck = 0
     if args.kind == "lora":
-        targets = lora_target_modules(
-            n_layers, set() if args.no_retire else set(RETIRED),
-            args.include_retired_attn)
+        # Capacity matching for the --no-retire control.
+        #
+        # The dense control exists to separate *recovery* from *fine-tuning*: if
+        # dense+LoRA reaches the same loss as pruned+LoRA, the adapter is not
+        # repairing the deleted layers, it is adapting to the training
+        # distribution. That comparison is only meaningful if both arms get the
+        # SAME number of trainable parameters.
+        #
+        # The first version of this control did not. With --no-retire it excluded
+        # nothing, so LoRA attached to all 28 layers -- 196 modules and
+        # 11,354,112 parameters against the pruned arm's 168 modules and
+        # 9,732,096, which is 16.7% MORE trainable capacity. A dense control with
+        # more capacity than the arm it is controlling for cannot answer the
+        # question. (Caught by the concurrent audit session; the fix is theirs,
+        # the bug was mine.)
+        #
+        # So the four retired layers are excluded from targeting either way. When
+        # they are retired their MLPs do not exist; when they are not, they are
+        # left untargeted on purpose. ``--unmatched-dense`` restores the old
+        # behaviour for a sensitivity check, and both counts are printed so the
+        # choice is auditable from the log rather than inferred from the code.
+        exclude = set() if (args.no_retire and args.unmatched_dense) else set(RETIRED)
+        targets = lora_target_modules(n_layers, exclude, args.include_retired_attn)
+        if args.no_retire:
+            matched = lora_target_modules(n_layers, set(RETIRED),
+                                          args.include_retired_attn)
+            unmatched = lora_target_modules(n_layers, set(),
+                                            args.include_retired_attn)
+            per_rank = 22528
+            print("  dense control targeting: " + str(len(targets))
+                  + " modules  (capacity-matched = " + str(len(matched))
+                  + " -> " + format(args.rank * per_rank * len(matched) // 7, ",")
+                  + " params;  unmatched = " + str(len(unmatched)) + " -> "
+                  + format(args.rank * per_rank * len(unmatched) // 7, ",")
+                  + " params)")
         model = get_peft_model(model, LoraConfig(
             r=args.rank, lora_alpha=alpha, lora_dropout=0.0, bias="none",
             task_type="CAUSAL_LM", target_modules=targets))
