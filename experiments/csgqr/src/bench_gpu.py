@@ -174,6 +174,54 @@ def bench_confidence_projection(model, *, tokens: int, warmup: int,
     }
 
 
+def bench_probe_monitors(model, *, tokens: int, n_groups: int,
+                         warmup: int, iters: int) -> dict:
+    """Measured cost of the probe monitors, against the exact lens.
+
+    This is the comparison the whole deployment argument rests on, and until now
+    it existed only as a MAC ratio. The closed form says the exact lens costs
+    ``|V|/(3 d_ff) = 3.556x`` the MLP it gates while a linear need probe costs
+    ``1/(6 d_ff) = 0.0109%`` and a group router ``|G|/(6 d_ff) = 0.2604%``. A MAC
+    ratio is not a latency, though: at these shapes the probe is a
+    ``[T, 1024] x [1024, 1]`` GEMM, which is so small it may be dominated by
+    launch overhead and therefore *worse* than its MAC share suggests, while the
+    lens is a large GEMM running at high efficiency. Measuring both against the
+    same MLP on the same card is the only way to know, and a probe that is
+    cheap in MACs but not in wall-clock would undercut the claim.
+
+    The probes are constructed here with random weights on purpose: this measures
+    the *shape* cost, which is all that latency depends on, and it keeps the
+    benchmark runnable without a trained artifact.
+    """
+    device = next(model.parameters()).device
+    hidden = int(model.config.hidden_size)
+    h = torch.randn(tokens, hidden, dtype=torch.float32, device=device)
+
+    w_need = torch.randn(1, hidden, dtype=torch.float32, device=device)
+    b_need = torch.randn(1, dtype=torch.float32, device=device)
+    w_router = torch.randn(n_groups, hidden, dtype=torch.float32, device=device)
+    b_router = torch.randn(n_groups, dtype=torch.float32, device=device)
+
+    def need() -> None:
+        torch.sigmoid(h @ w_need.t() + b_need)
+
+    def router() -> None:
+        _ = h @ w_router.t() + b_router
+
+    def both() -> None:
+        torch.sigmoid(h @ w_need.t() + b_need)
+        _ = h @ w_router.t() + b_router
+
+    return {
+        "need_probe": timed(need, warmup=warmup, iters=iters),
+        "group_router": timed(router, warmup=warmup, iters=iters),
+        "need_plus_router": timed(both, warmup=warmup, iters=iters),
+        "need_bytes_fp32": 4 * (hidden + 1),
+        "router_bytes_fp32": 4 * (hidden * n_groups + n_groups),
+        "tokens": tokens,
+    }
+
+
 # --------------------------------------------------------------------------
 def load_model(device: str):
     gc.collect()
@@ -245,6 +293,22 @@ def main() -> None:
     print("  measured confidence/MLP cost ratio: "
           + format(proj_ms / mlp_ms, ".3f") + "x   (closed form predicts 3.556x "
           "against the dense MLP)")
+
+    probe_cost_measured = bench_probe_monitors(
+        model, tokens=args.micro_tokens, n_groups=args.n_groups,
+        warmup=args.warmup, iters=args.iters)
+    dense_ms = 1000 * micro["dense_nn_linear"]["p50_s"]
+    print("\n  monitor cost measured against the dense MLP ("
+          + format(dense_ms, ".4f") + " ms at " + str(args.micro_tokens)
+          + " tokens):")
+    for label, key in (("need probe", "need_probe"),
+                       ("group router", "group_router"),
+                       ("need + router", "need_plus_router"),
+                       ("exact lens + features", None)):
+        ms = (proj_ms if key is None
+              else 1000 * probe_cost_measured[key]["p50_s"])
+        print("    {:<24s} {:>9.4f} ms   {:>9.3f}% of the dense MLP".format(
+            label, ms, 100 * ms / dense_ms))
     print()
 
     # -- resident bytes, measured -----------------------------------------
@@ -380,6 +444,17 @@ def main() -> None:
         "remnant_microbenchmark": micro,
         "confidence_projection": conf_cost,
         "measured_confidence_over_mlp_ratio": proj_ms / mlp_ms,
+        "probe_monitors": probe_cost_measured,
+        "monitor_share_of_dense_mlp": {
+            "need_probe": (1000 * probe_cost_measured["need_probe"]["p50_s"]
+                           / dense_ms),
+            "group_router": (1000 * probe_cost_measured["group_router"]["p50_s"]
+                             / dense_ms),
+            "need_plus_router": (
+                1000 * probe_cost_measured["need_plus_router"]["p50_s"]
+                / dense_ms),
+            "exact_lens_plus_features": proj_ms / dense_ms,
+        },
         "resident_bytes": resident,
         "arms": results,
         "environment": collect(),
