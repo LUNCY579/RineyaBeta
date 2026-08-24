@@ -209,6 +209,38 @@ CATALOGUE: dict[str, Arm] = {
         "confidence_whole", feature="random_token", tau_skip=0.6494),
 }
 
+# ----------------------------------------------------------------------
+# Threshold ladders, so the lens gate and the probe gate can be compared as
+# FRONTIERS rather than at one arbitrary operating point each. Comparing a
+# max_prob gate at tau=0.9 against a probe gate at tau=0.5 compares two points
+# on two curves and says nothing about which curve is better.
+# ----------------------------------------------------------------------
+for _t in (0.50, 0.70, 0.80, 0.90, 0.95, 0.99):
+    CATALOGUE["lens-t" + format(_t, ".2f")] = Arm(
+        "lens-t" + format(_t, ".2f"),
+        "max_prob whole-remnant gate, tau=" + format(_t, ".2f"),
+        "one point on the exact-lens gate frontier", INT4,
+        "confidence_whole", feature="max_prob", tau_skip=_t)
+for _t in (0.30, 0.40, 0.50, 0.60, 0.70, 0.80):
+    CATALOGUE["probe-t" + format(_t, ".2f")] = Arm(
+        "probe-t" + format(_t, ".2f"),
+        "probe_need whole-remnant gate, tau=" + format(_t, ".2f"),
+        "one point on the hidden-state-probe gate frontier", INT4,
+        "confidence_whole", feature="probe_need", tau_skip=_t)
+for _t in (0.60, 0.75, 0.90, 0.95):
+    CATALOGUE["rtok-t" + format(_t, ".2f")] = Arm(
+        "rtok-t" + format(_t, ".2f"),
+        "random token gate, tau=" + format(_t, ".2f"),
+        "one point on the no-skill matched-compute reference", INT4,
+        "confidence_whole", feature="random_token", tau_skip=_t)
+
+LENS_LADDER = tuple("lens-t" + format(t, ".2f")
+                    for t in (0.50, 0.70, 0.80, 0.90, 0.95, 0.99))
+PROBE_LADDER = tuple("probe-t" + format(t, ".2f")
+                     for t in (0.30, 0.40, 0.50, 0.60, 0.70, 0.80))
+RTOK_LADDER = tuple("rtok-t" + format(t, ".2f")
+                    for t in (0.60, 0.75, 0.90, 0.95))
+
 #: Random-token-gate controls, and the arm each one is matched to.
 MATCHED_TOKEN_GATES = {
     "r-tok-87": "b11-logitmargin-whole",
