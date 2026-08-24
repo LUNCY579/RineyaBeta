@@ -92,6 +92,9 @@ def main() -> None:
     ap.add_argument("--layer", type=int, required=True)
     ap.add_argument("--dataset", default="chat_dev", choices=sorted(DATASETS))
     ap.add_argument("--prompts", type=int, default=64)
+    ap.add_argument("--skip-prompts", type=int, default=0,
+                    help="discard this many usable prompts first, so a trace can "
+                         "be generated on the same slice an evaluation used")
     ap.add_argument("--max-len", type=int, default=256)
     ap.add_argument("--n-groups", type=int, default=24)
     ap.add_argument("--arm", default="int4", choices=sorted(ARMS))
@@ -117,7 +120,7 @@ def main() -> None:
     model.config.use_cache = False
 
     prompts = load_prompts(REPO / DATASETS[args.dataset], tokenizer,
-                           args.prompts, args.max_len)
+                           args.prompts, args.max_len, skip=args.skip_prompts)
     if not prompts:
         raise SystemExit("no usable prompts loaded")
     n_groups = args.n_groups
@@ -262,7 +265,8 @@ def main() -> None:
                   + format(time.time() - started, ".0f") + "s", flush=True)
 
     tag = ("L" + str(args.layer) + "_" + args.arm + "_g" + str(n_groups)
-           + "_" + args.dataset)
+           + "_" + args.dataset
+           + ("_skip" + str(args.skip_prompts) if args.skip_prompts else ""))
     out_dir = REPO / (args.out or ("experiments/csgqr/results/trace_" + tag))
     out_dir.mkdir(parents=True, exist_ok=True)
     with (out_dir / "traces.jsonl").open("w", encoding="utf-8", newline="\n") as fh:
@@ -272,7 +276,8 @@ def main() -> None:
     manifest = {
         "layer": args.layer, "arm": args.arm, "spec": spec.name(),
         "n_groups": n_groups, "dataset": args.dataset,
-        "prompts": len(prompts), "positions": len(records),
+        "prompts": len(prompts), "skip_prompts": args.skip_prompts,
+        "positions": len(records),
         "lens_rank": args.lens_rank, "seed": args.seed,
         "pairs": [list(x) for x in pair_list],
         "residual_invariance_max_abs": (invariance_max if args.verify_invariance
