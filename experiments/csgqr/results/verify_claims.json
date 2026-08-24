@@ -1,0 +1,953 @@
+{
+  "total": 105,
+  "ok": 105,
+  "failed": 0,
+  "missing": 0,
+  "checks": [
+    {
+      "claim": "CUDA was available to the run",
+      "source": "environment.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "torch is a CUDA build",
+      "source": "environment.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "GPU total VRAM (MiB)",
+      "source": "environment.json",
+      "status": "OK",
+      "expected": 8188.0,
+      "actual": 8187.5,
+      "tol": 1.0,
+      "note": ""
+    },
+    {
+      "claim": "model layers",
+      "source": "environment.json",
+      "status": "OK",
+      "expected": 28,
+      "actual": 28,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "model hidden size",
+      "source": "environment.json",
+      "status": "OK",
+      "expected": 1024,
+      "actual": 1024,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "model intermediate size",
+      "source": "environment.json",
+      "status": "OK",
+      "expected": 3072,
+      "actual": 3072,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "model vocab size",
+      "source": "environment.json",
+      "status": "OK",
+      "expected": 32768,
+      "actual": 32768,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "embeddings are tied",
+      "source": "environment.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "total parameters",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 474021888,
+      "actual": 474021888,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "MLP parameters per layer",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 9437184,
+      "actual": 9437184,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "one MLP layer is 1.99% of the model",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 0.0199,
+      "actual": 0.019908751555371217,
+      "tol": 0.0002,
+      "note": ""
+    },
+    {
+      "claim": "int4 remnant packed MiB",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 4.711,
+      "actual": 4.7109375,
+      "tol": 0.01,
+      "note": ""
+    },
+    {
+      "claim": "int4 compression vs bf16",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 3.821,
+      "actual": 3.8208955223880596,
+      "tol": 0.01,
+      "note": ""
+    },
+    {
+      "claim": "int4 saving as share of model VRAM = 1.47%",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 0.0147,
+      "actual": 0.014698257984238905,
+      "tol": 0.0002,
+      "note": ""
+    },
+    {
+      "claim": "int8 saving as share of model VRAM = 0.97%",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 0.0097,
+      "actual": 0.0097210700953961,
+      "tol": 0.0002,
+      "note": ""
+    },
+    {
+      "claim": "routing ceiling at rho=0 is 1.99% of model MACs",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 0.0199,
+      "actual": 0.01991150442477876,
+      "tol": 0.0002,
+      "note": ""
+    },
+    {
+      "claim": "routing ceiling at rho=0.25 is 1.49% of model MACs",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 0.0149,
+      "actual": 0.014933628318584071,
+      "tol": 0.0002,
+      "note": ""
+    },
+    {
+      "claim": "exact-confidence cost ratio = 3.556x",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 3.5556,
+      "actual": 3.5555555555555554,
+      "tol": 0.001,
+      "note": ""
+    },
+    {
+      "claim": "that ratio equals the closed form |V|/(3*d_ff)",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": 3.5555555555555554,
+      "actual": 3.5555555555555554,
+      "tol": 1e-09,
+      "note": ""
+    },
+    {
+      "claim": "the monitor costs MORE than the MLP it gates",
+      "source": "budget.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "all verification checks pass",
+      "source": "verify_csgqr.json",
+      "status": "OK",
+      "expected": 0,
+      "actual": 0,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "verification check count",
+      "source": "verify_csgqr.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "expected at least 80 checks; got 123"
+    },
+    {
+      "claim": "all 28 layers scanned",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": 28,
+      "actual": 28,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "FP remnant KL is exactly zero at every layer",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "the remnant code path is arithmetically clean"
+    },
+    {
+      "claim": "INT8 median KL recovery",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": 0.997,
+      "actual": 0.9970669516663164,
+      "tol": 0.002,
+      "note": ""
+    },
+    {
+      "claim": "INT4 median KL recovery",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": 0.967,
+      "actual": 0.9671920056093241,
+      "tol": 0.002,
+      "note": ""
+    },
+    {
+      "claim": "INT4 worst-layer KL recovery still above 0.94",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "min = 0.9447"
+    },
+    {
+      "claim": "L1 is the most damaging MLP to delete",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": 1,
+      "actual": 1,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "L25 is the least damaging MLP to delete",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": 25,
+      "actual": 25,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "selected moderate layer is 20",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": 20,
+      "actual": 20,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "L20 deletion damage (KL)",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": 0.3194,
+      "actual": 0.3193700548583785,
+      "tol": 0.001,
+      "note": ""
+    },
+    {
+      "claim": "L20 deleted top-1 agreement with dense",
+      "source": "layer_scan.json",
+      "status": "OK",
+      "expected": 0.75,
+      "actual": 0.7500000026936714,
+      "tol": 0.002,
+      "note": ""
+    },
+    {
+      "claim": "positions analysed",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": 798,
+      "actual": 798,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "prompts analysed",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": 96,
+      "actual": 96,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "mean KL(dense||delete) at L20",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": 0.31259,
+      "actual": 0.3125945266672141,
+      "tol": 0.0005,
+      "note": ""
+    },
+    {
+      "claim": "mean KL(dense||remnant) at L20",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": 0.00913,
+      "actual": 0.009129399176367355,
+      "tol": 0.0002,
+      "note": ""
+    },
+    {
+      "claim": "KL recovery ratio at L20",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": 0.9708,
+      "actual": 0.9707947567934021,
+      "tol": 0.001,
+      "note": ""
+    },
+    {
+      "claim": "max_prob low-minus-high utility gap is NEGATIVE",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "H1 predicts positive; measured -0.00115"
+    },
+    {
+      "claim": "best raw-lens AUROC stays below 0.62",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "neg_entropy = 0.5649"
+    },
+    {
+      "claim": "H1 does not hold for all four features",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": false,
+      "actual": false,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "raw lens top-1 agrees with dense only ~27% of the time",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": 0.2694,
+      "actual": 0.2694235588972431,
+      "tol": 0.005,
+      "note": ""
+    },
+    {
+      "claim": "deleted disagrees with dense on ~25% of tokens",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": 0.2481,
+      "actual": 0.24812030075187969,
+      "tol": 0.005,
+      "note": ""
+    },
+    {
+      "claim": "the remnant repairs ~86% of those disagreements",
+      "source": ".../confidence_analysis_d0.1.json",
+      "status": "OK",
+      "expected": 0.8586,
+      "actual": 0.8585858345031738,
+      "tol": 0.005,
+      "note": ""
+    },
+    {
+      "claim": "significance beats random p95 at every active fraction",
+      "source": ".../significance_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "significance capture at rho=0.25",
+      "source": ".../significance_analysis.json",
+      "status": "OK",
+      "expected": 0.16097,
+      "actual": 0.16097428501138883,
+      "tol": 0.0005,
+      "note": ""
+    },
+    {
+      "claim": "random capture at rho=0.25",
+      "source": ".../significance_analysis.json",
+      "status": "OK",
+      "expected": 0.07398,
+      "actual": 0.07397792518888789,
+      "tol": 0.0005,
+      "note": ""
+    },
+    {
+      "claim": "significance beats random by >2x at rho=0.25",
+      "source": ".../significance_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "ratio = 2.18"
+    },
+    {
+      "claim": "group utilities are additive to within 2.5%",
+      "source": ".../significance_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "mean |I|/(|U(A)|+|U(B)|) = 0.0205"
+    },
+    {
+      "claim": "additivity gap (sum of groups minus whole remnant) is small",
+      "source": ".../significance_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "-0.00521"
+    },
+    {
+      "claim": "IN THE ADDITIVE PROXY, static ranking leaves >60% of oracle utility unclaimed at rho=0.25 (the proxy is NOT a predictor -- see N14)",
+      "source": ".../significance_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "66.7%"
+    },
+    {
+      "claim": "per-token group ordering barely agrees with the global ranking",
+      "source": ".../significance_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "mean Spearman = 0.0699"
+    },
+    {
+      "claim": "hidden-state probe AUROC above 0.90",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.9358"
+    },
+    {
+      "claim": "best raw-lens AUROC below 0.62",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.6003"
+    },
+    {
+      "claim": "fitted lens-feature AUROC below 0.62",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.5797"
+    },
+    {
+      "claim": "probe beats the lens by more than 0.30 AUROC",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "+0.3355"
+    },
+    {
+      "claim": "permuted-label control is near chance",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.5065 -- rules out pipeline leakage"
+    },
+    {
+      "claim": "probe beats the position-only control",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "position-only = 0.6012"
+    },
+    {
+      "claim": "probe beats the prompt-level ORACLE ceiling",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "prompt-mean oracle = 0.6976; the probe resolves individual tokens"
+    },
+    {
+      "claim": "lambda was chosen on a disjoint validation split",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "train/val/test splits are disjoint by prompt",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "IN THE ADDITIVE PROXY, the probe wins >65% of static-to-oracle headroom at rho=0.25 (direct measurement says it wins none)",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "70.8%"
+    },
+    {
+      "claim": "IN THE ADDITIVE PROXY, the probe beats the static ranking at rho=0.25 -- FALSIFIED by direct measurement, see N13",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "probe beats its own permuted-target control at rho=0.25",
+      "source": ".../probe_analysis.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "permuted probe = 0.15510"
+    },
+    {
+      "claim": "dense arm reproduces the stored gate baseline exactly",
+      "source": "eval_b0-dense__chat_dev/summary.json",
+      "status": "OK",
+      "expected": 0.8335957795037207,
+      "actual": 0.8335957795037207,
+      "tol": 1e-09,
+      "note": ""
+    },
+    {
+      "claim": "dense arm case count",
+      "source": "eval_b0-dense__chat_dev/summary.json",
+      "status": "OK",
+      "expected": 510,
+      "actual": 510,
+      "tol": 0.0,
+      "note": ""
+    },
+    {
+      "claim": "noise floor |b0 - b2| is recorded",
+      "source": "eval_b2-fp-all.../summary.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "|b0 - b2| = 0.00084  (differences below this are not attributable to CSGQR)"
+    },
+    {
+      "claim": "deletion reduces quality",
+      "source": "eval_b1-delete.../summary.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "dense 0.83360 -> delete 0.82224"
+    },
+    {
+      "claim": "b3-int8-all recovers quality above deletion",
+      "source": "eval_b3-int8-all.../summary.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.83026"
+    },
+    {
+      "claim": "b4-int4-all recovers quality above deletion",
+      "source": "eval_b4-int4-all.../summary.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.83558"
+    },
+    {
+      "claim": "static-vs-random on QUALITY is inside the noise (|gap| < 1/7 of the 0.14901 paired sd)",
+      "source": "eval_b6/b5.../summary.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "static 0.81947 vs random 0.82819   |gap| 0.00872   -- ordering is read from forced_heldout_B"
+    },
+    {
+      "claim": "batch A_baselines completed with no failed arms",
+      "source": "forced_heldout_A_baselines.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "6 arms"
+    },
+    {
+      "claim": "batch B_matched completed with no failed arms",
+      "source": "forced_heldout_B_matched.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "9 arms"
+    },
+    {
+      "claim": "batch C_gates completed with no failed arms",
+      "source": "forced_heldout_C_gates.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "10 arms"
+    },
+    {
+      "claim": "batch D_tokengates completed with no failed arms",
+      "source": "forced_heldout_D_tokengates.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "6 arms"
+    },
+    {
+      "claim": "batch E_frontier completed with no failed arms",
+      "source": "forced_heldout_E_frontier.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "17 arms"
+    },
+    {
+      "claim": "the held-out set is disjoint from the probe's training prompts",
+      "source": "forced_heldout_A_baselines.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "skip_prompts = 96"
+    },
+    {
+      "claim": "the FP-passthrough noise floor is zero on this endpoint",
+      "source": "forced_heldout_A",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "-0.000001 nats"
+    },
+    {
+      "claim": "precision is monotone: int8 < int4 < delete",
+      "source": "forced_heldout_A",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "int8 0.00088 < int4 0.01049 < delete 0.28055"
+    },
+    {
+      "claim": "INT4 recovers >95% of the deletion divergence damage",
+      "source": "forced_heldout_A",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.9626"
+    },
+    {
+      "claim": "deleting the MLP costs no gold-token accuracy (so recovery is fidelity, not quality)",
+      "source": "forced_heldout_A",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "|delta gold_top1| = 0.000000"
+    },
+    {
+      "claim": "the wrong-layer donor is WORSE than installing nothing",
+      "source": "forced_heldout_A",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "wrong-layer 0.78649 vs delete 0.28055"
+    },
+    {
+      "claim": "the wrong-layer donor is the only arm whose gold-token accuracy falls below 0.27",
+      "source": "forced_heldout_A",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "gold_top1 0.2554"
+    },
+    {
+      "claim": "significance beats random at matched rho=0.25 (FIDELITY)",
+      "source": "forced_heldout_B",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "static 0.17822 vs random 0.21563"
+    },
+    {
+      "claim": "and their 95% intervals do not overlap",
+      "source": "forced_heldout_B",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "static hi 0.18710 < random lo 0.20570"
+    },
+    {
+      "claim": "REVERSING the ranking is worse than random (the ORDER carries the information)",
+      "source": "forced_heldout_B",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "reversed 0.24338"
+    },
+    {
+      "claim": "the MAGNITUDE heuristic is worse than random (an interventional label beats a weight-norm proxy)",
+      "source": "forced_heldout_B",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "magnitude 0.23719"
+    },
+    {
+      "claim": "dynamic per-state routing does NOT beat static at rho=0.25 (intervals overlap)",
+      "source": "forced_heldout_B",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "dynamic 0.18253 vs static 0.17822"
+    },
+    {
+      "claim": "...and the dynamic router is genuinely state-conditioned, not degenerate",
+      "source": "forced_heldout_B",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "per-group selection rate spans 0.018 to 0.548"
+    },
+    {
+      "claim": "H2: b11-logitmargin-whole beats its matched random-token gate",
+      "source": "forced_heldout_C + D",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "active 0.8702 vs 0.8701   KL 0.02988 vs 0.04778   1.60x"
+    },
+    {
+      "claim": "H2: b10-margin-whole beats its matched random-token gate",
+      "source": "forced_heldout_C + D",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "active 0.8356 vs 0.8361   KL 0.03410 vs 0.05701   1.67x"
+    },
+    {
+      "claim": "H2: b7-conf-whole beats its matched random-token gate",
+      "source": "forced_heldout_C + D",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "active 0.7889 vs 0.7908   KL 0.04212 vs 0.06572   1.56x"
+    },
+    {
+      "claim": "H2: b12-probe-whole beats its matched random-token gate",
+      "source": "forced_heldout_C + D",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "active 0.6772 vs 0.6790   KL 0.05703 vs 0.09469   1.66x"
+    },
+    {
+      "claim": "H2: b9-entropy-whole beats its matched random-token gate",
+      "source": "forced_heldout_C + D",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "active 0.6494 vs 0.6522   KL 0.07128 vs 0.09975   1.40x"
+    },
+    {
+      "claim": "no interior three-level point beats the binary probe gate",
+      "source": "forced_heldout_C",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "three-level 0.05839 @ 0.6819 active   vs binary 0.05703 @ 0.6772"
+    },
+    {
+      "claim": "...although the interior IS reached (0 < rho < 1 with partial activation)",
+      "source": "forced_heldout_C",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "skip 0.1745  full 0.5218  partial 0.3037"
+    },
+    {
+      "claim": "the additive utility proxy overstates true utility for every selection",
+      "source": "forced_heldout_B + trace analyses",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "random 1.14x   static 1.57x   dynamic 4.00x"
+    },
+    {
+      "claim": "the overstatement is WORST for the most per-token selection (the proxy flatters what optimises it)",
+      "source": "forced_heldout_B + probe_analysis",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "dynamic 4.00x > static 1.57x > random 1.14x"
+    },
+    {
+      "claim": "the proxy oracle at k=12 exceeds the TRUE utility of all 24 groups (impossible for a real utility)",
+      "source": "significance_analysis + forced_heldout_A",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "oracle 0.63376 vs true all-24 0.27006"
+    },
+    {
+      "claim": "the INT4 remnant is SLOWER than the dense MLP it replaces",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "2.3221 ms vs 0.4649 ms = 4.99x"
+    },
+    {
+      "claim": "hard group skipping DOES save time absent dequantization (FP at rho=0.25 is faster than dense)",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "0.70x dense"
+    },
+    {
+      "claim": "the exact-lens monitor costs MORE than the MLP it gates",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "1395.8% of the dense MLP"
+    },
+    {
+      "claim": "the probe monitor is at least 50x cheaper than the exact lens",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "112x cheaper"
+    },
+    {
+      "claim": "the probe's MEASURED share exceeds its MAC share by >100x (a MAC ratio is not a latency)",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "measured 12.50% vs MAC share 0.0109%"
+    },
+    {
+      "claim": "the FP passthrough remnant COPIES the donor (measured bytes == analytic bytes)",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "measured 18.000 vs analytic 18.000 MiB"
+    },
+    {
+      "claim": "peak reserved VRAM is HIGHER for the full method than for dense (Gate F fails)",
+      "source": "gpu_bench.json",
+      "status": "OK",
+      "expected": true,
+      "actual": true,
+      "tol": 0.0,
+      "note": "dense 950 MiB -> full method 1226 MiB"
+    }
+  ]
+}

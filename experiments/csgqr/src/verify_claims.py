@@ -246,7 +246,8 @@ def main() -> None:
               abs(sa["additivity_gap_sum_minus_whole"]) < 0.01,
               note=format(sa["additivity_gap_sum_minus_whole"], "+.5f"))
         h25 = next(e for e in sa["static_vs_oracle"] if abs(e["rho"] - 0.25) < 1e-9)
-        claim("static ranking leaves >60% of oracle utility unclaimed at rho=0.25",
+        claim("IN THE ADDITIVE PROXY, static ranking leaves >60% of oracle utility "
+              "unclaimed at rho=0.25 (the proxy is NOT a predictor -- see N14)",
               ".../significance_analysis.json", True,
               h25["relative_headroom"] > 0.60,
               note=format(100 * h25["relative_headroom"], ".1f") + "%")
@@ -303,11 +304,13 @@ def main() -> None:
               == pa["n_prompts"])
         for e in pa["topk_capture"]:
             if abs(e["rho"] - 0.25) < 1e-9:
-                claim("probe wins >65% of static-to-oracle headroom at rho=0.25",
+                claim("IN THE ADDITIVE PROXY, the probe wins >65% of static-to-oracle "
+                      "headroom at rho=0.25 (direct measurement says it wins none)",
                       ".../probe_analysis.json", True,
                       e["headroom_fraction_won"] > 0.65,
                       note=format(100 * e["headroom_fraction_won"], ".1f") + "%")
-                claim("probe beats static ranking at rho=0.25",
+                claim("IN THE ADDITIVE PROXY, the probe beats the static ranking at "
+                      "rho=0.25 -- FALSIFIED by direct measurement, see N13",
                       ".../probe_analysis.json", True, e["probe_beats_static"])
                 claim("probe beats its own permuted-target control at rho=0.25",
                       ".../probe_analysis.json", True, e["probe_beats_permuted"],
@@ -357,14 +360,31 @@ def main() -> None:
                   arms[key] > arms["b1-delete"],
                   note=format(arms[key], ".5f"))
     if "b6-static-25" in arms and "b5-random-25" in arms:
-        claim("significance beats random at matched rho=0.25 on QUALITY",
-              "eval_b6/b5.../summary.json", True,
-              arms["b6-static-25"] > arms["b5-random-25"],
+        # Deliberately NOT "significance beats random on quality". It does not,
+        # and it cannot be expected to: this endpoint has a paired sd of 0.14901
+        # against a deletion effect of 0.01135, so resolving a ~0.009 arm gap
+        # needs about 2,292 cases and 510 exist. Asserting the favourable
+        # direction on an endpoint that cannot resolve it is precisely the error
+        # this file exists to catch -- so what is verified is that the observed
+        # gap is inside the noise, which is what makes it correct to read the
+        # ordering off the teacher-forced endpoint instead.
+        gap = abs(arms["b6-static-25"] - arms["b5-random-25"])
+        claim("static-vs-random on QUALITY is inside the noise "
+              "(|gap| < 1/7 of the 0.14901 paired sd)",
+              "eval_b6/b5.../summary.json", True, gap < 0.02,
               note="static " + format(arms["b6-static-25"], ".5f")
-                   + " vs random " + format(arms["b5-random-25"], ".5f"))
+                   + " vs random " + format(arms["b5-random-25"], ".5f")
+                   + "   |gap| " + format(gap, ".5f")
+                   + "   -- ordering is read from forced_heldout_B")
     if arms:
         print("\n  arms present: " + ", ".join(
             k + "=" + format(v, ".5f") for k, v in sorted(arms.items())))
+
+    # Stage III: the held-out endpoint and the GPU benchmark. Kept in its own
+    # module but sharing this ledger and exit code, so there is exactly one
+    # command that verifies every committed claim.
+    from claims_stage3 import add_checks                            # noqa: PLC0415
+    add_checks(claim, section, load)
 
     # ------------------------------------------------------------------
     failed = [c for c in CHECKS if c["status"] == "FAIL"]
