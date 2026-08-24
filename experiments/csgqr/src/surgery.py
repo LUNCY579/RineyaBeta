@@ -64,20 +64,50 @@ class CSGQRMlp(nn.Module):
     def __init__(self, remnant: QuantizedMlpRemnant, head: ConfidenceHead | None,
                  policy: RoutingPolicy, *,
                  utility_fn: Callable[[Tensor], Tensor] | None = None,
+                 gate_fn: Callable[[Tensor], Tensor] | None = None,
                  trace: RoutingTrace | None = None) -> None:
         super().__init__()
         self.remnant = remnant
         self.head = head
         self.policy = policy
         self.utility_fn = utility_fn
+        self.gate_fn = gate_fn
         self.trace = trace
         self._residual: Tensor | None = None
         self._token_counter = 0
-        # Modes that never consult confidence must not pay for the projection.
-        self.needs_confidence = policy.mode not in ("none", "all", "fixed_fraction")
-        if self.needs_confidence and head is None:
-            raise ValueError("policy mode " + policy.mode
-                             + " needs confidence, but no ConfidenceHead was given")
+
+        # What this arm actually needs is read off the policy, so an arm cannot
+        # pay for a monitor its own configuration does not ask for, and cannot
+        # skip one it does.
+        if policy.needs_lens and head is None:
+            raise ValueError(
+                "policy " + policy.name() + " gates on the exact lens feature '"
+                + policy.feature + "' but no ConfidenceHead was supplied")
+        if policy.needs_probe and gate_fn is None:
+            raise ValueError(
+                "policy " + policy.name() + " gates on '" + policy.feature
+                + "', which comes from a trained hidden-state probe, but no "
+                "gate_fn was supplied. Train one with train_router.py.")
+        if policy.needs_group_utility and utility_fn is None:
+            raise ValueError(
+                "policy " + policy.name() + " uses the dynamic-significance "
+                "selector, which needs a per-state group-utility predictor, but "
+                "no utility_fn was supplied. Earlier revisions silently fell "
+                "back to the static ranking here, which made the dynamic arm a "
+                "duplicate of the static one while still calling itself "
+                "'significance'. Use selector='static_topk' for the static arm, "
+                "or pass a utility_fn from train_router.py.")
+
+    # -- what a forward pass will consult ----------------------------------
+    @property
+    def reads_residual(self) -> bool:
+        """Does this arm read the pre-remnant residual ``h``?
+
+        Both the gate signal and the dynamic-significance predictor read ``h``,
+        not the post-norm MLP input. Anything that reads it needs the hook.
+        """
+        return (self.policy.needs_gate_signal
+                or self.policy.needs_group_utility)
 
     # -- residual capture --------------------------------------------------
     def set_residual(self, residual: Tensor) -> None:
@@ -97,36 +127,65 @@ class CSGQRMlp(nn.Module):
                                + " does not match MLP input " + str(tuple(like.shape)))
         return r
 
+    def _drop_residual(self) -> None:
+        """Release the captured residual on paths that do not consult it.
+
+        The hook fires on every forward regardless of policy, so without this an
+        always-on or deleted arm would hold a reference to one activation tensor
+        for the lifetime of the module. Small, but it is resident bytes appearing
+        in exactly the arms whose memory numbers are supposed to be the clean
+        references.
+        """
+        self._residual = None
+
     # -- execution ---------------------------------------------------------
     def forward(self, x: Tensor) -> Tensor:
-        # Fast paths that need no confidence and no bucketing.
+        # Fast paths: k is fixed in advance and the group set is the same for
+        # every token, so there is nothing to bucket and no signal to compute.
         if self.policy.mode == "none":
-            if self.needs_confidence:
-                self._take_residual(x)
+            self._drop_residual()
             self._record_uniform(x, [])
             return torch.zeros_like(x)
         if self.policy.mode == "all":
+            self._drop_residual()
             self._record_uniform(x, list(range(self.remnant.n_groups)))
             return self.remnant.forward(x)
-        if self.policy.mode == "fixed_fraction" and self.policy.selector != "random":
+        if (self.policy.mode == "fixed_fraction"
+                and self.policy.selector not in ("random", "significance")):
+            # random varies per token; significance varies per *state*. Every
+            # other selector resolves to one fixed group set at a fixed k.
+            self._drop_residual()
             groups = self.policy.select(0.0)
             self._record_uniform(x, groups)
             return self.remnant.forward_groups(x, groups)
 
-        residual = self._take_residual(x) if self.needs_confidence else x
+        residual = self._take_residual(x) if self.reads_residual else x
         flat_x = x.reshape(-1, x.shape[-1])
         flat_r = residual.reshape(-1, residual.shape[-1])
         n = flat_x.shape[0]
 
-        if self.needs_confidence:
+        # -- the "how much" signal ----------------------------------------
+        if self.policy.needs_probe:
+            # The probe predicts *need*; the policy thresholds *maturity*. One
+            # subtraction puts them in the same orientation so a single
+            # three-level implementation serves the lens and the probe, and a
+            # tau means the same kind of thing in both.
+            need = self.gate_fn(flat_r).to(torch.float32).reshape(-1)
+            conf = (1.0 - need).clamp(0.0, 1.0).tolist()
+        elif self.policy.needs_lens:
             feats = features_from_hidden(self.head, flat_r)
             conf = feats[self.policy.feature].to(torch.float32).tolist()
         else:
             conf = [0.0] * n
 
+        # -- the "which groups" signal ------------------------------------
         utilities = None
-        if self.policy.selector == "significance" and self.utility_fn is not None:
+        if self.policy.needs_group_utility:
             utilities = self.utility_fn(flat_r)
+            if utilities.shape[0] != n:
+                raise RuntimeError(
+                    "utility_fn returned " + str(utilities.shape[0]) + " rows for "
+                    + str(n) + " positions")
 
         buckets: dict[tuple[int, ...], list[int]] = defaultdict(list)
         for i in range(n):
@@ -151,7 +210,7 @@ class CSGQRMlp(nn.Module):
         if self.trace is None:
             return
         for _ in range(x.reshape(-1, x.shape[-1]).shape[0]):
-            self.trace.record(0.0, groups)
+            self.trace.record(float("nan"), groups)
 
 
 @dataclass

@@ -66,6 +66,20 @@ MODES = ("none", "all", "confidence_whole", "fixed_fraction", "three_level")
 SELECTORS = ("significance", "random", "magnitude", "shuffled", "reversed",
              "static_topk", "contiguous")
 
+# Which scalar drives the "how much" decision. The first four are read from the
+# exact vocabulary lens. ``probe_need`` is read from a trained hidden-state
+# probe and is converted to the same "maturity" orientation (higher = less
+# remnant needed) before it reaches any threshold, so one policy implementation
+# serves both and a tau means the same kind of thing in each.
+FEATURES = ("max_prob", "neg_entropy", "prob_margin", "logit_margin",
+            "probe_need")
+
+# Features that come from the trained probe rather than the vocabulary lens.
+# Listing them here rather than testing a string at each call site keeps the
+# "does this arm need the LM-head projection?" question answerable in one place,
+# which is what decides whether an arm pays the |V|/(3*d_ff) monitor cost.
+PROBE_FEATURES = ("probe_need",)
+
 
 @dataclass
 class RoutingPolicy:
@@ -95,6 +109,9 @@ class RoutingPolicy:
         if self.selector not in SELECTORS:
             raise ValueError("selector must be one of " + str(SELECTORS)
                              + "; got " + str(self.selector))
+        if self.feature not in FEATURES:
+            raise ValueError("feature must be one of " + str(FEATURES)
+                             + "; got " + str(self.feature))
         if self.mode == "three_level" and not self.tau_full < self.tau_skip:
             raise ValueError("three_level needs tau_full < tau_skip; got "
                              + str(self.tau_full) + " >= " + str(self.tau_skip))
@@ -108,6 +125,40 @@ class RoutingPolicy:
             raise ValueError("ranking must be a permutation of 0..n_groups-1")
         if not self.group_costs:
             self.group_costs = [1.0] * self.n_groups
+
+    # -- what this policy requires at runtime ------------------------------
+    @property
+    def needs_gate_signal(self) -> bool:
+        """Does the "how much" decision consult a per-token signal at all?
+
+        ``none``, ``all`` and ``fixed_fraction`` fix ``k`` in advance, so they
+        must not pay for any monitor. Keeping this on the policy rather than in
+        the module means an arm cannot accidentally pay the projection cost
+        without its own configuration saying so.
+        """
+        return self.mode in ("confidence_whole", "three_level")
+
+    @property
+    def needs_lens(self) -> bool:
+        """Does it need the exact LM-head vocabulary projection?"""
+        return self.needs_gate_signal and self.feature not in PROBE_FEATURES
+
+    @property
+    def needs_probe(self) -> bool:
+        """Does it need the trained hidden-state probe for the gate signal?"""
+        return self.needs_gate_signal and self.feature in PROBE_FEATURES
+
+    @property
+    def needs_group_utility(self) -> bool:
+        """Does group *selection* need a per-state utility vector?
+
+        True only for the dynamic-significance selector. Every other selector
+        works from the static ``ranking``, which is precisely the
+        static-versus-dynamic contrast the ablation rests on -- so this must be
+        an explicit property and not an accident of whether a utility function
+        happens to have been passed in.
+        """
+        return self.selector == "significance"
 
     def name(self) -> str:
         if self.mode == "none":
@@ -141,13 +192,24 @@ class RoutingPolicy:
         return ((self.tau_skip - confidence) / span) ** self.gamma
 
     def budget(self, confidence: float) -> int:
-        """Number of groups to activate, ``k_t``."""
+        """Number of groups to activate, ``k_t``.
+
+        The ``- 1e-9`` before the ceiling is not cosmetic. Callers that want an
+        exact ``k`` express it as ``fraction = k / n_groups``, and for many
+        ``k`` that round-trip overshoots: ``5/24 * 24 == 5.000000000000001`` in
+        binary floating point, so a bare ``ceil`` returns 6. The utility-trace
+        pass builds every single-group and pair configuration this way, so the
+        bug would have silently mislabelled subset utilities for any subset size
+        whose fraction does not round-trip exactly. The tolerance is far below
+        any meaningful rho resolution (1e-9 of a group) and cannot absorb a real
+        fractional budget.
+        """
         r = self.rho(confidence)
         if r <= 0.0:
             return 0
         if r >= 1.0:
             return self.n_groups
-        return min(self.n_groups, int(math.ceil(r * self.n_groups)))
+        return min(self.n_groups, max(1, int(math.ceil(r * self.n_groups - 1e-9))))
 
     def select(self, confidence: float, *, utility: Tensor | None = None,
                token_index: int = 0) -> list[int]:
@@ -173,18 +235,48 @@ class RoutingPolicy:
         if self.selector == "contiguous":
             return list(range(k))
         if self.selector == "significance" and utility is not None:
+            # R_g = (1-C)^gamma * U_g / (c_g + eps). The (1-C)^gamma factor is a
+            # per-token *scalar*: it multiplies every group's value equally and
+            # therefore cannot change which k groups are largest. It is omitted
+            # from the ranking score deliberately, for two reasons. It is
+            # mathematically inert here, and including it introduced a real
+            # degeneracy -- at C = 1.0 every value became exactly 0.0 and
+            # argsort silently returned groups 0..k-1, turning the significance
+            # selector into the contiguous selector without any error. The factor
+            # remains in the specification because it is what sets *how many*
+            # groups run, and that job is done by rho()/budget() above.
+            flat_u = utility.to(torch.float64).flatten()
+            if flat_u.numel() != self.n_groups:
+                raise ValueError("per-state utility has " + str(flat_u.numel())
+                                 + " entries; expected " + str(self.n_groups)
+                                 + ". Checked before the division so the error "
+                                 "names the real problem instead of surfacing "
+                                 "as a broadcast failure.")
             costs = torch.tensor(self.group_costs, dtype=torch.float64)
-            weight = max(1.0 - confidence, 0.0) ** self.gamma
-            value = weight * utility.to(torch.float64) / (costs + 1e-12)
-            return torch.argsort(value, descending=True)[:k].tolist()
+            value = flat_u / (costs + 1e-12)
+            # stable=True so equal-utility groups always resolve to ascending
+            # group id. Quantization creates exact ties more often than
+            # continuous data would, and an unstable sort would make an arm
+            # irreproducible for exactly the tokens where the choice is
+            # arbitrary.
+            order = torch.argsort(-value, stable=True)
+            return order[:k].tolist()
         return self.ranking[:k]
 
     def to_dict(self) -> dict[str, object]:
+        """Every field that changes behaviour, so a run manifest fully pins the arm.
+
+        ``group_costs`` is included even though it is uniform on this checkpoint:
+        a serialized policy that omits a field which affects selection cannot be
+        replayed, and the omission only becomes visible once mixed-size groups
+        exist -- which is the worst moment to discover it.
+        """
         return {"mode": self.mode, "feature": self.feature,
                 "tau_skip": self.tau_skip, "tau_full": self.tau_full,
                 "gamma": self.gamma, "selector": self.selector,
                 "fraction": self.fraction, "n_groups": self.n_groups,
                 "seed": self.seed, "ranking": list(self.ranking),
+                "group_costs": list(self.group_costs),
                 "name": self.name()}
 
 
@@ -219,9 +311,19 @@ class RoutingTrace:
         self.budgets.append(k)
 
     def summary(self) -> dict[str, object]:
+        """Routing accounting for the run.
+
+        Arms with no per-token gate signal (deletion, always-on, fixed budget)
+        record their confidence as NaN rather than 0.0. Recording 0.0 would put a
+        real-looking "mean_confidence 0.000" in their manifest, which reads as a
+        measurement of a maximally-uncertain model rather than as the absence of a
+        measurement. NaN entries are excluded here and counted separately.
+        """
         t = max(self.tokens, 1)
         conf = torch.tensor(self.confidences, dtype=torch.float64) if self.confidences \
-            else torch.zeros(1, dtype=torch.float64)
+            else torch.zeros(0, dtype=torch.float64)
+        real = conf[~torch.isnan(conf)] if conf.numel() else conf
+        has_signal = real.numel() > 0
         return {
             "tokens": self.tokens,
             "groups_executed": self.groups_executed,
@@ -229,8 +331,9 @@ class RoutingTrace:
             "invocation_rate": self.invocations / t,
             "full_invocation_rate": self.full_invocations / t,
             "skip_rate": 1.0 - self.invocations / t,
-            "mean_confidence": conf.mean().item(),
-            "median_confidence": conf.median().item(),
+            "gate_signal_tokens": int(real.numel()),
+            "mean_confidence": real.mean().item() if has_signal else None,
+            "median_confidence": real.median().item() if has_signal else None,
             "mean_groups_per_token": self.groups_executed / t,
             "group_selection_rate": (self.per_group / t).tolist(),
         }

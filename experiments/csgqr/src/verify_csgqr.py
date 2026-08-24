@@ -54,6 +54,17 @@ def section(title: str) -> None:
     print("-" * len(title))
 
 
+def _raises(fn, exc: type[BaseException]) -> bool:
+    """True when ``fn()`` raises ``exc``. Keeps refusal checks to one line."""
+    try:
+        fn()
+    except exc:
+        return True
+    except Exception:  # noqa: BLE001 - the wrong exception type is a failure
+        return False
+    return False
+
+
 def toy_mlp(hidden: int = 256, inter: int = 768, seed: int = 0,
             scale: float = 1.0) -> nn.Module:
     """A bias-free gated MLP with the same algebra as Qwen3MLP."""
@@ -263,6 +274,66 @@ def verify_decomposition() -> None:
     except ValueError:
         check("a biased down_proj is refused (would break additivity)", True)
 
+    # -- coalesced dequantization ------------------------------------------
+    # Contiguous groups are merged into one dequantization call per run. That is
+    # a launch-count optimisation and must be bit-identical, not merely close:
+    # if it were only close, every quantized arm's quality would depend on how
+    # the router happened to group its selection.
+    rc = QuantizedMlpRemnant(mlp64, RemnantConfig(0, 24, QuantSpec(4, 128, False),
+                                                  torch.float64))
+
+    def per_group_gather(rem, groups):
+        gs, us, ds, als = [], [], [], []
+        for g in sorted(set(groups)):
+            lo, hi = rem.bounds[g]
+            gs.append(rem.gate_q.dequantize(lo, hi))
+            us.append(rem.up_q.dequantize(lo, hi))
+            ds.append(rem.down_q.dequantize(lo, hi))
+            als.append(rem.alpha[g].expand(hi - lo))
+        return (torch.cat(gs), torch.cat(us), torch.cat(ds), torch.cat(als))
+
+    sets = ([0], [0, 1, 2, 3], [3, 4, 5, 9], [5, 7, 9, 11], [0, 23],
+            list(range(24)))
+    identical = True
+    for sel in sets:
+        a = rc._gather(sorted(set(sel)))
+        b = per_group_gather(rc, sel)
+        identical &= all(torch.equal(p, q) for p, q in zip(a, b))
+    check("coalesced run-merged gather is bit-identical to a per-group gather",
+          identical, str(len(sets)) + " group sets")
+
+    runs_full = rc._runs(rc.bounds, list(range(24)))
+    runs_split = rc._runs(rc.bounds, [5, 7, 9, 11])
+    check("contiguous groups merge into one run; non-contiguous do not",
+          len(runs_full) == 1 and len(runs_split) == 4,
+          "all-24 -> " + str(len(runs_full)) + " run, [5,7,9,11] -> "
+          + str(len(runs_split)) + " runs")
+
+    covered = sum(hi - lo for lo, hi in runs_full)
+    check("merged runs cover the whole intermediate axis exactly once",
+          covered == rc.intermediate and runs_full[0] == (0, rc.intermediate),
+          "rows=" + str(covered))
+
+    # -- executed-FLOP accounting ------------------------------------------
+    per = rc.group_flops(1, 0)
+    check("active_flops is the sum of the true per-group costs",
+          rc.active_flops(list(range(24))) == 24 * per
+          and rc.active_flops([1, 5]) == 2 * per
+          and rc.active_flops([]) == 0,
+          "one group = " + format(per, ",") + " MACs/token")
+
+    # An uneven partition must not under-report the remainder group.
+    uneven = QuantizedMlpRemnant(
+        toy_mlp(hidden=64, inter=100), RemnantConfig(0, 7, QuantSpec(4, 128, False),
+                                                     torch.float32))
+    sizes = [hi - lo for lo, hi in uneven.bounds]
+    check("an uneven partition folds the remainder into the last group and "
+          "reports its true size", sum(sizes) == 100 and sizes[-1] == 16,
+          "sizes=" + str(sizes))
+    check("active_flops over an uneven partition equals the whole layer",
+          uneven.active_flops(list(range(7))) == 2 * 100 * 64 * 3,
+          format(uneven.active_flops(list(range(7))), ","))
+
 
 # ==========================================================================
 # C. Alpha calibration
@@ -310,6 +381,63 @@ def verify_alpha() -> None:
           pg.numel() == 24 and bool(torch.isfinite(pg).all()),
           "min=" + format(pg.min().item(), ".4f")
           + " max=" + format(pg.max().item(), ".4f"))
+
+    # -- regressions for the per-group target bug --------------------------
+    # A bit-exact remnant is F^Q == F, so EVERY per-group gain must be exactly
+    # 1. The earlier implementation fitted each group against the WHOLE MLP
+    # output, which makes alpha_g = 1 + <F_g, sum_{h!=g} F_h>/||F_g||^2. That is
+    # a different estimator, not a looser one: it returned gains spanning
+    # 0.978-1.024 on a lossless remnant and injected 1.3% relative error into a
+    # reconstruction that was exact. This check fails loudly under that form.
+    mlp_e = toy_mlp(seed=5)
+    exact = QuantizedMlpRemnant(mlp_e, RemnantConfig(0, 8, QuantSpec(16, 0, True),
+                                                     torch.float64))
+    xe = torch.randn(256, mlp_e.gate_proj.in_features, dtype=torch.float64)
+    mlp_e = mlp_e.to(torch.float64)
+    pg_exact = calibrate_alpha(exact, mlp_e, xe, per_group=True)
+    worst = (pg_exact.to(torch.float64) - 1.0).abs().max().item()
+    check("per-group alpha is EXACTLY 1 for a bit-exact remnant "
+          "(target is F_g, not F)", worst < 1e-9,
+          "max |alpha_g - 1| = " + format(worst, ".2e"))
+
+    sc_exact = calibrate_alpha(exact, mlp_e, xe)[0].item()
+    check("scalar alpha is exactly 1 for a bit-exact remnant",
+          abs(sc_exact - 1.0) < 1e-9, "alpha=" + format(sc_exact, ".12f"))
+
+    # Reference group outputs must themselves partition the donor exactly, or
+    # the target above is not what it claims to be.
+    from remnant import reference_group_output                      # noqa: PLC0415
+    ref_sum = sum(reference_group_output(mlp_e, xe, *exact.bounds[g])
+                  for g in range(exact.n_groups))
+    gap = (ref_sum - mlp_e(xe)).abs().max().item()
+    check("donor group outputs sum to the donor MLP exactly (float64)",
+          gap < 1e-12, "max abs = " + format(gap, ".2e"))
+
+    # Calibrating twice must not compound: the fit neutralises the current gain.
+    r_idem = QuantizedMlpRemnant(mlp, RemnantConfig(0, 24, QuantSpec(4, 128, False),
+                                                    torch.float32))
+    first = calibrate_alpha(r_idem, mlp, x)[0].item()
+    r_idem.alpha.fill_(first)
+    second = calibrate_alpha(r_idem, mlp, x)[0].item()
+    check("alpha calibration is idempotent (does not compound with the "
+          "gain already installed)", abs(first - second) < 1e-6,
+          "first=" + format(first, ".6f") + " second=" + format(second, ".6f"))
+    check("calibration restores the alpha buffer it was called with",
+          abs(r_idem.alpha[0].item() - first) < 1e-12)
+
+    # Subset gain: fitted against the same rows of the donor, and must not make
+    # the partial reconstruction worse.
+    sub = [1, 5, 9]
+    a_sub = calibrate_alpha(r_idem, mlp, x, subset=sub)[0].item()
+    r_idem.alpha.fill_(1.0)
+    ref_sub = sum(reference_group_output(mlp, x, *r_idem.bounds[g]) for g in sub)
+    out_sub = r_idem.forward_groups(x, sub)
+    e_before = ((out_sub - ref_sub).norm() / ref_sub.norm()).item()
+    e_after = ((a_sub * out_sub - ref_sub).norm() / ref_sub.norm()).item()
+    check("subset alpha does not increase the partial reconstruction error",
+          e_after <= e_before + 1e-9,
+          "alpha=" + format(a_sub, ".5f") + "  rel err "
+          + format(e_before, ".6f") + " -> " + format(e_after, ".6f"))
 
 
 # ==========================================================================
@@ -425,6 +553,61 @@ def verify_confidence() -> None:
     head = ConfidenceHead(norm, head_lin, AlignmentLens(64, 0), 128)
     check("ConfidenceHead borrows the model's LM head rather than copying it",
           head.lm_head is head_lin and head.final_norm is norm)
+
+    # -- chunking over positions -------------------------------------------
+    # features_from_hidden chunks the position axis so the transient does not
+    # scale with prompt length. Two separate claims, and they are not the same
+    # claim:
+    #
+    #   1. The *reduction* is per-position, so splitting it is bit-exact. This
+    #      is the part chunking is responsible for and it must be exact.
+    #   2. The *projection* is a GEMM, and BLAS picks a different kernel for
+    #      [133,64]x[64,512] than for [16,64]x[64,512]. So end-to-end agreement
+    #      is at GEMM epsilon, not bit-exact -- and this is the same
+    #      shape-dependent accumulation-order effect recorded as N8 for cuBLAS,
+    #      reproduced here on the CPU path. It is a property of matrix
+    #      multiplication on this stack, not of chunking.
+    #
+    # What must hold is that the gate's *decisions* do not move: the top-1 and
+    # top-2 tokens are identical and the scalar features agree to float32 GEMM
+    # epsilon.
+    from confidence import features_from_hidden                     # noqa: PLC0415
+    big = ConfidenceHead(nn.LayerNorm(64), nn.Linear(64, 512, bias=False),
+                         AlignmentLens(64, 0), 512)
+    torch.manual_seed(11)
+    hs = torch.randn(133, 64)
+
+    with torch.no_grad():
+        z = big.logits(hs)
+    red_whole = features_from_logits(z, 512)
+    red_split = {k: torch.cat([features_from_logits(z[i:i + 16], 512)[k]
+                               for i in range(0, 133, 16)], dim=0)
+                 for k in red_whole}
+    check("the confidence reduction is bit-exact when split over positions",
+          all(torch.equal(red_whole[k], red_split[k]) for k in red_whole),
+          "133 positions in blocks of 16")
+
+    whole = features_from_hidden(big, hs, chunk=10_000)
+    split = features_from_hidden(big, hs, chunk=16)
+    check("chunking preserves shape and every feature key",
+          set(whole) == set(split)
+          and all(split[k].shape[0] == 133 for k in split),
+          str(sorted(whole)))
+    check("chunking does not change which token the lens predicts",
+          bool((whole["top1"] == split["top1"]).all()
+               and (whole["top2"] == split["top2"]).all()),
+          "0 argmax changes over 133 positions")
+    worst = max((whole[k] - split[k]).abs().max().item()
+                for k in whole if whole[k].dtype.is_floating_point)
+    check("chunked features agree with unchunked to float32 GEMM epsilon",
+          worst < 1e-5, "max abs diff = " + format(worst, ".2e")
+          + " (shape-dependent GEMM, see N8)")
+
+    # A chunk equal to the position count must take the single-shot path and be
+    # bit-identical to it: no empty tail, no spurious concatenation.
+    odd = features_from_hidden(big, hs, chunk=133)
+    check("a chunk equal to the position count is handled without an empty tail",
+          all(torch.equal(odd[k], whole[k]) for k in odd))
 
 
 # ==========================================================================
@@ -642,6 +825,100 @@ def verify_routing() -> None:
           and abs(s["invocation_rate"] - 2 / 3) < 1e-12)
     check("trace full-invocation rate counts only fully active tokens",
           abs(s["full_invocation_rate"] - 1 / 3) < 1e-12)
+
+    # -- budget rounding ---------------------------------------------------
+    # Callers express an exact k as fraction = k/n. That round-trip overshoots in
+    # binary floating point for many k (5/24*24 == 5.000000000000001), and a bare
+    # ceil would then execute k+1 groups while the caller recorded k. Every k
+    # must survive the round-trip.
+    exact_k = True
+    offenders = []
+    for n in (12, 24, 48, 7):
+        for k in range(1, n + 1):
+            pol = RoutingPolicy(mode="fixed_fraction", fraction=k / n,
+                                selector="static_topk", n_groups=n)
+            got = pol.budget(0.0)
+            if got != k:
+                exact_k = False
+                offenders.append((n, k, got))
+    check("fraction = k/n recovers exactly k groups for every k "
+          "(n = 7, 12, 24, 48)", exact_k,
+          "OK for all 91 cases" if exact_k else "failures: " + str(offenders[:5]))
+
+    # A genuine fractional budget must still round up.
+    frac = RoutingPolicy(mode="fixed_fraction", fraction=0.21,
+                         selector="static_topk", n_groups=24)
+    check("a genuine fractional budget still rounds up (0.21 x 24 = 5.04 -> 6)",
+          frac.budget(0.0) == 6, "k=" + str(frac.budget(0.0)))
+
+    # -- deterministic ties in dynamic significance ------------------------
+    # Quantization makes exact ties common. An unstable sort would make the arm
+    # irreproducible for exactly the tokens where the choice is arbitrary.
+    tie_pol = RoutingPolicy(mode="fixed_fraction", fraction=0.25,
+                            selector="significance", n_groups=8)
+    flat_u = torch.zeros(8, dtype=torch.float64)
+    picks = {tuple(tie_pol.select(0.5, utility=flat_u)) for _ in range(20)}
+    check("all-equal utilities resolve deterministically to the lowest group ids",
+          picks == {(0, 1)}, "picked " + str(sorted(picks)))
+
+    partial_tie = torch.tensor([0., 9., 0., 9., 0., 0., 0., 0.],
+                               dtype=torch.float64)
+    check("tied winners are ordered by group id, and losers are excluded",
+          tie_pol.select(0.5, utility=partial_tie) == [1, 3],
+          str(tie_pol.select(0.5, utility=partial_tie)))
+
+    # Confidence must not perturb the *ranking*: (1-C)^gamma is a per-token
+    # scalar. It previously made every value 0.0 at C=1.0, silently turning the
+    # significance selector into the contiguous selector.
+    u = torch.tensor([0.1, 0.9, 0.2, 0.8, 0.3, 0.7, 0.4, 0.6],
+                     dtype=torch.float64)
+    same_pick = all(tie_pol.select(c, utility=u) == tie_pol.select(0.0, utility=u)
+                    for c in (0.0, 0.25, 0.5, 0.9, 1.0))
+    check("dynamic significance selects the same groups at every confidence "
+          "(the (1-C)^gamma factor is a scalar and cannot reorder)", same_pick,
+          "picked " + str(tie_pol.select(1.0, utility=u)) + " at C=1.0")
+
+    # -- a utility vector of the wrong width is an error, not a silent slice --
+    try:
+        tie_pol.select(0.5, utility=torch.zeros(5, dtype=torch.float64))
+        check("a wrongly-sized per-state utility vector is refused", False)
+    except ValueError:
+        check("a wrongly-sized per-state utility vector is refused", True)
+
+    # -- policy capability flags -------------------------------------------
+    checks_ok = (
+        RoutingPolicy(mode="all", n_groups=4).needs_gate_signal is False
+        and RoutingPolicy(mode="none", n_groups=4).needs_gate_signal is False
+        and RoutingPolicy(mode="fixed_fraction", fraction=0.5,
+                          selector="static_topk", n_groups=4).needs_gate_signal is False
+        and RoutingPolicy(mode="three_level", n_groups=4).needs_lens is True
+        and RoutingPolicy(mode="three_level", n_groups=4).needs_probe is False
+        and RoutingPolicy(mode="three_level", feature="probe_need",
+                          n_groups=4).needs_probe is True
+        and RoutingPolicy(mode="three_level", feature="probe_need",
+                          n_groups=4).needs_lens is False
+        and RoutingPolicy(mode="fixed_fraction", fraction=0.5,
+                          selector="significance",
+                          n_groups=4).needs_group_utility is True
+        and RoutingPolicy(mode="fixed_fraction", fraction=0.5,
+                          selector="static_topk",
+                          n_groups=4).needs_group_utility is False)
+    check("policy capability flags identify which monitors an arm must pay for",
+          checks_ok)
+
+    check("an unknown gate feature is refused rather than KeyError'd later",
+          _raises(lambda: RoutingPolicy(mode="three_level", feature="vibes",
+                                        n_groups=4), ValueError))
+
+    # -- serialization round-trip ------------------------------------------
+    pol = RoutingPolicy(mode="three_level", feature="probe_need", tau_skip=0.8,
+                        tau_full=0.2, gamma=1.5, selector="significance",
+                        n_groups=6, group_costs=[1., 2., 1., 1., 3., 1.])
+    d = pol.to_dict()
+    check("to_dict serializes every field that changes selection, group_costs "
+          "included", d["group_costs"] == [1., 2., 1., 1., 3., 1.]
+          and d["feature"] == "probe_need" and d["ranking"] == list(range(6)),
+          "keys=" + str(sorted(d)))
 
 
 # ==========================================================================

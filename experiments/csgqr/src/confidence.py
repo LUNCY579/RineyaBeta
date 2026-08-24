@@ -162,15 +162,47 @@ def features_from_logits(logits: Tensor, vocab_size: int | None = None,
     }
 
 
+#: Positions projected at once by :func:`features_from_hidden`. The peak
+#: transient is roughly ``chunk * |V| * 4 bytes`` times the three float32
+#: intermediates that ``features_from_logits`` needs (log-probs, probs, and the
+#: topk workspace). At |V| = 32768 that is about 12 MiB per 32 positions, which
+#: is negligible; the whole point is that it no longer scales with prompt length.
+CONFIDENCE_CHUNK = 256
+
+
 @torch.no_grad()
-def features_from_hidden(head: ConfidenceHead, h: Tensor) -> dict[str, Tensor]:
+def features_from_hidden(head: ConfidenceHead, h: Tensor, *,
+                         chunk: int = CONFIDENCE_CHUNK) -> dict[str, Tensor]:
     """Confidence features for residual states ``h``, without retaining logits.
 
     The vocabulary-sized tensor exists only inside this function and is dropped
     on return. Callers get a handful of scalars per position -- tens of bytes,
     not ``|V|`` floats.
+
+    **Chunked over positions, and this is not an optimisation.** Projecting a
+    whole prefill at once materialises ``[T, |V|]`` and then three float32
+    tensors of that shape inside :func:`features_from_logits`. At ``|V| = 32768``
+    and a 2048-token prompt that is ~1.6 GiB of transient on a card with 8 GiB
+    total, most of which is already holding the model -- so the gate would OOM on
+    long prompts while working fine on the short dev prompts, which is the worst
+    possible failure shape. Chunking bounds the transient by ``chunk`` instead of
+    by sequence length. The arithmetic is unchanged: every reduction in
+    ``features_from_logits`` is per-position, so splitting the position axis is
+    exact, not approximate. ``verify_csgqr.py`` asserts chunked and unchunked
+    results are bit-identical.
     """
-    return features_from_logits(head.logits(h), head.vocab_size, head.temperature)
+    if h.dim() != 2:
+        h = h.reshape(-1, h.shape[-1])
+    n = h.shape[0]
+    if n <= chunk:
+        return features_from_logits(head.logits(h), head.vocab_size,
+                                    head.temperature)
+    parts: list[dict[str, Tensor]] = []
+    for lo in range(0, n, chunk):
+        block = features_from_logits(head.logits(h[lo:lo + chunk]),
+                                     head.vocab_size, head.temperature)
+        parts.append(block)
+    return {k: torch.cat([p[k] for p in parts], dim=0) for k in parts[0]}
 
 
 def js_divergence(logits_a: Tensor, logits_b: Tensor) -> Tensor:

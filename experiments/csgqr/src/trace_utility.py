@@ -185,11 +185,28 @@ def main() -> None:
         module = inst.module
 
         def subset_policy(groups: list[int]) -> RoutingPolicy:
+            """A policy that executes exactly ``groups`` and nothing else.
+
+            Expressed as a fixed fraction with the subset pushed to the front of
+            the ranking. ``RoutingPolicy.budget`` rounds with a 1e-9 tolerance so
+            that ``fraction = k / n_groups`` recovers exactly ``k`` -- without it,
+            ``5/24 * 24`` evaluates to ``5.000000000000001`` and the policy would
+            silently execute six groups while this pass recorded it as five.
+            Asserted here rather than trusted, because a wrong subset size would
+            corrupt every utility label downstream without failing anything.
+            """
             rest = [k for k in range(n_groups) if k not in groups]
-            return RoutingPolicy(mode="fixed_fraction",
-                                 fraction=len(groups) / n_groups,
-                                 selector="static_topk", n_groups=n_groups,
-                                 ranking=list(groups) + rest)
+            pol = RoutingPolicy(mode="fixed_fraction",
+                                fraction=len(groups) / n_groups,
+                                selector="static_topk", n_groups=n_groups,
+                                ranking=list(groups) + rest)
+            chosen = pol.select(0.0)
+            if sorted(chosen) != sorted(groups):
+                raise RuntimeError(
+                    "subset policy for " + str(groups) + " selected "
+                    + str(sorted(chosen)) + "; the utility label would not "
+                    "describe the configuration it claims to")
+            return pol
 
         module.policy = RoutingPolicy(mode="all", n_groups=n_groups)
         kl_full = kl_rows(dense_lp, logprobs_at(model, ids, b))

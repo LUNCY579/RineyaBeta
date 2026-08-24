@@ -1,9 +1,9 @@
 {
   "torch": "2.13.0+cu130",
-  "total": 86,
-  "passed": 86,
+  "total": 112,
+  "passed": 112,
   "failed": 0,
-  "elapsed_s": 0.48,
+  "elapsed_s": 0.62,
   "checks": [
     {
       "name": "4-bit pack/unpack is a bijection at even and odd widths",
@@ -111,6 +111,36 @@
       "detail": ""
     },
     {
+      "name": "coalesced run-merged gather is bit-identical to a per-group gather",
+      "ok": true,
+      "detail": "6 group sets"
+    },
+    {
+      "name": "contiguous groups merge into one run; non-contiguous do not",
+      "ok": true,
+      "detail": "all-24 -> 1 run, [5,7,9,11] -> 4 runs"
+    },
+    {
+      "name": "merged runs cover the whole intermediate axis exactly once",
+      "ok": true,
+      "detail": "rows=768"
+    },
+    {
+      "name": "active_flops is the sum of the true per-group costs",
+      "ok": true,
+      "detail": "one group = 49,152 MACs/token"
+    },
+    {
+      "name": "an uneven partition folds the remainder into the last group and reports its true size",
+      "ok": true,
+      "detail": "sizes=[14, 14, 14, 14, 14, 14, 16]"
+    },
+    {
+      "name": "active_flops over an uneven partition equals the whole layer",
+      "ok": true,
+      "detail": "38,400"
+    },
+    {
       "name": "alpha matches the closed-form least-squares solution at every activation scale",
       "ok": true,
       "detail": "alphas=0.99555, 0.99408, 0.99407"
@@ -128,7 +158,37 @@
     {
       "name": "per-group alpha returns one gain per group and all are finite",
       "ok": true,
-      "detail": "min=0.9342 max=1.1006"
+      "detail": "min=0.9831 max=1.0067"
+    },
+    {
+      "name": "per-group alpha is EXACTLY 1 for a bit-exact remnant (target is F_g, not F)",
+      "ok": true,
+      "detail": "max |alpha_g - 1| = 0.00e+00"
+    },
+    {
+      "name": "scalar alpha is exactly 1 for a bit-exact remnant",
+      "ok": true,
+      "detail": "alpha=1.000000000000"
+    },
+    {
+      "name": "donor group outputs sum to the donor MLP exactly (float64)",
+      "ok": true,
+      "detail": "max abs = 9.44e-16"
+    },
+    {
+      "name": "alpha calibration is idempotent (does not compound with the gain already installed)",
+      "ok": true,
+      "detail": "first=0.994084 second=0.994084"
+    },
+    {
+      "name": "calibration restores the alpha buffer it was called with",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "subset alpha does not increase the partial reconstruction error",
+      "ok": true,
+      "detail": "alpha=0.99823  rel err 0.116037 -> 0.116024"
     },
     {
       "name": "uniform logits give neg_entropy 0 and max_prob 1/|V|",
@@ -212,6 +272,31 @@
     },
     {
       "name": "ConfidenceHead borrows the model's LM head rather than copying it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the confidence reduction is bit-exact when split over positions",
+      "ok": true,
+      "detail": "133 positions in blocks of 16"
+    },
+    {
+      "name": "chunking preserves shape and every feature key",
+      "ok": true,
+      "detail": "['logit_margin', 'max_prob', 'neg_entropy', 'prob_margin', 'top1', 'top2']"
+    },
+    {
+      "name": "chunking does not change which token the lens predicts",
+      "ok": true,
+      "detail": "0 argmax changes over 133 positions"
+    },
+    {
+      "name": "chunked features agree with unchunked to float32 GEMM epsilon",
+      "ok": true,
+      "detail": "max abs diff = 5.96e-08 (shape-dependent GEMM, see N8)"
+    },
+    {
+      "name": "a chunk equal to the position count is handled without an empty tail",
       "ok": true,
       "detail": ""
     },
@@ -399,6 +484,51 @@
       "name": "trace full-invocation rate counts only fully active tokens",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "fraction = k/n recovers exactly k groups for every k (n = 7, 12, 24, 48)",
+      "ok": true,
+      "detail": "OK for all 91 cases"
+    },
+    {
+      "name": "a genuine fractional budget still rounds up (0.21 x 24 = 5.04 -> 6)",
+      "ok": true,
+      "detail": "k=6"
+    },
+    {
+      "name": "all-equal utilities resolve deterministically to the lowest group ids",
+      "ok": true,
+      "detail": "picked [(0, 1)]"
+    },
+    {
+      "name": "tied winners are ordered by group id, and losers are excluded",
+      "ok": true,
+      "detail": "[1, 3]"
+    },
+    {
+      "name": "dynamic significance selects the same groups at every confidence (the (1-C)^gamma factor is a scalar and cannot reorder)",
+      "ok": true,
+      "detail": "picked [1, 3] at C=1.0"
+    },
+    {
+      "name": "a wrongly-sized per-state utility vector is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "policy capability flags identify which monitors an arm must pay for",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "an unknown gate feature is refused rather than KeyError'd later",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "to_dict serializes every field that changes selection, group_costs included",
+      "ok": true,
+      "detail": "keys=['feature', 'fraction', 'gamma', 'group_costs', 'mode', 'n_groups', 'name', 'ranking', 'seed', 'selector', 'tau_full', 'tau_skip']"
     },
     {
       "name": "analytic parameter count matches the safetensors file size",
