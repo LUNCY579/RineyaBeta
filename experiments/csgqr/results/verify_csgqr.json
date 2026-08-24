@@ -1,9 +1,9 @@
 {
   "torch": "2.13.0+cu130",
-  "total": 115,
-  "passed": 115,
+  "total": 122,
+  "passed": 122,
   "failed": 0,
-  "elapsed_s": 0.98,
+  "elapsed_s": 0.65,
   "checks": [
     {
       "name": "4-bit pack/unpack is a bijection at even and odd widths",
@@ -544,6 +544,41 @@
       "name": "to_dict serializes every field that changes selection, group_costs included",
       "ok": true,
       "detail": "keys=['feature', 'fraction', 'gamma', 'group_costs', 'mode', 'n_groups', 'name', 'ranking', 'seed', 'selector', 'tau_full', 'tau_skip']"
+    },
+    {
+      "name": "the remnant state_dict reloads strictly, with no missing or unexpected keys",
+      "ok": true,
+      "detail": "10 tensors, 312,325 B"
+    },
+    {
+      "name": "a reloaded remnant reproduces the full-remnant output bit-exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a reloaded remnant reproduces a PARTIAL group selection bit-exactly",
+      "ok": true,
+      "detail": "groups [0, 3, 4, 7]"
+    },
+    {
+      "name": "the reload actually replaced the destination's own weights",
+      "ok": true,
+      "detail": "unrelated donor gave a different output before loading"
+    },
+    {
+      "name": "the calibrated gain survives serialization",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "every packed weight in the artifact is uint8, and no full-precision donor copy is present",
+      "ok": true,
+      "detail": "packed=3  dtypes=['torch.float16', 'torch.float32', 'torch.uint8']"
+    },
+    {
+      "name": "the serialized artifact is the accounted packed bytes plus only container overhead",
+      "ok": true,
+      "detail": "artifact=312,325 B  accounted=308,768 B  container overhead=3,557 B over 10 tensors"
     },
     {
       "name": "analytic parameter count matches the safetensors file size",

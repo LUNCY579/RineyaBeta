@@ -963,6 +963,73 @@ def verify_routing() -> None:
           and d["feature"] == "probe_need" and d["ranking"] == list(range(6)),
           "keys=" + str(sorted(d)))
 
+    # -- the deployment artifact must reload without the dense donor -------
+    # This is the claim that decides whether the method is deployable at all:
+    # a remnant that needs the full-precision donor to reload has not compressed
+    # anything, it has added a second copy. Tested by saving, deleting the donor
+    # entirely, and reloading into a module built from a *different* MLP.
+    import io                                                       # noqa: PLC0415
+    donor = toy_mlp(seed=21)
+    spec4 = QuantSpec(4, 128, False)
+    src = QuantizedMlpRemnant(donor, RemnantConfig(7, 8, spec4, torch.float32))
+    src.alpha.copy_(torch.linspace(0.9, 1.1, 8))
+    xr = torch.randn(48, donor.gate_proj.in_features)
+    sel = [0, 3, 4, 7]
+    want_full = src.forward(xr).clone()
+    want_part = src.forward_groups(xr, sel).clone()
+
+    buf = io.BytesIO()
+    torch.save(src.state_dict(), buf)
+    artifact_bytes = buf.tell()
+    buf.seek(0)
+    blob = torch.load(buf, map_location="cpu", weights_only=True)
+
+    # Build the destination from an UNRELATED MLP, so any dependence on the
+    # original donor's values shows up as a mismatch rather than passing by
+    # coincidence.
+    other = toy_mlp(seed=99)
+    dst = QuantizedMlpRemnant(other, RemnantConfig(7, 8, spec4, torch.float32))
+    before = dst.forward(xr).clone()
+    missing = dst.load_state_dict(blob, strict=True)
+    del donor
+
+    check("the remnant state_dict reloads strictly, with no missing or "
+          "unexpected keys", not missing.missing_keys and not missing.unexpected_keys,
+          str(len(blob)) + " tensors, " + format(artifact_bytes, ",") + " B")
+    check("a reloaded remnant reproduces the full-remnant output bit-exactly",
+          torch.equal(dst.forward(xr), want_full))
+    check("a reloaded remnant reproduces a PARTIAL group selection bit-exactly",
+          torch.equal(dst.forward_groups(xr, sel), want_part),
+          "groups " + str(sel))
+    check("the reload actually replaced the destination's own weights",
+          not torch.equal(before, want_full),
+          "unrelated donor gave a different output before loading")
+    check("the calibrated gain survives serialization",
+          torch.equal(dst.alpha, src.alpha))
+    packed_keys = [k for k in blob if k.endswith("qweight")]
+    check("every packed weight in the artifact is uint8, and no full-precision "
+          "donor copy is present",
+          len(packed_keys) == 3
+          and all(blob[k].dtype == torch.uint8 for k in packed_keys)
+          and not any(blob[k].dtype in (torch.float32, torch.bfloat16)
+                      and blob[k].numel() > 8 * 1024 for k in blob),
+          "packed=" + str(len(packed_keys)) + "  dtypes="
+          + str(sorted({str(v.dtype) for v in blob.values()})))
+    # The artifact must be the accounted bytes plus only the container's own
+    # overhead -- torch.save writes a zip with a pickle header and one entry per
+    # tensor, which is a few KiB for ten tensors and does NOT scale with the
+    # weights. What this rules out is an extra tensor payload: if a dense donor
+    # or an optimizer state were riding along, the excess would be a multiple of
+    # the packed size rather than a fixed container cost.
+    packed_total = src.packed_bytes()["total"]
+    overhead = artifact_bytes - packed_total
+    check("the serialized artifact is the accounted packed bytes plus only "
+          "container overhead",
+          0 <= overhead < 8192,
+          "artifact=" + format(artifact_bytes, ",") + " B  accounted="
+          + format(packed_total, ",") + " B  container overhead="
+          + format(overhead, ",") + " B over " + str(len(blob)) + " tensors")
+
 
 # ==========================================================================
 # G. Budget accounting

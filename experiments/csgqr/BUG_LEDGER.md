@@ -36,6 +36,29 @@ All regression tests live in `src/verify_csgqr.py` unless stated otherwise.
 | **S14** | `MINOR` | `remnant.py` `group_flops` | Reported the *nominal* group size, under-counting the last group when `n_groups` does not divide the intermediate dimension. | `intermediate // n_groups` ignores the folded remainder. | Inert on this checkpoint (3072 = 24 × 128). Would silently under-report executed FLOPs for any uneven partition, and FLOP accounting is what the compute claim rests on. | `group_flops(tokens, group)` reports the true size; new `active_flops(groups, tokens)` sums true per-group costs. | `an uneven partition folds the remainder into the last group and reports its true size`; `active_flops over an uneven partition equals the whole layer` | **FIXED** |
 | **S15** | `MAJOR` | `run_eval.py` `_collect_mlp_inputs` | The α-calibration inputs were taken from `records[:n]` — the **same development records being scored**. | Calibration and evaluation drew from one list. | Calibration leakage (brief §30 requires disjoint calibration data). Latent rather than realised: `--calibrate-alpha` defaults to 0, so no committed run used it. It would have activated the moment anyone calibrated. | See S15 disposition below. | — | **OPEN — see below** |
 
+| **S16** | `MAJOR` | `router.py` `select` | `RoutingPolicy.select` raised `Expected all tensors to be on the same device` — but **only for the dynamic arms**, i.e. after every static arm in a sweep had already run. | The cost vector was built on CPU (`torch.tensor(self.group_costs)`) while a trained `utility_fn` returns CUDA tensors. Introduced by the S1 fix, which is what first made a GPU-resident utility vector reach this line. | Killed the first full powered sweep at arm 13 of 16, and because `eval_forced` wrote its JSON once at the end, the whole run's GPU time was discarded. | `torch.as_tensor(..., dtype=flat_u.dtype, device=flat_u.device)`. The per-token loop also moves the utility batch to CPU once rather than syncing per token. | covered by the dynamic-arm smoke run; the device-agnostic path is exercised by the `select` checks | **FIXED** |
+| **S17** | `MAJOR` | `eval_forced.py` | One arm's failure cascaded into **21** consecutive failures with a misleading message (`'CSGQRMlp' object has no attribute 'gate_proj'`), making a single card-level fault look like a code fault. | A mid-arm exception left the `CSGQRMlp` installed at `layers[j].mlp`, so the next `build_arm` read the installed module instead of the real MLP. The exception handler's comment claimed it restored the model; it did not. | A resource failure on arm 3 produced 20 further "failures" that said nothing about the arms they were attached to. Any reader of that output would have concluded the implementation was broken. | The pristine MLP is captured once before any arm installs anything, and a `finally` restores it and removes every registered hook after each arm. `_is_cuda_context_error` additionally **aborts** the sweep on a context-poisoning CUDA error and records `_sweep_aborted`, because continuing past one of those fabricates failures; a plain allocator OOM is excluded from that class and only skips its own arm. | the sweep now records `failures` and `complete` in its output, so a missing arm is visibly a failure rather than silently absent | **FIXED** |
+| **S18** | `MODERATE` | `stats.py` / `eval_forced.py` | The primary endpoint's bootstrap dominated its wall time. | `cluster_bootstrap` resamples index tensors: 4000 draws x 416 clusters = 1.66M small tensor operations **per metric per arm**. | Not a correctness problem, but it made the powered endpoint look expensive when its GPU work is a few minutes, which discourages using the endpoint that actually has power. | `cluster_bootstrap_mean` computes the same distribution in closed form from per-cluster sums and counts. 15x faster and **bit-identical** — point, lo and hi all agree to 0.0. | `vectorized clustered bootstrap matches the general one exactly`; `vectorized paired clustered bootstrap matches the general one`; `clustering by prompt widens the interval versus treating positions as independent` | **FIXED** |
+
+### S16/S17 note on the diagnosis itself
+
+The failure that triggered S17 was `CUBLAS_STATUS_EXECUTION_FAILED` on the
+FP-passthrough arm. My first hypothesis was that the S13 coalescing change was at
+fault: it returns a **view** (`self.dense[lo:hi]`) instead of a fresh `torch.cat`
+when the selection is a single contiguous run, and `.t()` on that view could
+plausibly have driven cuBLAS down a bad path. **That hypothesis was wrong.**
+Tested directly on the GPU across all three specs (`fp`, `int8`, `int4`), five
+prompt lengths including the known-awkward `T=22`, and 2-D and 3-D inputs: every
+case passes and the gathered gate matrix is contiguous with stride `(1024, 1)`.
+
+The remaining explanation is resource contention — a **different** experiment
+(`experiments/kv_significance/src/passkey.py --lengths 131072`) was running
+concurrently on the same 8 GiB card, and CUDA errors surface asynchronously at an
+arbitrary later launch, so the reported call site need not be the faulting one.
+Recorded because the wrong hypothesis was the plausible one, and because it is the
+reason `GPU_BENCHMARKS.md` is gated on an exclusive card rather than taken
+opportunistically.
+
 ### S15 disposition
 
 `--calibrate-alpha` was never used by any committed run (`alpha[0] = 1.00000` in

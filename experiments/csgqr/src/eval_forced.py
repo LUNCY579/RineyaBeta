@@ -110,6 +110,34 @@ import scripts.train.memory as mem                                 # noqa: E402
 MODEL = "artifacts/rineya-core-en32k-28L"
 SEED = 20260823
 
+#: Hook handles registered by the arm currently under test, so the loop can
+#: always remove them even when the arm raised.
+_hooks: list = []
+
+
+def _is_cuda_context_error(exc: BaseException) -> bool:
+    """Is this the kind of CUDA failure that poisons the context?
+
+    A device-side assert, an illegal access, a cuBLAS execution failure or an
+    out-of-memory raised from inside a kernel leaves the CUDA context unusable:
+    every later operation fails regardless of what the next arm does. Continuing
+    a sweep past one of these manufactures a long list of failures that say
+    nothing about the arms they are attached to, which is worse than stopping,
+    because it looks like a code fault rather than a card fault.
+
+    ``CUDA out of memory`` raised by the caching allocator is *not* in this
+    class -- the allocator raises before launching and the context survives -- so
+    it is deliberately excluded and such an arm is skipped rather than aborting
+    the run.
+    """
+    text = str(exc)
+    if "CUDA out of memory" in text:
+        return False
+    return any(marker in text for marker in (
+        "CUDA error", "CUBLAS_STATUS", "device-side assert",
+        "an illegal memory access", "CUDA kernel errors",
+        "cuDNN error"))
+
 
 @torch.no_grad()
 def reply_logprobs(model, ids: torch.Tensor, boundary: int) -> torch.Tensor:
@@ -178,6 +206,7 @@ def build_arm(model, arm, layer: int, n_groups: int, ranking_source, device,
                          donor_layer=donor, trace=trace,
                          utility_fn=utility_fn, gate_fn=gate_fn,
                          keep_donor_resident=True)
+    _hooks.append(inst.hook_handle)
     return inst, inst.original_mlp, trace
 
 
@@ -388,9 +417,12 @@ def main() -> None:
                 print("    " + key + "  " + str(pi + 1) + "/" + str(len(prompts))
                       + "  " + format(time.time() - t0, ".0f") + "s", flush=True)
 
+        # Teardown is also done in the caller's finally, so this is the happy
+        # path only and must be idempotent with it.
         if inst is not None:
-            target.mlp = inst.module
             inst.hook_handle.remove()
+            if inst.hook_handle in _hooks:
+                _hooks.remove(inst.hook_handle)
             target.mlp = original
 
         flat = {k: torch.cat(v).to(torch.float64) for k, v in cols.items()}
@@ -430,17 +462,41 @@ def main() -> None:
         results[key]["_flat"] = flat        # kept in-process for the contrasts
         results[key]["_clusters"] = cl
 
+    # The pristine MLP for this layer, captured before any arm installs
+    # anything. Restoring from this is what stops one arm's failure from
+    # cascading: a mid-arm exception used to leave a CSGQRMlp installed, and
+    # every subsequent build_arm then failed with "'CSGQRMlp' object has no
+    # attribute 'gate_proj'" -- so a single resource failure turned into 21
+    # failures and looked like a code fault rather than a card fault.
+    pristine_mlp = model.model.layers[args.layer].mlp
+
     for key in keys:
         try:
             run_arm(key)
         except Exception as exc:                       # noqa: BLE001
-            # One arm's failure must not discard the sweep. It is
-            # recorded in the output so a missing arm is visibly a
-            # failure rather than silently absent, and the layer's mlp
-            # is restored so the next arm starts from a clean model.
             failures[key] = repr(exc)
             print("  [FAIL] " + key + ": " + repr(exc), flush=True)
             results.pop(key, None)
+            if _is_cuda_context_error(exc):
+                # A CUDA error poisons the context: every later op fails no
+                # matter what is installed. Continuing would fabricate 20 more
+                # "failures" that say nothing about those arms. Stop and say so.
+                print("  CUDA context is unrecoverable; stopping the sweep. "
+                      "The remaining arms were NOT tested.", flush=True)
+                failures["_sweep_aborted"] = (
+                    "aborted after " + key + ": " + repr(exc))
+                checkpoint()
+                break
+        finally:
+            # Always hand the layer back its real MLP and drop any hook, so the
+            # next arm starts from a clean model whatever happened.
+            for h in list(_hooks):
+                try:
+                    h.remove()
+                except Exception:                      # noqa: BLE001, S110
+                    pass
+            _hooks.clear()
+            model.model.layers[args.layer].mlp = pristine_mlp
         checkpoint()
 
     # -- paired contrasts between every arm and the first one --------------
