@@ -1,0 +1,61 @@
+# SGQR reference experiment: significance-gated quantized remnant, no confidence.
+#
+# This config is intentionally quality-first. The first objective is to establish
+# the dense -> deleted -> always-on INT8/INT4 -> significance-routed frontier.
+# Confidence gating belongs to the separate CSGQR research track.
+
+seed: 20260824
+device: auto
+
+model:
+  path: artifacts/rineya-core-en32k-28L
+  dtype: bfloat16
+  target_layer: 14
+  group_size: 128
+  bitwidths: [8, 4]
+
+calibration:
+  dataset: chat_dev
+  limit: 64
+  exposure_exponent: 1.0
+  output_dir: artifacts/sgqr_runs/calibration_l14_g128
+
+routing:
+  # A fixed budget isolates whether significance chooses useful donor groups.
+  # Sweep this later across 0, 1/8, 1/4, 1/2, 3/4, and all groups.
+  budget_fraction: 0.5
+  static_scores: artifacts/sgqr_runs/calibration_l14_g128/summary.json
+  dynamic_router: artifacts/sgqr_runs/router_l14_g128.pt
+  dynamic_rank: 32
+
+router_training:
+  epochs: 200
+  batch_size: 32
+  lr: 1.0e-3
+  positive_weight: 2.0
+  dev_fraction: 0.2
+
+evaluation:
+  datasets: [chat_dev, rag_dev]
+  modes:
+    - dense
+    - fp_frozen
+    - deleted
+    - int8_all
+    - int4_all
+    - random_topk
+    - magnitude_topk
+    - static_topk
+    - dynamic_topk
+  max_new_tokens: 32
+  output_root: artifacts/sgqr_runs/evaluation
+
+memory:
+  cap_mib: 5120
+
+advancement_gates:
+  # These are research decisions, not hard-coded claims.
+  require_positive_int4_recovery: true
+  require_significance_beats_random: true
+  require_dynamic_beats_or_matches_static: false
+  require_measured_systems_reporting: true

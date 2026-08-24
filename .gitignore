@@ -91,3 +91,7 @@ artifacts/adapters/**/*.safetensors
 # the scripts. Summaries, per-category breakdowns and manifests ARE tracked.
 experiments/**/results/**/results.jsonl
 experiments/**/results/*.log
+
+# SGQR calibration traces, packed-remnant checkpoints and evaluation outputs are
+# reproducible from the committed code/configuration and remain machine-local.
+artifacts/sgqr_runs/
