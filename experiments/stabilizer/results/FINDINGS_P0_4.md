@@ -119,7 +119,8 @@ rather than a rescue of this one:
    healing is not weak. But 7.5% compounded across 28 layers is a much larger
    perturbation than the 2% token shift that cost 9 abstentions.
 3. **Attention.** Unmeasured. The FFN answer does not transfer, and
-   `weight_spectra` found k_proj/v_proj the *most* compressible matrices — which is
+   the weight-spectra measurement (that work lives on the model-surgery branch,
+   not here) found k_proj/v_proj the *most* compressible matrices — which is
    where `artifacts/attn_shape/` already went.
 
 On the "per-state versus global" question: this probe measured the **per-state

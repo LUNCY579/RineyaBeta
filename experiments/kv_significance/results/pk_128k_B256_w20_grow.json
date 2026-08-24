@@ -1,0 +1,247 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 64,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": null,
+  "pool_fwd": null,
+  "key_digits": 5,
+  "grow": 2.0,
+  "grow_max": 64,
+  "needle_words": 20,
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 7400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125830,
+      "budget": 256,
+      "depth": 0.1,
+      "acc": 0.8333333333333334,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage mirror kitchen beacon granite shadow parcel river tomato",
+          "got": "window island summit thread oran",
+          "hit": true
+        },
+        {
+          "key": "garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain engine silver summit market garden lantern hammer tower",
+          "got": "garage signal planet helmet gran",
+          "hit": false
+        },
+        {
+          "key": "blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer crystal hammer carpet cluster",
+          "got": "blanket orange sugar diamond des",
+          "hit": true
+        },
+        {
+          "key": "forest mountain diamond thread anchor desert signal tomato winter cluster stream granite bridge garage drawer amber blanket quarry basket garden",
+          "got": "forest mountain diamond thread a",
+          "hit": true
+        },
+        {
+          "key": "blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle",
+          "got": "blanket window anchor sunset jac",
+          "hit": true
+        },
+        {
+          "key": "tunnel beacon shadow packet market quarry button signal tomato orange granite helmet cotton hammer kitchen jacket mountain rocket temple harbor",
+          "got": "tunnel beacon shadow packet mark",
+          "hit": true
+        },
+        {
+          "key": "blanket amber jacket quarry sugar engine station anchor temple shadow silver granite sunset island cotton carpet planet harbor needle cluster",
+          "got": "blanket amber jacket quarry suga",
+          "hit": true
+        },
+        {
+          "key": "drawer socket forest beacon shadow thread parcel sugar tower needle hammer stream rocket barrel bucket carpet desert tunnel crystal engine",
+          "got": "drawer socket forest beacon shad",
+          "hit": true
+        },
+        {
+          "key": "bucket sunset bottle garage harbor ticket hammer planet yellow carpet barrel tomato ceiling tunnel parcel station needle orange fabric compass",
+          "got": "bucket sunset bottle garage harb",
+          "hit": true
+        },
+        {
+          "key": "basket granite pocket shadow shelter river helmet copper hammer drawer harvest bridge tunnel signal mirror stream forest barrel cluster bottle",
+          "got": "basket granite pocket shadow she",
+          "hit": true
+        },
+        {
+          "key": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato compass stream mirror shelter anchor",
+          "got": "orange carpet river forest plane",
+          "hit": false
+        },
+        {
+          "key": "window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit carpet",
+          "got": "window crystal needle tower fabr",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125830,
+      "budget": 256,
+      "depth": 0.5,
+      "acc": 0.4166666666666667,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage mirror kitchen beacon granite shadow parcel river tomato",
+          "got": "window island summit thread oran",
+          "hit": false
+        },
+        {
+          "key": "garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain engine silver summit market garden lantern hammer tower",
+          "got": "garage signal planet helmet gran",
+          "hit": false
+        },
+        {
+          "key": "blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer crystal hammer carpet cluster",
+          "got": "blanket orange sugar diamond des",
+          "hit": false
+        },
+        {
+          "key": "forest mountain diamond thread anchor desert signal tomato winter cluster stream granite bridge garage drawer amber blanket quarry basket garden",
+          "got": "forest mountain diamond thread a",
+          "hit": false
+        },
+        {
+          "key": "blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle",
+          "got": "blanket window anchor sunset jac",
+          "hit": true
+        },
+        {
+          "key": "tunnel beacon shadow packet market quarry button signal tomato orange granite helmet cotton hammer kitchen jacket mountain rocket temple harbor",
+          "got": "tunnel beacon shadow packet mark",
+          "hit": true
+        },
+        {
+          "key": "blanket amber jacket quarry sugar engine station anchor temple shadow silver granite sunset island cotton carpet planet harbor needle cluster",
+          "got": "blanket amber jacket quarry suga",
+          "hit": false
+        },
+        {
+          "key": "drawer socket forest beacon shadow thread parcel sugar tower needle hammer stream rocket barrel bucket carpet desert tunnel crystal engine",
+          "got": "drawer socket forest beacon shad",
+          "hit": false
+        },
+        {
+          "key": "bucket sunset bottle garage harbor ticket hammer planet yellow carpet barrel tomato ceiling tunnel parcel station needle orange fabric compass",
+          "got": "bucket sunset bottle garage harb",
+          "hit": true
+        },
+        {
+          "key": "basket granite pocket shadow shelter river helmet copper hammer drawer harvest bridge tunnel signal mirror stream forest barrel cluster bottle",
+          "got": "basket granite pocket shadow she",
+          "hit": true
+        },
+        {
+          "key": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato compass stream mirror shelter anchor",
+          "got": "orange carpet river forest plane",
+          "hit": false
+        },
+        {
+          "key": "window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit carpet",
+          "got": "window crystal needle tower fabr",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125830,
+      "budget": 256,
+      "depth": 0.9,
+      "acc": 0.3333333333333333,
+      "peak_mib": 1536.8,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": "window island summit thread orange planet hammer harvest packet shelter sunset garage mirror kitchen beacon granite shadow parcel river tomato",
+          "got": ": \"The grass is green. The sky i",
+          "hit": false
+        },
+        {
+          "key": "garage signal planet helmet granite tomato ticket rocket beacon needle kitchen mountain engine silver summit market garden lantern hammer tower",
+          "got": ": \"The pass phrase is: garage si",
+          "hit": false
+        },
+        {
+          "key": "blanket orange sugar diamond desert basket ticket beacon window silver tower winter shadow pocket tomato drawer crystal hammer carpet cluster",
+          "got": ": \"The pass phrase is: blanket o",
+          "hit": true
+        },
+        {
+          "key": "forest mountain diamond thread anchor desert signal tomato winter cluster stream granite bridge garage drawer amber blanket quarry basket garden",
+          "got": ": \"The grass is green. The sky i",
+          "hit": false
+        },
+        {
+          "key": "blanket window anchor sunset jacket mountain needle shelter packet winter silver harbor shadow rocket market diamond ceiling orange lantern bottle",
+          "got": ": \"blanket window anchor sunset ",
+          "hit": true
+        },
+        {
+          "key": "tunnel beacon shadow packet market quarry button signal tomato orange granite helmet cotton hammer kitchen jacket mountain rocket temple harbor",
+          "got": ": \"tunnels are green. The sky is",
+          "hit": false
+        },
+        {
+          "key": "blanket amber jacket quarry sugar engine station anchor temple shadow silver granite sunset island cotton carpet planet harbor needle cluster",
+          "got": ": \"The pass phrase is: blanket a",
+          "hit": true
+        },
+        {
+          "key": "drawer socket forest beacon shadow thread parcel sugar tower needle hammer stream rocket barrel bucket carpet desert tunnel crystal engine",
+          "got": "drawer socket forest beacon shad",
+          "hit": false
+        },
+        {
+          "key": "bucket sunset bottle garage harbor ticket hammer planet yellow carpet barrel tomato ceiling tunnel parcel station needle orange fabric compass",
+          "got": ": \"The grass is green. The sky i",
+          "hit": false
+        },
+        {
+          "key": "basket granite pocket shadow shelter river helmet copper hammer drawer harvest bridge tunnel signal mirror stream forest barrel cluster bottle",
+          "got": ": \"The grass is green. The sky i",
+          "hit": false
+        },
+        {
+          "key": "orange carpet river forest planet sunset shadow desert basket pocket thread tower blanket ceiling tomato compass stream mirror shelter anchor",
+          "got": "orange carpet river forest plane",
+          "hit": true
+        },
+        {
+          "key": "window crystal needle tower fabric sugar compass cluster diamond tomato orange planet forest island pocket lantern garage ticket summit carpet",
+          "got": ": \"window crystal needle tower f",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

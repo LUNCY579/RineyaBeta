@@ -291,8 +291,7 @@ def main() -> None:
     before = {n: p.detach().clone() for n, p in model.named_parameters()
               if p.requires_grad}
     report = mem.probe(probe_step, shapes=probe_shapes, cap_mib=cap,
-                       margin_mib=float(cfg["memory"].get("margin_mib", 1024)),
-                       on_cuda=(device.type == "cuda"))
+                       margin_mib=float(cfg["memory"].get("margin_mib", 1024)))
     with torch.no_grad():
         for name, param in model.named_parameters():
             if param.requires_grad:

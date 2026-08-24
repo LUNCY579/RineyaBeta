@@ -49,55 +49,12 @@ from scripts.common.response_control import (  # noqa: E402
     build_stopping_criteria, finalize_response, infer_stop_reason,
 )
 
-REGISTRY = ROOT / "configs" / "eval_registry.yaml"
+DATASETS = {"chat_dev": "artifacts/eval_sets/chat_dev.jsonl",
+            "rag_dev": "artifacts/eval_sets/rag_dev.jsonl",
+            "rag_test_SEALED": "artifacts/eval_sets/rag_test_SEALED.jsonl"}
 
 
-def load_registry() -> dict:
-    import yaml
-    return yaml.safe_load(REGISTRY.read_text(encoding="utf-8"))
-
-
-def run_external_scorer(entry: dict, predictions: Path, out_dir: Path) -> None:
-    """Invoke a benchmark's own scorer verbatim.
-
-    The correctness sets (long-context, puzzle, LCR) each ship a scorer that handles
-    their normalisation and accepted-answer sets. Reimplementing any of them would
-    make the numbers incomparable with their authors' own reported figures, which is
-    the same mistake the vendored v4.5 evaluator exists to avoid.
-    """
-    import subprocess
-    script = ROOT / entry["scorer_script"]
-    if not script.exists():
-        print(f"  external scorer missing: {script}")
-        return
-    cmd = [sys.executable, str(script)]
-
-    # Positional form (LCR): <dataset> <predictions>
-    positional = entry.get("scorer_positional") or []
-    for pos in positional:
-        cmd.append(str(ROOT / pos))
-    if positional:
-        cmd.append(str(predictions))
-
-    # Flag form (puzzle, long-context): alternating flag then repo-relative path.
-    args_list = entry.get("scorer_args") or []
-    for flag, value in zip(args_list[0::2], args_list[1::2]):
-        cmd += [flag, str(ROOT / value)]
-
-    if entry.get("scorer_predictions_flag"):
-        cmd += [entry["scorer_predictions_flag"], str(predictions)]
-    if entry.get("scorer_report_flag"):
-        cmd += [entry["scorer_report_flag"], str(out_dir / "external_report.json")]
-    print(f"\n  scorer: {' '.join(str(c) for c in cmd[1:])}\n")
-    proc = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True,
-                          encoding="utf-8", errors="replace")
-    print((proc.stdout or "").strip()[-2500:])
-    if proc.returncode != 0:
-        print((proc.stderr or "").strip()[-1500:])
-        print(f"  external scorer exited {proc.returncode}")
-
-
-def normalize(record: dict, category_key: str = "category") -> dict:
+def normalize(record: dict) -> dict:
     """Mirror the reference loader: gold comes out of messages into `reference`."""
     messages = [dict(m) for m in record.get("messages") or []]
     reference = record.get("reference")
@@ -107,10 +64,10 @@ def normalize(record: dict, category_key: str = "category") -> dict:
     out = dict(record)
     out["messages"] = messages
     out["reference"] = reference
-    meta = record.get("metadata") or {}
-    out["category"] = str(record.get(category_key) or meta.get(category_key)
-                          or record.get("category") or meta.get("category")
-                          or meta.get("reply_class") or "uncategorized")
+    out["category"] = str(record.get("category")
+                          or (record.get("metadata") or {}).get("category")
+                          or (record.get("metadata") or {}).get("reply_class")
+                          or "uncategorized")
     return out
 
 
@@ -122,35 +79,21 @@ def main() -> None:
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--cap-mib", type=float, default=4096.0)
-    ap.add_argument("--device", default="auto", choices=("auto", "cpu", "cuda"),
-                    help="cpu lets a gate run share a machine whose GPU is busy")
     args = ap.parse_args()
 
     assets = json.loads((ROOT / "manifests" / "eval_assets.json").read_text(encoding="utf-8"))
-    registry = load_registry()
-    entry = registry.get(args.dataset)
-    if entry is None:
-        raise SystemExit(f"{args.dataset!r} is not in configs/eval_registry.yaml.\n"
-                         f"Declared benchmarks: {', '.join(sorted(registry))}")
-
-    # Role, not filename. The old check tested for "SEALED" in the path, which would
-    # have waved through any sealed split that happened to be named differently.
-    if entry.get("role") == "sealed":
-        raise SystemExit(
-            f"refusing to evaluate {args.dataset}: declared role is 'sealed'. "
-            f"{entry.get('note', '').strip()}")
-
-    protocol = entry.get("protocol") or assets["generation_protocol"]
-    scorer = entry.get("scorer", "quality_v45")
-    category_key = entry.get("category_key", "category")
-    ds_path = ROOT / entry["path"]
+    protocol = assets["generation_protocol"]
+    ds_path = ROOT / DATASETS.get(args.dataset, args.dataset)
     out_dir = ROOT / args.out if not Path(args.out).is_absolute() else Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     results_path = out_dir / "results.jsonl"
     progress_path = out_dir / "progress.jsonl"
-    predictions_path = out_dir / "predictions.jsonl"
 
-    records = [normalize(json.loads(l), category_key) for l in
+    if "SEALED" in ds_path.name:
+        raise SystemExit("refusing to evaluate the sealed test set; it is reserved "
+                         "for a frozen rung. Use rag_dev for gating.")
+
+    records = [normalize(json.loads(l)) for l in
                ds_path.read_text(encoding="utf-8").splitlines() if l.strip()]
     if args.limit:
         records = records[:args.limit]
@@ -163,9 +106,8 @@ def main() -> None:
         print(f"resuming: {len(done):,} of {len(records):,} cases already scored")
 
     from transformers import AutoModelForCausalLM, AutoTokenizer
-    use_cuda = torch.cuda.is_available() and args.device != "cpu"
-    cap = mem.apply_cap(args.cap_mib if use_cuda else None)
-    device = torch.device("cuda:0" if use_cuda else "cpu")
+    cap = mem.apply_cap(args.cap_mib if torch.cuda.is_available() else None)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     dtype = torch.bfloat16 if device.type == "cuda" else torch.float32
 
     tokenizer = AutoTokenizer.from_pretrained(ROOT / args.model)
@@ -184,8 +126,8 @@ def main() -> None:
           f"{protocol['response_control']} greedy={not protocol['do_sample']}")
     print(f"scorer    : v{QUALITY_EVALUATION_VERSION}\n")
 
-    config = load_quality_config() if scorer == "quality_v45" else None
-    corpus_profile = build_corpus_profile(records) if scorer == "quality_v45" else None
+    config = load_quality_config()
+    corpus_profile = build_corpus_profile(records)
     pad_id = tokenizer.pad_token_id
     started = time.time()
 
@@ -220,10 +162,9 @@ def main() -> None:
             new_tokens.tolist(), eos_token_id=tokenizer.eos_token_id,
             max_new_tokens=int(protocol["max_new_tokens"]), criterion=criterion)
 
-        quality = (evaluate_response(record, reply, visible,
-                                     visible_model_tokens=visible,
-                                     config=config, corpus_profile=corpus_profile)
-                   if scorer == "quality_v45" else {})
+        quality = evaluate_response(record, reply, visible,
+                                    visible_model_tokens=visible,
+                                    config=config, corpus_profile=corpus_profile)
         row = {"id": rid, "category": record["category"], "reply": reply,
                "raw_reply": raw_with_special, "reference": record.get("reference"),
                "generated_tokens": int(new_tokens.numel()),
@@ -234,11 +175,6 @@ def main() -> None:
                **quality}
         with results_path.open("a", encoding="utf-8", newline="\n") as handle:
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
-        # {id, prediction} is the shape every bundled scorer accepts, so one file
-        # serves the puzzle, long-context and LCR scorers unchanged.
-        with predictions_path.open("a", encoding="utf-8", newline="\n") as pf:
-            pf.write(json.dumps({"id": rid, "prediction": reply},
-                                ensure_ascii=False) + "\n")
         done[rid] = row
 
         n = len(done)
@@ -255,25 +191,6 @@ def main() -> None:
                       f"{time.time()-started:6.0f}s elapsed")
 
     rows = [done[str(r["id"])] for r in records if str(r["id"]) in done]
-    if scorer != "quality_v45":
-        print()
-        print(f"--- {args.dataset} : {len(rows):,} cases in "
-              f"{(time.time()-started)/60:.1f} min ---")
-        (out_dir / "evaluation_manifest.json").write_text(json.dumps({
-            "dataset": args.dataset, "path": entry["path"], "rows": len(rows),
-            "model": args.model, "adapter": args.adapter, "device": str(device),
-            "protocol": protocol, "scorer": entry.get("scorer_script"),
-            "registry_anchors": entry.get("anchors", {}),
-            "elapsed_s": round(time.time() - started, 1),
-        }, indent=2), encoding="utf-8")
-        run_external_scorer(entry, predictions_path, out_dir)
-        if entry.get("anchors"):
-            print("  registry anchors for this set:")
-            for k, v in entry["anchors"].items():
-                print(f"    {k:44s} {v}")
-        print()
-        print(f"wrote {out_dir.relative_to(ROOT)}")
-        return
     summary = aggregate_quality_rows(rows)
     summary["quality_evaluation_version"] = QUALITY_EVALUATION_VERSION
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
