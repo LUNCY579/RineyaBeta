@@ -1,0 +1,99 @@
+{
+ "n_calib": 798,
+ "n_val": 1143,
+ "n_test": 2687,
+ "hidden_dim": 1024,
+ "models": {
+  "oracle (true utility)": {
+   "train_spearman": 0.9999999999999998,
+   "val_spearman": 0.9999999999999999,
+   "test_spearman": 1.0000000000000002,
+   "test_pearson": 0.9999999999999997,
+   "test_auroc_delta0.1": 1.0,
+   "test_utility_captured": {
+    "0.1": 0.3925257057142829,
+    "0.2": 0.5785502940936217,
+    "0.3": 0.700013667241732,
+    "0.5": 0.8640873710802767
+   }
+  },
+  "position in reply (free)": {
+   "train_spearman": -0.022137189153554754,
+   "val_spearman": 0.13584003227875732,
+   "test_spearman": 0.17860015027223514,
+   "test_pearson": 0.09620824910949283,
+   "test_auroc_delta0.1": 0.6431547989169683,
+   "test_utility_captured": {
+    "0.1": 0.0682455163963633,
+    "0.2": 0.20469076785396273,
+    "0.3": 0.3158508615321929,
+    "0.5": 0.5516577246050918
+   }
+  },
+  "prompt-mean ORACLE": {
+   "train_spearman": 0.14385664036315562,
+   "val_spearman": 0.2714716949810651,
+   "test_spearman": 0.27307485572577833,
+   "test_pearson": 0.346934574856142,
+   "test_auroc_delta0.1": 0.5953805337923782,
+   "test_utility_captured": {
+    "0.1": 0.189468699845167,
+    "0.2": 0.3310226852872315,
+    "0.3": 0.45300892380898306,
+    "0.5": 0.6587592331738593
+   },
+   "note": "an oracle: uses the prompt's own mean utility. Bounds any signal that varies only between prompts."
+  },
+  "linear, IN-SAMPLE ceiling": {
+   "train_spearman": 0.999999976385799,
+   "val_spearman": -0.059364417821745064,
+   "test_spearman": -0.08310356160195963,
+   "test_pearson": -0.10238366166191525,
+   "test_auroc_delta0.1": 0.5230427867339525,
+   "test_utility_captured": {
+    "0.1": 0.07676862614993349,
+    "0.2": 0.15054549655596738,
+    "0.3": 0.24237725079663863,
+    "0.5": 0.4617404805896205
+   },
+   "note": "lambda 1e-6: the best a linear readout can do on its own training data. Its TEST column is what that optimism costs."
+  },
+  "linear, val-selected ridge": {
+   "train_spearman": 0.6400476492068892,
+   "val_spearman": 0.17931739372229186,
+   "test_spearman": 0.30511931415851173,
+   "test_pearson": 0.302409529628359,
+   "test_auroc_delta0.1": 0.6148855769587405,
+   "test_utility_captured": {
+    "0.1": 0.1758301353218356,
+    "0.2": 0.3188450623010155,
+    "0.3": 0.4347369065782523,
+    "0.5": 0.6444479093762782
+   },
+   "chosen_lambda": 10000.0
+  },
+  "MLP, val-selected": {
+   "train_spearman": 0.9270926423711093,
+   "val_spearman": 0.08851239383045717,
+   "test_spearman": 0.14673152106135842,
+   "test_pearson": 0.12302993877905696,
+   "test_auroc_delta0.1": 0.5445446968754841,
+   "test_utility_captured": {
+    "0.1": 0.12000700114850844,
+    "0.2": 0.2416856937829683,
+    "0.3": 0.37027024625560356,
+    "0.5": 0.5708768867731703
+   },
+   "hidden_units": 256,
+   "weight_decay": 0.1,
+   "epochs": 400
+  }
+ },
+ "verdict": {
+  "linear_test_spearman": 0.30511931415851173,
+  "mlp_test_spearman": 0.14673152106135842,
+  "nonlinear_gain": -0.1583877930971533,
+  "reading": "the STATE is the binding constraint: a non-linear readout of the same residual does not materially improve on a linear one, so the information about future remnant utility is largely absent from the residual entering the first retired layer",
+  "fraction_of_oracle_rank_correlation": 0.14673152106135842
+ }
+}

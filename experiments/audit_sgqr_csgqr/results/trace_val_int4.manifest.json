@@ -1,0 +1,59 @@
+{
+ "split": "val",
+ "range": [
+  96,
+  224
+ ],
+ "prompts": 128,
+ "positions": 1143,
+ "bits": "int4",
+ "retired_layers": [
+  13,
+  14,
+  24,
+  25
+ ],
+ "n_groups": 24,
+ "signal_layer": 13,
+ "max_len": 256,
+ "hidden_dim": 1024,
+ "elapsed_s": 38.3,
+ "environment": {
+  "python": "3.11.15",
+  "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "machine": "AMD64",
+  "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+  "cpu_count": 32,
+  "git_sha": "d527c197e573c1959b08ccc9d67ee1a905b0719d",
+  "git_branch": "audit/sgqr-csgqr-dual",
+  "git_dirty": false,
+  "torch": "2.13.0+cu130",
+  "torch_cuda_build": "13.0",
+  "cuda_available": true,
+  "cudnn": 92000,
+  "gpu": {
+   "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+   "capability": "8.9",
+   "total_vram_mib": 8187.5,
+   "multi_processor_count": 36,
+   "free_mib_at_start": 5952.0,
+   "used_by_others_mib": 2235.5
+  },
+  "nvidia_smi": {
+   "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+   "memory.total": "8188",
+   "memory.used": "3636",
+   "memory.free": "4313",
+   "driver_version": "610.62",
+   "compute_cap": "8.9"
+  },
+  "transformers": "5.15.0",
+  "peft": "0.20.0",
+  "accelerate": "1.14.0",
+  "numpy": "2.4.6",
+  "scipy": null,
+  "datasets": null,
+  "safetensors": "0.8.0"
+ }
+}

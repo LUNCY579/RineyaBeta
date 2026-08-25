@@ -1,0 +1,52 @@
+{
+ "split": "test",
+ "bits": "int4",
+ "n_positions": 2687,
+ "n_prompts": 286,
+ "between_prompt_variance_share_utility": 0.12036359923060991,
+ "between_prompt_variance_share_deletion_damage": 0.12057656768719704,
+ "signals": {
+  "probe_need": {
+   "spearman_pooled": 0.30511931415851173,
+   "spearman_within_prompt": 0.3315637308378101,
+   "pearson_within_prompt": 0.31814362410421726,
+   "spearman_within_prompt_vs_deletion_damage": 0.3292184406668407
+  },
+  "probe_confidence": {
+   "spearman_pooled": 0.07554471955548601,
+   "spearman_within_prompt": 0.09189775629127817,
+   "pearson_within_prompt": 0.11394417348190175,
+   "spearman_within_prompt_vs_deletion_damage": 0.0876885985264259
+  },
+  "lens_max_prob": {
+   "spearman_pooled": 0.043807806065852974,
+   "spearman_within_prompt": -0.0016404040923676572,
+   "pearson_within_prompt": -0.03013324003306052,
+   "spearman_within_prompt_vs_deletion_damage": 0.0009675220483674762
+  },
+  "lens_neg_entropy": {
+   "spearman_pooled": 0.08918462446408892,
+   "spearman_within_prompt": 0.03638224529776485,
+   "pearson_within_prompt": 0.0009459131367229417,
+   "spearman_within_prompt_vs_deletion_damage": 0.03982462004295484
+  },
+  "lens_prob_margin": {
+   "spearman_pooled": 0.028157845414987413,
+   "spearman_within_prompt": -0.00615548183874696,
+   "pearson_within_prompt": -0.03143869962474002,
+   "spearman_within_prompt_vs_deletion_damage": -0.003989492196459062
+  },
+  "lens_logit_margin": {
+   "spearman_pooled": 0.012727047706996415,
+   "spearman_within_prompt": -0.0163856221760366,
+   "pearson_within_prompt": -0.031957221111157535,
+   "spearman_within_prompt_vs_deletion_damage": -0.01488144309084473
+  },
+  "position_in_reply": {
+   "spearman_pooled": 0.17860015027223514,
+   "spearman_within_prompt": 0.17520785602475722,
+   "pearson_within_prompt": 0.12043690346239741,
+   "spearman_within_prompt_vs_deletion_damage": 0.18061484846470033
+  }
+ }
+}

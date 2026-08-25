@@ -1,0 +1,214 @@
+{
+ "audit": "sgqr_csgqr_dual",
+ "device": "cpu",
+ "model": "artifacts/rineya-core-en32k-28L",
+ "total": 33,
+ "passed": 33,
+ "failed": 0,
+ "checks": [
+  {
+   "check": "group outputs sum to the whole MLP in float64",
+   "ok": true,
+   "detail": "max relative error 1.498e-15 over 24 groups",
+   "value": 1.4977486175360921e-15
+  },
+  {
+   "check": "no projection carries a bias (a down_proj bias would be counted once per active group)",
+   "ok": true,
+   "detail": "",
+   "value": null
+  },
+  {
+   "check": "the intermediate dimension divides evenly into groups",
+   "ok": true,
+   "detail": "d_ff=3072 n_groups=24",
+   "value": null
+  },
+  {
+   "check": "hand-unpacked INT4 nibbles reproduce dequantize() exactly",
+   "ok": true,
+   "detail": "max abs diff 0.000e+00 over 3072 x 1024",
+   "value": 0.0
+  },
+  {
+   "check": "INT4 codes occupy the full [0,15] range",
+   "ok": true,
+   "detail": "min 0 max 15",
+   "value": null
+  },
+  {
+   "check": "two INT4 values are stored per byte",
+   "ok": true,
+   "detail": "qweight (3072, 512) dtype torch.uint8 for 1024 columns",
+   "value": null
+  },
+  {
+   "check": "packed qweight bytes match 3 * d_ff * ceil(d_model/2)",
+   "ok": true,
+   "detail": "accounted 4718592, expected 4718592",
+   "value": null
+  },
+  {
+   "check": "scale bytes match 3 * d_ff * n_blocks * 2 (fp16)",
+   "ok": true,
+   "detail": "147456 vs 147456",
+   "value": null
+  },
+  {
+   "check": "zero-point bytes match 3 * d_ff * n_blocks * 1 (uint8)",
+   "ok": true,
+   "detail": "73728 vs 73728",
+   "value": null
+  },
+  {
+   "check": "single-layer INT4 compression against bf16 is 3.82x",
+   "ok": true,
+   "detail": "measured 3.82082 (bf16 reference 18874368 B)",
+   "value": 3.8208212682433875
+  },
+  {
+   "check": "four-layer INT4 budget is 19,759,488 B",
+   "ok": true,
+   "detail": "4 x 4939872",
+   "value": 19759488
+  },
+  {
+   "check": "precision is monotone: INT8 output error < INT4 output error",
+   "ok": true,
+   "detail": "int8 0.00990 < int4 0.17127",
+   "value": [
+    0.009899608394434878,
+    0.17126762979015073
+   ]
+  },
+  {
+   "check": "FP passthrough remnant reproduces the donor to float32 GEMM epsilon",
+   "ok": true,
+   "detail": "max abs 4.292e-06",
+   "value": null
+  },
+  {
+   "check": "the FP remnant COPIES the donor rather than aliasing it (CSGQR-v1 S19)",
+   "ok": true,
+   "detail": "donor mutated; remnant output moved by 0.000e+00",
+   "value": null
+  },
+  {
+   "check": "an empty group set dequantizes nothing",
+   "ok": true,
+   "detail": "0 dequantize calls",
+   "value": null
+  },
+  {
+   "check": "groups [0] dequantize exactly 3 x |sel| x group_size rows",
+   "ok": true,
+   "detail": "384 rows touched, expected 384",
+   "value": 384
+  },
+  {
+   "check": "groups [3, 4, 5] dequantize exactly 3 x |sel| x group_size rows",
+   "ok": true,
+   "detail": "1152 rows touched, expected 1152",
+   "value": 1152
+  },
+  {
+   "check": "groups [0, 12, 23] dequantize exactly 3 x |sel| x group_size rows",
+   "ok": true,
+   "detail": "1152 rows touched, expected 1152",
+   "value": 1152
+  },
+  {
+   "check": "groups ALL dequantize exactly 3 x |sel| x group_size rows",
+   "ok": true,
+   "detail": "9216 rows touched, expected 9216",
+   "value": 9216
+  },
+  {
+   "check": "allocate_exact hits the budget exactly (n=1000, B=12345)",
+   "ok": true,
+   "detail": "sum 12345, range [0, 25]",
+   "value": null
+  },
+  {
+   "check": "allocate_exact hits the budget exactly (n=777, B=74592)",
+   "ok": true,
+   "detail": "sum 74592, range [96, 96]",
+   "value": null
+  },
+  {
+   "check": "allocate_exact hits the budget exactly (n=500, B=1)",
+   "ok": true,
+   "detail": "sum 1, range [0, 1]",
+   "value": null
+  },
+  {
+   "check": "allocate_exact hits the budget exactly (n=2687, B=25786)",
+   "ok": true,
+   "detail": "sum 25786, range [0, 19]",
+   "value": null
+  },
+  {
+   "check": "a flat demand vector yields a uniform per-token budget",
+   "ok": true,
+   "detail": "range [24, 24]",
+   "value": null
+  },
+  {
+   "check": "the binary gate is all-or-nothing apart from one boundary token",
+   "ok": true,
+   "detail": "250 tokens at full remnant, sum 24000",
+   "value": null
+  },
+  {
+   "check": "a permuted budget vector has identical total compute",
+   "ok": true,
+   "detail": "24000 == 24000",
+   "value": null
+  },
+  {
+   "check": "BUG_LEDGER S7's stated example (5/24*24 == 5.000000000000001) is false",
+   "ok": true,
+   "detail": "5/24*24 = 5.0",
+   "value": null
+  },
+  {
+   "check": "no k in [1,24) triggers the S7 defect at n_groups=24",
+   "ok": true,
+   "detail": "affected k: []",
+   "value": null
+  },
+  {
+   "check": "no k in [1,96) triggers it at n_groups=96 either",
+   "ok": true,
+   "detail": "affected k: []",
+   "value": null
+  },
+  {
+   "check": "the defect IS real for other group counts (so the fix is still right)",
+   "ok": true,
+   "detail": "158 of 255 group counts affected; smallest is 25",
+   "value": null
+  },
+  {
+   "check": "the current RoutingPolicy returns exactly k for fraction = k/n",
+   "ok": true,
+   "detail": "budget = 5",
+   "value": null
+  },
+  {
+   "check": "a wrong-layer donor at identical bytes is an order of magnitude further from the donor than INT4 quantization is",
+   "ok": true,
+   "detail": "wrong donor 2.1099 vs int4 0.1713 (ratio 12.3x)",
+   "value": [
+    2.1098734201059792,
+    0.17126762979015073
+   ]
+  },
+  {
+   "check": "the wrong donor occupies exactly the same number of bytes",
+   "ok": true,
+   "detail": "4939872 == 4939872",
+   "value": null
+  }
+ ]
+}

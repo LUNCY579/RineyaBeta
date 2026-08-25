@@ -1,0 +1,317 @@
+{
+  "endpoint": "teacher_forced_paired",
+  "dataset": "chat_dev",
+  "layer": 20,
+  "n_groups": 24,
+  "prompts": 414,
+  "reply_positions": 3830,
+  "skip_prompts": 96,
+  "max_len": 256,
+  "unit_of_analysis": "reply position, bootstrap clustered by prompt",
+  "n_boot": 4000,
+  "ranking_from": "experiments/csgqr/results/trace_L20_int4/significance_analysis.json",
+  "router": {
+    "trace": "experiments/csgqr/results/trace_L20_int4",
+    "layer": 20,
+    "n_groups": 24,
+    "hidden": 1024,
+    "spec": "int4-b128-asym",
+    "arm": "int4",
+    "dataset": "chat_dev",
+    "train_prompts": 48,
+    "val_prompts": 19,
+    "test_prompts": 29,
+    "train_positions": 394,
+    "test_positions": 254,
+    "lambdas": [
+      1.0,
+      10.0,
+      100.0,
+      1000.0,
+      10000.0
+    ],
+    "environment": {
+      "python": "3.11.15",
+      "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "machine": "AMD64",
+      "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+      "cpu_count": 32,
+      "git_sha": "91e7225778f9a7c1d06d013db659567b2f85050f",
+      "git_branch": "research/csgqr-quantized-remnant",
+      "git_dirty": true,
+      "torch": "2.13.0+cu130",
+      "torch_cuda_build": "13.0",
+      "cuda_available": true,
+      "cudnn": 92000,
+      "gpu": {
+        "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "capability": "8.9",
+        "total_vram_mib": 8187.5,
+        "multi_processor_count": 36,
+        "free_mib_at_start": 7010.0,
+        "used_by_others_mib": 1177.5
+      },
+      "nvidia_smi": {
+        "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "memory.total": "8188",
+        "memory.used": "2986",
+        "memory.free": "4963",
+        "driver_version": "610.62",
+        "compute_cap": "8.9"
+      },
+      "transformers": "5.15.0",
+      "peft": "0.20.0",
+      "accelerate": "1.14.0",
+      "numpy": "2.4.6",
+      "scipy": null,
+      "datasets": null,
+      "safetensors": "0.8.0"
+    },
+    "kind": "group_utility",
+    "lam": 100.0,
+    "val_capture_at_k": 0.28527393982940946,
+    "selection_k": 6,
+    "static_ranking_fitted_on_train": [
+      23,
+      8,
+      4,
+      17,
+      1,
+      10,
+      5,
+      12,
+      6,
+      15,
+      22,
+      0,
+      14,
+      2,
+      3,
+      7,
+      13,
+      20,
+      16,
+      18,
+      19,
+      9,
+      11,
+      21
+    ],
+    "topk_capture": [
+      {
+        "k": 3,
+        "rho": 0.125,
+        "random": 0.0393164855393436,
+        "static": 0.08936481248389372,
+        "probe": 0.2631871927333409,
+        "oracle": 0.32660467929104126,
+        "headroom_fraction_won": 0.7326862158068379,
+        "probe_beats_static": true
+      },
+      {
+        "k": 6,
+        "rho": 0.25,
+        "random": 0.07718859118655116,
+        "static": 0.16085510846872733,
+        "probe": 0.39209125046966614,
+        "oracle": 0.4876812387617144,
+        "headroom_fraction_won": 0.7075203619540595,
+        "probe_beats_static": true
+      },
+      {
+        "k": 12,
+        "rho": 0.5,
+        "random": 0.15630213696120937,
+        "static": 0.260817303547753,
+        "probe": 0.5199627482687952,
+        "oracle": 0.6511866126134331,
+        "headroom_fraction_won": 0.663846871930807,
+        "probe_beats_static": true
+      },
+      {
+        "k": 18,
+        "rho": 0.75,
+        "random": 0.2340623010421129,
+        "static": 0.3111566801942284,
+        "probe": 0.5320375941640617,
+        "oracle": 0.6384829567446498,
+        "headroom_fraction_won": 0.6748034905648913,
+        "probe_beats_static": true
+      }
+    ],
+    "cost": {
+      "probe_macs": 49152,
+      "mlp_macs": 18874368,
+      "share_of_mlp": 0.0026041666666666665,
+      "bytes_fp32": 98400
+    },
+    "path": "C:\\Users\\clclc\\RineyaExperiment\\artifacts\\csgqr_probes\\router_L20_int4_g24.pt"
+  },
+  "probe": null,
+  "overrides": {},
+  "baseline_for_contrasts": "b1-delete",
+  "donor_resident": true,
+  "memory_note": "the donor is kept resident so the dense reference can be recomputed by a pointer swap; VRAM numbers must come from bench_gpu.py, not from this run",
+  "environment": {
+    "python": "3.11.15",
+    "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "cpu_count": 32,
+    "git_sha": "d527c197e573c1959b08ccc9d67ee1a905b0719d",
+    "git_branch": "audit/sgqr-csgqr-dual",
+    "git_dirty": false,
+    "torch": "2.13.0+cu130",
+    "torch_cuda_build": "13.0",
+    "cuda_available": true,
+    "cudnn": 92000,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "capability": "8.9",
+      "total_vram_mib": 8187.5,
+      "multi_processor_count": 36,
+      "free_mib_at_start": 6076.0,
+      "used_by_others_mib": 2111.5
+    },
+    "nvidia_smi": {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "memory.total": "8188",
+      "memory.used": "4265",
+      "memory.free": "3684",
+      "driver_version": "610.62",
+      "compute_cap": "8.9"
+    },
+    "transformers": "5.15.0",
+    "peft": "0.20.0",
+    "accelerate": "1.14.0",
+    "numpy": "2.4.6",
+    "scipy": null,
+    "datasets": null,
+    "safetensors": "0.8.0"
+  },
+  "arms": {
+    "b1-delete": {
+      "arm": "b1-delete",
+      "label": "B1 exact MLP deletion",
+      "purpose": "damage floor",
+      "spec": "int4-b128-asym",
+      "mode": "none",
+      "selector": "static_topk",
+      "feature": "max_prob",
+      "dense": false,
+      "n_positions": 3830,
+      "n_prompts": 414,
+      "kl": {
+        "point": 0.2805528762384915,
+        "lo": 0.268613558974217,
+        "hi": 0.2938011767298662,
+        "se": 0.00650195425468377,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "nll_arm": {
+        "point": 4.814350418907012,
+        "lo": 4.684012077917777,
+        "hi": 4.946121932307847,
+        "se": 0.06694970385339753,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "d_nll": {
+        "point": 0.004764454071668933,
+        "lo": -0.02897687211686973,
+        "hi": 0.03999222342662614,
+        "se": 0.017469251644028013,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "agree": {
+        "point": 0.7342036553524804,
+        "lo": 0.7191791139932723,
+        "hi": 0.7494162369413865,
+        "se": 0.007589097669742256,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "gold_top1": {
+        "point": 0.28224543080939946,
+        "lo": 0.26892317681978367,
+        "hi": 0.2960785439496757,
+        "se": 0.007035108956849812,
+        "n_clusters": 414,
+        "n": 3830,
+        "n_boot": 4000
+      },
+      "sequence_flip_rate": 0.8864734299516909,
+      "mean_first_flip_position": 2.0708446866485013,
+      "install": {
+        "layer": 20,
+        "donor_layer": 20,
+        "wrong_layer_donor": false,
+        "spec": "int4-b128-asym",
+        "bits": 4,
+        "block": 128,
+        "symmetric": false,
+        "n_groups": 1,
+        "group_size": 3072,
+        "packed_bytes": {
+          "gate": 1646592,
+          "up": 1646592,
+          "down": 1646592,
+          "alpha": 4,
+          "total": 4939780,
+          "scales": 147456,
+          "zeros": 73728
+        },
+        "dense_bytes": 18874368,
+        "compression_vs_dense": 3.820892428407743,
+        "policy": {
+          "mode": "none",
+          "feature": "max_prob",
+          "tau_skip": 0.9,
+          "tau_full": 0.3,
+          "gamma": 1.0,
+          "selector": "static_topk",
+          "fraction": 1.0,
+          "n_groups": 1,
+          "seed": 20260823,
+          "ranking": [
+            0
+          ],
+          "group_costs": [
+            1.0
+          ],
+          "name": "delete"
+        },
+        "alpha": [
+          1.0
+        ]
+      },
+      "routing": {
+        "tokens": 74160,
+        "groups_executed": 0,
+        "active_fraction": 0.0,
+        "invocation_rate": 0.0,
+        "full_invocation_rate": 0.0,
+        "skip_rate": 1.0,
+        "gate_signal_tokens": 0,
+        "mean_confidence": null,
+        "median_confidence": null,
+        "mean_groups_per_token": 0.0,
+        "group_selection_rate": [
+          0.0
+        ]
+      },
+      "elapsed_s": 47.0
+    }
+  },
+  "contrasts": [],
+  "failures": {},
+  "complete": false
+}

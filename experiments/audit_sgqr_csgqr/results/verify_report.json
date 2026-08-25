@@ -1,0 +1,820 @@
+{
+ "audit": "sgqr_csgqr_dual",
+ "total": 100,
+ "ok": 96,
+ "failed": 4,
+ "rows": [
+  {
+   "quantity": "artifacts hashed",
+   "source": "evidence_manifest.json",
+   "report": 132,
+   "recomputed": 132,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "untracked artifacts",
+   "source": "evidence_manifest.json",
+   "report": 22,
+   "recomputed": 22,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "results predating a producer change",
+   "source": "evidence_manifest.json",
+   "report": 4,
+   "recomputed": 4,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "claims checked",
+   "source": "claim_evidence_table.json",
+   "report": 194,
+   "recomputed": 194,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "claims VERIFIED",
+   "source": "claim_evidence_table.json",
+   "report": 188,
+   "recomputed": 188,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "claims INVALID",
+   "source": "claim_evidence_table.json",
+   "report": 3,
+   "recomputed": 3,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "claims AMBIGUOUS",
+   "source": "claim_evidence_table.json",
+   "report": 2,
+   "recomputed": 2,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "claims MISSING_PROVENANCE",
+   "source": "claim_evidence_table.json",
+   "report": 1,
+   "recomputed": 1,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "mechanism checks passed",
+   "source": "verify_mechanism.json",
+   "report": 33,
+   "recomputed": 33,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "mechanism checks failed",
+   "source": "verify_mechanism.json",
+   "report": 0,
+   "recomputed": 0,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "reproduction of b1-delete is bit-identical",
+   "source": "repro_A_baselines.json",
+   "report": 0.2805528762384915,
+   "recomputed": 0.2805528762384915,
+   "tol": 0.0,
+   "ok": true
+  },
+  {
+   "quantity": "reproduction of b4-int4-all is bit-identical",
+   "source": "repro_A_baselines.json",
+   "report": 0.010491680181964525,
+   "recomputed": 0.010491680181964525,
+   "tol": 0.0,
+   "ok": true
+  },
+  {
+   "quantity": "reproduction of b13-wrong-layer is bit-identical",
+   "source": "repro_A_baselines.json",
+   "report": 0.7864919317367076,
+   "recomputed": 0.7864919317367076,
+   "tol": 0.0,
+   "ok": true
+  },
+  {
+   "quantity": "every routed arm at rho=0.30 executes 1509896 group-tokens",
+   "source": "frontier_test_b030.json",
+   "report": "[1509896, 5032992]",
+   "recomputed": "[1509896, 5032992]",
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "every routed arm at rho=0.50 executes 2516496 group-tokens",
+   "source": "frontier_test_b050.json",
+   "report": "[2516496, 5032992]",
+   "recomputed": "[2516496, 5032992]",
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "dense KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.0,
+   "recomputed": 0.0,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "off-delete4 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.84122,
+   "recomputed": 0.8412206101518256,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "on-int4-full KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.02415,
+   "recomputed": 0.02415121977084732,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "oracle-sig-0.30 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.24913,
+   "recomputed": 0.2491318325987396,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-sig-0.30 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.39964,
+   "recomputed": 0.39964104717959514,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-probe-sig-0.30 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.39662,
+   "recomputed": 0.39661635425537983,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-conf-sig-0.30 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.38694,
+   "recomputed": 0.3869403635369228,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-lens-sig-0.30 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.40217,
+   "recomputed": 0.40216648634072544,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-binary-probe-0.30 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.42495,
+   "recomputed": 0.424953343100226,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-mag-0.30 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.6023,
+   "recomputed": 0.6022954215264388,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-rev-0.30 KL",
+   "source": "frontier_test_b030.json",
+   "report": 0.77932,
+   "recomputed": 0.779315899839107,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "oracle-sig-0.50 KL",
+   "source": "frontier_test_b050.json",
+   "report": 0.14617,
+   "recomputed": 0.1461697220869133,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-sig-0.50 KL",
+   "source": "frontier_test_b050.json",
+   "report": 0.30779,
+   "recomputed": 0.3077905969689625,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-probe-sig-0.50 KL",
+   "source": "frontier_test_b050.json",
+   "report": 0.30647,
+   "recomputed": 0.30646557023495813,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-conf-sig-0.50 KL",
+   "source": "frontier_test_b050.json",
+   "report": 0.27715,
+   "recomputed": 0.27714989575008075,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-lens-sig-0.50 KL",
+   "source": "frontier_test_b050.json",
+   "report": 0.28175,
+   "recomputed": 0.28175459518272405,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-binary-probe-0.50 KL",
+   "source": "frontier_test_b050.json",
+   "report": 0.2903,
+   "recomputed": 0.2902990551372346,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-mag-0.50 KL",
+   "source": "frontier_test_b050.json",
+   "report": 0.45166,
+   "recomputed": 0.4516634109464707,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-rev-0.50 KL",
+   "source": "frontier_test_b050.json",
+   "report": 0.68892,
+   "recomputed": 0.6889181583527695,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "significance effect at rho=0.30",
+   "source": "analysis_test_main.json",
+   "report": -0.18833,
+   "recomputed": -0.18833008093040565,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "confidence effect at rho=0.30",
+   "source": "analysis_test_main.json",
+   "report": -0.00284,
+   "recomputed": -0.0028382220245627083,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "interaction at rho=0.30",
+   "source": "analysis_test_main.json",
+   "report": -0.00019,
+   "recomputed": -0.00018647082992184625,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "significance effect vs pooled random at rho=0.30",
+   "source": "analysis_test_main.json",
+   "report": -0.17267,
+   "recomputed": -0.1726723974717777,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "significance effect vs pooled random at rho=0.50",
+   "source": "analysis_test_main.json",
+   "report": -0.06554,
+   "recomputed": -0.06554160834015631,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "random seed KLs at rho=0.30 span 0.47218-0.65679",
+   "source": "analysis_test_main.json",
+   "report": [
+    0.47218,
+    0.65679
+   ],
+   "recomputed": [
+    0.4721837170338668,
+    0.6567854887793078
+   ],
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "random seed KLs at rho=0.50 span 0.31194-0.46519",
+   "source": "analysis_test_main.json",
+   "report": [
+    0.31194,
+    0.46519
+   ],
+   "recomputed": [
+    0.31193701624860437,
+    0.46518854235578705
+   ],
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-probe-sig-0.30 vs sgqr-sig-0.30 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.00302,
+   "recomputed": -0.0030246928544845546,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "oracle-sig-0.30 vs sgqr-sig-0.30 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.15051,
+   "recomputed": -0.15050921448455526,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-probe-sig-0.50 vs sgqr-sig-0.50 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.00133,
+   "recomputed": -0.0013250267882396732,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "oracle-sig-0.50 vs sgqr-sig-0.50 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.16162,
+   "recomputed": -0.16162087482322293,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-conf-sig-0.50 vs sgqr-sig-0.50 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.03064,
+   "recomputed": -0.03064070130256792,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-conf-sig-0.30 vs sgqr-sig-0.30 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.0127,
+   "recomputed": -0.012700683662076665,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-sig-0.30 vs off-delete4 dGold",
+   "source": "analysis_test_main.json",
+   "report": 0.02828,
+   "recomputed": 0.02828433196873837,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "csgqr-probe-sig-0.30 vs sgqr-sig-0.30 dGold",
+   "source": "analysis_test_main.json",
+   "report": -0.00149,
+   "recomputed": -0.00148864905098623,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-sig-0.30 vs sgqr-rand-s1-0.30 dGold",
+   "source": "analysis_test_main.json",
+   "report": 0.03015,
+   "recomputed": 0.030145143282471157,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "on-int4-full vs off-delete4 dGold",
+   "source": "analysis_test_main.json",
+   "report": 0.03796,
+   "recomputed": 0.037960550800148866,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "on-int4-full vs dense dGold",
+   "source": "analysis_test_main.json",
+   "report": -0.00112,
+   "recomputed": -0.0011164867882396724,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "Spearman(KL, gold top-1) across arms",
+   "source": "analysis_test_main.json",
+   "report": -0.885,
+   "recomputed": -0.885435179376356,
+   "tol": 0.001,
+   "ok": true
+  },
+  {
+   "quantity": "Spearman(KL, perplexity) across arms",
+   "source": "analysis_test_main.json",
+   "report": 0.803,
+   "recomputed": 0.8030364372469636,
+   "tol": 0.001,
+   "ok": true
+  },
+  {
+   "quantity": "arms in the merged analysis",
+   "source": "analysis_test_main.json",
+   "report": 39,
+   "recomputed": 39,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "mean deletion damage on test",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.84122,
+   "recomputed": 0.8412206101518256,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "KL recovery of the always-on remnant",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.9713,
+   "recomputed": 0.9712902662162682,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "fraction of positions with positive utility",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.9978,
+   "recomputed": 0.9977670264235207,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "fraction of positions with utility > 0.1",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.8508,
+   "recomputed": 0.8507629326386305,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "top decile share of utility",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.392,
+   "recomputed": 0.39161271422915955,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_max_prob spearman vs utility",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.0438,
+   "recomputed": 0.043807806065852974,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_max_prob AUROC at delta=0.1",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.5548,
+   "recomputed": 0.5548170256772766,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_max_prob utility captured in top 20%",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.1861,
+   "recomputed": 0.1861446239898358,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_neg_entropy spearman vs utility",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.0892,
+   "recomputed": 0.08918462446408892,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_neg_entropy AUROC at delta=0.1",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.5733,
+   "recomputed": 0.5732835452924993,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_neg_entropy utility captured in top 20%",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.1975,
+   "recomputed": 0.19745689202845093,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "probe_need spearman vs utility",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.3051,
+   "recomputed": 0.30511931415851173,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "probe_need AUROC at delta=0.1",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.6149,
+   "recomputed": 0.6148855769587405,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "probe_need utility captured in top 20%",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.3188,
+   "recomputed": 0.31884506239093935,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "probe_confidence spearman vs utility",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.0755,
+   "recomputed": 0.07554471955548601,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "probe_confidence AUROC at delta=0.1",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.4169,
+   "recomputed": 0.41689520730108237,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "probe_confidence utility captured in top 20%",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.227,
+   "recomputed": 0.22698310128546978,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "oracle_utility spearman vs utility",
+   "source": "gate_signal_audit_test.json",
+   "report": 1.0,
+   "recomputed": 1.0000000000000002,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "oracle_utility AUROC at delta=0.1",
+   "source": "gate_signal_audit_test.json",
+   "report": 1.0,
+   "recomputed": 1.0,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "oracle_utility utility captured in top 20%",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.5786,
+   "recomputed": 0.5785502939613953,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "remnant changes the deleted argmax on 40.5% of positions",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.405,
+   "recomputed": 0.404540379605508,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "net gold top-1 gain from the remnant",
+   "source": "gate_signal_audit_test.json",
+   "report": 0.03796,
+   "recomputed": 0.037960550800148866,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "between-prompt share of utility variance",
+   "source": "within_prompt_signal_test.json",
+   "report": 0.1204,
+   "recomputed": 0.12036359923060991,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_max_prob within-prompt spearman",
+   "source": "within_prompt_signal_test.json",
+   "report": -0.0016,
+   "recomputed": -0.0016404040923676572,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_neg_entropy within-prompt spearman",
+   "source": "within_prompt_signal_test.json",
+   "report": 0.0364,
+   "recomputed": 0.03638224529776485,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_prob_margin within-prompt spearman",
+   "source": "within_prompt_signal_test.json",
+   "report": -0.0062,
+   "recomputed": -0.00615548183874696,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "lens_logit_margin within-prompt spearman",
+   "source": "within_prompt_signal_test.json",
+   "report": -0.0164,
+   "recomputed": -0.0163856221760366,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "probe_need within-prompt spearman",
+   "source": "within_prompt_signal_test.json",
+   "report": 0.3316,
+   "recomputed": 0.3315637308378101,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "position_in_reply within-prompt spearman",
+   "source": "within_prompt_signal_test.json",
+   "report": 0.1752,
+   "recomputed": 0.17520785602475722,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "linear probe test spearman",
+   "source": "probe_ceiling.json",
+   "report": 0.3051,
+   "recomputed": 0.30511931415851173,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "MLP probe test spearman",
+   "source": "probe_ceiling.json",
+   "report": 0.1467,
+   "recomputed": 0.14673152106135842,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "unregularized linear test spearman",
+   "source": "probe_ceiling.json",
+   "report": -0.0831,
+   "recomputed": -0.08310356160195963,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "mean four-layer deletion KL on calibration",
+   "source": "significance_96.json",
+   "report": 0.80966,
+   "recomputed": 0.8096597893163562,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "groups with negative marginal utility",
+   "source": "significance_96.json",
+   "report": 38,
+   "recomputed": 38,
+   "tol": 0,
+   "ok": true
+  },
+  {
+   "quantity": "rank-stability Spearman mean",
+   "source": "significance_96.json",
+   "report": 0.9414,
+   "recomputed": 0.9414013497015736,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "rank-stability Spearman p05",
+   "source": "significance_96.json",
+   "report": 0.8969,
+   "recomputed": 0.8969106077048293,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "top-24 overlap mean",
+   "source": "significance_96.json",
+   "report": 0.8514,
+   "recomputed": 0.8513542413711548,
+   "tol": 0.0005,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-sig-0.30 vs sgqr-mag-0.30 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.20265,
+   "recomputed": -0.20265437429103092,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-sig-0.30 vs sgqr-rev-0.30 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.37967,
+   "recomputed": -0.37967485275027907,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-sig-0.50 vs sgqr-mag-0.50 dKL",
+   "source": "analysis_test_main.json",
+   "report": -0.14387,
+   "recomputed": -0.14387281401563082,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "sgqr-mag-0.50 vs sgqr-rand-s1-0.50 dKL",
+   "source": "analysis_test_main.json",
+   "report": 0.13973,
+   "recomputed": 0.13972639477484183,
+   "tol": 5e-05,
+   "ok": true
+  },
+  {
+   "quantity": "block present: frontier_test_perm.json",
+   "source": "frontier_test_perm.json",
+   "report": "expected",
+   "recomputed": "MISSING",
+   "tol": 0,
+   "ok": false
+  },
+  {
+   "quantity": "block present: reference_arms_test.json",
+   "source": "reference_arms_test.json",
+   "report": "expected",
+   "recomputed": "MISSING",
+   "tol": 0,
+   "ok": false
+  },
+  {
+   "quantity": "block present: systems_audit.json",
+   "source": "systems_audit.json",
+   "report": "expected",
+   "recomputed": "MISSING",
+   "tol": 0,
+   "ok": false
+  },
+  {
+   "quantity": "block present: capacity_controls.json",
+   "source": "capacity_controls.json",
+   "report": "expected",
+   "recomputed": "MISSING",
+   "tol": 0,
+   "ok": false
+  }
+ ]
+}

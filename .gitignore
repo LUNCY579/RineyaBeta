@@ -97,3 +97,15 @@ experiments/**/results/*.log
 experiments/csgqr/results/**/traces.jsonl
 experiments/csgqr/results/**/results.jsonl
 experiments/csgqr/results/*.log
+
+# SGQR/CSGQR dual-audit per-case outputs: 56 MB of the 57 MB tree, and all of it
+# regenerable from src/ + the seeds recorded in RUN_MANIFEST.json. Summaries,
+# manifests, derived tables and the fitted probes ARE tracked.
+#   *.aux.pt              per-position budget vectors and pooled demands
+#   *.hidden.pt           captured residuals for probe fitting
+#   per_example_results_* one row per arm x reply position
+#   trace_*_int4.jsonl    per-position gate signal / deletion damage / utility
+experiments/audit_sgqr_csgqr/results/*.aux.pt
+experiments/audit_sgqr_csgqr/results/*.hidden.pt
+experiments/audit_sgqr_csgqr/results/per_example_results_*.jsonl
+experiments/audit_sgqr_csgqr/results/trace_*_int4.jsonl

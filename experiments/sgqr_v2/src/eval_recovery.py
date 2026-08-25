@@ -68,6 +68,13 @@ def main() -> None:
     ap.add_argument("--max-len", type=int, default=256)
     ap.add_argument("--n-boot", type=int, default=4000)
     ap.add_argument("--cap-mib", type=float, default=5120.0)
+    ap.add_argument("--no-retire", action="store_true",
+                    help="leave all 28 layers intact and evaluate the adapter on "
+                         "the DENSE model. This is the control that separates "
+                         "recovery from fine-tuning: if dense+adapter reaches the "
+                         "same loss as pruned+adapter, the adapter is not "
+                         "recovering the deleted layers, it is adapting to the "
+                         "training distribution.")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -99,8 +106,9 @@ def main() -> None:
     print("dense reference cached in " + format(time.time() - t0, ".1f") + "s")
 
     # -- retire the four layers -------------------------------------------
-    for l in RETIRED:
-        model.model.layers[l].mlp = ZeroMlp()
+    if not args.no_retire:
+        for l in RETIRED:
+            model.model.layers[l].mlp = ZeroMlp()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
@@ -186,7 +194,8 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({
         "campaign": "sgqr_v2", "endpoint": "teacher_forced_paired",
-        "retired_layers": list(RETIRED), "dataset": args.dataset,
+        "retired_layers": [] if args.no_retire else list(RETIRED),
+        "no_retire": args.no_retire, "dataset": args.dataset,
         "prompts": len(prompts), "skip_prompts": args.skip_prompts,
         "max_len": args.max_len, "n_boot": args.n_boot,
         "arms": {key: entry}, "environment": collect(),
