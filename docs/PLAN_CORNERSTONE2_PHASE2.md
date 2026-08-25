@@ -19,7 +19,7 @@ questions and gate different claims.
 | the score is what works, not the budget | random 0/36 and StreamingLLM 0/36 against 36/36, at both B=16 and B=64, *p* = 2.9 × 10⁻¹¹ |
 | backward reach alone decides | forward reach inert (spread 0.000); width-5 backward beats width-7 centred |
 | required reach tracks the span | d=7 at back=4 → 0.000 where d=5 at back=4 → 1.000; thresholds 3, 4, 8, 10 for d = 4, 5, 7, 9 |
-| deriving the reach beats tuning it | matches or beats the best hand-tuned reach at every span length |
+| deriving the reach beats **holding one reach fixed** | 1.000/1.000/0.889 at d=4/5/7 vs back=6's 0.972/1.000/0.778. *(NOT "beats the best tuned reach": a tuned back=8 scores 1.000 at d=7. Corrected 2026-08-25.)* |
 | competition costs capacity, not correctness | 1.000 → 0.611 with 16 query-shaped decoys, restored to 1.000 by budget alone |
 | transfers across checkpoints | Halo: 8 cells, 288 needles, zero failures, no code change |
 | inference-time only | 0 parameters, 1.5625% cache overhead, no retraining |
@@ -323,21 +323,93 @@ measurable proxy, and the proxy needs its own calibration before it carries weig
 honest position remains: *this programme has no generation-validated measurement of
 evidence spans beyond 9 tokens, and cannot get one on this model.*
 
+### C1′ — natural language, and why it is now FIRST rather than seventh
+
+**The finding that reorders the plan.** Every result cornerstone 2 has produced is
+passkey-shaped. I audited all 40 committed result files that set `pool_back` — 31 `pk_*`
+and 9 `halo_*` — and **not one carries `rag_dev` or `chat_dev`.** The scorer in that
+harness is a single line, `hit = str(key) in got`: a substring test for a digit string,
+on filler containing no digits. So every cornerstone-2 number is a *span-preservation*
+measurement and **none of it is evidence about response quality.**
+
+Worse, the mechanism could not have been evaluated on language even if we had tried:
+`run_eval_sig.py`, the only natural-language runner, had **no `--pool-back`,
+`--pool-fwd`, `--grow` or `--grow-max` flags**. Cornerstone 2's directional pooling was
+unreachable from the language harness. (Fixed 2026-08-25; the flags are wired, the
+effective window is recorded in the manifest, and `Policy.pool_window()` now raises if
+only one of back/fwd is set — `--pool 7 --pool-back 6` silently gave a *forward-reaching*
+(6, 3) window, which would have measured a different mechanism and looked fine.)
+
+**What cornerstone 1 already measured on language, which is the reason this is urgent.**
+On 752 RAG cases with a centred window and a heuristic rubric scorer:
+
+| keep | quality | vs uncompressed | byte-identical replies |
+|---:|---:|---:|---:|
+| off | 0.66939 | — | — |
+| 0.75 | 0.65677 | −0.013 | 711/752 |
+| 0.50 | 0.61401 | −0.055 | 605/752 |
+| **0.25** | **0.33863** | **−0.331** | **159/752** |
+
+At **4× compression on real prose, half the quality is gone.** Against the passkey
+headline of 7,864× these are different universes, and the honest reading is that passkey
+describes a haystack with exactly one distinctive region, not a document. Cornerstone 1
+also published where its score *loses* to a matched positional control: +0.181 at keep
+0.75, +0.137 at keep 0.50, and **−0.083 at keep 0.25**.
+
+**The question C1′ answers.** Does cornerstone 2's directional pooling — which on passkey
+was the difference between 0.000 and 1.000 — move any of those language numbers, and in
+particular does it repair the keep-0.25 loss?
+
+**Design.** Eight cells on `rag_dev`, 752 cases each, ~8–18 min per cell, against the
+committed `off` reference. Every arm matches the committed cornerstone-1 manifests on
+`sinks=4, recent=32, window=16` and one protocol, so a directional arm differs in exactly
+one variable:
+- **centred pool=7 controls at keep 0.25 and 0.75** — these did not exist, and without
+  them a directional arm would be compared against a `pool=1` arm, confounding *pooling*
+  with *direction*, which is the entire variable of interest. (keep 0.5 already has one.)
+- **directional (back=6, fwd=0) at keep 0.25 / 0.50 / 0.75**
+- **derived reach (`grow=2.0`) at keep 0.25 / 0.50**
+- **directional at keep 0.25 with `--recent-frac 0.25`** — the plain keep-0.25 arm spent
+  so much on a fixed `recent=32` that only 37% of the budget was score-chosen, making it
+  StreamingLLM in disguise; this raises that to ~67%, which is where the score can
+  actually be judged.
+
+**Pre-stated reading of the outcome, so it cannot be rationalised afterwards.**
+- If directional pooling closes the keep-0.25 gap: cornerstone 2 transfers to language
+  and there is a deployable claim.
+- If it moves the language numbers by less than the run-to-run spread: **the passkey
+  result does not transfer**, and cornerstone 2 must be described as a retrieval
+  mechanism rather than a general cache-compression method. That is a publishable
+  negative and must be stated as plainly as the positive would be.
+- Either way, `quality` here is a **heuristic rubric**, not a model judge — the code
+  itself flags `quality_pass_is_diagnostic_only: True` — and no statistical test has ever
+  been run on these deltas. A quality difference smaller than the rubric's resolution
+  will not be claimed.
+
+---
+
 ### Revised ordering from here
 
-1. **A3** *(running)* — n = 99 per depth. Correctly ordered: it was gated behind A1 and
-   A4, and both have now landed.
-2. **B1** — self-sizing budget. Unchanged as the highest value per hour, and now the
-   *leading* strategic item rather than the second, since A4 vacated the top slot.
-3. **A4′** — the cache-level span instrument, with its calibration gate.
-4. **B4, B2** — multi-turn persistence, then iterative re-scoring.
-5. **A5** — runtime cost. **Every number in this programme is still a benefit with no
+1. **C1′ — natural language.** *(running)* Promoted from seventh to first. Nothing else
+   on this list matters if the mechanism does not transfer off passkey, and until
+   2026-08-25 it could not even be run on language.
+2. **A3** — n = 99 per depth. **Crashed** on its first attempt with
+   `CUBLAS_STATUS_EXECUTION_FAILED` after ~21 min at 91 °C; no partial artifact was
+   written, so nothing is contaminated. Re-queued behind C1′ with full logging. (The
+   wrapper reported *exit code 0* for that crash — it piped python through `grep | tail`,
+   so the pipeline returned tail's status and the traceback was discarded. Fixed.)
+3. **B1** — self-sizing budget. Still the highest value per hour among the capability
+   items, but it is now third: a self-sizing budget for a mechanism not shown to work on
+   language would be tuning the wrong thing.
+4. **A4′** — the cache-level span instrument, with its calibration gate.
+5. **B4, B2** — multi-turn persistence, then iterative re-scoring.
+6. **A5** — runtime cost. **Every number in this programme is still a benefit with no
    measured cost.** Note the thermal band: A3 is currently running at 91 °C, and the
    programme's own rule is that no throughput claim below 2× is defensible against a
    2.17× thermal band, so A5 must control temperature or it will measure the fan.
-6. **O13** — the open anomaly. Not scheduled, because no candidate explanation survives;
+7. **O13** — the open anomaly. Not scheduled, because no candidate explanation survives;
    it needs a new hypothesis before it needs GPU time.
-7. **C1, C2, B3, B5, B6, C3** — as below.
+8. **C2, B3, B5, B6, C3** — as below. *(C1 is promoted to slot 1 as C1′.)*
 
 ---
 
@@ -371,5 +443,10 @@ Not a bigger compression ratio. Three things:
 2. **A self-sizing budget** (B1) — turns a tuned hyperparameter into a derived quantity,
    which is the same move that made derived reach beat fixed reach.
 3. **Multi-turn evidence** (B4) — the dominant deployment pattern, entirely untested.
+4. **Any natural-language evidence at all** (C1′) — added 2026-08-25, and it belongs at
+   the top of this list rather than the bottom. The mechanism has never been measured on
+   a natural-language token; cornerstone 1's language numbers show quality falling by
+   0.331 at 4× compression, where passkey reports 7,864× losslessly. Until C1′ runs, the
+   practical claim rests on a task a regex can solve.
 
 Any one of these is worth more than another order of magnitude on passkey.

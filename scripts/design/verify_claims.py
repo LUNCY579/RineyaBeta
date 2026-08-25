@@ -695,6 +695,39 @@ CLAIMS = [
      lambda: retracted_fit("coef"), 5e-4, "0.141", "ledger,c2paper"),
     ("RETRACTED fit: exponent", 0.5350,
      lambda: retracted_fit("exponent"), 5e-4, "0.535", "ledger,c2paper"),
+
+    # --- a RELATIONAL pin, and why this class of pin had to be invented -----
+    # "Derived reach matches or beats the best hand-tuned reach at every span
+    # length" sat in FOUR documents and was false: at d=7 derived scores 0.889
+    # against a tuned back=8's 1.000.
+    #
+    # The instructive part is HOW it survived a checker at 136/136. Both
+    # falsifying arms were ALREADY PINNED, at their true values, as "O2: d=7
+    # back=7" (0.944) and "O2: d=7 back=8" (1.000). Nothing was stale and no
+    # number had drifted. Every pin above verifies ONE number against ONE file,
+    # but the false claim was a RELATION BETWEEN numbers -- and no pin has ever
+    # checked a relation, so a comparative claim could contradict two pins that
+    # both passed.
+    #
+    # This pin therefore asserts the ORDERING, not a value. It fails if anyone
+    # ever restores the withdrawn claim, and it fails if a future arm changes
+    # which side wins. The lesson generalises: a claim of the form "A beats the
+    # best B" needs a pin over max(B), not a pin on each B.
+    ("RELATION: derived reach LOSES to the best tuned reach at d=7", -0.1111,
+     lambda: pk("pk_128k_B64_d7_grow2.0.json", require={"key_digits": 7, "grow": 2.0})
+             - max(pk("pk_128k_B64_d7_b6f0.json", require={"pool_back": 6}),
+                   pk("pk_128k_B64_d7_b7f0.json", require={"pool_back": 7}),
+                   pk("pk_128k_B64_d7_b8f0.json", require={"pool_back": 8})),
+     5e-4, "−0.111", "p2"),
+    # The deployment-relevant relation, which is the one that DOES survive:
+    # derived beats a single fixed reach held constant across span lengths.
+    ("RELATION: derived beats a CONSTANT back=6 at d=7", 0.1111,
+     lambda: pk("pk_128k_B64_d7_grow2.0.json", require={"key_digits": 7, "grow": 2.0})
+             - pk("pk_128k_B64_d7_b6f0.json", require={"key_digits": 7, "pool_back": 6}),
+     5e-4, "0.889", "p2"),
+    ("d=9 tuned back=8 (no derived arm exists at d=9)", 0.8333,
+     lambda: pk("pk_128k_B64_d9_b8f0.json",
+                require={"key_digits": 9, "pool_back": 8}), 5e-4, "0.833", "p2"),
 ]
 
 

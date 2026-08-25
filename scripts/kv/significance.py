@@ -572,6 +572,22 @@ class Policy:
         causal window -- position i inherits only from positions at or before it,
         which is the shape that credits a payload for the label preceding it.
         """
+        # Setting exactly one of the two is almost never what the caller means.
+        # `--pool 7 --pool-back 6` silently yields (6, 3) -- fwd falls back to
+        # pool//2 -- so a run intended to be causal measures a window that
+        # reaches THREE POSITIONS INTO THE FUTURE. Every cornerstone-2 result
+        # rests on fwd=0, and the failure is silent: the run completes, the
+        # manifest looks plausible, and the number is of a different mechanism.
+        # No committed run ever hit this (audited: 0 of them set one alone), so
+        # raising costs nothing and closes it before it can happen.
+        if (self.pool_back is None) != (self.pool_fwd is None):
+            raise ValueError(
+                f"pool_back={self.pool_back!r} and pool_fwd={self.pool_fwd!r}: set "
+                f"BOTH or NEITHER. The unset one defaults to pool//2 = "
+                f"{self.pool // 2}, so setting pool_back alone with pool="
+                f"{self.pool} gives a window of ({self.pool_back}, "
+                f"{self.pool // 2}) that reaches forward -- not the causal "
+                f"window. Pass pool_fwd=0 explicitly for the cornerstone-2 shape.")
         half = self.pool // 2
         back = half if self.pool_back is None else int(self.pool_back)
         fwd = half if self.pool_fwd is None else int(self.pool_fwd)

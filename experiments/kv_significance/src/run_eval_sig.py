@@ -92,6 +92,24 @@ def main() -> None:
                          "significance-selected, making that cell StreamingLLM "
                          "rather than a test of scoring.")
     ap.add_argument("--pool", type=int, default=1)
+    # Cornerstone 2 -- directional pooling. These existed in passkey.py from the
+    # day the mechanism was found and were never added here, so every
+    # natural-language number in this programme was measured with the CENTRED
+    # window that cornerstone 2 superseded. Without these flags the mechanism
+    # cannot be evaluated on language at all.
+    ap.add_argument("--pool-back", type=int, default=None,
+                    help="backward reach of the pooling window. Cornerstone 2's "
+                         "result is that reach BACKWARD is what decides; forward "
+                         "reach is inert. Requires --pool > 1.")
+    ap.add_argument("--pool-fwd", type=int, default=None,
+                    help="forward reach. Set 0 with --pool-back for the causal "
+                         "window. Requires --pool > 1.")
+    ap.add_argument("--grow", type=float, default=None,
+                    help="derived reach: geodesic dilation with gate "
+                         "s > median(s)*mult. Beats a single fixed reach held "
+                         "constant across span lengths.")
+    ap.add_argument("--grow-max", type=int, default=64,
+                    help="dilation cap; only meaningful with --grow.")
     ap.add_argument("--window", type=int, default=16)
     ap.add_argument("--no-sinks", action="store_true", help="disable sink protection")
     ap.add_argument("--limit", type=int, default=None)
@@ -134,7 +152,13 @@ def main() -> None:
     print(f"eviction {'ON' if evicting else 'OFF'}"
           + (f"   budget {'frac ' + str(args.keep_frac) if args.keep_frac is not None else args.budget}"
              f"   sinks {0 if args.no_sinks else args.sinks}   recent {args.recent}"
-             f"   pool {args.pool}   window {args.window}" if evicting else ""))
+             f"   pool {args.pool}"
+             + (f"   window ({args.pool_back},{args.pool_fwd}) CAUSAL"
+                if args.pool_fwd == 0 and args.pool_back
+                else f"   window ({args.pool_back},{args.pool_fwd})"
+                if args.pool_back is not None else "   window CENTRED")
+             + (f"   grow {args.grow}" if args.grow else "")
+             + f"   attn-window {args.window}" if evicting else ""))
 
     config = load_quality_config()
     corpus_profile = build_corpus_profile(records)
@@ -142,6 +166,7 @@ def main() -> None:
     rows, t0 = [], time.time()
     kept_ratios = []
     recents_used = []
+    windows_used = []
     for i, rec in enumerate(records):
         prompt = tok.apply_chat_template(rec["messages"], tokenize=False,
                                          add_generation_prompt=True, enable_thinking=False)
@@ -155,7 +180,9 @@ def main() -> None:
             recent = (max(1, int(round(args.recent_frac * budget)))
                       if args.recent_frac is not None else args.recent)
             policy = sig.Policy(budget=budget, sinks=args.sinks, recent=recent,
-                                protect_sinks=not args.no_sinks, pool=args.pool)
+                                protect_sinks=not args.no_sinks, pool=args.pool,
+                                pool_back=args.pool_back, pool_fwd=args.pool_fwd,
+                                grow=args.grow, grow_max=args.grow_max)
             # Record what the policy ACTUALLY used. Writing args.recent here --
             # which is what this file used to do -- makes every --recent-frac run
             # look like a fixed recent=32 run in the manifest, and summarize.py
@@ -163,6 +190,7 @@ def main() -> None:
             # truth is 63.7%/67.4%. The one column whose purpose is to expose
             # StreamingLLM-in-disguise was reporting the fix for it as a no-op.
             recents_used.append(policy.n_recent())
+            windows_used.append(tuple(policy.pool_window()))
 
         sig.reset_scores()
         sig.set_recording(evicting, window=args.window)
@@ -223,6 +251,21 @@ def main() -> None:
         "recent_frac": args.recent_frac,
         "heavy_zero_count": sig.heavy_zero_count(),
         "pool": args.pool, "window": args.window,
+        # Record the EFFECTIVE window, not the flags. Policy.pool_window()
+        # defaults to (pool//2, pool//2) when --pool-back is unset, so a run
+        # that recorded only the flags would write pool_back=null for a centred
+        # window AND for a directional one that happened to be defaulted -- the
+        # same ambiguity that made a heavy=0 run record as heavy=8. Any pin
+        # asserting `pool_back` must be able to tell a cornerstone-2 run from a
+        # cornerstone-1 run from the manifest alone.
+        "pool_back": (windows_used[0][0] if windows_used else None),
+        "pool_fwd": (windows_used[0][1] if windows_used else None),
+        "pool_back_flag": args.pool_back, "pool_fwd_flag": args.pool_fwd,
+        "pool_window_uniform": (len(set(windows_used)) <= 1) if windows_used else None,
+        "grow": args.grow,
+        "grow_max": (args.grow_max if args.grow else None),
+        "directional": bool(windows_used and windows_used[0][1] == 0
+                            and windows_used[0][0] > 0),
         "mean_kept_ratio": round(mean_keep, 4),
         "case_count": len(rows), "protocol": protocol,
         "elapsed_s": round(elapsed, 1),

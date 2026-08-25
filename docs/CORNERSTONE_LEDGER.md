@@ -17,7 +17,7 @@ below are left as the record of what was known at the time.
 | 2 | lossless 128K at B=256 (492×) | **B=16 (7,864×)**, peak 1,501 MiB — with a backward-reaching pool window |
 | 3 | directional pooling listed as an untested open direction | **it is cornerstone 2.** 21 committed files set it; its pre-declared kill test was run and failed to kill it |
 | 4 | pool window a tuned constant | **backward reach alone decides** (forward reach inert, spread 0.000), and the requirement **tracks span length**: back=4 gives 1.000 at d=5 and 0.000 at d=7 |
-| 5 | — | **derived reach** (`grow_spans`) matches or beats the best *tuned* fixed reach at every span length without being told it: 1.000 / 1.000 / 0.889 at d=4/5/7 against 0.972 / 1.000 / 0.778 |
+| 5 | — | **derived reach** (`grow_spans`) beats any *single* fixed reach held constant across span lengths, without being told the span: 1.000 / 1.000 / 0.889 at d=4/5/7 against back=6's 0.972 / 1.000 / 0.778. *(CORRECTED 2026-08-25: "matches or beats the best tuned reach at every span length" is **withdrawn** — at d=7 a tuned back=8 scores 1.000 against derived reach's 0.889. Per-span oracle tuning wins there; it is just not available at inference time.)* |
 | 6 | no result outside passkey | **stage 1 run.** 16 query-shaped decoys take B=64 from 1.000 to **0.611**; 16 neutral ones cost nothing (0.972); exact McNemar **p = 0.0010** |
 | 7 | — | that collapse is **capacity, not scoring**: budget alone restores it (B=512 → 1.000). Competition costs **32×** of compression — 7,864× down to **246×** |
 

@@ -41,8 +41,10 @@ backward window scores 1.000 where a width-7 centred window scores 0.278.
 Critically, the required reach **tracks the evidence span and is not a constant**: a
 7-digit key at back=4 scores 0.000 where a 5-digit key at the same reach scores 1.000.
 We therefore derive the reach from the score's own structure by geodesic dilation, which
-matches or beats the best *hand-tuned* fixed reach at every span length without being
-told the span length.
+beats any *single* fixed reach held constant across span lengths — the comparison a
+deployed system faces, since the span is not known in advance — without being told the
+span length. Against a *per-span oracle* it is not uniformly better: at d=7 derived
+reach scores 0.889 where a hand-tuned back=8 scores 1.000 (§4.6).
 
 Against controls the mechanism has never previously faced, the score is what works: at
 128K with a 16-slot budget — four attention sinks, four recent, **eight score-chosen** —

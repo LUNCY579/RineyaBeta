@@ -433,9 +433,28 @@ One policy, never told the key length, against the best *tuned* fixed reach:
 | 5 | **1.000** | 1.000 | back=4 → 1.000 | +0.000 |
 | 7 | **0.889** | 0.611 | back=6 → 0.778 | **+0.111** |
 
-At `grow=2.0` the derived reach **matches or beats the best hand-tuned fixed reach at
-every span length**, without being told the span length. That is the claim this
-mechanism was built for.
+**CORRECTION 2026-08-25 — the "best hand-tuned" column above is not the best.** At d=7
+the ladder also contains back=7 → **0.944** and back=8 → **1.000**, both measured, both
+beating derived reach's 0.889. The row compares against back=6 only. Restated against
+the true per-span best:
+
+| span (digits) | derived `grow=2.0` | true best tuned fixed | Δ |
+|---:|---:|---|---:|
+| 4 | **1.000** | back=3 → 0.972 | +0.028 *(only back=2,3 were measured at d=4)* |
+| 5 | **1.000** | back=4 → 1.000 | 0.000 |
+| 7 | 0.889 | **back=8 → 1.000** | **−0.111** |
+| 9 | *no derived arm exists* | back=10 → 1.000 | *untested* |
+
+**So "matches or beats the best hand-tuned fixed reach at every span length" is
+WITHDRAWN.** It is false at d=7 by four needles, it was never tested at d=9, and the
+d=4 win is against an incomplete ladder that stops at back=3.
+
+**What survives, and it is the claim that actually matters for deployment.** Derived
+reach beats any *single* fixed reach held constant across span lengths. A deployed
+system does not know the span in advance, so it must pick one reach and keep it: back=6
+held across d = 4/5/7 gives 0.972 / 1.000 / 0.778, where derived gives 1.000 / 1.000 /
+0.889 with no span argument. Per-span oracle tuning still wins at d=7 — but per-span
+oracle tuning is not available at inference time, which is the whole point.
 
 **But the multiplier is not inert, and the earlier claim that it was is withdrawn.**
 Exact McNemar between the two multipliers:
