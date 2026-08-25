@@ -614,3 +614,31 @@ model, which is itself a finding worth stating."*
    larger verbatim-recall capacity.
 3. The gate earned its place. Without it, 0.000 at d=20 compressed would have been
    reported as a catastrophic compression failure. It is a model ceiling.
+
+## O13 — the cache-coordinate hypothesis is REFUTED (2026-08-25); the cause stays open
+
+`trace_cache_gaps.py` carried original position identity through every gather and
+measured what a `back=6` window actually spans at the compression where the needle is
+present:
+
+| chunk | round | stored before | entries in needle | reach in TOKENS | max gap | contiguous |
+|---:|---:|---:|---:|---:|---:|---|
+| 4096 | 15 | 4,112 | 26 | **6** | 1 | **yes** |
+| 2048 | 30 | 2,064 | 26 | **6** | 1 | **yes** |
+
+`back=6` spans exactly six tokens at both chunk sizes, with adjacent cache entries one
+original position apart. **The window is not fragmented, so §4.4 and §4.5 do not need
+restating in cache coordinates.** The leading explanation for O13 is dead.
+
+**A limitation of this probe, stated so the record is not over-read.** It inspects
+**layer 0, head 0 only**, and records a row only while that stream holds needle entries.
+Both runs show a single round, which looks like immediate eviction — but P2.1 measured
+the needle surviving in 79–90% of the 224 (layer, KV-head) streams, so one stream losing
+it is expected and says nothing about retrieval. Aggregating across streams would be
+needed to read survival from this tool, and the single-round observation should not be
+cited as evidence of anything.
+
+**O13 therefore remains open**: chunk 2048 reproducibly scores 0.42/0.50 at depth 0.5
+where 4096 scores 1.000, the failures are the 4-of-5 truncation signature, the data and
+needles are identical, chunked prefill is bit-identical to single-shot at every chunk
+size, and the window is contiguous. No candidate explanation currently survives.

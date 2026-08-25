@@ -1,0 +1,23 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "chunk": 4096,
+  "depth": 0.5,
+  "budget": 16,
+  "back": 6,
+  "needle": [
+    62910,
+    62936
+  ],
+  "rounds": [
+    {
+      "round": 15,
+      "stored_before": 4112,
+      "entries_in_needle": 26,
+      "reach_tokens": 6,
+      "reach_entries": 6,
+      "max_gap": 1,
+      "contiguous": true
+    }
+  ],
+  "first_token": " "
+}
