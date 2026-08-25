@@ -87,7 +87,10 @@ the observation that its remaining failures had a signature nobody had looked at
 6. **Deriving the reach beats tuning it** (§4.6).
 7. **Controls**: equal-budget random and StreamingLLM both score 0/36 where the
    mechanism scores 36/36 (§4.7).
-8. **Transfer** to a separately published core with no code change (§4.8).
+8. **Transfer** to a separately published core with no code change (§4.8), and
+   **robustness to the prefill schedule**: at 122 compressions instead of 30 the
+   result is statistically indistinguishable (*p* = 1.0000) while peak memory
+   falls 30%.
 9. **One measured failure condition and one withdrawn experiment** (§5), reported
    rather than omitted.
 

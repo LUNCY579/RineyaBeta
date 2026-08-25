@@ -485,3 +485,27 @@ dominates the recent window.
 supply — rare tokens, proper nouns, or a symbol class absent from the haystack —
 restoring the "only object of its kind" property that makes an answer checkable. Until
 that runs, this programme has **no valid measurement of span length beyond 9 tokens.**
+
+## O9 — RESOLVED 2026-08-24: the headline survives 4x the eviction pressure
+
+| chunk | compressions at 128K | d0.1 | d0.5 | d0.9 | accuracy | peak |
+|---:|---:|---:|---:|---:|---:|---:|
+| 4096 | 30 | 1.00 | 1.00 | 1.00 | **36/36** | 1,501 MiB |
+| 1024 | **122** | 1.00 | 1.00 | 0.92 | 35/36 | **1,057 MiB** |
+
+Exact McNemar on the discordant pair: **p = 1.0000, indistinguishable**. So **7,864× is
+a property of the mechanism, not of the prefill schedule**, and compression figures do
+not need a chunk size attached to them. This was the largest open threat to the headline
+and it closes in the strengthening direction.
+
+**Two further observations.**
+
+*Peak memory falls 30%* at the smaller chunk (1,501 → 1,057 MiB), because the in-flight
+prefill chunk is the dominant variable term rather than the compressed cache. A
+deployment can chunk smaller for less memory and keep the accuracy — a lever nobody had
+checked.
+
+*The single failure lands where O7 predicts.* At chunk 1024 the depth-0.9 needle sits in
+chunk 110 of 123 and therefore faces **12** compressions instead of 3 — a 4× increase.
+The one lost needle appears at exactly the depth that gained the most rounds, so the
+failure is consistent with the measured mechanism rather than arbitrary.
