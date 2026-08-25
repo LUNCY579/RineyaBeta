@@ -719,3 +719,94 @@ fragmentation mode. **The cause is open**, and it is recorded here rather than d
 because the earlier "survives 4× the eviction pressure" result compares only 4096
 against 1024 and steps over the cell between them.
 
+---
+
+## 2026-08-25, later: the FIRST natural-language evidence, and it is not the passkey story
+
+Until today the mechanism had never been run on a natural-language token. All 40
+committed `pool_back` result files were passkey; `run_eval_sig.py`, the only rag_dev /
+chat_dev runner, had no `--pool-back` flag at all. These are the first cells.
+
+752 RAG cases, paired on case id, every arm matching the committed cornerstone-1
+manifests on `sinks=4, recent=32, window=16` and one generation protocol, so a
+directional arm differs in exactly one field.
+
+### Direction matters on language, and the sign FLIPS with compression pressure
+
+| keep | compression | centred (3,3) | causal (6,0) | paired diff | discordant | exact sign p |
+|---:|---:|---:|---:|---:|---|---|
+| 0.25 | 4x | 0.26096 | **0.41286** | **+0.15190** | 235 up / 36 down | **5.66e-37** |
+| 0.50 | 2x | 0.63371 | **0.64858** | +0.01487 | *unpaired* | *n/a* |
+| 0.75 | 1.33x | **0.65999** | 0.65136 | **-0.00863** | 1 up / 23 down | **2.98e-06** |
+
+The keep-0.50 row is means-only: the committed centred arm's per-case records are
+gitignored and absent here, so it cannot be paired. It is reported as a mean difference
+and nothing is claimed from it.
+
+**The crossover is the finding.** Causal pooling wins hugely under pressure and loses,
+slightly but significantly, when there is none. That is mechanically coherent: with an
+ample budget a centred window's forward reach buys real context, and with a tight budget
+that same forward reach spends slots on positions the query has not reached yet.
+
+**Pooling itself is harmful under pressure; direction is what rescues it.** At keep 0.25
+the centred window scores **0.26096**, *worse than not pooling at all* (`frac0.25`,
+pool=1, **0.33863**). So the causal window is not adding a gain on top of pooling -- it
+is repairing damage that pooling causes, and then some.
+
+### Derived reach LOSES on language, where it was the star on passkey
+
+| keep 0.50 arm | window | grow | quality |
+|---|---|---|---:|
+| `frac0.5-pool7-fixed` | centred (3,3) | -- | 0.63371 |
+| `frac0.5-grow2` | centred (3,3) | 2.0 | **0.61346** |
+| `frac0.5-b6f0` | **causal (6,0)** | -- | **0.64858** |
+
+Paired, causal vs derived: **-0.03513**, 1.48e-05. Geodesic dilation was the mechanism's
+best passkey result -- it beat every single fixed reach held constant across span
+lengths. On prose it is the worst of the three. Stated plainly because the passkey
+finding was stated plainly.
+
+*Scope note:* the `grow` arm carries a centred (3,3) window, because `--grow` without
+`--pool-back` defaults the window to `pool//2` -- the same convention the passkey `grow`
+arms used. So this contrast is (centred+grow) against (causal), not a clean grow / no-grow
+test. Against the matched centred arm without grow, adding grow costs **-0.020**
+(0.63371 -> 0.61346), unpaired.
+
+### What this supports, and what it does not
+
+Against the uncompressed reference (**0.66939**): causal pooling retains **96.9%** of
+full quality at **2x** compression and 97.3% at 1.33x, and collapses to 61.7% at 4x.
+Against the published positional control it is **+0.172** at keep 0.50 and **+0.176** at
+keep 0.75, but only **-0.009** at keep 0.25 -- where recency-only is just as good.
+
+**The honest deployable claim is ~2x KV reduction at ~97% quality retention.** Not
+7,864x. That figure is a passkey property and must never be quoted near a language
+number.
+
+### The scale gap, which is larger than any effect measured above
+
+`rag_dev` prompts: **median 238 tokens, maximum 330. Not one exceeds 1K.** The passkey
+headline runs at **125,826** real tokens -- **543x longer**. This programme has evidence
+at ~232 tokens and evidence at ~126K tokens and **nothing between them**. The mechanism's
+entire value proposition is long-context memory, and the only natural-language benchmark
+available exercises it where compression saves on the order of 170 cache entries.
+
+Every language number above should be read as *"at ~232 tokens"*, and no long-context
+language claim is supported by any of it.
+
+### Two cells did not finish, and one of them is a defect worth chasing
+
+- `frac0.25-grow2` **timed out** at the 2400 s limit, having reached 200/752 in 481 s
+  and slowed from there.
+- `frac0.25-rf0.25-b6f0` reached 400/752 and died with **CUDA illegal memory access**,
+  after slowing progressively: 233 s, 245 s, 571 s, 528 s per 100 cases. A monotone
+  slowdown ending in an illegal address is a leak signature, not a thermal one, and both
+  affected arms are the aggressive keep-0.25 configurations.
+- The A3 power run, launched immediately after that crash, died right after loading
+  weights with no further output -- consistent with inheriting a poisoned context. The
+  GPU tests clean afterwards (6,990 MiB free, bf16 matmul fine), so it is retryable.
+
+**No result above depends on the failed cells.** They are recorded because an
+unexplained slowdown-then-illegal-access in the eviction path is a stability risk for
+exactly the deployment case this mechanism is for.
+

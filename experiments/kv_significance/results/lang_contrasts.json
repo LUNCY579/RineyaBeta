@@ -1,0 +1,62 @@
+{
+  "contrasts": {
+    "keep0.25_centred_vs_causal": {
+      "arm_a": "frac0.25-pool7-fixed__rag_dev",
+      "arm_b": "frac0.25-b6f0__rag_dev",
+      "n_paired": 752,
+      "mean_quality_a": 0.26096,
+      "mean_quality_b": 0.41286,
+      "paired_mean_diff": 0.1519,
+      "ci95": [
+        0.12981,
+        0.17399
+      ],
+      "b_better": 235,
+      "b_worse": 36,
+      "tied": 481,
+      "sign_test_p": 5.660637295061795e-37,
+      "identical_replies": 227,
+      "mean_stored_kv": 57.9,
+      "mean_prompt_tokens": 231.6
+    },
+    "keep0.75_centred_vs_causal": {
+      "arm_a": "frac0.75-pool7-fixed__rag_dev",
+      "arm_b": "frac0.75-b6f0__rag_dev",
+      "n_paired": 752,
+      "mean_quality_a": 0.65999,
+      "mean_quality_b": 0.65136,
+      "paired_mean_diff": -0.00863,
+      "ci95": [
+        -0.01261,
+        -0.00464
+      ],
+      "b_better": 1,
+      "b_worse": 23,
+      "tied": 728,
+      "sign_test_p": 2.9802322387695312e-06,
+      "identical_replies": 702,
+      "mean_stored_kv": 173.7,
+      "mean_prompt_tokens": 231.6
+    },
+    "keep0.50_causal_vs_derived": {
+      "arm_a": "frac0.5-b6f0__rag_dev",
+      "arm_b": "frac0.5-grow2__rag_dev",
+      "n_paired": 752,
+      "mean_quality_a": 0.64858,
+      "mean_quality_b": 0.61346,
+      "paired_mean_diff": -0.03513,
+      "ci95": [
+        -0.04769,
+        -0.02257
+      ],
+      "b_better": 19,
+      "b_worse": 57,
+      "tied": 676,
+      "sign_test_p": 1.4836899336372363e-05,
+      "identical_replies": 629,
+      "mean_stored_kv": 115.8,
+      "mean_prompt_tokens": 231.6
+    }
+  },
+  "note": "Paired on case id. b MINUS a. Sign test is exact and two-sided on DISCORDANT pairs only. quality_score is the repo's heuristic rubric, which flags itself quality_pass_is_diagnostic_only -- it is not a model judge."
+}

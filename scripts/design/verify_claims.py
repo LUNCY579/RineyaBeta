@@ -174,6 +174,30 @@ def pk(fname: str, depth: float | None = None, budget: int | None = None,
     return sum(r["acc"] for r in rows) / len(rows)
 
 
+def lang(label: str, field: str):
+    """A cornerstone-2 natural-language contrast, from the COMMITTED artifact.
+
+    Same reasoning as identical_replies(): the per-case records these are derived
+    from are gitignored, so a check that read them would pass here and fail in a
+    fresh clone. scripts/design/lang_contrasts.py derives them into a few kB of
+    committed JSON; run it with --check to confirm the artifact still matches the
+    raw records when those are present.
+    """
+    path = KVS / "lang_contrasts.json"
+    if not path.exists():
+        return None
+    row = json.loads(path.read_text(encoding="utf-8"))["contrasts"].get(label)
+    return None if not row or row.get("status") else row[field]
+
+
+def lang_quality(tag: str):
+    """Mean quality of one rag_dev arm, read from its own summary.json."""
+    path = KVS / f"{tag}__rag_dev" / "summary.json"
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8")).get("mean_quality_score")
+
+
 def cp_bound(n: int, tail: float) -> float:
     """Clopper-Pearson bound for a cell with zero failures: tail ** (1/n).
 
@@ -728,6 +752,42 @@ CLAIMS = [
     ("d=9 tuned back=8 (no derived arm exists at d=9)", 0.8333,
      lambda: pk("pk_128k_B64_d9_b8f0.json",
                 require={"key_digits": 9, "pool_back": 8}), 5e-4, "0.833", "p2"),
+
+    # --- the FIRST natural-language cells cornerstone 2 ever produced --------
+    # Until 2026-08-25 every pool_back result file was passkey and the language
+    # runner had no --pool-back flag. These pin the arms and the paired
+    # contrasts between them. The contrasts come from a derived artifact for the
+    # same reason identical_replies() does: the per-case records are gitignored,
+    # so a check reading them would pass here and fail in a fresh clone.
+    ("LANG keep0.25 centred window", 0.26096,
+     lambda: lang_quality("frac0.25-pool7-fixed"), 5e-6, "0.26096", "p2"),
+    ("LANG keep0.25 CAUSAL window", 0.41286,
+     lambda: lang_quality("frac0.25-b6f0"), 5e-6, "0.41286", "p2"),
+    ("LANG keep0.75 centred window", 0.65999,
+     lambda: lang_quality("frac0.75-pool7-fixed"), 5e-6, "0.65999", "p2"),
+    ("LANG keep0.75 CAUSAL window", 0.65136,
+     lambda: lang_quality("frac0.75-b6f0"), 5e-6, "0.65136", "p2"),
+    ("LANG keep0.50 CAUSAL window", 0.64858,
+     lambda: lang_quality("frac0.5-b6f0"), 5e-6, "0.64858", "p2"),
+    ("LANG keep0.50 derived (grow=2.0)", 0.61346,
+     lambda: lang_quality("frac0.5-grow2"), 5e-6, "0.61346", "p2"),
+
+    # The crossover: direction helps under pressure and HURTS without it. Both
+    # signs are pinned, because a one-sided pin would let the inconvenient half
+    # of the finding drift away unnoticed.
+    ("LANG contrast keep0.25 causal-minus-centred", 0.15190,
+     lambda: lang("keep0.25_centred_vs_causal", "paired_mean_diff"),
+     5e-6, "0.15190", "p2"),
+    ("LANG contrast keep0.75 causal-minus-centred (NEGATIVE)", -0.00863,
+     lambda: lang("keep0.75_centred_vs_causal", "paired_mean_diff"),
+     5e-6, "-0.00863", "p2"),
+    ("LANG contrast keep0.50 derived-minus-causal (NEGATIVE)", -0.03513,
+     lambda: lang("keep0.50_causal_vs_derived", "paired_mean_diff"),
+     5e-6, "-0.03513", "p2"),
+    ("LANG keep0.25 discordant pairs favouring causal", 235,
+     lambda: lang("keep0.25_centred_vs_causal", "b_better"), 0.5, "235", "p2"),
+    ("LANG keep0.75 discordant pairs favouring CENTRED", 23,
+     lambda: lang("keep0.75_centred_vs_causal", "b_worse"), 0.5, "23", "p2"),
 ]
 
 
