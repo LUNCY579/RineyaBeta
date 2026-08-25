@@ -810,3 +810,54 @@ language claim is supported by any of it.
 unexplained slowdown-then-illegal-access in the eviction path is a stability risk for
 exactly the deployment case this mechanism is for.
 
+### RESOLVED same day: it was the queue, not the mechanism, and the leak reading was wrong
+
+The slowdown-then-illegal-access looked like a leak in the eviction path. It is not.
+
+A bounded repro of the exact crashing configuration, run alone on an idle GPU with an
+allocator trace added to the progress line:
+
+| cases | wall | allocated | reserved |
+|---:|---:|---:|---:|
+| 100 | 93 s | 918 MiB | 968 MiB |
+| 200 | 194 s | **918 MiB** | **968 MiB** |
+
+**Memory is flat to the megabyte, and the run is 2.4x faster than the one that died**
+(97 s per 100 cases against 233 / 245 / 571 / 528). There is no leak.
+
+The cause is in the queue. `timeout -k` SIGKILLed the preceding `grow` cell and the next
+cell started **in the same second**, before the killed process had released the device.
+The follow-on ran starved, degraded monotonically, and died with an illegal address; the
+A3 run launched immediately after inherited the same state and died on load.
+
+Fixed by draining the device between cells — poll until GPU memory falls below a
+threshold before starting the next run. The lesson generalises past this harness: a
+SIGKILL of a CUDA process is not synchronous with the device being free, and a queue
+that assumes it is will manufacture failures that look like bugs in whatever runs next.
+
+Also corrected in the wrapper: a run whose summary was written but whose optional
+`--compare-to` step failed was being reported as **FAILED**. Six good cells were labelled
+that way. Artifact presence now decides success, and a non-zero code with an artifact is
+reported as what it is.
+
+### The first runtime cost this programme has measured
+
+A5 has stood open with the note that *every number here is a benefit with no measured
+cost*. The language runs supply one for free, since the arms differ only in policy:
+
+| arm | keep 0.50 | keep 0.25 |
+|---|---:|---:|
+| causal (6,0) | 67.7 s / 100 cases | 89.8–97.0 s / 100 cases |
+| derived (`grow=2.0`) | 115.6 s / 100 cases | 240.5 s / 100 cases |
+| **derived / causal** | **1.71x** | **2.48x** |
+
+So on natural language **derived reach is worse on both axes at once** — it costs 1.7–2.5x
+the runtime *and* scores lower (−0.035 paired against the causal window, p = 1.48e-05).
+Whatever case exists for geodesic dilation rests on passkey, where it was the best arm;
+on prose there is currently no argument for it.
+
+This is a same-hardware, same-harness, back-to-back comparison rather than a controlled
+timing study — it is not thermally controlled, and A5 proper still needs to be. But the
+ratio is large enough, and consistent enough across two keep fractions, that the
+direction is not in doubt.
+

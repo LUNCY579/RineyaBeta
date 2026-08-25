@@ -403,7 +403,11 @@ one variable:
    language would be tuning the wrong thing.
 4. **A4′** — the cache-level span instrument, with its calibration gate.
 5. **B4, B2** — multi-turn persistence, then iterative re-scoring.
-6. **A5** — runtime cost. **Every number in this programme is still a benefit with no
+6. **A5** — runtime cost. *(Partially answered 2026-08-25: derived reach costs
+   **1.71x** at keep 0.50 and **2.48x** at keep 0.25 against the causal window on
+   rag_dev, while also scoring lower. Not thermally controlled, so A5 proper still
+   stands — but the programme is no longer in the position of having zero measured
+   costs.)* **Every number in this programme is still a benefit with no
    measured cost.** Note the thermal band: A3 is currently running at 91 °C, and the
    programme's own rule is that no throughput claim below 2× is defensible against a
    2.17× thermal band, so A5 must control temperature or it will measure the fan.

@@ -213,7 +213,20 @@ def main() -> None:
                      "prompt_tokens": n_prompt, "stored_kv": stored,
                      "visible_generated_tokens": visible, **quality})
         if (i + 1) % 100 == 0:
-            print(f"  {i + 1}/{len(records)}  {time.time() - t0:.0f}s", flush=True)
+            # Memory alongside progress. A run of this harness slowed monotonically
+            # (233/245/571/528 s per 100 cases) and then died with a CUDA illegal
+            # memory access; wall-clock alone could not distinguish a leak from
+            # thermal throttling, and there was no allocator number to look at.
+            # `reserved` is what matters for fragmentation: allocated can stay
+            # flat while reserved climbs, which is the signature that precedes an
+            # allocator failure.
+            if torch.cuda.is_available():
+                al = torch.cuda.memory_allocated() / 2 ** 20
+                rs = torch.cuda.memory_reserved() / 2 ** 20
+                print(f"  {i + 1}/{len(records)}  {time.time() - t0:.0f}s  "
+                      f"alloc {al:.0f} MiB  reserved {rs:.0f} MiB", flush=True)
+            else:
+                print(f"  {i + 1}/{len(records)}  {time.time() - t0:.0f}s", flush=True)
 
     summary = aggregate_quality_rows(rows)
     elapsed = time.time() - t0
