@@ -493,10 +493,16 @@ that runs, this programme has **no valid measurement of span length beyond 9 tok
 | 4096 | 30 | 1.00 | 1.00 | 1.00 | **36/36** | 1,501 MiB |
 | 1024 | **122** | 1.00 | 1.00 | 0.92 | 35/36 | **1,057 MiB** |
 
-Exact McNemar on the discordant pair: **p = 1.0000, indistinguishable**. So **7,864× is
-a property of the mechanism, not of the prefill schedule**, and compression figures do
-not need a chunk size attached to them. This was the largest open threat to the headline
-and it closes in the strengthening direction.
+Exact McNemar on the discordant pair: **p = 1.0000, indistinguishable**. The headline
+survives a 4× increase in eviction pressure.
+
+> **CORRECTED the same day, when chunk=2048 landed.** That cell scores **0.806** —
+> 1.00 / **0.42** / 1.00 — which is worse than *both* 4096 and 1024. **The chunk axis is
+> non-monotonic**, so the endpoints agreeing does not make it flat, and the claim
+> "compression figures do not need a chunk size attached" was written one cell too early.
+> It is withdrawn pending O13. What survives is narrower and still useful: the mechanism
+> does not degrade with eviction pressure per se, since the highest-pressure setting
+> (122 rounds) is the second-best of the three.
 
 **Two further observations.**
 
@@ -509,3 +515,40 @@ checked.
 chunk 110 of 123 and therefore faces **12** compressions instead of 3 — a 4× increase.
 The one lost needle appears at exactly the depth that gained the most rounds, so the
 failure is consistent with the measured mechanism rather than arbitrary.
+
+## O13 — the chunk axis is non-monotonic, and the round-count account does not explain it
+
+**Observed.** 128K, B=16, backward reach, identical in every other respect:
+
+| chunk | compressions | rounds faced at depth 0.5 | d0.1 | d0.5 | d0.9 | accuracy |
+|---:|---:|---:|---:|---:|---:|---:|
+| 4096 | 30 | 15 | 1.00 | 1.00 | 1.00 | **1.000** |
+| 2048 | 61 | 31 | 1.00 | **0.42** | 1.00 | 0.806 |
+| 1024 | 122 | 61 | 1.00 | 1.00 | 0.92 | 0.972 |
+
+Depth 0.5 faces 15 / 31 / 61 rounds and scores 1.00 / 0.42 / 1.00. **More rounds is not
+monotonically worse**, so O7's round-count account does not explain this on its own.
+
+**Ruled out.** The needle does not straddle a chunk boundary at any of the three sizes —
+it sits inside chunk 15, 30 and 61 respectively.
+
+**The failure signature is precise.** Seven of twelve failures at depth 0.5 are the
+4-of-5 truncation: `90190` → `9019`, `66445` → `6644`, `70176` → `7017`. The final token
+of the key span is lost, which is exactly the P2 fragmentation mode.
+
+**Leading candidate, untested.** Pooling operates on the *compressed cache*, not on the
+text. After a compression the cache holds B entries drawn from scattered original
+positions, so a `back=6` window spans six *cache entries*, not six tokens. The window's
+reach in text therefore depends on how compacted the cache is when the needle's
+protecting compression occurs — which is a function of chunk size and of where in the
+chunk the needle falls. If so, the effective reach is not a fixed quantity at all and
+§4.4's "backward reach" needs restating in cache coordinates.
+
+**Decisive test.** Log, at each compression, the original-position gap between adjacent
+cache entries in the pooling window. If the gap is ~1 at chunk 4096 and larger at 2048,
+the account holds. This is an instrumentation change to the existing trace tool and needs
+no new sweep.
+
+**Why this matters more than one cell.** If confirmed, it affects every reach result in
+§4.4 and §4.5, because those were all measured at chunk 4096 where the cache is least
+compacted at the critical moment.
