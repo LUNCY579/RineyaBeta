@@ -278,6 +278,13 @@ def main() -> None:
                          "sharing it runs unchanged -- the published Halo "
                          "cores do. Vocabulary and dtype differ and do not "
                          "matter to eviction.")
+    ap.add_argument("--sinks", type=int, default=4,
+                    help="always-kept prefix. Fixed at 4 in every result to "
+                         "date and never ablated, which matters because at "
+                         "B=16 that is 25%% of the budget: the headline claims "
+                         "EIGHT significance-chosen positions retrieve a needle, "
+                         "and if the sinks carry part of that the count is wrong. "
+                         "0 puts the whole budget under the score.")
     ap.add_argument("--select", choices=("significance","random","streaming"),
                     default="significance",
                     help="BASELINE arms. `random` keeps the same number of "
@@ -440,7 +447,7 @@ def main() -> None:
                     torch.cuda.empty_cache()
                     torch.cuda.reset_peak_memory_stats()
                     rec = (budget - 4) if args.select == 'streaming' else args.recent
-                    policy = (sig.Policy(budget=budget, sinks=4, recent=rec,
+                    policy = (sig.Policy(budget=budget, sinks=args.sinks, recent=rec,
                                          pool=args.pool,
                                          select=args.select,
                                          pool_back=args.pool_back,
@@ -529,7 +536,7 @@ def main() -> None:
          # right and the record was wrong, which is the harder failure to catch.
          "recent": ((b0 - 4) if args.select == "streaming" else args.recent),
          "recent_flag": args.recent, "trials": args.trials, "window": args.window,
-         "pool": args.pool,
+         "sinks": args.sinks, "pool": args.pool,
          "pool_back": args.pool_back, "pool_fwd": args.pool_fwd,
          "key_digits": args.key_digits,
          "grow": args.grow, "grow_max": args.grow_max,
