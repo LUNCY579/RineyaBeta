@@ -101,6 +101,12 @@ that property while extending span length:
 **Digit groups are the clean fix**: they extend the span axis arbitrarily while keeping
 the answer the only object of its kind, and they stay exactly-checkable.
 
+> **SIMPLIFIED 2026-08-25, no new code needed.** Verified on the tokeniser that a long
+> digit string stays *one token per digit* — 12, 20 and 30 digits give spans of exactly
+> 12, 20 and 30 tokens. So `--key-digits 20` already **is** a 20-token span, in filler
+> that contains no digits. Digit groups were unnecessary; the existing flag covers the
+> whole 20–40 token regime.
+
 **Experiment.** Groups of 4 digits, 1–8 groups (5–40 tokens), at 128K with derived reach,
 plus an uncompressed 16K gate at every span length.
 
