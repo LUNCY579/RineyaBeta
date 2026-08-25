@@ -278,7 +278,70 @@ principle. Untested here. Lower priority but high ceiling.
 
 ---
 
-## Ordering, and why
+## REVISION 2026-08-25 — the plan's top-priority item is dead, and what replaces it
+
+A1, A2 and A4 all ran. A1 and A2 did what a validity check is supposed to do: A2 forced
+a restatement of the headline, A1 turned up the non-monotonic chunk axis (O13, open).
+
+**A4 did not fail — it was killed by its own pre-stated gate, and that changes the
+plan's strategy section, not just its status table.** With a *full uncompressed cache*
+this model scores 0.000 on a 12-digit key, emitting 11 correct digits then diverging.
+No budget, window, or task redesign routes around a model's recall ceiling. So item 1
+of "what would make this mechanism genuinely strong" below — *a valid long-span
+measurement* — **cannot be obtained on this model through a generation-scored task.**
+
+### A4′ — span preservation measured in the CACHE, not through generation
+
+The replacement is not a different task; it is a different **instrument**. A4 tried to
+read span preservation through the model's mouth, so it inherited the model's recall
+limit. The quantity the mechanism actually controls is *how much of the evidence span
+survives eviction*, and that is directly observable.
+
+- **Metric.** Carry original-position identity through every gather (the machinery
+  already exists in `experiments/stabilizer/src/trace_cache_gaps.py`) and report, per
+  (layer, KV-head) stream, the fraction of the needle's positions still resident after
+  the final compression. P2.1 already did this at one span length and measured 79–90%
+  survival across the 224 streams.
+- **Why it dodges the ceiling.** Survival is a property of the cache, not of decoding.
+  A 40-token span can be measured for retention even when the model could never recite
+  it — which is exactly the regime real evidence occupies.
+- **Why it is worth doing.** §4.5's reach law is currently measured over d = 4, 5, 7, 9
+  by generation. If cache-level survival reproduces the *same* reach law over that
+  range, the law can then be extended to d = 20–40 on the instrument alone, with the
+  generation results serving as the calibration that licenses it.
+- **The pre-stated kill condition.** If cache-level survival does **not** reproduce the
+  known reach law over d = 4, 5, 7, 9, the instrument is not measuring what generation
+  measures and the extension is not licensed. Say so and stop.
+- **Known limitation to fix first.** `trace_cache_gaps.py` inspects **layer 0, head 0
+  only** and must be aggregated across all 224 streams before anything is read from it.
+  The current single-stream output must not be cited (see O13's stated limitation).
+- **Cost.** CPU/GPU-cheap relative to a generation sweep: no sampling, no scoring, one
+  forward pass per cell.
+
+**A4′ does not restore item 1 below.** It converts an unmeasurable quantity into a
+measurable proxy, and the proxy needs its own calibration before it carries weight. The
+honest position remains: *this programme has no generation-validated measurement of
+evidence spans beyond 9 tokens, and cannot get one on this model.*
+
+### Revised ordering from here
+
+1. **A3** *(running)* — n = 99 per depth. Correctly ordered: it was gated behind A1 and
+   A4, and both have now landed.
+2. **B1** — self-sizing budget. Unchanged as the highest value per hour, and now the
+   *leading* strategic item rather than the second, since A4 vacated the top slot.
+3. **A4′** — the cache-level span instrument, with its calibration gate.
+4. **B4, B2** — multi-turn persistence, then iterative re-scoring.
+5. **A5** — runtime cost. **Every number in this programme is still a benefit with no
+   measured cost.** Note the thermal band: A3 is currently running at 91 °C, and the
+   programme's own rule is that no throughput claim below 2× is defensible against a
+   2.17× thermal band, so A5 must control temperature or it will measure the fan.
+6. **O13** — the open anomaly. Not scheduled, because no candidate explanation survives;
+   it needs a new hypothesis before it needs GPU time.
+7. **C1, C2, B3, B5, B6, C3** — as below.
+
+---
+
+## Ordering, and why *(superseded by the revision above; kept as the record)*
 
 1. **A1, A2** *(running)* — cheap, and either could force a restatement of the headline.
 2. **A4** — the withdrawal is the largest hole; digit groups fix the design flaw cleanly.
@@ -300,8 +363,11 @@ in a good number early is exactly what this programme has repeatedly had to undo
 
 Not a bigger compression ratio. Three things:
 
-1. **A valid long-span measurement** (A4) — without it the method is unproven in the
-   regime that matters for real documents.
+1. ~~**A valid long-span measurement** (A4)~~ — **UNOBTAINABLE ON THIS MODEL.** The gate
+   fired: 0.000 at 12 digits with a full uncompressed cache. The method remains unproven
+   in the regime that matters for real documents, and on this hardware it will stay that
+   way. A4′ above offers a cache-level proxy, which needs its own calibration before it
+   counts. This is now a stated limitation of the programme rather than a task on it.
 2. **A self-sizing budget** (B1) — turns a tuned hyperparameter into a derived quantity,
    which is the same move that made derived reach beat fixed reach.
 3. **Multi-turn evidence** (B4) — the dominant deployment pattern, entirely untested.
