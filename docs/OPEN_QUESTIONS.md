@@ -177,6 +177,82 @@ It did not rule out a *model capability* ceiling, which this entry is about.
 
 ---
 
+## O9 — every long-context result uses ONE chunk size, and the schedule depends on it
+
+**Observed.** 124 of 132 committed result files use `chunk=4096`. At 128K that is 31
+chunks and **30 compressions**. At `chunk=1024` it would be 123 chunks and **122
+compressions — four times the eviction pressure** on the same evidence.
+
+**Why it matters.** O7 established that survival is governed by how many compression
+rounds a position faces: 27 at depth 0.1 against 3 at depth 0.9 produces a 9× difference
+in exposure. Chunk size is the knob that sets that number globally. If the headline
+(36/36 at B=16) holds only at 30 rounds and collapses at 122, the result is a property
+of the *schedule* rather than of the mechanism, and the compression figure is not
+transferable to a deployment that prefills differently.
+
+**This is the most consequential unasked question in the register.** It is also cheap.
+
+**Decisive test.** 128K, B=16, backward reach, at `chunk` ∈ {1024, 2048, 4096}. If
+accuracy holds at 1024, the mechanism is robust to eviction pressure and the claim
+strengthens. If it falls, the headline needs the chunk size attached to it.
+
+---
+
+## O10 — sinks are fixed at 4 and were never ablated with backward reach
+
+**Observed.** Every cell uses `sinks=4`, hardcoded rather than swept. At **B=16 that is
+25% of the entire budget**, leaving 8 heavy slots after the recent window.
+
+**Why it matters.** Cornerstone 1 measured that R2 places 46.3% of its attention mass on
+the first four positions, which is why sinks are pinned. But the headline result is
+"eight significance-chosen positions retrieve a needle from 125,826 tokens". If the four
+sinks are doing part of that work, the honest count is not eight.
+
+**Decisive test.** 128K, B=16, backward reach, at `sinks` ∈ {0, 2, 4, 8}. Sinks=0 with
+accuracy preserved would strengthen the claim considerably — the budget would be entirely
+significance-chosen. A collapse at sinks=0 bounds what the score alone achieves.
+
+---
+
+## O11 — is the score measuring importance, or similarity to the query?
+
+**Observed.** P2.2 measured that the score retains query-shaped framing at 54% and the
+payload it introduces at 35%, and §5.1 showed query-shaped distractors cost 0.361 where
+neutral ones cost nothing. Both say the score responds strongly to *lexical resemblance
+to the question*.
+
+**Why it matters conceptually.** If the significance score is largely a query-similarity
+index rather than an attention-importance measure, the contribution should be framed
+differently — closer to a retrieval index computed in attention space than to
+"accumulated importance". That changes the related-work positioning and what the method
+should be compared against.
+
+**It also predicts a failure mode not yet tested.** In real question-answering the
+question and the answer-bearing span often share few words. If the score depends on
+lexical overlap, it should degrade sharply there — which is pre-registered prediction P4
+in `PLAN_LONG_REASONING.md` and remains unrun.
+
+**Decisive test.** Rewrite the needle so it shares no vocabulary with the question while
+still containing the answer, and compare against the current framing at matched budget.
+
+---
+
+## O12 — the mechanism's own runtime cost is unmeasured
+
+**Observed.** Every number in this programme is a benefit: accuracy retained, memory
+saved. `grow_spans` iterates up to `grow_max` times per compression, and query-aware
+scoring runs an extra forward pass per chunk boundary.
+
+**Why it matters.** A practicability claim needs both sides. Compression that costs 30%
+of decode throughput is a different proposition from one that costs 2%, and neither has
+been measured.
+
+**Decisive test.** Wall-clock per compression round for centred pooling, fixed backward
+reach, and derived reach at matched budget; plus prefill time with and without
+query-aware scoring. The repository already has `measure_decode.py` for the decode side.
+
+---
+
 ## Closing an entry
 
 State the cause, cite the measurement that demonstrates it, and move the entry to a
