@@ -30,6 +30,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import math
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -46,6 +48,8 @@ DOCS = {
     "attention_shape": ROOT / "experiments/attention_shape/README.md",
     "kv_readme": ROOT / "experiments/kv_significance/README.md",
     "p2": ROOT / "experiments/stabilizer/results/FINDINGS_P2.md",
+    "c2paper": ROOT / "docs/PAPER_DRAFT_CORNERSTONE2.md",
+    "ledger": ROOT / "docs/CORNERSTONE_LEDGER.md",
 }
 
 
@@ -168,6 +172,42 @@ def pk(fname: str, depth: float | None = None, budget: int | None = None,
     if not rows:
         return None
     return sum(r["acc"] for r in rows) / len(rows)
+
+
+def cp_bound(n: int, tail: float) -> float:
+    """Clopper-Pearson bound for a cell with zero failures: tail ** (1/n).
+
+    Closed form, so this pin checks the ARITHMETIC of a bound the prose quotes,
+    not a measurement. It exists because 0.779 and 0.903 are the two numbers most
+    likely to be swapped for each other -- they are the same construction at
+    different n and different tails, and the pairing is easy to state backwards.
+    """
+    return tail ** (1.0 / n)
+
+
+def retracted_fit(which: str) -> float:
+    """Refit the WITHDRAWN scaling law from the B_half triple the ledger records.
+
+    HONESTY ABOUT SCOPE. `B_half = 0.141 * L**0.535` is retracted (it was fitted
+    from the centred window only). The ladders it was fitted on belong to the
+    cornerstone-1 programme and are not committed on this branch, so this cannot
+    be a measurement pin and must not be read as one. What it checks is that the
+    coefficient and exponent still quoted in the retraction record reproduce from
+    the three B_half values quoted beside them -- i.e. that a withdrawn figure
+    cannot drift into a different withdrawn figure while nothing watches it.
+    """
+    txt = DOCS["ledger"].read_text(encoding="utf-8")
+    m = re.search(r"\*\*([\d.]+) / ([\d.]+) / ([\d.]+)\*\* at 32K/64K/128K", txt)
+    if not m:
+        raise AssertionError("ledger no longer states the B_half triple")
+    bh = [float(g) for g in m.groups()]
+    ls = [math.log(L) for L in (32768, 65536, 131072)]
+    lb = [math.log(b) for b in bh]
+    mx = sum(ls) / 3, sum(lb) / 3
+    cov = sum((x - mx[0]) * (y - mx[1]) for x, y in zip(ls, lb))
+    var = sum((x - mx[0]) ** 2 for x in ls)
+    slope = cov / var
+    return slope if which == "exponent" else math.exp(mx[1] - slope * mx[0])
 
 
 def pk_depth_pooled(depth: float):  # currently unused -- see the note in CLAIMS
@@ -602,6 +642,59 @@ CLAIMS = [
                 require={"key_digits": 4, "pool_back": 3}), 5e-4, "0.972", "p2"),
     ("pool=7 exponent: e=0 depth 0.9", 0.1667,
      lambda: pk("pk_128k_pool7_e0.0.json", 0.9), 5e-4, "0.17", "findings"),
+
+    # --- A2: the sinks are load-bearing -------------------------------------
+    # Sinks were fixed at four in every earlier result and never ablated, so the
+    # headline read as "eight score-chosen positions retrieve a needle". These
+    # two cells are why it now reads "four sinks PLUS eight". sinks=0 gets the
+    # freed slots -- 12 score-chosen against 8 -- and still scores zero.
+    ("A2: sinks=0 with 12 score-chosen slots", 0.0000,
+     lambda: pk("pk_128k_B16_sinks0.json",
+                require={"sinks": 0, "key_digits": 5}), 5e-4, "0.000", "c2paper"),
+    ("A2: sinks=2 with 10 score-chosen slots", 1.0000,
+     lambda: pk("pk_128k_B16_sinks2.json",
+                require={"sinks": 2, "key_digits": 5}), 5e-4, "1.000", "c2paper"),
+
+    # --- O13: the chunk axis is non-monotonic, at a second seed --------------
+    # One bad cell between two perfect neighbours is a run; two seeds is a fact.
+    # The control pins that the seed itself is not the cause.
+    ("O13: chunk 2048, seed B", 0.8333,
+     lambda: pk("pk_128k_B16_chunk2048_seedB.json",
+                require={"chunk": 2048, "sinks": 4}), 5e-4, "0.833", "c2paper"),
+    ("O13: chunk 4096 control, seed B", 1.0000,
+     lambda: pk("pk_128k_B16_chunk4096_seedB.json",
+                require={"chunk": 4096, "sinks": 4}), 5e-4, "1.000", "c2paper"),
+
+    # --- A4: the span axis is capped by the MODEL, not by the mechanism ------
+    # budget=0 is no compression at all. A fall here is recall, not eviction,
+    # and it is why section 4.5's reach law stops at d=9.
+    ("A4: 12-digit key, full cache, no eviction", 0.0000,
+     lambda: pk("pk_16k_d12_full.json", budget=0,
+                require={"key_digits": 12}), 5e-4, "0.000", "c2paper"),
+    ("A4: 20-digit key, full cache", 0.0000,
+     lambda: pk("pk_16k_d20_full.json", budget=0,
+                require={"key_digits": 20}), 5e-4, "0.000", "c2paper"),
+    ("A4: 30-digit key, full cache", 0.0000,
+     lambda: pk("pk_16k_d30_full.json", budget=0,
+                require={"key_digits": 30}), 5e-4, "0.000", "c2paper"),
+
+    # --- figures the prose derives rather than measures ----------------------
+    # These five were quoted in the documents with nothing checking them. Three
+    # are arithmetic on pinned quantities; two are the record of a retraction.
+    ("decoy gap: bare minus framed", 0.3611,
+     lambda: pk("pk_128k_B64_dist16_bare.json",
+                require={"distractors": 16, "distractor_style": "bare"})
+             - pk("pk_128k_B64_dist16_framed.json",
+                  require={"distractors": 16, "distractor_style": "framed"}),
+     5e-4, "0.361", "c2paper"),
+    ("CP lower bound, n=12, one-sided 95%", 0.7791,
+     lambda: cp_bound(12, 0.05), 5e-4, "0.779", "ledger,c2paper"),
+    ("CP bound, n=36, two-sided 2.5% tail", 0.9026,
+     lambda: cp_bound(36, 0.025), 5e-4, "0.903", "ledger,c2paper"),
+    ("RETRACTED fit: coefficient", 0.1407,
+     lambda: retracted_fit("coef"), 5e-4, "0.141", "ledger,c2paper"),
+    ("RETRACTED fit: exponent", 0.5350,
+     lambda: retracted_fit("exponent"), 5e-4, "0.535", "ledger,c2paper"),
 ]
 
 

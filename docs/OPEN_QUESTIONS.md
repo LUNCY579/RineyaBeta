@@ -360,7 +360,16 @@ Both clear a floor comfortably. This model *can* chain hops, unlike its performa
 so stage 3's compression numbers will measure the mechanism rather than the model's
 incapacity. Stage 3 is viable and the hop ladder can proceed.
 
-## O8 — PARTLY RESOLVED 2026-08-24: the model does not degrade with span length
+## O8 — ~~PARTLY RESOLVED~~ **WITHDRAWN 2026-08-24**: the gate below is confounded
+
+> **Read the O1/O8 entry further down before using anything in this section.** The gate
+> used the word-phrase task, whose filler is also words, so the model can answer with
+> filler and be scored wrong for reasons unrelated to the cache. Filler recitation
+> accounts for **100% of failures in the uncompressed control**. The table below is
+> retained as the record of what was measured, not as a result. The digit-span axis was
+> then tried instead and hit a model ceiling — see A4.
+
+### The withdrawn gate, for the record: "the model does not degrade with span length"
 
 Full cache, no compression, 16K:
 
@@ -486,7 +495,12 @@ supply — rare tokens, proper nouns, or a symbol class absent from the haystack
 restoring the "only object of its kind" property that makes an answer checkable. Until
 that runs, this programme has **no valid measurement of span length beyond 9 tokens.**
 
-## O9 — RESOLVED 2026-08-24: the headline survives 4x the eviction pressure
+## O9 — RESOLVED 2026-08-24 **with one qualification added 2026-08-25**: the headline survives 4x the eviction pressure
+
+> **Qualification.** This entry compares chunk 4096 against 1024 only, and the honest
+> reading of those two cells is "eviction *pressure* does not degrade the headline". It
+> is **not** "the chunk axis is safe": chunk **2048** — between the two rows below —
+> scores 0.806/0.833 at two seeds. See O13, which remains open.
 
 | chunk | compressions at 128K | d0.1 | d0.5 | d0.9 | accuracy | peak |
 |---:|---:|---:|---:|---:|---:|---:|

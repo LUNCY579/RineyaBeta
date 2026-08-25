@@ -92,5 +92,8 @@ artifacts/adapters/**/*.safetensors
 experiments/**/results/**/results.jsonl
 experiments/**/results/*.log
 
-# Copied published cores (2.3 GB each) -- provenance is in artifacts/halo_configs/
-artifacts/Rineya-Halo-*/model.safetensors
+# Copied published cores (2.3 GB each) -- provenance is in artifacts/halo_configs/,
+# which is committed. The rule used to name model.safetensors only, which left the
+# tokenizer and config files stageable: a single `git add -A` would have vendored a
+# second copy of metadata this repo already tracks. Ignore the directories whole.
+artifacts/Rineya-Halo-*/

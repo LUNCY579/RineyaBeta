@@ -45,9 +45,14 @@ matches or beats the best *hand-tuned* fixed reach at every span length without 
 told the span length.
 
 Against controls the mechanism has never previously faced, the score is what works: at
-128K with eight heavy slots, significance scores **36/36** where equal-budget random and
-StreamingLLM both score **0/36** (*p* = 2.9 × 10⁻¹¹). The result transfers unchanged to
-a separately published core.
+128K with a 16-slot budget — four attention sinks, four recent, **eight score-chosen** —
+significance scores **36/36** where equal-budget random and StreamingLLM both score
+**0/36** (*p* = 2.9 × 10⁻¹¹). The result transfers unchanged to a separately published
+core.
+
+An ablation shows the sinks are **not optional overhead but load-bearing**: with
+`sinks=0` and *more* score-chosen slots (12 against 8), accuracy is **0.000**. The claim
+is therefore four sinks *plus* eight score-chosen positions, not eight positions alone.
 
 We report where it fails. Sixteen query-shaped distractors take accuracy from 1.000 to
 0.611, and budget alone restores it — competition is a capacity cost, not a scoring
@@ -87,12 +92,14 @@ the observation that its remaining failures had a signature nobody had looked at
 6. **Deriving the reach beats tuning it** (§4.6).
 7. **Controls**: equal-budget random and StreamingLLM both score 0/36 where the
    mechanism scores 36/36 (§4.7).
-8. **Transfer** to a separately published core with no code change (§4.8), and
-   **robustness to the prefill schedule**: at 122 compressions instead of 30 the
-   result is statistically indistinguishable (*p* = 1.0000) while peak memory
-   falls 30%.
-9. **One measured failure condition and one withdrawn experiment** (§5), reported
-   rather than omitted.
+8. **Transfer** to a separately published core with no code change (§4.8). Eviction
+   pressure per se does not degrade it — at 122 compressions instead of 30 the result
+   is statistically indistinguishable (*p* = 1.0000) while peak memory falls 30% — but
+   the chunk axis is **non-monotonic** and we cannot yet explain it (§5.3).
+9. **The attention sinks are load-bearing** (§4.9): removing them collapses accuracy to
+   0.000 despite a larger score-chosen budget.
+10. **Two measured failure conditions, one withdrawn experiment, and one unexplained
+    anomaly** (§5), reported rather than omitted.
 
 ---
 
@@ -310,6 +317,29 @@ Halo matches it exactly.
 
 ---
 
+### 4.9 The attention sinks are load-bearing
+
+Sinks were fixed at four in every result and never ablated. At B=16 they are 25% of the
+budget, so the natural reading of §4.7 is "eight score-chosen positions retrieve a needle
+from 125,826 tokens". That reading is wrong.
+
+| sinks | score-chosen slots | d0.1 | d0.5 | d0.9 | accuracy |
+|---:|---:|---:|---:|---:|---:|
+| **0** | **12** | 0.00 | 0.00 | 0.00 | **0.000** |
+| 2 | 10 | 1.00 | 1.00 | 1.00 | **1.000** |
+| 4 | 8 | 1.00 | 1.00 | 1.00 | **1.000** |
+
+With no sinks the mechanism scores zero *while holding more score-chosen slots than the
+configuration that scores 1.000*. The parent programme measured that this model places
+46.3% of its attention mass on the first four positions; removing them breaks the
+attention distribution past anything the score can recover.
+
+Two sinks suffice, so the requirement is "some sinks", not four — but it is a
+requirement, and the correct statement of the headline is **four sinks plus eight
+score-chosen positions**.
+
+---
+
 ## 5. Where it fails
 
 ### 5.1 Competition is a capacity cost, not a scoring failure
@@ -344,6 +374,32 @@ The consequence is a stated limit rather than a result: **this work has no valid
 measurement of evidence spans longer than 9 tokens.** §4.5's span law is measured on
 digit spans, where the confound cannot occur, and is unaffected.
 
+We then asked whether the digit axis could be pushed instead, and it cannot: a 12-digit
+key fails **with the cache uncompressed** (§6, limitation 3). So the 9-token limit is not an artefact
+of the withdrawn task — it is where this model's verbatim recall ends.
+
+---
+
+### 5.3 The chunk axis is non-monotonic and we cannot explain it
+
+| chunk | compressions at 128K | d0.5 | accuracy |
+|---:|---:|---:|---:|
+| 4096 | 30 | 1.00 | **1.000** |
+| **2048** | 61 | **0.42 / 0.50** | **0.806 / 0.833** |
+| 1024 | 122 | 1.00 | 0.972 |
+
+The two chunk-2048 figures are independent seeds; it reproduces. Eviction pressure alone
+does not explain it, since the highest-pressure setting is the second best. We have
+eliminated: differing data (the prompt is byte-identical and the failing needles pass at
+both other chunk sizes), a prefill bug (chunked prefill is bit-identical to single-shot
+at all three sizes with compression off), boundary straddling (the needle lies inside one
+chunk at every size), and pooling-window fragmentation (a `back=6` window spans exactly
+six tokens with no gaps at both 4096 and 2048).
+
+The failures carry the fragmentation signature — seven of twelve are the 4-of-5
+truncation. **No candidate explanation currently survives**, and we report it rather than
+omit it.
+
 ---
 
 ## 6. Limitations
@@ -355,12 +411,19 @@ digit spans, where the confound cannot occur, and is unaffected.
 2. **One task family.** Everything is passkey-shaped. The filler contains **no digits at
    all**, so the answer is the only object of its kind and a regex scores 1.000 with no
    model. These are span-*preservation* measurements, not retrieval-difficulty ones.
-3. **No uncompressed reference above ~32K.** A 64K full cache OOM'd at 6,425.6 MiB
+3. **The span axis cannot be extended on this model, and we measured why.** With a *full
+   cache and no eviction*, the model scores **0.000** on a 12-digit key, emitting 11
+   correct digits then diverging — the same ceiling at 20 and 30 digits. So the reach law
+   of §4.5 is measured over d = 4, 5, 7, 9 and **no experimental design can extend it
+   here**; testing the 20–40 token spans that real evidence occupies requires a model
+   with greater verbatim-recall capacity. Unlike the withdrawal in §5.2, this is a
+   property of the model rather than a flaw we could fix.
+4. **No uncompressed reference above ~32K.** A 64K full cache OOM'd at 6,425.6 MiB
    against a highest-survived 4,972.9 MiB. Above 32K the claim is not "cheaper than
    full" but "runs at all".
-4. **The mechanism's own runtime cost is unmeasured.** Derived reach iterates; every
+5. **The mechanism's own runtime cost is unmeasured.** Derived reach iterates; every
    number here is a benefit.
-5. **One model family.** Halo shares the architecture; nothing is shown across scales or
+6. **One model family.** Halo shares the architecture; nothing is shown across scales or
    head configurations.
 
 ---

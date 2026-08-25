@@ -575,7 +575,8 @@ claim actually rests on. Thirty-eight causal and derived-reach result files exis
 before either of these arms ran.
 
 128K, B=16 — eight heavy slots after sinks and recent — identical budget, seed, and the
-same twelve needles at every depth:
+same twelve needles at every depth. (Read this table with the sink ablation below: the
+eight heavy slots do **not** work without the four sinks under them.)
 
 | arm | d0.1 | d0.5 | d0.9 | accuracy |
 |---|---:|---:|---:|---:|
@@ -639,3 +640,63 @@ Stage 2 was never given the capability gate stage 3 got. See **O8** in
 `docs/OPEN_QUESTIONS.md`; the uncompressed reference at W=3/12/20 is running, and until
 it reports, the fall from 1.000 at five tokens to 0.528 at twenty cannot be attributed
 to the mechanism.
+
+---
+
+## 2026-08-25: three results that change how the earlier sections must be read
+
+### The sinks are load-bearing, so the headline decomposition matters
+
+Sinks sat at four in every arm above and were never ablated, so "eight heavy slots
+retrieve a needle from 125,826 tokens" was the natural reading. It is wrong.
+
+| sinks | heavy (score-chosen) slots | d0.1 | d0.5 | d0.9 | accuracy |
+|---:|---:|---:|---:|---:|---:|
+| **0** | **12** | 0.00 | 0.00 | 0.00 | **0.000** |
+| 2 | 10 | 1.00 | 1.00 | 1.00 | **1.000** |
+| 4 | 8 | 1.00 | 1.00 | 1.00 | **1.000** |
+
+`sinks=0` gets the freed slots — twelve score-chosen against eight — and still scores
+zero. P1 measured this model placing 46.3% of its attention mass on the first four
+positions; removing them breaks the attention distribution past what any ranking can
+recover. **Two sinks suffice**, so the requirement is "some sinks", not "four", but it
+is a requirement. Every headline above should be read as *four sinks plus eight
+score-chosen positions*.
+
+### The span axis is capped by the model, and the cap is measured
+
+With a **full cache and no eviction at all** at 16K:
+
+| span (digits) | accuracy | what the model emits |
+|---:|---:|---|
+| 12 | **0.000** | 11 correct digits, then diverges |
+| 20 | **0.000** | 11 of 20 |
+| 30 | **0.000** | 11 of 30 |
+
+This was the pre-stated kill condition for the corrected span experiment, and it fired.
+The reach law is therefore measured over d = 4, 5, 7, 9 and **cannot be extended on this
+model** — not by any budget, window, or task redesign. Testing the 20–40 token spans
+real evidence occupies needs a model with more verbatim-recall capacity. Without this
+gate, 0.000 at d=20 compressed would have been written up as a compression failure.
+
+### The chunk axis is non-monotonic, and no explanation survives
+
+| chunk | compressions at 128K | d0.5 | accuracy |
+|---:|---:|---:|---:|
+| 4096 | 30 | 1.00 | **1.000** |
+| **2048** | 61 | **0.42 / 0.50** | **0.806 / 0.833** |
+| 1024 | 122 | 1.00 | 0.972 |
+
+Two independent seeds for chunk 2048; it reproduces. Eviction pressure alone cannot
+explain it — the highest-pressure setting is the second best. Eliminated so far:
+differing data (byte-identical prompts; the failing needles pass at both other chunk
+sizes), a chunked-prefill bug (bit-identical to single-shot at all three sizes with
+compression off), boundary straddling (the needle lies inside one chunk at every size),
+and window fragmentation (`trace_cache_gaps.py` measured a `back=6` window spanning
+exactly six tokens with gap 1 at both 4096 and 2048).
+
+Seven of twelve failures carry the 4-of-5 truncation signature, which is the P2
+fragmentation mode. **The cause is open**, and it is recorded here rather than dropped
+because the earlier "survives 4× the eviction pressure" result compares only 4096
+against 1024 and steps over the cell between them.
+

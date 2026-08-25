@@ -40,7 +40,7 @@ questions and gate different claims.
 
 *What must be true for the current claims to survive review. Nothing here is optional.*
 
-### A1. Chunk-size robustness — **the biggest single threat** *(running)*
+### A1. Chunk-size robustness — **the biggest single threat** *(DONE 2026-08-25 — and it found something: 4096/1024 are fine, 2048 is not. See O13, open)*
 
 **Follows from.** O7: survival is governed by how many compression rounds a position
 faces (27 at depth 0.1 vs 3 at depth 0.9). Chunk size sets that count globally: 128K at
@@ -54,7 +54,7 @@ size. That would be a serious limitation, not a footnote.
 
 **Cost.** 2 cells, ~35 min.
 
-### A2. Sink ablation *(running)*
+### A2. Sink ablation *(DONE 2026-08-25 — sinks are load-bearing; sinks=0 scores 0.000 with MORE score-chosen slots. Forced a headline restatement)*
 
 **Follows from.** At B=16 the budget is 4 sinks + 4 recent + 8 heavy. Sinks are 25% of
 the budget and were hardcoded, never swept. The headline claims *eight* score-chosen
@@ -67,7 +67,7 @@ restated as "eight score-chosen plus four pinned".
 
 **Cost.** 2 cells, ~35 min.
 
-### A3. Statistical power — the last gate on the word "lossless"
+### A3. Statistical power — the last gate on the word "lossless" *(running: n=99 per depth)*
 
 **Follows from.** Each cell draws the same 12 keys at all three depths, so a 36-trial row
 is 12 independent needles. A perfect cell supports a 95% Clopper–Pearson lower bound of
@@ -82,7 +82,7 @@ between n=299 and n=517.
 
 **Cost.** ~5 GPU-hours.
 
-### A4. A corrected long-span experiment — **the highest-value single item**
+### A4. A corrected long-span experiment — ~~**the highest-value single item**~~ *(DONE 2026-08-25 — KILLED BY ITS OWN GATE: this model cannot recite past ~11 digits, so the span axis is unmeasurable here at any budget)*
 
 **Follows from.** The withdrawal. Real evidence spans run 20–40 tokens and we have no
 valid measurement past 9.
