@@ -51,8 +51,10 @@ a separately published core.
 
 We report where it fails. Sixteen query-shaped distractors take accuracy from 1.000 to
 0.611, and budget alone restores it — competition is a capacity cost, not a scoring
-failure. A 20-token evidence span collapses to 0.528 and we cannot yet attribute that
-between span length and context length.
+failure. We also withdraw a word-phrase variant built to extend the span axis past nine
+tokens: its filler was made of words, like the payload, so the model could answer with
+filler and be scored wrong for reasons unrelated to the cache. Consequently this work
+has **no valid measurement of evidence spans longer than nine tokens**.
 
 ---
 
@@ -86,7 +88,8 @@ the observation that its remaining failures had a signature nobody had looked at
 7. **Controls**: equal-budget random and StreamingLLM both score 0/36 where the
    mechanism scores 36/36 (§4.7).
 8. **Transfer** to a separately published core with no code change (§4.8).
-9. **Two measured failure conditions** (§5), reported rather than omitted.
+9. **One measured failure condition and one withdrawn experiment** (§5), reported
+   rather than omitted.
 
 ---
 
