@@ -438,3 +438,50 @@ mechanism is not simply "reach the label", and no replacement law is stated here
 required backward reach *tracks the evidence span* and is not a constant. d=7 at back=4
 scores 0.000 where d=5 at back=4 scores 1.000. That is why deriving the reach beats
 tuning it, and it does not depend on the exact form of the law.
+
+## O1 / O8 — RESOLVED 2026-08-24: the word-phrase task is confounded, and the flaw is mine
+
+**The span-length results of stage 2 do not measure span length.** They are contaminated
+by a task-design error, and the evidence is direct.
+
+Failures where the model recites the **filler** instead of the payload:
+
+| cell | depth | failures | filler-recitations |
+|---|---:|---:|---:|
+| W=3 compressed | 0.9 | 9 | **9 (100%)** |
+| W=20 compressed | 0.9 | 8 | 6 (75%) |
+| W=12 compressed | 0.5 | 1 | 1 (100%) |
+| **W=3 uncompressed** | all | 4 | **4 (100%)** |
+| **W=20 uncompressed** | 0.5, 0.9 | 2 | **2 (100%)** |
+
+Emitted text: `"The grass is green. The sky is blue. The su…"`, `"green. blue. yellow."`
+
+**It occurs in the uncompressed cells too**, so it is a property of the task rather than
+of compression.
+
+**The cause.** Passkey's filler contains **no digits at all**, so a filler recitation can
+never be mistaken for an answer — the answer is the only object of its kind in the
+context. Building the word-phrase task for stage 2, I made the payload out of *words*,
+and the filler is also words (`grass`, `green`, `sky`, `blue`). That removed the property
+that made the task scoreable, and the model answers with filler at depths where filler
+dominates the recent window.
+
+**Consequences, stated plainly.**
+
+1. The span-length curve **0.750 (W=3) / 0.861 (W=12) / 0.528 (W=20)** is **withdrawn as
+   a span-length measurement**. It is non-monotonic, and the shortest span scores worse
+   than the middle one, because confusability rather than span length drives it.
+2. **O1 is resolved**: the W=20 collapse is substantially this confound, not evidence
+   that the mechanism fails on long spans.
+3. **O8 is fully resolved**: the depth inversion that triggered it is filler dominating
+   the recent window at late depths, which has nothing to do with the compression
+   schedule.
+4. **§4.5's span law is unaffected** and stands. It is measured on *digit* spans
+   (d = 4, 5, 7, 9), where the filler contains no digits and the confound cannot occur.
+   The `d=7 back=4 → 0.000` cell against `d=5 back=4 → 1.000` remains clean evidence
+   that required reach tracks the span.
+
+**What a corrected stage 2 needs.** A payload drawn from a vocabulary the filler cannot
+supply — rare tokens, proper nouns, or a symbol class absent from the haystack —
+restoring the "only object of its kind" property that makes an answer checkable. Until
+that runs, this programme has **no valid measurement of span length beyond 9 tokens.**

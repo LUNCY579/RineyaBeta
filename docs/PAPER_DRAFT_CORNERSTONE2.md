@@ -322,12 +322,21 @@ But budget alone restores it: B=128 → 0.806, B=256 → 0.944, **B=512 → 1.00
 still finds the right span; it cannot afford it. Competition costs **32×** of
 compression — 7,864× down to 246×.
 
-### 5.2 A 20-token span collapses, and we cannot yet say why
+### 5.2 A word-phrase span task we had to withdraw
 
-At 128K/B=256 with a 20-token evidence span, derived reach scores **0.528**. The
-uncompressed reference at 16K for the same span is 0.944, so this is a real compression
-cost — but the two cells differ in *both* span length and context length, and the
-matched cell is not yet run. We report it unattributed rather than assign it a cause.
+We built a word-phrase variant to extend the span axis past what digits allow, and
+**withdraw its results**. The payload was made of words and the haystack filler is also
+words, so the model can answer with filler and be scored wrong for reasons unrelated to
+the cache. Filler recitation accounts for 100% of failures at W=3 depth 0.9, 75% at
+W=20 depth 0.9, and **100% of failures in the uncompressed control** — so it is a
+property of the task, not of compression.
+
+Passkey's filler contains no digits at all, which is what makes the answer the only
+object of its kind and therefore checkable. The word variant removed that property.
+
+The consequence is a stated limit rather than a result: **this work has no valid
+measurement of evidence spans longer than 9 tokens.** §4.5's span law is measured on
+digit spans, where the confound cannot occur, and is unaffected.
 
 ---
 
