@@ -446,7 +446,12 @@ def main() -> None:
                     ids = tok(text, return_tensors="pt").to(args.device)["input_ids"]
                     torch.cuda.empty_cache()
                     torch.cuda.reset_peak_memory_stats()
-                    rec = (budget - 4) if args.select == 'streaming' else args.recent
+                    # budget - SINKS, not budget - 4. Hardcoding 4 here silently
+                    # broke streaming for any other sink count: heavy() would be
+                    # (sinks - 4) instead of 0, so the baseline would stop being
+                    # StreamingLLM without saying so.
+                    rec = ((budget - args.sinks) if args.select == 'streaming'
+                           else args.recent)
                     policy = (sig.Policy(budget=budget, sinks=args.sinks, recent=rec,
                                          pool=args.pool,
                                          select=args.select,
@@ -534,7 +539,7 @@ def main() -> None:
          # to budget-4 so heavy() reaches 0, and recording args.recent made the
          # manifest claim heavy=8 for a run that had heavy=0. The policy was
          # right and the record was wrong, which is the harder failure to catch.
-         "recent": ((b0 - 4) if args.select == "streaming" else args.recent),
+         "recent": ((b0 - args.sinks) if args.select == "streaming" else args.recent),
          "recent_flag": args.recent, "trials": args.trials, "window": args.window,
          "sinks": args.sinks, "pool": args.pool,
          "pool_back": args.pool_back, "pool_fwd": args.pool_fwd,
