@@ -1,0 +1,255 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 16,
+  "recent_flag": 16,
+  "trials": 12,
+  "window": 16,
+  "pool": 7,
+  "pool_back": 8,
+  "pool_fwd": 0,
+  "key_digits": 9,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 3000.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125810,
+      "budget": 64,
+      "depth": 0.1,
+      "acc": 0.6666666666666666,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 636790627,
+          "got": "636790627.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 719869860,
+          "got": "719869860.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 836245547,
+          "got": "836245547.",
+          "hit": true
+        },
+        {
+          "key": 367466803,
+          "got": "367466803.",
+          "hit": true
+        },
+        {
+          "key": 855385889,
+          "got": "855385889.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 561750237,
+          "got": "56175023. \n\nRemember",
+          "hit": false
+        },
+        {
+          "key": 756922728,
+          "got": "756922728.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 809917125,
+          "got": "80991712. \n\nRemember",
+          "hit": false
+        },
+        {
+          "key": 562402844,
+          "got": "562402844.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 592963543,
+          "got": "59296354. \n\nRemember",
+          "hit": false
+        },
+        {
+          "key": 777666460,
+          "got": "777666460. Remember",
+          "hit": true
+        },
+        {
+          "key": 907823613,
+          "got": "90782361. \n\nRemember",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125810,
+      "budget": 64,
+      "depth": 0.5,
+      "acc": 0.8333333333333334,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 636790627,
+          "got": "636790627. Remember",
+          "hit": true
+        },
+        {
+          "key": 719869860,
+          "got": "7198698607.",
+          "hit": true
+        },
+        {
+          "key": 836245547,
+          "got": "836245547. Remember",
+          "hit": true
+        },
+        {
+          "key": 367466803,
+          "got": "367466803.",
+          "hit": true
+        },
+        {
+          "key": 855385889,
+          "got": "855385889. Remember",
+          "hit": true
+        },
+        {
+          "key": 561750237,
+          "got": "561750237. Remember",
+          "hit": true
+        },
+        {
+          "key": 756922728,
+          "got": "7569227281.",
+          "hit": true
+        },
+        {
+          "key": 809917125,
+          "got": "809917125. Remember",
+          "hit": true
+        },
+        {
+          "key": 562402844,
+          "got": "562402844.",
+          "hit": true
+        },
+        {
+          "key": 592963543,
+          "got": "5929635471.",
+          "hit": false
+        },
+        {
+          "key": 777666460,
+          "got": "777666460. Remember",
+          "hit": true
+        },
+        {
+          "key": 907823613,
+          "got": "90782361. Remember the",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125810,
+      "budget": 64,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1506.9,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 636790627,
+          "got": "636790627.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 719869860,
+          "got": "719869860.",
+          "hit": true
+        },
+        {
+          "key": 836245547,
+          "got": "836245547. Here",
+          "hit": true
+        },
+        {
+          "key": 367466803,
+          "got": "3674668036.",
+          "hit": true
+        },
+        {
+          "key": 855385889,
+          "got": "855385889. Here",
+          "hit": true
+        },
+        {
+          "key": 561750237,
+          "got": "561750237. Here",
+          "hit": true
+        },
+        {
+          "key": 756922728,
+          "got": "756922728.\n\nSo",
+          "hit": true
+        },
+        {
+          "key": 809917125,
+          "got": "809917125. Here",
+          "hit": true
+        },
+        {
+          "key": 562402844,
+          "got": "562402844.",
+          "hit": true
+        },
+        {
+          "key": 592963543,
+          "got": "592963543. So",
+          "hit": true
+        },
+        {
+          "key": 777666460,
+          "got": "777666460.",
+          "hit": true
+        },
+        {
+          "key": 907823613,
+          "got": "9078236137.",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}
