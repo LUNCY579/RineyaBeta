@@ -1,0 +1,256 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 4,
+  "recent_flag": 4,
+  "trials": 12,
+  "window": 16,
+  "sinks": 0,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 2200.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 1501.2,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "7575. \n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "8567. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "999. So, the answer is 9",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "426. So, the answer is 4",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "663. So the answer is 66",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "901. So, the answer is 9",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "96. The pass key is 96.",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "664. So the answer is 66",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "701. So the answer is 70",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "927. So, the answer is 9",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "607. \n\nSo the answer is 6",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "8467. \n\nSo the answer is",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 1501.2,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75. So the answer is 75.",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "85. So, the answer is 85",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "99. So, the answer is 99",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "42. So the answer is 42.",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "666. So, the answer is 6",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "90. So, the answer is 90",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "96. So, the answer is 96",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "666. So, the answer is 6",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "70. So, the answer is 70",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "92. So, the answer is 92",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "60. So, the answer is 60",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "84. So the answer is 84.",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 1501.2,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "755. So the answer is 75",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "856. So the answer is 85",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "998. So the answer is 99",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "426. So the answer is 42",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "6632. So the answer is 6",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "901. So the answer is 90",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "9669. So the answer is 9",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "664. So the answer is 66",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "701. So the answer is 70",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "927. So the answer is 92",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "607. So the answer is 60",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "846. So the answer is 84",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

@@ -552,3 +552,65 @@ no new sweep.
 **Why this matters more than one cell.** If confirmed, it affects every reach result in
 §4.4 and §4.5, because those were all measured at chunk 4096 where the cache is least
 compacted at the critical moment.
+
+## O13 — CONFIRMED 2026-08-25: the chunk-2048 anomaly reproduces at a fresh seed
+
+| cell | d0.1 | d0.5 | d0.9 | accuracy |
+|---|---:|---:|---:|---:|
+| chunk 2048, seed A | 1.00 | 0.42 | 1.00 | 0.806 |
+| chunk 2048, **seed B** | 1.00 | **0.50** | 1.00 | **0.833** |
+| chunk 4096, seed A | 1.00 | 1.00 | 1.00 | 1.000 |
+| chunk 4096, **seed B** | 1.00 | 1.00 | 1.00 | **1.000** |
+
+**It is real, not a bad run.** Two independent seeds put chunk 2048 at 0.42/0.50 on
+depth 0.5 while chunk 4096 is perfect at both. The chunk axis is genuinely
+non-monotonic and the cause remains open — the cache-coordinate hypothesis is the
+leading candidate and its instrumentation is written (`trace_cache_gaps.py`).
+
+## A2 — RESOLVED 2026-08-25: the sinks are NOT optional, and the headline was wrong
+
+| sinks | heavy slots | d0.1 | d0.5 | d0.9 | accuracy |
+|---:|---:|---:|---:|---:|---:|
+| **0** | **12** | 0.00 | 0.00 | 0.00 | **0.000** |
+| 2 | 10 | 1.00 | 1.00 | 1.00 | **1.000** |
+| 4 | 8 | 1.00 | 1.00 | 1.00 | **1.000** |
+
+**With no sinks the mechanism scores zero — while having MORE score-chosen slots (12
+against 8).** So attention sinks are load-bearing, not budget overhead, which is
+consistent with cornerstone 1's measurement that this model places 46.3% of its
+attention mass on the first four positions. Remove them and the attention distribution
+is broken; nothing the score does can recover it.
+
+**The headline must be restated.** "Eight significance-chosen positions retrieve a
+needle from 125,826 tokens" is wrong. It is **four sinks plus eight score-chosen
+positions**, and the sinks are required. What the ablation *does* establish is that
+**two sinks suffice** — sinks=2 with 10 heavy slots is also perfect — so the
+requirement is "some sinks", not "four".
+
+## A4 — KILLED BY ITS OWN GATE 2026-08-25: the model cannot recite past ~11 digits
+
+| span (digits) | uncompressed 16K | compressed 128K |
+|---:|---:|---:|
+| 12 | **0.000** | 0.000 |
+| 20 | **0.000** | 0.000 |
+| 30 | **0.000** | 0.000 |
+
+The **uncompressed** column is the finding. With a full cache and no eviction at all,
+the model scores zero at 12 digits. It emits **11 correct digits then diverges** — the
+same ceiling at d=20 and d=30 (`11/20`, `11/30`).
+
+This is the kill test stated in advance: *"accuracy falls with span length in the gate
+as well → the model cannot recite long payloads and the axis is unmeasurable on this
+model, which is itself a finding worth stating."*
+
+**Consequences.**
+
+1. **This programme cannot measure evidence spans beyond ~9–11 tokens on this model**,
+   and no experimental design fixes that — it is a property of the model, not of the
+   task or the cache. The word-phrase attempt failed for a different reason
+   (confounded filler); this attempt fails for a reason no design can route around.
+2. The span law of §4.5 is therefore measured over d = 4, 5, 7, 9 and **cannot be
+   extended on this hardware**. Testing 20–40 token evidence needs a model with a
+   larger verbatim-recall capacity.
+3. The gate earned its place. Without it, 0.000 at d=20 compressed would have been
+   reported as a catastrophic compression failure. It is a model ceiling.

@@ -1,0 +1,256 @@
+{
+  "model": "artifacts/Rineya-Halo-1.2.0-devfreeze",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 512,
+  "recent_flag": 512,
+  "trials": 12,
+  "window": 16,
+  "sinks": 4,
+  "pool": 7,
+  "pool_back": null,
+  "pool_fwd": null,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 4400.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 16384,
+      "real_tokens": 15714,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 3241.5,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember it. 7",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember it. 8",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. Remember it. 4",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember it. 7",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. Remember it. 8",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 16384,
+      "real_tokens": 15714,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 3241.5,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember it. 7",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember it. 8",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. Remember it. 4",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember it. 7",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. Remember it. 8",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 16384,
+      "real_tokens": 15714,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 3241.5,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "75526. Remember it. 7",
+          "hit": true
+        },
+        {
+          "key": 85667,
+          "got": "85667. Remember it. 8",
+          "hit": true
+        },
+        {
+          "key": 99873,
+          "got": "99873. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. \n\nThe grass is green",
+          "hit": true
+        },
+        {
+          "key": 66365,
+          "got": "66365. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 96659,
+          "got": "96659. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. Remember it. 6",
+          "hit": true
+        },
+        {
+          "key": 70176,
+          "got": "70176. Remember it. 7",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722. Remember it. 9",
+          "hit": true
+        },
+        {
+          "key": 60745,
+          "got": "60745. \n\nThe grass is green",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699. Remember it. 8",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}

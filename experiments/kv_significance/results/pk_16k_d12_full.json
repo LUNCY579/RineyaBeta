@@ -1,0 +1,256 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 512,
+  "recent_flag": 512,
+  "trials": 12,
+  "window": 16,
+  "sinks": 4,
+  "pool": 7,
+  "pool_back": null,
+  "pool_fwd": null,
+  "key_digits": 12,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 3500.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 16384,
+      "real_tokens": 15728,
+      "budget": 0,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 2915.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 733507355022,
+          "got": "73350735502",
+          "hit": false
+        },
+        {
+          "key": 373527921838,
+          "got": "37352792183",
+          "hit": false
+        },
+        {
+          "key": 877258417357,
+          "got": "87725841735",
+          "hit": false
+        },
+        {
+          "key": 828477163938,
+          "got": "82847716393",
+          "hit": false
+        },
+        {
+          "key": 604360785008,
+          "got": "60436078500",
+          "hit": false
+        },
+        {
+          "key": 927344386672,
+          "got": "92734438667",
+          "hit": false
+        },
+        {
+          "key": 528439689431,
+          "got": "52843968943",
+          "hit": false
+        },
+        {
+          "key": 682268340258,
+          "got": "68226834025",
+          "hit": false
+        },
+        {
+          "key": 181492625268,
+          "got": "18149262526",
+          "hit": false
+        },
+        {
+          "key": 909232626528,
+          "got": "90923262652",
+          "hit": false
+        },
+        {
+          "key": 820639867979,
+          "got": "82063986799",
+          "hit": false
+        },
+        {
+          "key": 828929593519,
+          "got": "82892959351",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 16384,
+      "real_tokens": 15728,
+      "budget": 0,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 2915.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 733507355022,
+          "got": "73350735502",
+          "hit": false
+        },
+        {
+          "key": 373527921838,
+          "got": "37352792183",
+          "hit": false
+        },
+        {
+          "key": 877258417357,
+          "got": "87725841735",
+          "hit": false
+        },
+        {
+          "key": 828477163938,
+          "got": "82847716393",
+          "hit": false
+        },
+        {
+          "key": 604360785008,
+          "got": "60436078500",
+          "hit": false
+        },
+        {
+          "key": 927344386672,
+          "got": "92734438667",
+          "hit": false
+        },
+        {
+          "key": 528439689431,
+          "got": "52843968943",
+          "hit": false
+        },
+        {
+          "key": 682268340258,
+          "got": "68226834025",
+          "hit": false
+        },
+        {
+          "key": 181492625268,
+          "got": "18149262526",
+          "hit": false
+        },
+        {
+          "key": 909232626528,
+          "got": "90923262652",
+          "hit": false
+        },
+        {
+          "key": 820639867979,
+          "got": "82063986797",
+          "hit": false
+        },
+        {
+          "key": 828929593519,
+          "got": "82892959351",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 16384,
+      "real_tokens": 15728,
+      "budget": 0,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 2915.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": null,
+      "trials": [
+        {
+          "key": 733507355022,
+          "got": "73350735502",
+          "hit": false
+        },
+        {
+          "key": 373527921838,
+          "got": "37352792183",
+          "hit": false
+        },
+        {
+          "key": 877258417357,
+          "got": "87725841735",
+          "hit": false
+        },
+        {
+          "key": 828477163938,
+          "got": "82847716393",
+          "hit": false
+        },
+        {
+          "key": 604360785008,
+          "got": "60436078500",
+          "hit": false
+        },
+        {
+          "key": 927344386672,
+          "got": "92734438667",
+          "hit": false
+        },
+        {
+          "key": 528439689431,
+          "got": "52843968943",
+          "hit": false
+        },
+        {
+          "key": 682268340258,
+          "got": "68226834025",
+          "hit": false
+        },
+        {
+          "key": 181492625268,
+          "got": "18149262526",
+          "hit": false
+        },
+        {
+          "key": 909232626528,
+          "got": "90923262652",
+          "hit": false
+        },
+        {
+          "key": 820639867979,
+          "got": "82063986797",
+          "hit": false
+        },
+        {
+          "key": 828929593519,
+          "got": "82892959351",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

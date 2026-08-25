@@ -1,0 +1,256 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 2048,
+  "recent": 4,
+  "recent_flag": 4,
+  "trials": 12,
+  "window": 16,
+  "sinks": 4,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 2200.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 771103,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1200.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 99966,
+          "got": "99966. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 26162,
+          "got": "26162. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 44350,
+          "got": "44350. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 36282,
+          "got": "36282. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 73596,
+          "got": "73596. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 88102,
+          "got": "88102. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 56848,
+          "got": "56848. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 55993,
+          "got": "55993. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 12686,
+          "got": "12686. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 60245,
+          "got": "60245. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 32269,
+          "got": "32269. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 13093,
+          "got": "13093. The pass key is",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.5,
+      "acc": 0.5,
+      "peak_mib": 1200.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 99966,
+          "got": "9996. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 26162,
+          "got": "26162. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 44350,
+          "got": "4435. So the answer is 4",
+          "hit": false
+        },
+        {
+          "key": 36282,
+          "got": "3628. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 73596,
+          "got": "73596. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 88102,
+          "got": "8810. Here we go. There and",
+          "hit": false
+        },
+        {
+          "key": 56848,
+          "got": "5684. So the answer is 5",
+          "hit": false
+        },
+        {
+          "key": 55993,
+          "got": "55993. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 12686,
+          "got": "1268. So the answer is 1",
+          "hit": false
+        },
+        {
+          "key": 60245,
+          "got": "60245. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 32269,
+          "got": "32269. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 13093,
+          "got": "130931. Here we go.",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1200.1,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 99966,
+          "got": "99966. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 26162,
+          "got": "26162. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 44350,
+          "got": "44350. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 36282,
+          "got": "36282. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 73596,
+          "got": "73596. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 88102,
+          "got": "88102. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 56848,
+          "got": "56848. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 55993,
+          "got": "55993. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 12686,
+          "got": "12686. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 60245,
+          "got": "60245. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 32269,
+          "got": "32269. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 13093,
+          "got": "13093. Here we go. There",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}
