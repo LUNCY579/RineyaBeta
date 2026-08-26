@@ -233,6 +233,14 @@ def exempt_cells() -> int:
     return n
 
 
+def lang_quality2(tag: str, dataset: str):
+    """Mean quality of one arm on a NON-rag_dev dataset (the long-context sets)."""
+    path = KVS / f"{tag}__{dataset}" / "summary.json"
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8")).get("mean_quality_score")
+
+
 def cp_bound(n: int, tail: float) -> float:
     """Clopper-Pearson bound for a cell with zero failures: tail ** (1/n).
 
@@ -870,6 +878,37 @@ CLAIMS = [
      lambda: lang_quality("cpu-frac0.25-streaming-b6f0"), 5e-6, "0.42740", "p2"),
     ("LANG significance arm, CPU (device anchor)", 0.59488,
      lambda: lang_quality("cpu-frac0.25-rf0.25-b6f0"), 5e-6, "0.59488", "p2"),
+    # --- O13 RESOLVED: marginal capacity, not the chunk schedule -------------
+    # Registered with kill conditions before the runs. Prediction 1 held,
+    # prediction 2 was refuted -- and BOTH are pinned, because a programme that
+    # pins only its confirmed predictions is not keeping a record, it is
+    # curating one.
+    ("O13: B=32 rescues chunk 2048", 1.0000,
+     lambda: pk("pk_128k_B32_chunk2048.json", require={"chunk": 2048}),
+     5e-4, "1.000", "p2"),
+    ("O13: B=32 chunk 4096 matched control", 1.0000,
+     lambda: pk("pk_128k_B32_chunk4096.json", require={"chunk": 4096}),
+     5e-4, "1.000", "p2"),
+    ("O13: back=8 REFUTED prediction 2 (worse, not better)", 0.5556,
+     lambda: pk("pk_128k_B16_chunk2048_b8.json",
+                require={"chunk": 2048, "pool_back": 8}), 5e-4, "0.556", "p2"),
+
+    # --- LONG CONTEXT: the model is the constraint, not the cache ------------
+    # The uncompressed arms are the load-bearing pins here. Without them a
+    # reader could take "4x compression retains quality at 16K" for a triumph
+    # rather than a statement about a regime the model has already lost.
+    ("LONG 4K uncompressed", 0.39102,
+     lambda: lang_quality2("long4k-off", "rag_long4k"), 5e-6, "0.39102", "p2"),
+    ("LONG 16K uncompressed", 0.18571,
+     lambda: lang_quality2("long16k-off", "rag_long16k"), 5e-6, "0.18571", "p2"),
+    ("LONG 32K uncompressed", 0.12827,
+     lambda: lang_quality2("long32k-off", "rag_long32k"), 5e-6, "0.12827", "p2"),
+    ("LONG 16K keep 0.25 (indistinguishable from uncompressed)", 0.19559,
+     lambda: lang_quality2("long16k-b6f0-k0.25-rf0.25", "rag_long16k"),
+     5e-6, "0.19559", "p2"),
+    ("LONG 4K keep 0.50", 0.39126,
+     lambda: lang_quality2("long4k-b6f0-k0.5", "rag_long4k"), 5e-6, "0.39126", "p2"),
+
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

@@ -1046,3 +1046,99 @@ The matched control strengthens the attribution of the *score*. It says nothing 
 two defects found the same day: the `grow_spans` flood and the zero-compression cells. A
 clean control over a mis-specified policy still measures the mis-specified policy.
 
+---
+
+## 2026-08-26: O13 RESOLVED, and the long-context result is not what either side expected
+
+### O13 — capacity confirmed, my mechanism story refuted
+
+Both predictions were registered with kill conditions before the runs.
+
+| arm | d0.1 | d0.5 | d0.9 | overall |
+|---|---:|---:|---:|---:|
+| B=16 chunk 4096 (baseline) | 1.000 | 1.000 | 1.000 | 1.000 |
+| B=16 chunk 2048 (the anomaly) | 1.000 | 0.417 | 1.000 | **0.806** |
+| **B=32 chunk 2048** | 1.000 | **1.000** | 1.000 | **1.000** |
+| B=32 chunk 4096 (control) | 1.000 | 1.000 | 1.000 | 1.000 |
+| **B=16 back=8 chunk 2048** | 1.000 | **0.000** | 0.667 | **0.556** |
+
+**Prediction 1 confirmed.** Doubling the budget removes the chunk-2048 deficit entirely,
+and the matched B=32 chunk-4096 control also scores 1.000, so the budget is not merely
+lifting everything. **The chunk axis is not a property of the schedule; it is a marginal-
+capacity effect that only appears when the budget is thin.** O13 is resolved after four
+failed explanations.
+
+**Prediction 2 refuted, and informatively.** I predicted `back=8` would *help*, on the
+account that a longer reach lifts the span's trailing edge above the competition. It made
+it **much worse** — 0.556 against back=6's 0.806, with depth 0.5 falling to 0.000. My
+kill condition said this refutes the tie-break account of the trailing edge, and it does.
+
+The reading that survives both results: a longer backward reach **inflates the candidate
+set**, because more positions inherit the span's high score. At a thin budget that is
+strictly harmful — more high-scoring positions compete for the same eight slots. So
+backward reach is not monotonically better; it trades against budget. That is consistent
+with reach deciding retrieval (established) while adding *more* of it hurts when there is
+nowhere to put the extra candidates.
+
+**Deployment rule this yields:** size the budget to the span with headroom. Do not tune
+the chunk schedule, and do not assume more reach is safer.
+
+### Long context: compression is free, and the model is the constraint
+
+The 543x gap, at last measured. `off` is the uncompressed arm at each length — included
+precisely so a fall could be attributed to the model rather than the policy.
+
+| length | uncompressed | keep 0.50 | keep 0.25 | share of native |
+|---|---:|---:|---:|---:|
+| native ~232 tok | **0.66939** | — | — | 100% |
+| 4K | **0.39102** | 0.39126 | 0.38730 | 58% |
+| 16K | **0.18571** | 0.19559 | 0.19559 | 28% |
+| 32K | **0.12827** | — | — | 19% |
+
+**Compression costs nothing at length.** Every paired contrast against the uncompressed
+arm is indistinguishable from zero:
+
+| contrast | paired diff | discordant | p |
+|---|---:|---|---|
+| 4K, uncompressed → keep 0.50 | +0.00024 | 1/2 | 1.000 |
+| 4K, uncompressed → keep 0.25 | −0.00372 | 1/4 | 0.375 |
+| 16K, uncompressed → keep 0.50 | +0.00988 | 2/0 | 0.500 |
+| 16K, uncompressed → keep 0.25 | +0.00988 | 3/1 | 0.625 |
+
+**But the model collapses with length on its own.** Uncompressed quality falls to 58% of
+native at 4K, 28% at 16K, 19% at 32K — with the *entire* cache present.
+
+The inference that follows is clean despite the collapse, and it is the important one:
+**a full cache and a quarter cache perform identically at these lengths, so the cache is
+not the binding constraint. The model is.** Had this been competition-as-capacity — the
+§5.1 mechanism, where budget restores accuracy — more budget would have helped. It does
+not; `off` holds 100% of the cache and scores the same as keep 0.25.
+
+**This is the same shape as A4, and the `off` arm is why we can say so.** Without it,
+"4x compression retains quality at 16K" would have read as a triumph. It is instead a
+statement about a regime where the model has already lost the thread.
+
+### A confound I built into the benchmark, stated plainly
+
+Lengthening the haystack means adding distractor documents, so length and competitor
+count rise together and cannot be separated in this design:
+
+| dataset | mean prompt | mean distractor documents |
+|---|---:|---:|
+| rag_long4k | 4,227 tok | 46.4 |
+| rag_long16k | 16,520 tok | 189.3 |
+| rag_long32k | 32,902 tok | 380.0 |
+
+Passkey has the same property but its filler is inert; these distractors are *plausible
+evidence documents*, which makes the task harder in a way passkey's never is. So "the
+model collapses with length" should be read as **"with length and with hundreds of
+plausible competing documents"**, and this benchmark cannot apportion between them.
+
+### What this means for the next step
+
+The mechanism is free at 4-16K on this core, and the core cannot use 16K. That makes a
+**long-context-trained checkpoint the single highest-value thing to test next** — the
+policy comparison only becomes informative once the model can do the task at all. A
+QLoRA long-context fine-tune of Halo is in progress on this machine, and it targets
+exactly the capability whose absence is the binding constraint above.
+
