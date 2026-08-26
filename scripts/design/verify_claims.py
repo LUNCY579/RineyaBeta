@@ -936,6 +936,28 @@ CLAIMS = [
     ("LANG keep0.25 derived-minus-causal, fixed gate (NEGATIVE)", -0.07466,
      lambda: lang_quality("frac0.25-grow2-fixedgate")
              - lang_quality("frac0.25-b6f0"), 5e-6, "0.07466", "p2"),
+    # --- the audit's re-runs: what the defects actually cost ----------------
+    # Pinned at the FIXED gate. Every grow=2.0 arm is unchanged to four decimals,
+    # so section 4.6 is untouched; only grow=5.0 moved, and it moved the way the
+    # mechanism predicts (a stricter multiplier depends more on a correct floor).
+    ("REGROW d=4 grow2.0 fixed gate (unchanged)", 1.0000,
+     lambda: pk("pk_128k_B64_d4_grow2.0_fixedgate.json",
+                require={"key_digits": 4, "grow": 2.0}), 5e-4, "1.0000", "p2"),
+    ("REGROW d=7 grow2.0 fixed gate (unchanged)", 0.8889,
+     lambda: pk("pk_128k_B64_d7_grow2.0_fixedgate.json",
+                require={"key_digits": 7, "grow": 2.0}), 5e-4, "0.8889", "p2"),
+    ("REGROW d=7 grow5.0 fixed gate (the one that MOVED)", 0.7222,
+     lambda: pk("pk_128k_B64_d7_grow5.0_fixedgate.json",
+                require={"key_digits": 7, "grow": 5.0}), 5e-4, "0.7222", "p2"),
+    # Halo depth-0.9 re-measured at chunk 1024, where it faces 2 compressions
+    # rather than 0. Same answer -- the claim was true, it just had not been
+    # tested. The B=32 depth-0.1 cell is the honest cost of measuring properly.
+    ("REGROW halo 16K B=32 chunk1024 d0.1 (the one real failure)", 0.9167,
+     lambda: pk("halo_16k_B32_grow_c1024.json", 0.1,
+                require={"chunk": 1024}), 5e-4, "0.917", "p2"),
+    ("REGROW halo 16K B=32 chunk1024 d0.9 (was vacuous)", 1.0000,
+     lambda: pk("halo_16k_B32_grow_c1024.json", 0.9,
+                require={"chunk": 1024}), 5e-4, "1.000", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

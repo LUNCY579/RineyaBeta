@@ -283,6 +283,13 @@ is the **qualitative** claim: the requirement is a function of the evidence span
 
 ### 4.6 Deriving the reach beats a *constant* reach — on passkey only
 
+> **Audited 2026-08-26 and unchanged.** `grow_spans` was found to compute its noise floor
+> over masked slots, flooding the growth gate. Every arm in this section was re-run with
+> the corrected floor and **every `grow=2.0` figure is identical to four decimals**. Only
+> the `grow=5.0` arm moved (0.611 → 0.722), so the multiplier contrast at d=7 weakens
+> from *p* = 0.0020 to *p* = 0.0312 — still one-sided, with no needle preferring the
+> larger multiplier under either gate.
+
 One policy, never told the key length, against the best *hand-tuned* fixed reach:
 
 | digits | derived (`grow=2.0`) | best tuned fixed | |
@@ -326,6 +333,17 @@ and a different vocabulary (151,936 against 32,768), 16K, derived reach:
 
 **No code change** — only a model path. The mechanism keys off the attention shape, and
 Halo matches it exactly.
+
+---
+
+**Correction (2026-08-26).** Three of these cells measured nothing. `chunked_prefill`
+never compresses the final chunk, and at 16K with chunk 4096 the depth-0.9 needle sits
+inside it — facing **zero** compressions, where a policy keeping nothing would also score
+1.000. Re-run at chunk 1024, where that needle faces two compressions, the depth-0.9
+cells give **the same 1.000**: the claim was true, it had simply not been tested. One
+real failure appears at B=32 depth 0.1 (0.917), because fifteen compression rounds
+instead of three is five times the eviction pressure. **The corrected total is 287/288**,
+and 36 of those needles only became evidence with the re-run.
 
 ---
 

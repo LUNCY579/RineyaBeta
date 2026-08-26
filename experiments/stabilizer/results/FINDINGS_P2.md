@@ -1218,3 +1218,69 @@ genuinely runs — the passkey derived-reach cells have `heavy_zero_count = 0`, 
 is the only thing that was wrong there, and those re-runs are the real test of the
 defect's magnitude.
 
+---
+
+## 2026-08-26: the audit closes — both defects bounded, both core claims survive
+
+### The grow_spans flood mattered in exactly one place
+
+The passkey derived-reach cells are the real test: their `heavy_zero_count` is **0**, so
+the gate was the only thing wrong with them.
+
+| arm | flooded gate | **fixed gate** | delta |
+|---|---:|---:|---:|
+| d=4, `grow=2.0` | 1.0000 | **1.0000** | 0.0000 |
+| d=5, `grow=2.0` | 1.0000 | **1.0000** | 0.0000 |
+| d=7, `grow=2.0` | 0.8889 | **0.8889** | 0.0000 |
+| d=7, **`grow=5.0`** | 0.6111 | **0.7222** | **+0.1111** |
+
+**Every `grow=2.0` result is unchanged to four decimals.** §4.6 rests entirely on
+`grow=2.0`, so its numbers — 1.000 / 1.000 / 0.889 at d = 4 / 5 / 7 — and the corrected
+claim built on them (derived reach beats a *constant* reach, loses to per-span tuning at
+d=7, where `back=8` scores 1.000) are **untouched by the defect**.
+
+The one arm that moved is `grow=5.0`, and it moved in the direction the mechanism
+predicts: a *stricter* multiplier depends more on the floor being right, so a depressed
+floor hurt it most. At `mult=2.0` the gate is permissive enough that halving the floor
+changes little.
+
+**The multiplier finding survives, weaker.** Exact McNemar on the paired needles at d=7:
+
+| gate | 2.0-wins | 5.0-wins | exact *p* |
+|---|---:|---:|---:|
+| flooded (published) | 10 | 0 | 0.0020 |
+| **fixed** | **6** | **0** | **0.0312** |
+
+Still significant, and still one-sided — no needle prefers `mult=5.0` under either gate —
+but the effect is about half what was reported. The published 0.0020 should be read as
+0.0312.
+
+### The zero-compression cells re-run correctly, and the transfer claim survives
+
+Halo 16K re-run at chunk 1024, which moves the depth-0.9 needle from **0 compressions
+faced to 2**:
+
+| budget | published (chunk 4096) | **re-run (chunk 1024)** |
+|---|---|---|
+| B=32 | 1.000 / 1.000 / **1.000 (vacuous)** | **0.917** / 1.000 / **1.000 (real)** |
+| B=128 | 1.000 / 1.000 / **1.000 (vacuous)** | 1.000 / 1.000 / **1.000 (real)** |
+| B=512 | 1.000 / 1.000 / **1.000 (vacuous)** | 1.000 / 1.000 / **1.000 (real)** |
+
+**The depth-0.9 cells give the same answer once they are genuinely compressed.** The
+claim was true; it just had not been tested. That is the second time today a retraction
+survived its own re-run, and it is worth noticing that neither could have been known
+without doing the work.
+
+One real change: **B=32 depth-0.1 falls to 0.917** (11/12). Chunk 1024 means fifteen
+compression rounds instead of three, so the shallowest needle faces five times the
+eviction pressure and loses one. That is consistent with everything else established
+about round count, and it is the honest cost of measuring the cell properly.
+
+**Corrected transfer total: 287/288.** The count of needles is unchanged — 108 at 16K
+plus 180 at 32K/128K — but 36 of them (the three depth-0.9 cells) previously measured
+nothing, and the one failure is real. So the published *"288 needles, zero failures"*
+becomes **"288 needles, one failure, and 36 of them only became evidence today"**.
+
+*(I first wrote 323/324 here from a miscount and corrected it before committing; the
+arithmetic is 107/108 at 16K plus 180/180 at 32K and 128K.)*
+
