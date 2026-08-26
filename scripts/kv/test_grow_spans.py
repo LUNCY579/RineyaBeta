@@ -128,6 +128,40 @@ def main() -> None:
           not bool((g_short[150:170] >= 1.0 - 1e-6).all()),
           "reach=4 cannot cross a 20-token span, as expected")
 
+    # --- the masked-median defect --------------------------------------------
+    # select_keep masks sinks and the recent window to -inf BEFORE calling
+    # grow_spans. The noise floor used to be the median of a vector with 0.0
+    # substituted for those slots, so once the masks passed half the vector the
+    # floor was exactly 0.0 and, scores being non-negative, the gate opened on
+    # EVERY eligible position -- the flood this function's docstring rejects a
+    # quantile for, arrived at by another route. All eleven tests above passed
+    # throughout, because not one of them ever fed grow_spans a MASKED tensor.
+    n_m = 59
+    torch.manual_seed(0)
+    sm = torch.rand(1, 1, n_m) * 0.05
+    sm[0, 0, n_m // 2] = 1.0
+    sm[..., :4] = float("-inf")             # sinks
+    sm[..., n_m - 31:] = float("-inf")      # recent -- 35 of 59 = 59% masked
+    grown_m = grow_spans(sm, 2.0, 64)
+    eligible = int(torch.isfinite(sm).sum())
+    changed = int(((grown_m != sm) & torch.isfinite(sm)).sum())
+    check("59% masked: growth does not flood every eligible position",
+          changed < eligible, f"{changed} of {eligible} eligible positions grown")
+    check("masked slots stay masked after growth",
+          bool(torch.isinf(grown_m[..., :4]).all()), "sinks remain -inf")
+
+    fin_m = torch.where(torch.isinf(sm), torch.full_like(sm, float("-inf")), sm)
+    val_m = torch.isfinite(fin_m)
+    want_m = fin_m[val_m].median().item()
+    mn_m = torch.where(val_m, fin_m, torch.full_like(fin_m, float("nan")))
+    check("noise floor is the median over VALID entries only",
+          abs(mn_m.nanmedian(dim=-1).values.item() - want_m) < 1e-6,
+          f"floor {want_m:.5f}, not the zero-padded median")
+
+    allmask = torch.full((1, 1, 8), float("-inf"))
+    check("a fully masked row grows nothing and does not raise",
+          bool(torch.isinf(grow_spans(allmask, 2.0, 8)).all()), "degenerate row is safe")
+
     print(f"\n{len(PASS)}/{len(PASS) + len(FAIL)} checks pass")
     if FAIL:
         print("FAILED: " + ", ".join(FAIL))

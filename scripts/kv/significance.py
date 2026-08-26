@@ -400,8 +400,29 @@ def grow_spans(s: torch.Tensor, mult: float, max_reach: int) -> torch.Tensor:
         return s
     finite = torch.where(torch.isinf(s), torch.full_like(s, float("-inf")), s)
     valid = torch.isfinite(finite)
-    filled = torch.where(valid, finite, torch.zeros_like(finite))
-    noise = filled.median(dim=-1, keepdim=True).values
+
+    # THE MEDIAN MUST BE OVER VALID ENTRIES ONLY. This previously substituted 0.0
+    # for every masked slot and took the median of the padded vector -- which is
+    # not "each stream's median" at all. `select_keep` masks sinks and the recent
+    # window to -inf BEFORE calling this, and at decode-step evictions n is only
+    # budget + 1, so those masks are a large share of the vector. On the rag_dev
+    # keep-0.25 geometry (budget 58, sinks 4, recent 31) they are 59% of it, the
+    # median of the zero-padded vector is EXACTLY 0.0, and since scores are
+    # non-negative softmax sums the gate `finite > 0 * mult` opens on every
+    # eligible position: measured 24 of 24 admitted where the true median admits
+    # 2. Growth then floods the stream and the top-k after it is arbitrary --
+    # which is verbatim the failure the docstring above rejects a quantile for.
+    # The implementation had been producing it by another route.
+    #
+    # Severity tracks the masked fraction, so this degrades every grow arm rather
+    # than only the collapsed ones: at 31% masked (keep 0.50, and the passkey
+    # grow cells) the floor still lands near the 27th percentile instead of the
+    # 50th.
+    masked_nan = torch.where(valid, finite, torch.full_like(finite, float("nan")))
+    noise = masked_nan.nanmedian(dim=-1, keepdim=True).values
+    # A row with no valid entries yields nan, and `finite > nan` is False
+    # everywhere, so the gate closes and nothing is grown. That is the correct
+    # degenerate behaviour: no eligible positions means no span to grow.
     gate = valid & (finite > noise * mult)
     grown = finite
     for _ in range(max(0, int(max_reach))):
