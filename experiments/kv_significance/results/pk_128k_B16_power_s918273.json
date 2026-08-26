@@ -1,0 +1,376 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 4,
+  "recent_flag": 4,
+  "trials": 20,
+  "window": 16,
+  "sinks": 4,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 2200.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 918273,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.1,
+      "acc": 1.0,
+      "peak_mib": 1501.2,
+      "yarn": 4.0,
+      "trials_ok": 20,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 49454,
+          "got": "49454945494",
+          "hit": true
+        },
+        {
+          "key": 63277,
+          "got": "63277. Here we go. The",
+          "hit": true
+        },
+        {
+          "key": 46637,
+          "got": "46637. \n\nSo, the pass",
+          "hit": true
+        },
+        {
+          "key": 49610,
+          "got": "49610. \n\nSo, the pass",
+          "hit": true
+        },
+        {
+          "key": 81075,
+          "got": "81075. \n\nSo, the pass",
+          "hit": true
+        },
+        {
+          "key": 59122,
+          "got": "59122. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 82312,
+          "got": "82312. The pass key is",
+          "hit": true
+        },
+        {
+          "key": 99207,
+          "got": "99207. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 71620,
+          "got": "71620. \n\nSo, the pass",
+          "hit": true
+        },
+        {
+          "key": 60926,
+          "got": "60926092609",
+          "hit": true
+        },
+        {
+          "key": 75890,
+          "got": "758901. \n\nSo, the",
+          "hit": true
+        },
+        {
+          "key": 77018,
+          "got": "77018. \n\nSo, the pass",
+          "hit": true
+        },
+        {
+          "key": 79934,
+          "got": "799341. \n\nSo, the",
+          "hit": true
+        },
+        {
+          "key": 85322,
+          "got": "853221. \n\nSo, the",
+          "hit": true
+        },
+        {
+          "key": 84422,
+          "got": "84422. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 21820,
+          "got": "218201. \n\nSo, the",
+          "hit": true
+        },
+        {
+          "key": 88814,
+          "got": "88814. \n\nSo, the pass",
+          "hit": true
+        },
+        {
+          "key": 25317,
+          "got": "25317. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 58640,
+          "got": "58640. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 15623,
+          "got": "15623. \n\nSo, the answer",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 1501.2,
+      "yarn": 4.0,
+      "trials_ok": 20,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 49454,
+          "got": "4945494549.",
+          "hit": true
+        },
+        {
+          "key": 63277,
+          "got": "63277. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 46637,
+          "got": "46637. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 49610,
+          "got": "49610. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 81075,
+          "got": "81075. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 59122,
+          "got": "59122. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 82312,
+          "got": "82312. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 99207,
+          "got": "99207. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 71620,
+          "got": "71620. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 60926,
+          "got": "609260. Here we go.",
+          "hit": true
+        },
+        {
+          "key": 75890,
+          "got": "758901. Here we go.",
+          "hit": true
+        },
+        {
+          "key": 77018,
+          "got": "77018. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 79934,
+          "got": "79934. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 85322,
+          "got": "853221. Here we go.",
+          "hit": true
+        },
+        {
+          "key": 84422,
+          "got": "844222222. Here",
+          "hit": true
+        },
+        {
+          "key": 21820,
+          "got": "21820. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 88814,
+          "got": "88814. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 25317,
+          "got": "25317. Here we go.",
+          "hit": true
+        },
+        {
+          "key": 58640,
+          "got": "58640. There and back again.",
+          "hit": true
+        },
+        {
+          "key": 15623,
+          "got": "156231. Here we go.",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125826,
+      "budget": 16,
+      "depth": 0.9,
+      "acc": 1.0,
+      "peak_mib": 1501.2,
+      "yarn": 4.0,
+      "trials_ok": 20,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 49454,
+          "got": "49454. So the answer is",
+          "hit": true
+        },
+        {
+          "key": 63277,
+          "got": "63277. So the answer is",
+          "hit": true
+        },
+        {
+          "key": 46637,
+          "got": "46637. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 49610,
+          "got": "49610. So, the answer is",
+          "hit": true
+        },
+        {
+          "key": 81075,
+          "got": "81075. So the answer is",
+          "hit": true
+        },
+        {
+          "key": 59122,
+          "got": "59122. So, the answer is",
+          "hit": true
+        },
+        {
+          "key": 82312,
+          "got": "82312. So the answer is",
+          "hit": true
+        },
+        {
+          "key": 99207,
+          "got": "99207.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 71620,
+          "got": "71620. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 60926,
+          "got": "60926. So the answer is",
+          "hit": true
+        },
+        {
+          "key": 75890,
+          "got": "75890. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 77018,
+          "got": "77018.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 79934,
+          "got": "79934. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 85322,
+          "got": "85322. So the answer is",
+          "hit": true
+        },
+        {
+          "key": 84422,
+          "got": "84422. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 21820,
+          "got": "21820. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 88814,
+          "got": "88814. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 25317,
+          "got": "25317. So the answer is",
+          "hit": true
+        },
+        {
+          "key": 58640,
+          "got": "58640. Here we go. There",
+          "hit": true
+        },
+        {
+          "key": 15623,
+          "got": "15623. Here we go. There",
+          "hit": true
+        }
+      ]
+    }
+  ]
+}
