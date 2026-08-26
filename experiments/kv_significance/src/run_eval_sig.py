@@ -46,6 +46,21 @@ MODEL = "artifacts/rineya-core-en32k-28L"
 DATASETS = {
     "chat_dev": "artifacts/eval_sets/chat_dev.jsonl",
     "rag_dev": "artifacts/eval_sets/rag_dev.jsonl",
+    # Long-context natural language, built by make_long_rag.py. Same questions,
+    # references and response contracts as rag_dev -- so the same validated
+    # scorer applies and rag_dev itself is the native-length baseline. Only the
+    # amount of real irrelevant prose around the answer changes. These close the
+    # 543x gap between this programme's language evidence (median 238 tokens)
+    # and its retrieval evidence (125,826 tokens). All fit inside the model's
+    # 40,960 native positions, so no YaRN is involved and LENGTH IS THE ONLY
+    # VARIABLE against rag_dev.
+    "rag_long4k": "artifacts/eval_sets/rag_long4k_d0.5.jsonl",
+    "rag_long16k": "artifacts/eval_sets/rag_long16k_d0.5.jsonl",
+    "rag_long32k": "artifacts/eval_sets/rag_long32k_d0.5.jsonl",
+    "rag_long4k_d0.1": "artifacts/eval_sets/rag_long4k_d0.1.jsonl",
+    "rag_long4k_d0.9": "artifacts/eval_sets/rag_long4k_d0.9.jsonl",
+    "rag_long16k_d0.1": "artifacts/eval_sets/rag_long16k_d0.1.jsonl",
+    "rag_long16k_d0.9": "artifacts/eval_sets/rag_long16k_d0.9.jsonl",
 }
 
 
