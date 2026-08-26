@@ -110,6 +110,12 @@ def main() -> None:
                          "constant across span lengths.")
     ap.add_argument("--grow-max", type=int, default=64,
                     help="dilation cap; only meaningful with --grow.")
+    ap.add_argument("--min-heavy-frac", type=float, default=0.0,
+                    help="B1: reserve at least this FRACTION of the budget for "
+                         "score-chosen slots. The recent window yields to it. "
+                         "Prevents the degenerate case where sinks+recent consume "
+                         "the whole budget and the policy is silently StreamingLLM "
+                         "-- which fired 17,360 times on rag_dev at keep 0.25.")
     ap.add_argument("--window", type=int, default=16)
     ap.add_argument("--no-sinks", action="store_true", help="disable sink protection")
     ap.add_argument("--limit", type=int, default=None)
@@ -182,7 +188,8 @@ def main() -> None:
             policy = sig.Policy(budget=budget, sinks=args.sinks, recent=recent,
                                 protect_sinks=not args.no_sinks, pool=args.pool,
                                 pool_back=args.pool_back, pool_fwd=args.pool_fwd,
-                                grow=args.grow, grow_max=args.grow_max)
+                                grow=args.grow, grow_max=args.grow_max,
+                                min_heavy_frac=args.min_heavy_frac)
             # Record what the policy ACTUALLY used. Writing args.recent here --
             # which is what this file used to do -- makes every --recent-frac run
             # look like a fixed recent=32 run in the manifest, and summarize.py
@@ -276,6 +283,7 @@ def main() -> None:
         "pool_back_flag": args.pool_back, "pool_fwd_flag": args.pool_fwd,
         "pool_window_uniform": (len(set(windows_used)) <= 1) if windows_used else None,
         "grow": args.grow,
+        "min_heavy_frac": args.min_heavy_frac,
         "grow_max": (args.grow_max if args.grow else None),
         "directional": bool(windows_used and windows_used[0][1] == 0
                             and windows_used[0][0] > 0),

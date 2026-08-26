@@ -278,6 +278,10 @@ def main() -> None:
                          "sharing it runs unchanged -- the published Halo "
                          "cores do. Vocabulary and dtype differ and do not "
                          "matter to eviction.")
+    ap.add_argument("--min-heavy-frac", type=float, default=0.0,
+                    help="B1: floor on the score's share of the budget. See "
+                         "run_eval_sig.py; kept here so the two harnesses expose "
+                         "the same policy surface.")
     ap.add_argument("--sinks", type=int, default=4,
                     help="always-kept prefix. Fixed at 4 in every result to "
                          "date and never ablated, which matters because at "

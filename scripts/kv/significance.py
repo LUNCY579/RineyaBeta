@@ -553,6 +553,20 @@ class Policy:
                                    # score, instead of a fixed pool_back. 2.0 means
                                    # "twice the noise floor". See grow_spans.
     grow_max: int = 64             # iteration bound for growth
+    # --- B1: the self-sizing budget -----------------------------------------
+    # `recent` as a fixed constant is the defect that produced the largest wrong
+    # conclusion in this programme. On a 232-token rag_dev prompt at keep 0.25
+    # the whole budget is ~58, so sinks(4) + recent(32) took 61% of it and
+    # heavy() hit zero on 17,360 compressions -- the policy silently became
+    # StreamingLLM and we scored its absence as the mechanism underperforming.
+    #
+    # recent_frac makes the window scale with the budget. min_heavy_frac is the
+    # part that matters: it RESERVES a share for the score, so the degenerate
+    # case cannot occur at all rather than being counted after the fact. A
+    # counter that reports "the mechanism did not run" is worth having, but not
+    # having to.
+    recent_frac: float | None = None   # recent as a fraction of budget; overrides `recent`
+    min_heavy_frac: float = 0.0        # floor on the score's share of the budget
     normalize: bool = False    # shorthand for count_exponent = 1.0
     count_exponent: float | None = None   # rank on sum / count**e; 0 = sum, 1 = mean
     stats: dict = field(default_factory=dict)
@@ -599,7 +613,21 @@ class Policy:
     def n_recent(self) -> int:
         # The always-kept regions must fit inside the budget, or the "budget" is
         # not a budget. sinks + recent = 36 silently overran a budget of 32.
-        return min(self.recent, max(0, self.budget - self.n_sinks()))
+        avail = max(0, self.budget - self.n_sinks())
+        want = (self.recent if self.recent_frac is None
+                else int(round(self.recent_frac * self.budget)))
+        rec = min(max(0, int(want)), avail)
+
+        # B1 floor. The recent window yields to the score, not the other way
+        # round: `recent` is a heuristic for "positions too new to have a
+        # trustworthy score", while the score is the mechanism under test. When
+        # the two compete for a budget this small, starving the mechanism makes
+        # the run measure nothing. The `streaming` baseline is exempt -- it sets
+        # heavy to zero deliberately, and that is its whole purpose.
+        if self.min_heavy_frac > 0.0 and self.select == "significance":
+            reserve = max(1, int(math.ceil(self.min_heavy_frac * self.budget)))
+            rec = min(rec, max(0, avail - reserve))
+        return rec
 
     def heavy(self) -> int:
         """Slots chosen by significance. Zero means the policy is StreamingLLM.
