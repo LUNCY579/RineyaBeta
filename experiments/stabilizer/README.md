@@ -26,3 +26,13 @@ results/
 ```
 
 Run with `../../.venv/Scripts/python.exe`.
+
+## Training-time follow-on: peer-conditioned sparse native updates
+
+A separate follow-on was added on 2026-08-26 under
+[`peer_optimizer/`](peer_optimizer/). It does **not** revive the failed
+inference-time firing-selector hypothesis above. It asks whether compatible layers can
+generate a useful support and step-scale prior for sparse native-weight fine-tuning,
+while the task gradient retains control of update direction. Its implementation,
+mathematical specification, tests, controlled feasibility results, and real-model
+protocol are isolated in that subdirectory. No Rineya quality result is claimed yet.
