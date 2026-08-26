@@ -656,3 +656,72 @@ cited as evidence of anything.
 where 4096 scores 1.000, the failures are the 4-of-5 truncation signature, the data and
 needles are identical, chunked prefill is bit-identical to single-shot at every chunk
 size, and the window is contiguous. No candidate explanation currently survives.
+
+## O13 — a NEW hypothesis, pre-registered 2026-08-26: marginal capacity, not chunk schedule
+
+O13 has had no surviving explanation since the cache-coordinate account was refuted.
+Four candidates were eliminated: differing data, a chunked-prefill bug, boundary
+straddling, and window fragmentation. This is a fifth, registered **before** the test so
+it cannot be fitted afterwards.
+
+### What the failure records actually say
+
+| cell | depth 0.1 | depth 0.5 | depth 0.9 |
+|---|---|---|---|
+| chunk 2048 seed A | 12/12 | **5/12** | 12/12 |
+| chunk 2048 seed B | 12/12 | **6/12** | 12/12 |
+| chunk 1024 seed A | 12/12 | 12/12 | 11/12 |
+
+**All 14 failures across every cell emit exactly the first four digits of a five-digit
+key, then diverge.** Not a wrong answer, not a refusal — the span's *final token* is
+missing, every time.
+
+### An intermediate hypothesis, and its refutation
+
+Seed A's depth-0.5 failures are trials **5–11: a contiguous tail**. That pattern points
+hard at state leaking across trials — `reset_scores()` failing, later trials degrading.
+It would have been a serious defect.
+
+**Seed B refutes it.** Its failures are scattered (trials 0, 2, 3, 5, 6, 8). The
+contiguous tail was coincidence in a single draw, and a one-seed reading would have
+reported a state-leakage bug that does not exist. Recorded because the near-miss is the
+point: the second seed existed only because O13 demanded a replication.
+
+### The hypothesis
+
+With a **causal** window the last digit of the key inherits `max` over digits 1–5 plus
+the framing tokens — the same maximum the 4th digit inherits. Their pooled scores
+**tie**, so the last digit is the *marginal* position in the top-k, and which member of a
+tied pair survives depends on the `S / C**e` ranking. The compression-round count changes
+`C`. So the chunk size does not damage retrieval directly; it perturbs a tie-break at the
+span's trailing edge, and only where the margin is already thin.
+
+This is the same shape as the competition result, which is already established: sixteen
+query-shaped decoys took B=64 from 1.000 to 0.611 and **budget alone restored it**
+(B=512 → 1.000), diagnosed as a capacity cost rather than a scoring failure. Depth 0.5
+being the only affected depth fits — it is the position with the most competing context
+on both sides.
+
+### Why it has never been tested
+
+**Every chunk-2048 cell ever run is at B=16.** The budget axis and the chunk axis have
+never been crossed. The whole anomaly lives at a single budget.
+
+### Pre-registered predictions and kill conditions
+
+1. **B=32 at chunk 2048 scores 1.000.** If capacity at the margin is the cause, doubling
+   the budget removes the margin.
+   *Kill:* if B=32 at chunk 2048 still falls below chunk 4096, **capacity is not the
+   explanation and this hypothesis is dead.** Say so and return O13 to unexplained.
+2. **back=8 at chunk 2048, B=16, improves on back=6.** A longer reach lifts more of the
+   span above the competition, so fewer trailing tokens sit at the margin.
+   *Kill:* no improvement means the tie-break account of the trailing edge is wrong, even
+   if prediction 1 holds for some other reason.
+3. **Depth 0.1 and 0.9 stay at 1.000 in both arms.** If either falls, the arms are not
+   measuring what this hypothesis describes.
+
+A secondary consequence if it holds: the chunk axis is not a free parameter *at thin
+budgets*, and the deployment rule becomes "size the budget to the span with headroom",
+not "avoid chunk 2048". The current documents say only that the axis is non-monotonic and
+unexplained.
+
