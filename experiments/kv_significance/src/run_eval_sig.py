@@ -125,6 +125,24 @@ def main() -> None:
                          "constant across span lengths.")
     ap.add_argument("--grow-max", type=int, default=64,
                     help="dilation cap; only meaningful with --grow.")
+    # THE CONTROL THE LANGUAGE RESULTS DID NOT HAVE. Passkey has had this since
+    # cornerstone 2 began -- `random` keeps the same NUMBER of positions chosen
+    # uniformly, so the score is isolated from the budget at matched sinks,
+    # matched recent and matched window. The language arms had no equivalent, so
+    # the published "+0.184 over the positional control" compares against an arm
+    # differing in THREE things at once: no score, no pooling, AND a recent
+    # window 3.7x larger (53.88 against 14.38). That contrast cannot attribute
+    # anything to the score.
+    ap.add_argument("--select", choices=("significance", "random", "streaming"),
+                    default="significance",
+                    help="BASELINE arms, matching passkey.py. `random` keeps the "
+                         "same number of positions chosen uniformly -- the only "
+                         "control that isolates the SCORE rather than the budget. "
+                         "`streaming` spends everything on sinks plus recent and "
+                         "ranks nothing.")
+    ap.add_argument("--seed", type=int, default=20260826,
+                    help="seeds the `random` selection arm so it is reproducible; "
+                         "the significance arm is deterministic and ignores it.")
     ap.add_argument("--min-heavy-frac", type=float, default=0.0,
                     help="B1: reserve at least this FRACTION of the budget for "
                          "score-chosen slots. The recent window yields to it. "
@@ -200,11 +218,25 @@ def main() -> None:
                       if args.keep_frac is not None else args.budget)
             recent = (max(1, int(round(args.recent_frac * budget)))
                       if args.recent_frac is not None else args.recent)
+            # `streaming` is NOT implemented inside select_keep -- that function
+            # only special-cases `random`. passkey.py realises streaming by
+            # having the CALLER spend the whole budget on sinks plus recent, so
+            # heavy() becomes 0 and nothing is ranked. Doing the same here.
+            #
+            # Without this, --select streaming produced SIGNIFICANCE selection
+            # while writing "streaming" into the manifest: a synthetic probe
+            # showed it still keeping the single high-scoring position that
+            # streaming must miss. That is the same defect shape as the
+            # pool_back/pool_fwd footgun -- a config silently yielding a
+            # different mechanism than the caller asked for.
+            if args.select == "streaming":
+                recent = max(0, budget - (0 if args.no_sinks else args.sinks))
             policy = sig.Policy(budget=budget, sinks=args.sinks, recent=recent,
                                 protect_sinks=not args.no_sinks, pool=args.pool,
                                 pool_back=args.pool_back, pool_fwd=args.pool_fwd,
                                 grow=args.grow, grow_max=args.grow_max,
-                                min_heavy_frac=args.min_heavy_frac)
+                                min_heavy_frac=args.min_heavy_frac,
+                                select=args.select)
             # Record what the policy ACTUALLY used. Writing args.recent here --
             # which is what this file used to do -- makes every --recent-frac run
             # look like a fixed recent=32 run in the manifest, and summarize.py
@@ -214,6 +246,11 @@ def main() -> None:
             recents_used.append(policy.n_recent())
             windows_used.append(tuple(policy.pool_window()))
 
+        # Seed per case so the `random` arm is reproducible AND independent
+        # across cases. passkey.py does the same per trial; without it a random
+        # baseline is neither replicable nor properly varied.
+        if args.select == "random":
+            torch.manual_seed(args.seed + i)
         sig.reset_scores()
         sig.set_recording(evicting, window=args.window)
         cache = sig.SignificanceCache(config=model.config, policy=policy)
@@ -299,6 +336,7 @@ def main() -> None:
         "pool_window_uniform": (len(set(windows_used)) <= 1) if windows_used else None,
         "grow": args.grow,
         "min_heavy_frac": args.min_heavy_frac,
+        "select": args.select, "seed": args.seed,
         "grow_max": (args.grow_max if args.grow else None),
         "directional": bool(windows_used and windows_used[0][1] == 0
                             and windows_used[0][0] > 0),
