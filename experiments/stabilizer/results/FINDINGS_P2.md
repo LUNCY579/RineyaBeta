@@ -926,3 +926,72 @@ from arms whose `heavy_zero_count` was never inspected. The counter existed and 
 recorded in the manifests the whole time. A metric that reports *the mechanism did not
 run* is worth more than one that reports how well it scored, and it should be read first.
 
+---
+
+## 2026-08-26: a defect in the mechanism itself, found by adversarial audit
+
+`grow_spans` derives the reach by growing each score forward through positions above a
+noise floor, and its docstring is explicit that the gate must be **"relative to each
+stream's MEDIAN"** — it rejects a quantile by name because "the gate opens on everything,
+and growth floods the sequence so that the top-k after it is arbitrary."
+
+The implementation computed that median over a vector with **`0.0` substituted for every
+masked slot**. `select_keep` masks sinks and the recent window to `-inf` before calling
+it, so once those masks pass half the vector the floor is exactly `0.0`, and since scores
+are non-negative softmax sums the gate opens on everything. The implementation was
+producing the precise failure its own docstring exists to prevent, by another route.
+
+| geometry | masked | floor as-was | gate admitted | true floor admits |
+|---|---:|---:|---:|---:|
+| rag_dev keep 0.25, recent 31 | **59%** | **0.00000** | **24 / 24** | 2 |
+| rag_dev keep 0.25, recent 14 | 31% | 0.01410 | 22 / 41 | 1 |
+| rag_dev keep 0.50, recent 32 | 31% | 0.01257 | 33 / 81 | 9 |
+| passkey 128K B=64, recent 16 | 31% | 0.01183 | 22 / 45 | 5 |
+
+**All eleven existing `grow_spans` tests passed before and after the fix.** None of them
+ever fed the function a masked tensor — they tested it in isolation, never in the
+composition `select_keep` actually uses. That is the general lesson: a unit test that
+does not reproduce the caller's preconditions can pin the wrong function entirely.
+
+### What this invalidates, stated by severity rather than as a blanket retraction
+
+**Collapsed — 1 arm.** `frac0.25-grow2__rag_dev` (59% masked, gate fully open).
+Quarantined. Its 0.33833 and the −0.07452 keep-0.25 contrast are withdrawn, and the two
+pins that read them are deleted rather than adjusted — there is no correct value until
+the arm is re-run, and a pin that silently tracks a moved number is worse than none.
+
+**Degraded — about thirty arms at 26–36% masked.** Every passkey grow arm, every Halo
+transfer arm, the distractor arms behind the competition result, and `frac0.5-grow2`.
+Their floors sat near the 27th percentile instead of the 50th.
+
+**What survives, and why the distinction matters.** A contrast between two arms sharing
+the same geometry keeps its internal validity: both faced the same mis-specified gate.
+The competition result compares `dist16_framed` against `dist16_bare` at identical budget
+and recent, so **−0.361 stands as a contrast**. What it no longer describes is the policy
+we documented. Absolute claims, and comparisons across geometries, are what need
+re-measurement.
+
+### A second defect from the same audit: cells that faced zero compressions
+
+`chunked_prefill` never compresses the final chunk (`ci < n_chunks - 1`), by design. But
+a needle inside that final chunk therefore faces **no compression at all**, and the result
+row records no chunk index or round count — so a vacuous cell is byte-indistinguishable
+from one that survived thirty rounds.
+
+Scanning all 424 committed compressed cells: **8 faced zero compressions.** Three of them
+are inside a published claim — the Halo 16K depth-0.9 cells at B=32/128/512, where
+`real_tokens = 15714`, chunk 4096 puts the exempt region at ≥ 12288, and the depth-0.9
+needle sits at ~14142. **A policy keeping nothing would also score 1.00 there.**
+
+O5 previously ran this check and resolved it — but only for the 128K geometry, where the
+exempt fraction is 0.977 and a depth-0.9 needle still faces three rounds. At 16K the
+exempt fraction is 0.782 against a needle at 0.897. O5's own pre-declared test reads: *"If
+a depth-0.9 needle faces zero rounds, that cell measures nothing and must be excluded from
+the headline."* It does, and it must.
+
+So §4.8's "8 cells, 288 needles, zero failures" is **252 valid needle-observations**, not
+288: the depth-0.9 column of the three 16K cells contributes nothing. The 32K and 128K
+Halo cells are unaffected. Independent corroboration sits in the committed data:
+`passkey_ratio.json` at 16K/B=2048 scores 0.0 / 0.0 / **1.0** across depths — the only
+cell that succeeds is the only one never compressed.
+

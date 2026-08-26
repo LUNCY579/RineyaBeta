@@ -395,10 +395,22 @@ uncompressed quality at **4×** compression and **96.9%** at 2×, and beats the 
 positional control by **+0.184** at keep 0.25. That is the deployable claim. It is not
 7,864×, which is a passkey property and should never be quoted beside a language number.
 
-**Derived reach does not transfer.** Geodesic dilation, the best passkey arm of §4.6, is
-the worst language arm at both keep fractions tested — −0.03513 (*p* = 1.5 × 10⁻⁵) at
-keep 0.50 and −0.07452 (*p* = 5.5 × 10⁻¹²) at keep 0.25 — while also costing **1.71×**
-and **2.48×** the runtime of the causal window. We report no case for it outside passkey.
+**Derived reach does not transfer — one leg retracted, one standing.** Geodesic
+dilation, the best passkey arm of §4.6, scored −0.03513 (*p* = 1.5 × 10⁻⁵) below the
+causal window at keep 0.50.
+
+*The keep-0.25 leg (−0.07452) is **withdrawn**.* `grow_spans` computed its noise floor
+as the median of a score vector with `0.0` substituted for the sink and recent masks;
+on that arm's geometry those masks are 59% of the vector, so the floor was exactly zero
+and the growth gate admitted **every** eligible position (24 of 24, against a true median
+admitting 2). That arm measured a degenerate positional policy, not derived reach, and
+is quarantined. The defect is fixed and the arm will be re-run.
+
+The keep-0.50 leg sat at 30% masked — floor depressed to roughly the 27th percentile
+rather than collapsed to zero — so it is **degraded, not void**, and is reported with
+that caveat. The runtime figures (**1.71×** and **2.48×**) are likewise inflated: an
+over-open gate runs the dilation loop further before converging, which is the most
+likely reason the *smaller* budget carried the *larger* cost.
 
 **The scale gap, which bounds everything in this section.** These prompts have a median
 of 238 tokens and a maximum of 330; not one exceeds 1K. The passkey results run at

@@ -198,6 +198,41 @@ def lang_quality(tag: str):
     return json.loads(path.read_text(encoding="utf-8")).get("mean_quality_score")
 
 
+def exempt_cells() -> int:
+    """Committed compressed cells whose needle faced ZERO compressions.
+
+    chunked_prefill never compresses the final chunk. A needle inside it faces
+    no compression at all, so the cell measures the model rather than the
+    policy -- a policy keeping NOTHING would score the same. Three such cells
+    sit inside the published Halo 16K transfer claim.
+
+    This pin is a CENSUS, not a value: it fails if the count moves in either
+    direction, which forces anyone adding an exempt cell to justify it and
+    anyone removing one to update the documents.
+    """
+    import math
+    n = 0
+    for path in KVS.glob("*.json"):
+        if any(part.startswith("_invalidated") for part in path.parts):
+            continue
+        try:
+            d = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            continue
+        if not isinstance(d, dict) or not d.get("chunk"):
+            continue
+        for r in d.get("results", []):
+            if not isinstance(r, dict) or r.get("acc") is None:
+                continue
+            rt, depth, bud = r.get("real_tokens"), r.get("depth"), r.get("budget")
+            if not rt or depth is None or not bud:
+                continue
+            nch = math.ceil(rt / d["chunk"])
+            if max(0, (nch - 1) - (int(depth * rt) // d["chunk"])) == 0:
+                n += 1
+    return n
+
+
 def cp_bound(n: int, tail: float) -> float:
     """Clopper-Pearson bound for a cell with zero failures: tail ** (1/n).
 
@@ -784,6 +819,19 @@ CLAIMS = [
     ("LANG contrast keep0.50 derived-minus-causal (NEGATIVE)", -0.03513,
      lambda: lang("keep0.50_causal_vs_derived", "paired_mean_diff"),
      5e-6, "-0.03513", "p2"),
+    # RETRACTED 2026-08-26 -- the two keep-0.25 derived pins that used to sit
+    # here read from frac0.25-grow2__rag_dev, now quarantined under
+    # _invalidated_grow_noisefloor. At 59% masked that arm's grow gate was FULLY
+    # OPEN (24 of 24 eligible positions admitted against a true median admitting
+    # 2), so 0.33833 and the -0.07452 contrast measured a degenerate positional
+    # policy rather than derived reach. Deleting the pins rather than adjusting
+    # them: there is no correct value to pin until the arm is re-run, and a pin
+    # that silently tracks a moved number is worse than no pin.
+    #
+    # The keep-0.50 pin above is RETAINED with a stated caveat: that arm sat at
+    # 30% masked -- the floor was depressed to roughly the 27th percentile, not
+    # collapsed to zero -- so it is degraded rather than void. It is a separate
+    # question from the collapsed arm and is flagged in the documents.
     ("LANG keep0.25 discordant pairs favouring causal", 235,
      lambda: lang("keep0.25_centred_vs_causal", "b_better"), 0.5, "235", "p2"),
     ("LANG keep0.75 discordant pairs favouring CENTRED", 23,
@@ -804,15 +852,12 @@ CLAIMS = [
      lambda: json.loads((KVS / "frac0.25-b6f0__rag_dev" / "run_manifest.json")
                         .read_text(encoding="utf-8"))["heavy_zero_count"],
      0.5, "17,360", "p2"),
+    ("CENSUS: committed cells that faced ZERO compressions", 8,
+     exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,
      lambda: json.loads((KVS / "frac0.25-rf0.25-b6f0__rag_dev" / "run_manifest.json")
                         .read_text(encoding="utf-8"))["heavy_zero_count"],
      0.5, "zero", "p2"),
-    ("LANG keep0.25 derived-minus-causal (NEGATIVE)", -0.07452,
-     lambda: lang("keep0.25_causal_vs_derived", "paired_mean_diff"),
-     5e-6, "-0.07452", "p2"),
-    ("LANG keep0.25 derived reach", 0.33833,
-     lambda: lang_quality("frac0.25-grow2"), 5e-6, "0.33833", "p2"),
 ]
 
 

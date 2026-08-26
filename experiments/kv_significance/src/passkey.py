@@ -519,8 +519,21 @@ def main() -> None:
                 # distinguishable in the results file. (A manifest that stored the
                 # raw argument instead of the effective value has already caused
                 # one wrong published number in this program.)
+                # HOW MANY COMPRESSIONS DID THIS NEEDLE ACTUALLY FACE?
+                # chunked_prefill never compresses the final chunk, by design.
+                # A needle inside that chunk therefore faces NONE -- and the row
+                # used to record no chunk index and no round count, so a vacuous
+                # cell was byte-indistinguishable from one that survived thirty
+                # rounds. Three published Halo 16K depth-0.9 cells were exactly
+                # this: real_tokens 15714, chunk 4096, exempt region >= 12288,
+                # needle at ~14142. A policy keeping NOTHING scores 1.00 there.
+                # Recorded now so no cell can hide it again.
+                _nchunks = max(1, -(-real_n // args.chunk)) if args.chunk else 1
+                _faced = max(0, (_nchunks - 1) - (int(depth * real_n) // args.chunk))                     if args.chunk else 0
                 rows.append({"length": n, "real_tokens": real_n, "budget": budget,
                              "depth": depth, "acc": acc, "peak_mib": round(peak, 1),
+                             "n_chunks": _nchunks, "compressions_faced": _faced,
+                             "exempt_from_compression": bool(budget and _faced == 0),
                              "yarn": args.yarn, "trials_ok": seen, "ooms": ooms,
                              "rank_exponent": (policy.rank_exponent() if policy
                                                else None),
