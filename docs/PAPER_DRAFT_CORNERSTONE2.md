@@ -166,9 +166,14 @@ Because the required reach tracks the span (§4.5), we replace the fixed window 
 growth gated on the score itself:
 
 ```
-gate  = s > median(s) · m
+gate  = s > median(s over UNMASKED positions) · m
 repeat: s ← max(s, shift_forward(s)) masked by gate, until convergence or max_reach
 ```
+
+The qualifier on the median is load-bearing, not pedantry. Sinks and the recent window
+are masked to −∞ before this runs, and an implementation that took the median of the
+masked vector with zeros substituted produced a floor of exactly 0 whenever those masks
+exceeded half the vector — opening the gate on every eligible position. See Appendix B.
 
 The score enters a span at its **head** (§4.2) and is grown forward through positions
 that are themselves above the stream's noise floor, so it reproduces the span and stops
@@ -190,6 +195,36 @@ the top-*k* **to be grown into** inverts hysteresis, which needs a selective see
 *permissive* gate. A payload position is individually weak — that is the entire problem
 — so the top-*k* requirement excluded exactly what the mechanism exists to rescue. It
 scored 0.00 and emitted degenerate output.
+
+---
+
+### 3.4 Budget allocation
+
+The budget is not spent uniformly. It divides three ways, and the division turns out to
+matter more than any scoring choice we make (§4.10):
+
+```
+budget = sinks  +  recent  +  heavy
+         pinned    pinned     chosen by the score
+```
+
+`sinks` are load-bearing and never yield: `sinks = 0` scores 0.000 even while holding
+*more* score-chosen slots (§4.9). `recent` is partly a heuristic — new positions have too
+few observations for a trustworthy score — and partly structural, because it absorbs the
+lag between a token entering the cache and being scored; the implementation raises rather
+than pad that lag with +∞, which would let the newest tokens win the top-k
+unconditionally. `heavy` is what the mechanism actually controls.
+
+Two rules for setting `recent` are compared in §4.10: a **ratio** (`recent = f · budget`)
+and a **floor** (`min_heavy_frac`, reserving a share for the score and letting `recent`
+take what is left, down to a minimum of one). With sinks = 4 the smallest budget that can
+run the mechanism at all is 6.
+
+Earlier work in this programme fixed `recent` at a constant 32. On a 232-token prompt at
+keep 0.25 that consumes 61% of the budget before the score is consulted, and the score is
+left **zero** slots on 17,360 compressions — the policy silently degenerating to
+StreamingLLM. We report a counter for this condition, and recommend that any evaluation of
+a budgeted eviction policy do the same.
 
 ---
 
@@ -448,6 +483,39 @@ that caveat. The runtime figures (**1.71×** and **2.48×**) are likewise inflat
 over-open gate runs the dilation loop further before converging, which is the most
 likely reason the *smaller* budget carried the *larger* cost.
 
+**The allocation curve has an interior optimum, and a self-sizing floor only ties it.**
+Sweeping the split at keep 0.25, all arms CPU, 752 cases, only the recent window moving:
+
+| `recent_frac` | score's share | quality |
+|---:|---:|---:|
+| 0.10 | 83.1% | 0.59788 |
+| **0.15** | 78.1% | **0.60834** |
+| 0.25 | 68.3% | 0.59488 |
+| 0.35 | 58.1% | 0.53656 |
+| 0.50 | 43.2% | 0.43732 |
+
+The optimum is **interior** — pushing the score's share higher is slightly worse, so the
+recent window is not overhead. The curve also validates itself at the far end: at 43.2%
+under the score it reaches 0.43732, within 0.010 of the separately-run streaming control
+(0.42740), which nothing forced.
+
+A floor-based rule (§3.4's `min_heavy_frac`) was measured
+against this and **ties rather than beats**: best floor 0.60297 against the best tuned
+ratio's 0.60834, paired difference −0.00537, 95% CI [−0.019, +0.008], 50 better / 48
+worse, *p* = 0.92. We report it as the null it is. The floor's value is that it makes the
+degenerate `heavy = 0` state unreachable by construction — a **safety** property, not a
+quality one. Note also that allocations as different as recent = 4.3 and 8.7 land within
+0.005 of each other while 14.4 and 28.9 fall away sharply: the optimum is a broad plateau
+with a cliff on one side, so an allocation rule needs to be *safe* rather than *accurate*.
+
+**The score's value grows as the budget tightens**, which is the mechanism's central
+claim. Against matched random controls at two compression levels:
+
+| keep | matched random | significance | the score is worth |
+|---:|---:|---:|---:|
+| 0.50 (2×) | 0.44191 | 0.65338 | **+0.21147** |
+| 0.25 (4×) | 0.34304 | 0.59488 | **+0.25184** |
+
 **The scale gap, which bounds everything in this section.** These prompts have a median
 of 238 tokens and a maximum of 330; not one exceeds 1K. The passkey results run at
 125,826 tokens — **543× longer** — and we have nothing in between. Every figure here
@@ -528,25 +596,30 @@ omit it.
    is at 125,826 tokens; the language evidence (§4.10) is at a median of 238 tokens with
    no prompt above 1K. The regime this mechanism is *for* — a long natural-language
    document — is unmeasured, and neither body of evidence speaks for it.
-3. **The language scorer is a heuristic rubric, not a model judge**, and flags itself
+3. **Every language result is on the 474M base core** `rineya-core-en32k-28L`. The only
+   evidence on a published core is the passkey transfer test of §4.8. There is no
+   natural-language evidence on any published core, and none on any long-context-trained
+   checkpoint — the harness gained the ability to load a fine-tuned adapter only after
+   these measurements were taken.
+4. **The language scorer is a heuristic rubric, not a model judge**, and flags itself
    `quality_pass_is_diagnostic_only`. It is adequate for a paired within-task contrast
    and should not be read as an absolute quality scale.
-4. **One task family for the retrieval results.** Everything there is passkey-shaped. The filler contains **no digits at
+5. **One task family for the retrieval results.** Everything there is passkey-shaped. The filler contains **no digits at
    all**, so the answer is the only object of its kind and a regex scores 1.000 with no
    model. These are span-*preservation* measurements, not retrieval-difficulty ones.
-5. **The span axis cannot be extended on this model, and we measured why.** With a *full
+6. **The span axis cannot be extended on this model, and we measured why.** With a *full
    cache and no eviction*, the model scores **0.000** on a 12-digit key, emitting 11
    correct digits then diverging — the same ceiling at 20 and 30 digits. So the reach law
    of §4.5 is measured over d = 4, 5, 7, 9 and **no experimental design can extend it
    here**; testing the 20–40 token spans that real evidence occupies requires a model
    with greater verbatim-recall capacity. Unlike the withdrawal in §5.2, this is a
    property of the model rather than a flaw we could fix.
-6. **No uncompressed reference above ~32K.** A 64K full cache OOM'd at 6,425.6 MiB
+7. **No uncompressed reference above ~32K.** A 64K full cache OOM'd at 6,425.6 MiB
    against a highest-survived 4,972.9 MiB. Above 32K the claim is not "cheaper than
    full" but "runs at all".
-7. **The mechanism's own runtime cost is unmeasured.** Derived reach iterates; every
+8. **The mechanism's own runtime cost is unmeasured.** Derived reach iterates; every
    number here is a benefit.
-8. **One model family.** Halo shares the architecture; nothing is shown across scales or
+9. **One model family.** Halo shares the architecture; nothing is shown across scales or
    head configurations.
 
 ---
@@ -568,6 +641,35 @@ Kept rather than deleted, because the reasoning is worth more than the verdict.
 ---
 
 ## Appendix B — engineering defects that produced false results
+
+**The growth gate's noise floor was computed over the mask (2026-08-26).** `select_keep`
+masks sinks and the recent window to −∞ and hands the masked tensor to the growth
+function, which took the median of that vector with `0.0` substituted for the masked
+slots. Once the masks exceeded half the vector the floor was exactly `0.0`, and since
+scores are non-negative the gate opened on every eligible position — 24 of 24 measured,
+against a true median admitting 2. That is the precise failure the method rejects a
+quantile gate for, reached by another route. **All eleven of the function's unit tests
+passed before and after the fix**, because none of them ever fed it a masked tensor: they
+exercised the function in isolation, never in the composition its caller uses. Re-running
+every affected arm bounded the damage — all `grow = 2.0` results identical to four
+decimals, only `grow = 5.0` moving (0.611 → 0.722), weakening the multiplier contrast at
+d=7 from *p* = 0.0020 to *p* = 0.0312.
+
+**A budget floor starved the window that absorbs the score lag (2026-08-26).** The same
+error class, in code written the same day the lesson was named: a floor reserving the
+budget for the score drove `recent` to 0 at every budget ≤ 20, and eviction raises when
+the score lag exceeds the recent window. Twenty-four unit tests passed — they asserted the
+score's share was never starved, never that `recent ≥ 1`, and never ran the eviction path.
+
+**Three published transfer cells measured nothing (2026-08-26).** Chunked prefill never
+compresses the final chunk, so a needle inside it faces no compression at all, and the
+result rows recorded no chunk index or round count — leaving a vacuous cell
+byte-indistinguishable from one that survived thirty rounds. Of 424 committed compressed
+cells, 8 faced zero compressions and 3 sat inside the §4.8 transfer claim. Re-measured at
+a chunk size that compresses them, they return the same 1.000: the claim was true, it had
+not been tested.
+
+
 
 Recorded because each one initially looked like a finding.
 
