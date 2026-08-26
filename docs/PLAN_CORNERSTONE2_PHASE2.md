@@ -401,6 +401,15 @@ committed headline exactly), but the card was at **100% utilisation and 93 °C**
 jobs on it, and my run was consuming headroom the other job might have needed. I stopped
 my queue and killed only my own PIDs.
 
+**Correction to rule 1, added after it cost an hour.** The first version blocked
+whenever a process whose command line matched another project was *alive*. It then
+yielded for a full hour to a **launcher shim holding 1 MB and 0 CPU seconds** while the
+card sat at baseline — confusing "a process exists" with "the card is in use" — and the
+A3 shard and the whole allocation sweep were skipped. The guard now requires **both** a
+foreign process holding real memory (>200 MB working set) **and** the card actually
+consuming (≥1500 MiB). Being a good neighbour means yielding to work, not to a name in a
+process table.
+
 **Rules for every future queue here:**
 1. Before starting a cell, check for GPU processes that are **not ours** — match on the
    command line, not on "is python running". If a foreign job holds the device, wait or
