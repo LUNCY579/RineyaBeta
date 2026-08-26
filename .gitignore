@@ -97,3 +97,4 @@ experiments/**/results/*.log
 # tokenizer and config files stageable: a single `git add -A` would have vendored a
 # second copy of metadata this repo already tracks. Ignore the directories whole.
 artifacts/Rineya-Halo-*/
+_sel_*__rag_dev/
