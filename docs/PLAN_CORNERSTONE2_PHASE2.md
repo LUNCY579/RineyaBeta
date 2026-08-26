@@ -388,6 +388,31 @@ one variable:
 
 ---
 
+### Operational rule added 2026-08-25: this GPU is not exclusively ours
+
+A3's shard queue ran for over an hour alongside **the user's own job** —
+`run_stability192_validation.py`, from the Chat-Bubble repository, started 21:33:57 —
+on the same 8 GB card. My cooldown gate saw 5,182 MiB and then 6,734 MiB already in use
+and *proceeded anyway* on its fallback, because the gate was written to wait out **my
+own** previous cell, not somebody else's job.
+
+The three completed shards are unaffected (60/60 each, peak 1,501 MiB, matching the
+committed headline exactly), but the card was at **100% utilisation and 93 °C** with both
+jobs on it, and my run was consuming headroom the other job might have needed. I stopped
+my queue and killed only my own PIDs.
+
+**Rules for every future queue here:**
+1. Before starting a cell, check for GPU processes that are **not ours** — match on the
+   command line, not on "is python running". If a foreign job holds the device, wait or
+   yield; do not fall through and start anyway.
+2. A cooldown fallback that proceeds after a timeout is correct when waiting on our own
+   teardown and *wrong* when another job is simply using the machine. Distinguish them.
+3. Never kill a process we did not start. Target our own PIDs explicitly by command line.
+4. Long GPU campaigns should be resumable per-cell (the shard design already is), so
+   yielding costs one cell rather than the run.
+
+---
+
 ### Revised ordering from here
 
 1. **C1′ — natural language.** *(running)* Promoted from seventh to first. Nothing else
