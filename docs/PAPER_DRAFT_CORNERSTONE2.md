@@ -56,6 +56,16 @@ An ablation shows the sinks are **not optional overhead but load-bearing**: with
 `sinks=0` and *more* score-chosen slots (12 against 8), accuracy is **0.000**. The claim
 is therefore four sinks *plus* eight score-chosen positions, not eight positions alone.
 
+On **natural language** the mechanism transfers but the headline does not (§4.10). At
+~232-token RAG prompts, causal pooling retains **90.6%** of uncompressed quality at **4×**
+compression and beats a matched positional control by **+0.184** — but only once the
+budget is allocated proportionally. Under the fixed `recent` inherited from prior work,
+the score was left **zero** slots on 17,360 compressions and the policy silently
+degenerated to StreamingLLM; repairing that allocation is worth **+0.193** (*p* = 3 ×
+10⁻⁶⁰), the largest language effect we measure. We report the 7,864× figure as a property
+of passkey and not of prose, and note that our language evidence sits **543× shorter**
+than our retrieval evidence with nothing in between.
+
 We report where it fails. Sixteen query-shaped distractors take accuracy from 1.000 to
 0.611, and budget alone restores it — competition is a capacity cost, not a scoring
 failure. We also withdraw a word-phrase variant built to extend the span axis past nine
@@ -271,7 +281,7 @@ We state no closed-form law. `back ≥ d−1` fits d=4 and d=5 and fails at d=7;
 fits d=7 and over-predicts at d=5. What is established, and is what the method rests on,
 is the **qualitative** claim: the requirement is a function of the evidence span.
 
-### 4.6 Deriving the reach beats tuning it
+### 4.6 Deriving the reach beats a *constant* reach — on passkey only
 
 One policy, never told the key length, against the best *hand-tuned* fixed reach:
 
@@ -339,6 +349,62 @@ attention distribution past anything the score can recover.
 Two sinks suffice, so the requirement is "some sinks", not four — but it is a
 requirement, and the correct statement of the headline is **four sinks plus eight
 score-chosen positions**.
+
+---
+
+### 4.10 Natural language: the mechanism transfers, but the headline does not
+
+Every result above is passkey-shaped, scored by `hit = str(key) in got` on filler that
+contains no digits — a task a regular expression solves without a model. This section is
+the first natural-language evidence the mechanism has produced. 752 RAG cases, paired on
+case id, a heuristic rubric scorer that flags itself `quality_pass_is_diagnostic_only`.
+Uncompressed reference: **0.66939**.
+
+**Window direction matters, and the sign flips with compression pressure.**
+
+| keep | compression | centred (3,3) | causal (6,0) | paired Δ | exact sign test |
+|---:|---:|---:|---:|---:|---|
+| 0.25 | 4× | 0.26096 | **0.41286** | **+0.15190** | *p* = 5.7 × 10⁻³⁷ |
+| 0.75 | 1.33× | **0.65999** | 0.65136 | **−0.00863** | *p* = 3.0 × 10⁻⁶ |
+
+Causal pooling wins under pressure and loses, slightly but significantly, without it —
+with an ample budget a centred window's forward reach buys context; with a tight budget
+the same reach spends slots on positions the query has not reached. Note also that at
+keep 0.25 the centred window (0.26096) is *worse than not pooling at all* (0.33863): the
+causal window is repairing damage that pooling causes, not merely adding a gain.
+
+**The dominant variable is budget allocation, not scoring.** The arms above inherit
+`recent` pinned at a fixed 32 positions. On a 232-token prompt at keep 0.25 the whole
+budget is ~58, so sinks + recent consume 61% of it before the score is consulted:
+
+| keep-0.25 arm | score-chosen share | `heavy_zero_count` | quality |
+|---|---:|---:|---:|
+| fixed `recent = 32` | 39.0% | **17,360** | 0.41286 |
+| proportional `recent = 0.25·B` | **68.2%** | **0** | **0.60617** |
+
+Paired difference **+0.19331**, *p* = 3.1 × 10⁻⁶⁰ — the largest effect we measure on
+language. `heavy_zero_count` records compressions where the budget left the score *zero*
+slots, so the policy degenerated to StreamingLLM: under the fixed allocation it fired
+17,360 times, under proportional allocation zero. **The mechanism was not
+underperforming at aggressive compression; it was not running for much of the work.**
+Any evaluation of a budgeted eviction policy should report this counter, and we had it in
+our manifests unread.
+
+**What this supports.** With proportional allocation, causal pooling retains **90.6%** of
+uncompressed quality at **4×** compression and **96.9%** at 2×, and beats the matched
+positional control by **+0.184** at keep 0.25. That is the deployable claim. It is not
+7,864×, which is a passkey property and should never be quoted beside a language number.
+
+**Derived reach does not transfer.** Geodesic dilation, the best passkey arm of §4.6, is
+the worst language arm at both keep fractions tested — −0.03513 (*p* = 1.5 × 10⁻⁵) at
+keep 0.50 and −0.07452 (*p* = 5.5 × 10⁻¹²) at keep 0.25 — while also costing **1.71×**
+and **2.48×** the runtime of the causal window. We report no case for it outside passkey.
+
+**The scale gap, which bounds everything in this section.** These prompts have a median
+of 238 tokens and a maximum of 330; not one exceeds 1K. The passkey results run at
+125,826 tokens — **543× longer** — and we have nothing in between. Every figure here
+should be read as *"at ~232 tokens"*, and no long-context language claim follows from
+any of it.
 
 ---
 
@@ -410,22 +476,29 @@ omit it.
    three depths, so a 36-trial row is 12 needles observed three times. A perfect cell
    supports a 95% Clopper–Pearson lower bound of **0.779**. Every *contrast* here is
    overwhelming; the word "lossless" is weaker than it sounds.
-2. **One task family.** Everything is passkey-shaped. The filler contains **no digits at
+2. **Two task families, 543× apart, with nothing between them.** The retrieval evidence
+   is at 125,826 tokens; the language evidence (§4.10) is at a median of 238 tokens with
+   no prompt above 1K. The regime this mechanism is *for* — a long natural-language
+   document — is unmeasured, and neither body of evidence speaks for it.
+3. **The language scorer is a heuristic rubric, not a model judge**, and flags itself
+   `quality_pass_is_diagnostic_only`. It is adequate for a paired within-task contrast
+   and should not be read as an absolute quality scale.
+4. **One task family for the retrieval results.** Everything there is passkey-shaped. The filler contains **no digits at
    all**, so the answer is the only object of its kind and a regex scores 1.000 with no
    model. These are span-*preservation* measurements, not retrieval-difficulty ones.
-3. **The span axis cannot be extended on this model, and we measured why.** With a *full
+5. **The span axis cannot be extended on this model, and we measured why.** With a *full
    cache and no eviction*, the model scores **0.000** on a 12-digit key, emitting 11
    correct digits then diverging — the same ceiling at 20 and 30 digits. So the reach law
    of §4.5 is measured over d = 4, 5, 7, 9 and **no experimental design can extend it
    here**; testing the 20–40 token spans that real evidence occupies requires a model
    with greater verbatim-recall capacity. Unlike the withdrawal in §5.2, this is a
    property of the model rather than a flaw we could fix.
-4. **No uncompressed reference above ~32K.** A 64K full cache OOM'd at 6,425.6 MiB
+6. **No uncompressed reference above ~32K.** A 64K full cache OOM'd at 6,425.6 MiB
    against a highest-survived 4,972.9 MiB. Above 32K the claim is not "cheaper than
    full" but "runs at all".
-5. **The mechanism's own runtime cost is unmeasured.** Derived reach iterates; every
+7. **The mechanism's own runtime cost is unmeasured.** Derived reach iterates; every
    number here is a benefit.
-6. **One model family.** Halo shares the architecture; nothing is shown across scales or
+8. **One model family.** Halo shares the architecture; nothing is shown across scales or
    head configurations.
 
 ---
