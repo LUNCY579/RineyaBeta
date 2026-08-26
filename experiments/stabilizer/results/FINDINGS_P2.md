@@ -861,3 +861,68 @@ timing study — it is not thermally controlled, and A5 proper still needs to be
 ratio is large enough, and consistent enough across two keep fractions, that the
 direction is not in doubt.
 
+---
+
+## 2026-08-25, final: the aggressive-compression result was an artifact of BUDGET ALLOCATION
+
+Everything above about keep 0.25 -- including "recency-only is just as good at 4x" --
+was measured with `recent` pinned at a **fixed 32 positions**, inherited from the
+cornerstone-1 arms. On a 232-token prompt at keep 0.25 the whole budget is ~58, so
+sinks(4) + recent(32) consumed **61% of it before the score saw anything**.
+
+Setting `--recent-frac 0.25` instead, with the causal window unchanged:
+
+| keep-0.25 arm | window | recent | score-chosen | `heavy_zero_count` | quality |
+|---|---|---:|---:|---:|---:|
+| `frac0.25-b6f0` | causal (6,0) | 31.33 | 22.6 (39.0%) | **17,360** | 0.41286 |
+| `frac0.25-rf0.25-b6f0` | causal (6,0) | **14.38** | **39.5 (68.2%)** | **0** | **0.60617** |
+
+Paired on 752 cases: **+0.19331**, exact sign test **p = 3.08e-60**. This is the largest
+effect this programme has measured on natural language, and it is larger than the
+direction effect that preceded it.
+
+**The mechanistic explanation is in the `heavy_zero_count` column.** That counter records
+(layer, head, compression) events where the budget left **zero** slots for the score, so
+the policy silently degenerated to plain StreamingLLM. Under the fixed `recent=32` it
+fired **17,360 times**; under proportional allocation it fires **zero** times. The
+mechanism was not underperforming at aggressive compression. **It was switched off for a
+large share of the work, and we were measuring its absence.**
+
+### What this changes
+
+| claim | before | after |
+|---|---|---|
+| quality at 4x compression | 0.41286, **61.7%** of uncompressed | **0.60617, 90.6%** |
+| vs positional control at keep 0.25 | **-0.009** (recency ties it) | **+0.184** (`rf1.0` = 0.42208) |
+| deployable operating point | ~2x at ~97% | **~4x at ~91%**, or 2x at ~97% |
+
+The earlier reading -- *"at keep 0.25 the score merely ties recency-only"* -- is
+**withdrawn**. It was true of a configuration that had disabled the score, not of the
+mechanism.
+
+### Derived reach loses at this keep fraction too
+
+| keep 0.25 | quality | vs causal |
+|---|---:|---:|
+| causal (6,0) | 0.41286 | -- |
+| derived (`grow=2.0`, centred) | 0.33833 | **-0.07452**, p = 5.52e-12 |
+
+Consistent with keep 0.50 (-0.03513). Derived reach is worse on natural language at both
+keep fractions tested, on top of costing 1.7-2.5x the runtime. Its case rests entirely on
+passkey.
+
+### Consequence for the plan
+
+**B1 (self-sizing budget) is no longer speculative.** It was ranked highest-value-per-hour
+on the argument that turning a tuned constant into a derived quantity is the move that
+made derived reach beat fixed reach. That argument is now backed by the single largest
+language effect on record -- and `recent-frac` is a crude proxy for what B1 would do
+properly, since it still fixes a *ratio* rather than deriving the split from the score's
+own distribution. The headroom above 0.60617 is what B1 is for.
+
+**A methodological note worth keeping.** Every keep-0.25 conclusion in this programme,
+including cornerstone 1's published `-0.083` loss to the positional control, was drawn
+from arms whose `heavy_zero_count` was never inspected. The counter existed and was
+recorded in the manifests the whole time. A metric that reports *the mechanism did not
+run* is worth more than one that reports how well it scored, and it should be read first.
+

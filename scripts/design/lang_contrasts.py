@@ -41,6 +41,13 @@ CONTRASTS = [
     ("keep0.25_centred_vs_causal", "frac0.25-pool7-fixed__rag_dev", "frac0.25-b6f0__rag_dev"),
     ("keep0.75_centred_vs_causal", "frac0.75-pool7-fixed__rag_dev", "frac0.75-b6f0__rag_dev"),
     ("keep0.50_causal_vs_derived", "frac0.5-b6f0__rag_dev", "frac0.5-grow2__rag_dev"),
+    ("keep0.25_causal_vs_derived", "frac0.25-b6f0__rag_dev", "frac0.25-grow2__rag_dev"),
+    # The budget-ALLOCATION contrast. Window held causal in both arms; what
+    # changes is recent (fixed 32 -> 25% of budget), which moves the score's
+    # share of the budget from ~39% to ~68%. This is the single largest effect
+    # measured on language.
+    ("keep0.25_allocation_fixed_vs_fair", "frac0.25-b6f0__rag_dev",
+     "frac0.25-rf0.25-b6f0__rag_dev"),
 ]
 
 

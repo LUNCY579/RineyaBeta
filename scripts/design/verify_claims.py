@@ -788,6 +788,31 @@ CLAIMS = [
      lambda: lang("keep0.25_centred_vs_causal", "b_better"), 0.5, "235", "p2"),
     ("LANG keep0.75 discordant pairs favouring CENTRED", 23,
      lambda: lang("keep0.75_centred_vs_causal", "b_worse"), 0.5, "23", "p2"),
+
+    # --- BUDGET ALLOCATION: the largest language effect measured -------------
+    # The keep-0.25 arms had `recent` pinned at a fixed 32 on a ~232-token
+    # prompt, so sinks+recent ate 61% of the budget and heavy_zero_count fired
+    # 17,360 times -- the policy silently degenerated to StreamingLLM. The
+    # heavy_zero_count pins matter more than the quality ones: they are what
+    # distinguishes "the mechanism scored badly" from "the mechanism did not run".
+    ("LANG keep0.25 fair-share allocation", 0.60617,
+     lambda: lang_quality("frac0.25-rf0.25-b6f0"), 5e-6, "0.60617", "p2"),
+    ("LANG allocation effect (largest on language)", 0.19331,
+     lambda: lang("keep0.25_allocation_fixed_vs_fair", "paired_mean_diff"),
+     5e-6, "0.19331", "p2"),
+    ("LANG heavy_zero under FIXED recent=32", 17360,
+     lambda: json.loads((KVS / "frac0.25-b6f0__rag_dev" / "run_manifest.json")
+                        .read_text(encoding="utf-8"))["heavy_zero_count"],
+     0.5, "17,360", "p2"),
+    ("LANG heavy_zero under PROPORTIONAL recent", 0,
+     lambda: json.loads((KVS / "frac0.25-rf0.25-b6f0__rag_dev" / "run_manifest.json")
+                        .read_text(encoding="utf-8"))["heavy_zero_count"],
+     0.5, "zero", "p2"),
+    ("LANG keep0.25 derived-minus-causal (NEGATIVE)", -0.07452,
+     lambda: lang("keep0.25_causal_vs_derived", "paired_mean_diff"),
+     5e-6, "-0.07452", "p2"),
+    ("LANG keep0.25 derived reach", 0.33833,
+     lambda: lang_quality("frac0.25-grow2"), 5e-6, "0.33833", "p2"),
 ]
 
 

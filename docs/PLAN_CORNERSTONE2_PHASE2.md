@@ -393,14 +393,30 @@ one variable:
 1. **C1′ — natural language.** *(running)* Promoted from seventh to first. Nothing else
    on this list matters if the mechanism does not transfer off passkey, and until
    2026-08-25 it could not even be run on language.
-2. **A3** — n = 99 per depth. **Crashed** on its first attempt with
+2. **A3 — SHARDED after three failures.** Three attempts, three *different* CUDA errors
+   (`CUBLAS_STATUS_EXECUTION_FAILED`, death on load, `cudaErrorUnknown`), the last on a
+   verified-drained GPU at 31 minutes in. The drain fix cured the language cells but not
+   this, so the remaining variable is sustained 128K work: ~2.5 h of continuous
+   full-budget prefill on an 8 GB card that reached 91 °C. Re-cast as **5 shards of 20
+   trials on 5 distinct seeds** (verified: 100 keys, zero cross-seed collisions), each
+   ~25–30 min with a drain and thermal cooldown between. n = 100 pooled gives a
+   one-sided 95% Clopper–Pearson lower bound of **0.9705** against 0.7791 at n = 12,
+   which is the entire purpose of A3.
+   *(Original note, kept:)* Crashed on its first attempt with
    `CUBLAS_STATUS_EXECUTION_FAILED` after ~21 min at 91 °C; no partial artifact was
    written, so nothing is contaminated. Re-queued behind C1′ with full logging. (The
    wrapper reported *exit code 0* for that crash — it piped python through `grep | tail`,
    so the pipeline returned tail's status and the traceback was discarded. Fixed.)
-3. **B1** — self-sizing budget. Still the highest value per hour among the capability
-   items, but it is now third: a self-sizing budget for a mechanism not shown to work on
-   language would be tuning the wrong thing.
+3. **B1 — self-sizing budget. PROMOTED, and no longer speculative.** C1′ produced the
+   largest language effect on record and it is an *allocation* effect, not a scoring one:
+   holding the causal window fixed and changing `recent` from a fixed 32 to 25% of the
+   budget moves keep-0.25 quality from **0.41286 to 0.60617** (+0.19331, p = 3.08e-60),
+   and drops `heavy_zero_count` from **17,360 to zero**. That counter records events where
+   the budget left the score no slots at all, so the policy had been silently degenerating
+   to StreamingLLM — the mechanism was not underperforming at aggressive compression, it
+   was *switched off* for much of the work. `--recent-frac` is a crude proxy for what B1
+   would do properly, since it still fixes a ratio rather than deriving the split. The
+   headroom above 0.60617 is what B1 is for.
 4. **A4′** — the cache-level span instrument, with its calibration gate.
 5. **B4, B2** — multi-turn persistence, then iterative re-scoring.
 6. **A5** — runtime cost. *(Partially answered 2026-08-25: derived reach costs
