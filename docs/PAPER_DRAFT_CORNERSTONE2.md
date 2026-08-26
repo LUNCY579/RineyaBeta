@@ -516,6 +516,21 @@ claim. Against matched random controls at two compression levels:
 | 0.50 (2×) | 0.44191 | 0.65338 | **+0.21147** |
 | 0.25 (4×) | 0.34304 | 0.59488 | **+0.25184** |
 
+**The gain is concentrated, and the mean is the wrong summary.** Broken down by case
+category, the score helps most exactly where evidence competes — ambiguous evidence
+(+0.646), planted distractors (+0.565), stale facts (+0.481), conflicts and multi-fact
+answers — and is very slightly *negative* on `social` (−0.053), where there is no evidence
+to retrieve and the mechanism has no job. That is §5.1's competition result reappearing
+on prose: the categories that *are* competition are the categories the score rescues.
+
+The distribution matters more than the average. Mean gain **+0.2653**, median **+0.0105**;
+**40% of cases are unchanged**, 53% improve, 7% degrade, and the top 10% of cases carry
+31% of the total gain (top 30%: 77%). So the claim this supports is not *"quality improves
+by 0.27"* but **"catastrophic failures on the hard subset are prevented"** — a different
+promise, justifying a different deployment. It also means a benchmark of mostly-easy cases
+will under-report this mechanism and one weighted toward competing evidence will
+over-report it, so any comparison should state its category mix.
+
 **The scale gap, which bounds everything in this section.** These prompts have a median
 of 238 tokens and a maximum of 330; not one exceeds 1K. The passkey results run at
 125,826 tokens — **543× longer** — and we have nothing in between. Every figure here

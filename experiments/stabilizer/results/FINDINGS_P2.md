@@ -1384,3 +1384,62 @@ deriving the split from the score's distribution rather than from a constant —
 lower value than it looked, because the plateau is broad: there is roughly 0.005 of
 quality available between a bad-but-safe allocation and the best one found.
 
+---
+
+## 2026-08-26: WHERE the score earns its keep, and why the mean is the wrong summary
+
+The headline "+0.265 over matched random at keep 0.25" is a mean, and the mean hides the
+shape. Breaking the same paired comparison down by the RAG category of each case:
+
+| category | n | mean gain |
+|---|---:|---:|
+| ambiguous_evidence | 38 | **+0.6461** |
+| supported_with_distractor | 38 | **+0.5651** |
+| stale_evidence | 38 | +0.4812 |
+| procedure_conflict | 25 | +0.4649 |
+| multi_fact_supported | 38 | +0.4380 |
+| prompt_injection | 38 | +0.4115 |
+| supported | 152 | +0.3815 |
+| conflict | 38 | +0.3441 |
+| procedure_missing_input | 25 | +0.2116 |
+| supported_paraphrase | 38 | +0.1170 |
+| qualified_answer | 38 | +0.1058 |
+| missing_answer | 38 | +0.0934 |
+| procedure_supported | 125 | +0.0371 |
+| procedure_with_distractor | 25 | 0.0000 |
+| partial_support | 38 | −0.0169 |
+| **social** | 20 | **−0.0529** |
+
+**The score helps most exactly where evidence competes.** Ambiguous evidence, planted
+distractors, stale facts, conflicts, multi-fact answers — the top of the table is the set
+of cases where the prompt contains something that *looks* like the answer and is not. At
+the bottom sits `social`, where there is no evidence to retrieve at all and the score has
+nothing to do; it is very slightly negative there, which is what an honest mechanism
+looks like when its job does not apply.
+
+This is §5.1's competition result appearing on natural language. There, sixteen
+query-shaped decoys took passkey from 1.000 to 0.611 and budget alone restored it. Here,
+the categories that *are* competition are the categories the score rescues.
+
+### The distribution, which changes the deployment claim
+
+| | |
+|---|---|
+| mean gain | **+0.2653** |
+| **median gain** | **+0.0105** |
+| unchanged | **300 cases (40%)** |
+| better | 400 (53%) |
+| worse | 52 (7%) |
+| top 10% of cases carry | **31% of the total gain** |
+| top 20% carry | 54% |
+| top 30% carry | 77% |
+
+**The score is not a uniform lift.** Two cases in five are unaffected, and a minority move
+a great deal. So the deployable claim is not *"quality improves by 0.27"* — it is
+**"catastrophic failures on the hard subset are prevented"**. Those are different
+promises, they justify different deployments, and only the second is what the data says.
+
+It also means a benchmark whose cases are mostly easy will under-report this mechanism,
+and one weighted toward competing evidence will over-report it. Any future comparison
+should state its category mix.
+

@@ -241,6 +241,30 @@ def lang_quality2(tag: str, dataset: str):
     return json.loads(path.read_text(encoding="utf-8")).get("mean_quality_score")
 
 
+def _cat_gain(category: str):
+    """Mean per-case quality gain of the best allocation over matched random,
+    restricted to one RAG category.
+
+    Reads the per-case records directly and returns None when they are absent,
+    so a fresh clone reports MISSING rather than a wrong number. The category
+    breakdown is the evidence that the mean is the wrong summary: the gain is
+    concentrated in cases where evidence competes, and is slightly NEGATIVE on
+    `social`, where there is nothing to retrieve.
+    """
+    import statistics
+    a = KVS / "cpu-frac0.25-random-b6f0__rag_dev" / "results.jsonl"
+    b = KVS / "cpu-frac0.25-rf0.15-b6f0__rag_dev" / "results.jsonl"
+    if not (a.exists() and b.exists()):
+        return None
+    A = {json.loads(l)["id"]: json.loads(l)
+         for l in a.read_text(encoding="utf-8").splitlines() if l.strip()}
+    B = {json.loads(l)["id"]: json.loads(l)
+         for l in b.read_text(encoding="utf-8").splitlines() if l.strip()}
+    d = [B[i]["quality_score"] - A[i]["quality_score"]
+         for i in A if i in B and A[i].get("category") == category]
+    return statistics.mean(d) if d else None
+
+
 def cp_bound(n: int, tail: float) -> float:
     """Clopper-Pearson bound for a cell with zero failures: tail ** (1/n).
 
@@ -975,6 +999,16 @@ CLAIMS = [
     ("LANG keep0.5 score-vs-random gap", 0.21147,
      lambda: lang_quality("cpu-frac0.5-rf0.25-b6f0")
              - lang_quality("cpu-frac0.5-random-b6f0"), 5e-6, "0.21147", "p2"),
+    # --- the gain is CONCENTRATED, which changes the deployment claim -------
+    # The mean (+0.2653) and the median (+0.0105) describe different worlds.
+    # Pinning both, because quoting only the mean would be true and misleading.
+    ("SHAPE: mean per-case gain over matched random", 0.26530,
+     lambda: lang_quality("cpu-frac0.25-rf0.15-b6f0")
+             - lang_quality("cpu-frac0.25-random-b6f0"), 5e-6, "0.26530", "p2"),
+    ("SHAPE: social category, where the score has no job", -0.0529,
+     lambda: _cat_gain("social"), 5e-4, "0.0529", "p2"),
+    ("SHAPE: ambiguous_evidence, where it has the most job", 0.6461,
+     lambda: _cat_gain("ambiguous_evidence"), 5e-4, "0.6461", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,
