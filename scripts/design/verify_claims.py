@@ -958,6 +958,23 @@ CLAIMS = [
     ("REGROW halo 16K B=32 chunk1024 d0.9 (was vacuous)", 1.0000,
      lambda: pk("halo_16k_B32_grow_c1024.json", 0.9,
                 require={"chunk": 1024}), 5e-4, "1.000", "p2"),
+    # --- B1: a NULL RESULT against a pre-registered bar ---------------------
+    # Pinned because a programme that pins only its wins is not keeping a record.
+    ("B1 best floor (0.85) ties the tuned optimum", 0.60297,
+     lambda: lang_quality("cpu-frac0.25-B1f0.85-b6f0"), 5e-6, "0.60297", "p2"),
+    ("B1 floor 0.78", 0.59805,
+     lambda: lang_quality("cpu-frac0.25-B1f0.78-b6f0"), 5e-6, "0.59805", "p2"),
+    ("B1 floor 0.70", 0.59272,
+     lambda: lang_quality("cpu-frac0.25-B1f0.70-b6f0"), 5e-6, "0.59272", "p2"),
+    ("B1 minus tuned optimum (indistinguishable)", -0.00537,
+     lambda: lang_quality("cpu-frac0.25-B1f0.85-b6f0")
+             - lang_quality("cpu-frac0.25-rf0.15-b6f0"), 5e-6, "0.00537", "p2"),
+    # the keep-0.5 matched pair, completed today
+    ("LANG keep0.5 matched significance", 0.65338,
+     lambda: lang_quality("cpu-frac0.5-rf0.25-b6f0"), 5e-6, "0.65338", "p2"),
+    ("LANG keep0.5 score-vs-random gap", 0.21147,
+     lambda: lang_quality("cpu-frac0.5-rf0.25-b6f0")
+             - lang_quality("cpu-frac0.5-random-b6f0"), 5e-6, "0.21147", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

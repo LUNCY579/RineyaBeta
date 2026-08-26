@@ -1317,3 +1317,70 @@ the source.
 test. There is no natural-language evidence on any published core, and none on any
 long-context-trained checkpoint.
 
+---
+
+## 2026-08-26: B1 ties the tuned optimum — a null result against a pre-registered bar
+
+The bar was written into the queue before the runs: **B1 must match or beat 0.60834**,
+the best tuned ratio. That is the bar derived reach was held to on passkey, where it
+failed at d=7.
+
+| rule | recent | quality |
+|---|---:|---:|
+| tuned ratio rf=0.10 | 5.82 | 0.59788 |
+| **tuned ratio rf=0.15** | 8.70 | **0.60834** |
+| tuned ratio rf=0.25 | 14.38 | 0.59488 |
+| B1 floor 0.70 | 12.98 | 0.59272 |
+| B1 floor 0.78 | 8.32 | 0.59805 |
+| **B1 floor 0.85** | 4.30 | **0.60297** |
+
+Paired over the same 752 cases, best against best: **−0.00537**, 95% CI
+[−0.01852, +0.00778], 50 better / 48 worse, exact sign test ***p* = 0.92**.
+
+**They are indistinguishable.** B1 *matches* the tuned ratio and does not beat it.
+
+### What this does and does not establish
+
+**It does not test "deriving beats tuning", and that was stated before the runs.**
+`min_heavy_frac` is still a **tuned constant**, only differently shaped — a floor rather
+than a ratio. Nothing here derives the split from the score's own distribution. So the
+honest reading is narrow: *two tuned parameterisations of the same allocation reach the
+same place.* The question B1 was invented to answer is still open.
+
+**What B1 does buy is a safety property, not quality.** A ratio can still drive the score
+to zero slots — the fixed `recent=32` did exactly that on 17,360 compressions, and the
+proportional ratio only avoids it by luck of arithmetic. The floor makes the degenerate
+state **unreachable by construction**. That is worth having, and it is worth having under
+its real name: this is robustness, not performance.
+
+**A third reading, from the shape of the table.** Allocations as different as recent=4.30
+and recent=8.70 land within 0.005 of each other, while recent=14.38 and recent=28.94 fall
+away sharply. The optimum is a **broad plateau with a cliff on one side**. That means
+precise allocation tuning is not where the remaining value is — being *on* the plateau
+matters, where exactly on it does not. It also means a self-sizing rule does not need to
+be accurate, only safe, which is an easier target than B1 was designed for.
+
+### And the matched control at a second compression level
+
+The keep-0.5 pair is now complete — `cpu-frac0.5-random` had no matched significance
+partner until today, so that contrast could not be computed at all.
+
+| keep | matched random | matched significance | the score is worth |
+|---:|---:|---:|---:|
+| 0.50 (2×) | 0.44191 | **0.65338** | **+0.21147** |
+| 0.25 (4×) | 0.34304 | 0.59488 | **+0.25184** |
+
+**The score's value grows as the budget tightens** — +0.211 at 2× and +0.252 at 4×. That
+is the mechanism's central claim, and it now holds on natural language against controls
+matched on budget, sinks, recent, window and device, at two compression levels rather
+than one.
+
+### Consequence for the plan
+
+B1 as implemented is **done and it is a tie**. Reporting a derived quantity as a win
+because it is derived would be the same error the passkey derived-reach claim made, and
+this is recorded as a null result rather than dressed up. The remaining B1 question —
+deriving the split from the score's distribution rather than from a constant — is now
+lower value than it looked, because the plateau is broad: there is roughly 0.005 of
+quality available between a bad-but-safe allocation and the best one found.
+
