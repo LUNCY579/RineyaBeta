@@ -648,6 +648,24 @@ class Policy:
         if self.min_heavy_frac > 0.0 and self.select == "significance":
             reserve = max(1, int(math.ceil(self.min_heavy_frac * self.budget)))
             rec = min(rec, max(0, avail - reserve))
+            # THE RECENT WINDOW IS NOT PURELY A HEURISTIC -- it also absorbs the
+            # SCORE LAG. Between a token entering the cache and being scored
+            # there is at least one un-scored position, and `_evict` raises if
+            # that lag exceeds n_recent, because padding it with +inf would let
+            # the newest tokens win the heavy top-k unconditionally and silently
+            # turn the policy into sinks + newest-chunk.
+            #
+            # The first version of this floor drove recent to 0 at every budget
+            # <= 20. rag_dev prompts start at 41 tokens, so keep 0.25 produces
+            # budgets from ~10, and all three B1 arms died on the first short
+            # prompt. The 24 CPU tests passed throughout: they asserted heavy > 0
+            # across budgets 5..1024 and never asserted recent >= 1, because they
+            # tested Policy in isolation and never ran the eviction path. That is
+            # the same gap that let grow_spans flood its gate under eleven green
+            # tests -- a unit test that does not reproduce the caller's
+            # preconditions pins the wrong function.
+            if avail >= 1:
+                rec = max(1, rec)
         return rec
 
     def heavy(self) -> int:

@@ -55,9 +55,30 @@ def main() -> None:
               Policy(budget=b, sinks=4, recent=32, recent_frac=0.25).n_recent(), want)
 
     print("\nmin_heavy_frac -- the score's share cannot be starved:")
-    for b in (5, 8, 11, 16, 32, 58, 128, 1024):
+    # THE CONSTRAINT HIERARCHY, learned by breaking it. Three things compete
+    # for a tiny budget and they are NOT equal:
+    #   1. sinks  -- load-bearing and measured: sinks=0 scores 0.000 even with
+    #                MORE score-chosen slots. Never yields.
+    #   2. recent -- must be >= 1 because it absorbs the SCORE LAG; _evict
+    #                raises otherwise. Structural, not heuristic. Yields to 1.
+    #   3. heavy  -- the mechanism. Gets what is left.
+    # With sinks=4 the smallest budget that can run the mechanism at all is
+    # 4 + 1 + 1 = 6. Below that heavy() is legitimately 0. The first version of
+    # this test asserted heavy > 0 at budget 5, which is arithmetically
+    # impossible once recent >= 1 holds -- written before I knew the recent
+    # window had a structural role, and three B1 arms died proving it.
+    for b in (8, 11, 16, 32, 58, 128, 1024):
         p = Policy(budget=b, sinks=4, recent=32, min_heavy_frac=0.5)
         check(f"budget {b:>4} -> heavy {p.heavy()} > 0", p.heavy() > 0, True)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        tiny = Policy(budget=5, sinks=4, recent=32, min_heavy_frac=0.5)
+        check("budget 5 is BELOW the viable floor (4 sinks + 1 recent leaves none)",
+              (tiny.n_sinks(), tiny.n_recent(), tiny.heavy()), (4, 1, 0))
+    for b in (5, 8, 10, 12, 16, 20, 30, 58, 116, 1024):
+        p = Policy(budget=b, sinks=4, recent=32, min_heavy_frac=0.78)
+        check(f"budget {b:>4} -> recent {p.n_recent()} >= 1 (absorbs the score lag)",
+              p.n_recent() >= 1, True)
 
     print("\n  the floor yields the RECENT window, never the sinks:")
     p = Policy(budget=11, sinks=4, recent=32, min_heavy_frac=0.5)
