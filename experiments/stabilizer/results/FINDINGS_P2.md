@@ -1284,3 +1284,36 @@ becomes **"288 needles, one failure, and 36 of them only became evidence today"*
 *(I first wrote 323/324 here from a miscount and corrected it before committing; the
 arithmetic is 107/108 at 16K plus 180/180 at 32K and 128K.)*
 
+---
+
+## 2026-08-26: which model is each claim actually about?
+
+A direct question exposed a provenance gap. Counting every committed result by the model
+its manifest names:
+
+| model | files | what rests on it |
+|---|---:|---|
+| `artifacts/rineya-core-en32k-28L` | 155 | **almost everything** — the passkey headline, the reach law, O13, the span law |
+| `artifacts/Rineya-Halo-1.2.0-devfreeze` | 12 | the §4.8 transfer test, and nothing else |
+| **not recorded** | **37** | **every natural-language arm** |
+
+The language harness had its checkpoint **hardcoded** as a module constant and wrote it
+into no manifest, so all 37 rag_dev arms are silently on the base core and no reader
+could tell from the artifact. It also could not be pointed at another checkpoint at all —
+which is precisely what evaluating a long-context fine-tune requires. `passkey.py` has
+had `--model` for weeks; the language harness did not.
+
+Fixed: `--model` added, honoured at load time (adding the flag while still loading the
+constant would be the manifest-records-the-flag defect in reverse — the artifact naming a
+checkpoint the run never opened), and recorded in every manifest.
+
+**The 37 existing arms stay as they are.** They were all produced by the same base core
+under the same hardcoded constant, so they are internally consistent and their contrasts
+hold. What changes is that this is now *stated* rather than inferable only from reading
+the source.
+
+**The honest scope line for the paper:** every language result in this work is on the
+474M base core `rineya-core-en32k-28L`. The only Halo evidence is the passkey transfer
+test. There is no natural-language evidence on any published core, and none on any
+long-context-trained checkpoint.
+

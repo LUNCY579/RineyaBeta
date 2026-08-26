@@ -133,6 +133,15 @@ def main() -> None:
     # differing in THREE things at once: no score, no pooling, AND a recent
     # window 3.7x larger (53.88 against 14.38). That contrast cannot attribute
     # anything to the score.
+    # The language harness had MODEL hardcoded and recorded it NOWHERE, so all 37
+    # committed rag_dev arms are silently on the base core and a reader cannot
+    # tell from the artifact. That also made it impossible to point this harness
+    # at a different checkpoint -- which is exactly what testing a long-context
+    # fine-tune requires. passkey.py has had --model for weeks.
+    ap.add_argument("--model", default=MODEL,
+                    help="checkpoint to evaluate. Recorded in the manifest, so a "
+                         "result can never again be silent about which model "
+                         "produced it.")
     ap.add_argument("--select", choices=("significance", "random", "streaming"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
@@ -166,7 +175,10 @@ def main() -> None:
         aggregate_quality_rows, build_corpus_profile, evaluate_response,
         load_quality_config)
 
-    path = REPO / MODEL
+    # Use the FLAG, not the module constant. Adding --model but still loading
+    # MODEL would be the manifest-records-the-flag defect in reverse: the
+    # artifact would name a checkpoint the run never opened.
+    path = REPO / args.model
     tok = AutoTokenizer.from_pretrained(path)
     model = AutoModelForCausalLM.from_pretrained(
         path, dtype=torch.bfloat16 if args.device.startswith("cuda") else torch.float32,
@@ -313,6 +325,7 @@ def main() -> None:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
     (out_dir / "run_manifest.json").write_text(json.dumps({
         "tag": tag, "dataset": args.dataset, "eviction": evicting,
+        "model": args.model,
         "budget": args.budget, "keep_frac": args.keep_frac,
         "sinks": 0 if args.no_sinks else args.sinks,
         "recent_flag": args.recent,

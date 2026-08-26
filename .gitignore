@@ -98,3 +98,4 @@ experiments/**/results/*.log
 # second copy of metadata this repo already tracks. Ignore the directories whole.
 artifacts/Rineya-Halo-*/
 _sel_*__rag_dev/
+_modelsmoke*
