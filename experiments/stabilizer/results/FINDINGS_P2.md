@@ -1093,7 +1093,7 @@ precisely so a fall could be attributed to the model rather than the policy.
 | native ~232 tok | **0.66939** | — | — | 100% |
 | 4K | **0.39102** | 0.39126 | 0.38730 | 58% |
 | 16K | **0.18571** | 0.19559 | 0.19559 | 28% |
-| 32K | **0.12827** | — | — | 19% |
+| 32K | **0.12827** | — | **0.10851** | 19% |
 
 **Compression costs nothing at length.** Every paired contrast against the uncompressed
 arm is indistinguishable from zero:
@@ -1104,6 +1104,10 @@ arm is indistinguishable from zero:
 | 4K, uncompressed → keep 0.25 | −0.00372 | 1/4 | 0.375 |
 | 16K, uncompressed → keep 0.50 | +0.00988 | 2/0 | 0.500 |
 | 16K, uncompressed → keep 0.25 | +0.00988 | 3/1 | 0.625 |
+| 32K, uncompressed → keep 0.25 | −0.01976 | 0/2 | 0.500 |
+
+The 32K arm is the strongest form of the point: a **4.0x** cache reduction (32,922 → 8,226
+stored positions) with only two discordant cases in fifty.
 
 **But the model collapses with length on its own.** Uncompressed quality falls to 58% of
 native at 4K, 28% at 16K, 19% at 32K — with the *entire* cache present.
@@ -1141,4 +1145,76 @@ The mechanism is free at 4-16K on this core, and the core cannot use 16K. That m
 policy comparison only becomes informative once the model can do the task at all. A
 QLoRA long-context fine-tune of Halo is in progress on this machine, and it targets
 exactly the capability whose absence is the binding constraint above.
+
+---
+
+## 2026-08-26: the allocation curve has an INTERIOR optimum, and it validates itself
+
+The allocation finding said proportional beats fixed. It did not say what proportion.
+`recent_frac = 0.25` was a first guess, not a searched value. Five arms, all CPU, all
+752 cases, keep 0.25, causal (6,0), `sinks=4` — only the split moves.
+
+| `recent_frac` | recent | score's share of budget | quality |
+|---:|---:|---:|---:|
+| 0.10 | 5.82 | 83.1% | 0.59788 |
+| **0.15** | **8.70** | **78.1%** | **0.60834** |
+| 0.25 | 14.38 | 68.3% | 0.59488 |
+| 0.35 | 20.32 | 58.1% | 0.53656 |
+| 0.50 | 28.94 | 43.2% | 0.43732 |
+
+**The optimum is interior**, at roughly 78% of the budget under the score. That is a
+finding in itself: pushing the score's share *higher* (83.1% at rf=0.10) is slightly
+worse, so the recent window is not pure overhead — it earns its ~15%, and an allocation
+rule that simply maximised the score's share would be wrong.
+
+**The curve validates itself at the far end.** As the score's share falls, the policy
+must approach StreamingLLM, and it does: rf=0.50 leaves 43.2% under the score and scores
+**0.43732**, within 0.010 of the matched-budget streaming control's **0.42740**. Nothing
+forced that agreement — the sweep and the control are separate runs — so it is a real
+consistency check on both.
+
+Against the matched random control (0.34304), the best allocation is worth **+0.26530**,
+up from +0.25184 at the guessed rf=0.25.
+
+**What this sets up for B1.** The self-sizing budget now has a number to beat: **0.60834**,
+from a *tuned* ratio. B1 derives the split instead of fixing it, and the honest bar is
+that deriving must match or beat tuning — the same bar derived reach was held to on
+passkey, and failed at d=7. If B1 merely ties a tuned constant, that is worth saying
+plainly rather than presenting a derived quantity as a win because it is derived.
+
+---
+
+## 2026-08-26: the re-run says the flooded gate did not matter here, and the retraction is lifted
+
+The `grow_spans` fix was re-run on the quarantined arm. Same configuration, same 752
+cases, only the noise floor changed.
+
+| | quality |
+|---:|---:|
+| flooded gate (quarantined) | 0.33833 |
+| **fixed gate** | **0.33820** |
+| difference | **−0.00014** |
+
+The retracted contrast returns essentially unchanged: derived reach loses to the causal
+window at keep 0.25 by **−0.07466**, against the withdrawn −0.07452.
+
+**So the claim was right and I retracted it on a defect that did not move it.** The
+retraction was still the correct action — the arm *was* produced by a mechanism that did
+not match its specification, and there was no way to know the magnitude without
+re-running. But the outcome deserves stating as plainly as the retraction was: the
+number survived.
+
+**Why the flood did not matter here, which is the interesting part.** This arm carries
+`recent = 31.33` — the fixed window, not the proportional one — and its
+`heavy_zero_count` is **17,360**. The score had *zero* slots on seventeen thousand
+compressions. A growth gate that admits too many candidates cannot matter where there is
+no top-k for them to enter. **The two defects overlapped, and the allocation defect
+dominated.** That is why the arm scores 0.338 rather than something near the 0.608 the
+tuned allocation reaches.
+
+This bounds what the re-run establishes: it shows the flood was immaterial **in an arm
+already crippled by allocation**. It says nothing yet about arms where the score
+genuinely runs — the passkey derived-reach cells have `heavy_zero_count = 0`, so the gate
+is the only thing that was wrong there, and those re-runs are the real test of the
+defect's magnitude.
 

@@ -909,6 +909,33 @@ CLAIMS = [
     ("LONG 4K keep 0.50", 0.39126,
      lambda: lang_quality2("long4k-b6f0-k0.5", "rag_long4k"), 5e-6, "0.39126", "p2"),
 
+    ("LONG 32K keep 0.25 (4.0x, indistinguishable)", 0.10851,
+     lambda: lang_quality2("long32k-b6f0-k0.25-rf0.25", "rag_long32k"),
+     5e-6, "0.10851", "p2"),
+    # --- the allocation curve: an INTERIOR optimum, endpoint self-validating -
+    ("ALLOC rf=0.10 (83.1% under the score)", 0.59788,
+     lambda: lang_quality("cpu-frac0.25-rf0.10-b6f0"), 5e-6, "0.59788", "p2"),
+    ("ALLOC rf=0.15 OPTIMUM", 0.60834,
+     lambda: lang_quality("cpu-frac0.25-rf0.15-b6f0"), 5e-6, "0.60834", "p2"),
+    ("ALLOC rf=0.35", 0.53656,
+     lambda: lang_quality("cpu-frac0.25-rf0.35-b6f0"), 5e-6, "0.53656", "p2"),
+    # The endpoint check: at rf=0.50 only 43.2% sits under the score, so the
+    # policy must approach StreamingLLM -- and it lands within 0.010 of the
+    # separately-run streaming control. Pinned because an agreement nothing
+    # forced is worth as much as a headline.
+    ("ALLOC rf=0.50 approaches the streaming control", 0.43732,
+     lambda: lang_quality("cpu-frac0.25-rf0.50-b6f0"), 5e-6, "0.43732", "p2"),
+    ("ALLOC best-vs-random gap", 0.26530,
+     lambda: lang_quality("cpu-frac0.25-rf0.15-b6f0")
+             - lang_quality("cpu-frac0.25-random-b6f0"), 5e-6, "0.26530", "p2"),
+    # --- UN-RETRACTED: re-run with the fixed gate, moved by 0.00014 ----------
+    # Pinned against the FIXED-gate arm, not the quarantined one. The withdrawn
+    # figures were 0.33833 and -0.07452; the honest replacements are these.
+    ("LANG keep0.25 derived reach (fixed gate)", 0.33820,
+     lambda: lang_quality("frac0.25-grow2-fixedgate"), 5e-6, "0.33820", "p2"),
+    ("LANG keep0.25 derived-minus-causal, fixed gate (NEGATIVE)", -0.07466,
+     lambda: lang_quality("frac0.25-grow2-fixedgate")
+             - lang_quality("frac0.25-b6f0"), 5e-6, "0.07466", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,
