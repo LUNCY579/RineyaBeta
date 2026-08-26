@@ -99,3 +99,4 @@ experiments/**/results/*.log
 artifacts/Rineya-Halo-*/
 _sel_*__rag_dev/
 _modelsmoke*
+_adapt*

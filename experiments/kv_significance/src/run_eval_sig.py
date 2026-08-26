@@ -142,6 +142,18 @@ def main() -> None:
                     help="checkpoint to evaluate. Recorded in the manifest, so a "
                          "result can never again be silent about which model "
                          "produced it.")
+    # LoRA/QLoRA adapters. The long-context programme is blocked on a model that
+    # can USE long context, and the only route to one here is a fine-tuned
+    # adapter over a published core. This harness could not load one.
+    #
+    # An adapter's config names its own base model, so --adapter alone suffices;
+    # --model is only for overriding that deliberately, and the override is
+    # recorded, because applying an adapter to a base it was not trained on is a
+    # silent way to measure nonsense.
+    ap.add_argument("--adapter", default=None,
+                    help="PEFT adapter directory (trainer checkpoint or saved "
+                         "adapter). Merged before evaluation and recorded in the "
+                         "manifest with its base model and step.")
     ap.add_argument("--select", choices=("significance", "random", "streaming"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
@@ -178,11 +190,34 @@ def main() -> None:
     # Use the FLAG, not the module constant. Adding --model but still loading
     # MODEL would be the manifest-records-the-flag defect in reverse: the
     # artifact would name a checkpoint the run never opened.
-    path = REPO / args.model
+    adapter_cfg = None
+    if args.adapter:
+        cfg_path = Path(args.adapter) / "adapter_config.json"
+        if not cfg_path.exists():
+            raise SystemExit(f"--adapter {args.adapter}: no adapter_config.json there")
+        adapter_cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+        if args.model == MODEL:      # not overridden -- trust the adapter's own base
+            args.model = adapter_cfg.get("base_model_name_or_path") or args.model
+
+    path = Path(args.model)
+    if not path.is_absolute():
+        path = REPO / args.model
     tok = AutoTokenizer.from_pretrained(path)
     model = AutoModelForCausalLM.from_pretrained(
         path, dtype=torch.bfloat16 if args.device.startswith("cuda") else torch.float32,
     ).to(args.device).eval()
+
+    if args.adapter:
+        from peft import PeftModel
+        model = PeftModel.from_pretrained(model, args.adapter)
+        # MERGE rather than leave the adapter as a side branch. The significance
+        # patch wraps attention, and an unmerged PEFT wrapper changes the module
+        # tree that patch expects. Merging keeps the evaluated graph identical in
+        # shape to every other run in this programme, so a difference in the
+        # numbers is the adapter and not the plumbing.
+        model = model.merge_and_unload().eval()
+        print(f"adapter               {args.adapter}")
+        print(f"adapter base          {adapter_cfg.get('base_model_name_or_path')}")
 
     protocol = json.loads(
         (REPO / "manifests/eval_assets.json").read_text(encoding="utf-8")
@@ -325,7 +360,9 @@ def main() -> None:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
     (out_dir / "run_manifest.json").write_text(json.dumps({
         "tag": tag, "dataset": args.dataset, "eviction": evicting,
-        "model": args.model,
+        "model": str(args.model),
+        "adapter": (str(args.adapter) if args.adapter else None),
+        "adapter_base": (adapter_cfg or {}).get("base_model_name_or_path"),
         "budget": args.budget, "keep_frac": args.keep_frac,
         "sinks": 0 if args.no_sinks else args.sinks,
         "recent_flag": args.recent,
