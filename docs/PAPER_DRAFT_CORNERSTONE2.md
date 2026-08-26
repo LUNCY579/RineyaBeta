@@ -390,10 +390,28 @@ underperforming at aggressive compression; it was not running for much of the wo
 Any evaluation of a budgeted eviction policy should report this counter, and we had it in
 our manifests unread.
 
-**What this supports.** With proportional allocation, causal pooling retains **90.6%** of
-uncompressed quality at **4×** compression and **96.9%** at 2×, and beats the matched
-positional control by **+0.184** at keep 0.25. That is the deployable claim. It is not
-7,864×, which is a passkey property and should never be quoted beside a language number.
+**What this supports, against a control that isolates the score.** Every earlier
+language comparison used an arm differing in three things at once — no score, no pooling,
+and a recent window of 53.88 against 14.38. A 3.7× larger recent window is a second
+treatment, not a control. Passkey has had `--select random` since §4.7; language did not
+until we added it.
+
+At keep 0.25, all arms CPU, causal window, `sinks=4`, `recent-frac 0.25`, paired on 752
+cases — `random` differing from `significance` in **nothing but how the heavy slots are
+chosen**:
+
+| arm | quality | paired vs significance |
+|---|---:|---|
+| **significance** | **0.59488** | — |
+| streaming, matched budget | 0.42740 | **+0.16747** (*p* = 3.2 × 10⁻³²) |
+| **random**, matched slots | 0.34304 | **+0.25184** (*p* = 2.0 × 10⁻⁶⁶) |
+
+**The score is worth +0.252 at 4× compression** against an arm holding the same number of
+positions by lottery. This supersedes the previously reported +0.184 — not because that
+figure was too large, but because it could not be attributed to the score. With
+proportional allocation, causal pooling retains **90.6%** of uncompressed quality at 4×
+and **96.9%** at 2×. That is the deployable claim. It is not 7,864×, which is a passkey
+property and should never be quoted beside a language number.
 
 **Derived reach does not transfer — one leg retracted, one standing.** Geodesic
 dilation, the best passkey arm of §4.6, scored −0.03513 (*p* = 1.5 × 10⁻⁵) below the

@@ -995,3 +995,54 @@ Halo cells are unaffected. Independent corroboration sits in the committed data:
 `passkey_ratio.json` at 16K/B=2048 scores 0.0 / 0.0 / **1.0** across depths — the only
 cell that succeeds is the only one never compressed.
 
+---
+
+## 2026-08-26: the language claim finally has a matched control
+
+Every language number this programme published compared the mechanism against
+`frac0.25-rf1.0`, an arm that differs from it in **three** things at once: no score, no
+pooling, and a recent window of **53.88 against 14.38**. A 3.7x larger recent window is
+not a control; it is a second treatment. The passkey results have had the clean control
+since cornerstone 2 began — `--select random` keeps the same *number* of positions,
+chosen uniformly, at matched everything. The language harness had no such flag until
+today.
+
+All four arms below are CPU, keep 0.25, causal (6,0) window, `sinks=4`,
+`recent-frac 0.25`, same 752 cases, paired on case id. `random` differs from
+`significance` in **nothing except how the heavy slots are chosen**.
+
+| arm | select | recent | `heavy_zero` | quality |
+|---|---|---:|---:|---:|
+| **significance** | significance | 14.38 | 0 | **0.59488** |
+| streaming (matched budget) | streaming | 53.88 | 317,604 | 0.42740 |
+| **random** (matched slots) | random | 14.38 | 0 | **0.34304** |
+
+| contrast | paired difference | exact sign test |
+|---|---:|---|
+| **score vs matched RANDOM** | **+0.25184** | ***p* = 1.97 × 10⁻⁶⁶** |
+| score vs matched-budget streaming | +0.16747 | *p* = 3.24 × 10⁻³² |
+
+**This is the first language number attributable to the score itself.** The score is
+worth **+0.252** at 4x compression against an arm holding the same number of positions
+by lottery. The previously published "+0.184 over the positional control" is superseded —
+not because it was too large, but because it could not be attributed.
+
+Two honest notes attached.
+
+*The streaming arm cannot be matched on `recent`.* Spending the budget down to
+`heavy = 0` is what makes it streaming, so its recent window is necessarily larger. Its
+`heavy_zero_count` of **317,604** is the counter doing its job: it confirms the arm ran
+with the score fully disabled, which is exactly what the control requires. Only the
+`random` contrast is matched in the strict sense.
+
+*Device.* These are CPU numbers. The GPU measurement of the same significance
+configuration is **0.60617** against CPU's **0.59488** — a gap of 0.011. Devices are
+comparable but not identical, so the contrasts above are computed CPU-against-CPU and no
+CPU number is differenced against a GPU one anywhere in this section.
+
+### A note on what the controls do NOT rescue
+
+The matched control strengthens the attribution of the *score*. It says nothing about the
+two defects found the same day: the `grow_spans` flood and the zero-compression cells. A
+clean control over a mis-specified policy still measures the mis-specified policy.
+

@@ -48,6 +48,16 @@ CONTRASTS = [
     # measured on language.
     ("keep0.25_allocation_fixed_vs_fair", "frac0.25-b6f0__rag_dev",
      "frac0.25-rf0.25-b6f0__rag_dev"),
+    # THE MATCHED CONTROLS. All CPU, all at keep 0.25 with recent-frac 0.25, the
+    # causal window and sinks=4 -- so `random` differs from `significance` in
+    # NOTHING except how the heavy slots are chosen. This is what the published
+    # "+0.184 over the positional control" could not say, its control also
+    # carrying a 3.7x larger recent window. Listed a-then-b so a positive
+    # difference favours the SCORE.
+    ("keep0.25_cpu_random_vs_significance", "cpu-frac0.25-random-b6f0__rag_dev",
+     "cpu-frac0.25-rf0.25-b6f0__rag_dev"),
+    ("keep0.25_cpu_streaming_vs_significance", "cpu-frac0.25-streaming-b6f0__rag_dev",
+     "cpu-frac0.25-rf0.25-b6f0__rag_dev"),
 ]
 
 

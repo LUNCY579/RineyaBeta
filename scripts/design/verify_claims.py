@@ -852,6 +852,24 @@ CLAIMS = [
      lambda: json.loads((KVS / "frac0.25-b6f0__rag_dev" / "run_manifest.json")
                         .read_text(encoding="utf-8"))["heavy_zero_count"],
      0.5, "17,360", "p2"),
+    # --- THE MATCHED CONTROL, which the language claim never had -------------
+    # All CPU, keep 0.25, causal window, sinks=4, recent-frac 0.25. `random`
+    # differs from `significance` in NOTHING except how the heavy slots are
+    # chosen, so this is the first language number that can be attributed to the
+    # SCORE. The previously published "+0.184 over the positional control"
+    # cannot: its control also carried a 3.7x larger recent window.
+    ("LANG the score vs matched RANDOM (the clean control)", 0.25184,
+     lambda: lang("keep0.25_cpu_random_vs_significance", "paired_mean_diff"),
+     5e-6, "0.25184", "p2"),
+    ("LANG the score vs matched-budget streaming", 0.16747,
+     lambda: lang("keep0.25_cpu_streaming_vs_significance", "paired_mean_diff"),
+     5e-6, "0.16747", "p2"),
+    ("LANG matched random arm", 0.34304,
+     lambda: lang_quality("cpu-frac0.25-random-b6f0"), 5e-6, "0.34304", "p2"),
+    ("LANG matched streaming arm", 0.42740,
+     lambda: lang_quality("cpu-frac0.25-streaming-b6f0"), 5e-6, "0.42740", "p2"),
+    ("LANG significance arm, CPU (device anchor)", 0.59488,
+     lambda: lang_quality("cpu-frac0.25-rf0.25-b6f0"), 5e-6, "0.59488", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

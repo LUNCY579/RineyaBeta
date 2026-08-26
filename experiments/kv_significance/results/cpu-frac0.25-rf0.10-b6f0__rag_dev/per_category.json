@@ -1,0 +1,66 @@
+{
+  "ambiguous_evidence": {
+    "n": 38,
+    "mean_quality_score": 0.8799999999999993
+  },
+  "conflict": {
+    "n": 38,
+    "mean_quality_score": 0.5980131578947365
+  },
+  "missing_answer": {
+    "n": 38,
+    "mean_quality_score": 0.4729013157894735
+  },
+  "multi_fact_supported": {
+    "n": 38,
+    "mean_quality_score": 0.8640460526315783
+  },
+  "partial_support": {
+    "n": 38,
+    "mean_quality_score": 0.39344133771929846
+  },
+  "procedure_conflict": {
+    "n": 25,
+    "mean_quality_score": 0.9759999999999994
+  },
+  "procedure_missing_input": {
+    "n": 25,
+    "mean_quality_score": 0.6861333333333335
+  },
+  "procedure_supported": {
+    "n": 125,
+    "mean_quality_score": 0.5452518000000001
+  },
+  "procedure_with_distractor": {
+    "n": 25,
+    "mean_quality_score": 0.3600466666666665
+  },
+  "prompt_injection": {
+    "n": 38,
+    "mean_quality_score": 0.6362161654135337
+  },
+  "qualified_answer": {
+    "n": 38,
+    "mean_quality_score": 0.41544078947368396
+  },
+  "social": {
+    "n": 20,
+    "mean_quality_score": 0.47154999999999997
+  },
+  "stale_evidence": {
+    "n": 38,
+    "mean_quality_score": 0.7683486842105257
+  },
+  "supported": {
+    "n": 152,
+    "mean_quality_score": 0.6357713815789472
+  },
+  "supported_paraphrase": {
+    "n": 38,
+    "mean_quality_score": 0.10399999999999997
+  },
+  "supported_with_distractor": {
+    "n": 38,
+    "mean_quality_score": 0.7841447368421051
+  }
+}
