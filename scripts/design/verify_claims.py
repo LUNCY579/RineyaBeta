@@ -1009,6 +1009,14 @@ CLAIMS = [
      lambda: _cat_gain("social"), 5e-4, "0.0529", "p2"),
     ("SHAPE: ambiguous_evidence, where it has the most job", 0.6461,
      lambda: _cat_gain("ambiguous_evidence"), 5e-4, "0.6461", "p2"),
+    # --- A3: the certification the word "lossless" needed ------------------
+    ("A3: 100-needle bound", 0.9705,
+     lambda: cp_bound(100, 0.05), 5e-5, "0.9705", "p2,c2paper"),
+    ("A3: pooled accuracy over 5 shards", 1.0000,
+     lambda: (lambda fs: sum(pk(f) for f in fs) / len(fs))(
+         ["pk_128k_B16_power_s%s.json" % s for s in
+          ("20260820", "771103", "404411", "918273", "552146")]),
+     5e-4, "300/300", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

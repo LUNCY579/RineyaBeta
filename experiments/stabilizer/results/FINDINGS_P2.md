@@ -1443,3 +1443,31 @@ It also means a benchmark whose cases are mostly easy will under-report this mec
 and one weighted toward competing evidence will over-report it. Any future comparison
 should state its category mix.
 
+---
+
+## A3 FINAL: "lossless" is certified at n = 100, and the word can now be used
+
+Every "lossless" cell in this programme rested on **n = 12** — twelve independent needles
+observed at three depths, which supports a one-sided 95% Clopper-Pearson lower bound of
+only **0.7791**. A perfect cell was compatible with a true rate near 78%.
+
+**300/300 observations, 100 distinct needles, zero failures**, at 128K/B=16 with the
+causal window. Peak memory **1,501.2 MiB in every shard**, identical to the headline cell.
+
+| n | one-sided 95% lower bound |
+|---:|---:|
+| 12 | 0.7791 |
+| 36 | 0.9202 |
+| **100** | **0.9705** |
+
+The word "lossless" was previously an overstatement of a 0.78 bound. At 0.9705 it is a
+defensible description of the same configuration.
+
+**How it was obtained matters, because three attempts failed first.** A single 99-trial
+run died three times with three *different* CUDA errors — `CUBLAS_STATUS_EXECUTION_FAILED`
+at 21 minutes, death on load, and `cudaErrorUnknown` at 31 minutes — the last on a
+verified-drained card. Re-cast as **five shards of 20 trials on five disjoint seeds**
+(verified: 100 keys, zero cross-seed collisions), every shard completed cleanly. Sustained
+multi-hour GPU work on an 8 GB card at 85–91 °C is not reliable here; short resumable
+cells are. That is an operational finding worth as much as the bound.
+

@@ -539,6 +539,31 @@ any of it.
 
 ---
 
+### 4.11 The headline is certified at n = 100
+
+Every result above rests on 12 independent needles per cell, which supports a one-sided
+95% Clopper–Pearson lower bound of only **0.779** — a perfect cell is compatible with a
+true rate near 78%. For the headline configuration we removed that limitation directly.
+
+At 128K/B=16 with the causal window: **300/300 observations across 100 distinct needles,
+zero failures**, peak memory 1,501.2 MiB in every shard — identical to the headline cell.
+
+| n | one-sided 95% lower bound |
+|---:|---:|
+| 12 | 0.7791 |
+| 100 | **0.9705** |
+
+"Lossless" was an overstatement of a 0.779 bound. At 0.9705 it is a defensible
+description of this configuration. The bound for every *other* cell in this work remains
+0.779, and we do not extend this certification to them.
+
+*Method note.* A single 99-trial run failed three times with three different CUDA errors,
+the last on a verified-idle card. Re-cast as five 20-trial shards on disjoint seeds, every
+shard completed. Sustained multi-hour GPU work is unreliable on this hardware; short
+resumable cells are not.
+
+---
+
 ## 5. Where it fails
 
 ### 5.1 Competition is a capacity cost, not a scoring failure
@@ -605,7 +630,10 @@ omit it.
 
 1. **n = 12 independent needles per cell.** Each cell draws the same 12 keys at all
    three depths, so a 36-trial row is 12 needles observed three times. A perfect cell
-   supports a 95% Clopper–Pearson lower bound of **0.779**. Every *contrast* here is
+   supports a 95% Clopper–Pearson lower bound of **0.779**. *(For the headline
+   configuration specifically this has since been retired: a 100-needle run at 128K/B=16
+   scores **300/300**, raising the bound to **0.9705** — see §4.11. The 0.779 caveat still
+   governs every other 12-needle cell in this work.)* Every *contrast* here is
    overwhelming; the word "lossless" is weaker than it sounds.
 2. **Two task families, 543× apart, with nothing between them.** The retrieval evidence
    is at 125,826 tokens; the language evidence (§4.10) is at a median of 238 tokens with
