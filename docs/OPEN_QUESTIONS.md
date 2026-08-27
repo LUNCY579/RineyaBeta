@@ -198,7 +198,15 @@ strengthens. If it falls, the headline needs the chunk size attached to it.
 
 ---
 
-## O10 — sinks are fixed at 4 and were never ablated with backward reach
+## O10 — RESOLVED 2026-08-25 by A2: the sinks are load-bearing
+
+> **Answered.** The ablation ran. `sinks=0` scores **0.000** while holding *more*
+> score-chosen slots (12 against 8); `sinks=2` scores 1.000. So the sinks are not
+> optional overhead, two suffice, and the headline reads "four sinks **plus** eight
+> score-chosen positions". See the A2 entry below. The original text is kept for the
+> reasoning that motivated the ablation.
+
+### The question as originally posed
 
 **Observed.** Every cell uses `sinks=4`, hardcoded rather than swept. At **B=16 that is
 25% of the entire budget**, leaving 8 heavy slots after the recent window.

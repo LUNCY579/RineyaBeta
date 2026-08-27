@@ -150,6 +150,16 @@ def main() -> None:
     # --model is only for overriding that deliberately, and the override is
     # recorded, because applying an adapter to a base it was not trained on is a
     # silent way to measure nonsense.
+    # A HARD GPU CEILING. passkey.py has had --cap-mib since the campaign began;
+    # this harness did not, so a long-context arm could allocate until the driver
+    # refused -- which is how three runs died. A cap makes the failure mode
+    # "slower, or an honest OOM inside our own process" instead of "the card is
+    # exhausted and whatever else is running dies too". Slower beats dying.
+    ap.add_argument("--cap-mib", type=float, default=None,
+                    help="hard ceiling on this process's GPU allocation, in MiB. "
+                         "Enforced via torch.cuda.set_per_process_memory_fraction, "
+                         "so the process OOMs inside its own budget rather than "
+                         "taking the card down. Recorded in the manifest.")
     ap.add_argument("--adapter", default=None,
                     help="PEFT adapter directory (trainer checkpoint or saved "
                          "adapter). Merged before evaluation and recorded in the "
@@ -190,6 +200,13 @@ def main() -> None:
     # Use the FLAG, not the module constant. Adding --model but still loading
     # MODEL would be the manifest-records-the-flag defect in reverse: the
     # artifact would name a checkpoint the run never opened.
+    if args.cap_mib and args.device.startswith("cuda"):
+        total = torch.cuda.get_device_properties(0).total_memory / 2 ** 20
+        frac = min(args.cap_mib, total) / total
+        torch.cuda.set_per_process_memory_fraction(frac)
+        print(f"gpu cap              {args.cap_mib:.0f} MiB of {total:.0f} "
+              f"({frac:.1%} of the device)")
+
     adapter_cfg = None
     if args.adapter:
         cfg_path = Path(args.adapter) / "adapter_config.json"
@@ -362,6 +379,7 @@ def main() -> None:
         "tag": tag, "dataset": args.dataset, "eviction": evicting,
         "model": str(args.model),
         "adapter": (str(args.adapter) if args.adapter else None),
+        "cap_mib": args.cap_mib,
         "adapter_base": (adapter_cfg or {}).get("base_model_name_or_path"),
         "budget": args.budget, "keep_frac": args.keep_frac,
         "sinks": 0 if args.no_sinks else args.sinks,
