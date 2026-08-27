@@ -1165,7 +1165,27 @@ CLAIMS = [
     ("MATCH: Baya 16K random vs significance differ only in select", 0,
      lambda: matched_pair("long16k-random-baya-ad", "long16k-sig-baya-ad",
                           "rag_long16k"), 0.5, "0.24086", "p2"),
-    ("CENSUS: committed cells that faced ZERO compressions", 8,
+    # --- multi-hop: compression free, length breaks the chain ---------------
+    # 8K hop arms are pinned on depths 0.1 and 0.5 ONLY: the depth-0.9 cell
+    # faces zero compressions at 8K/chunk 4096 and measures nothing. The census
+    # pin caught this in fresh data before it reached a conclusion.
+    ("HOP 8K 2-hop significance (valid depths)", 0.7917,
+     lambda: (pk("pk_8k_B64_hop2_sig.json", 0.1) + pk("pk_8k_B64_hop2_sig.json", 0.5)) / 2,
+     5e-4, "0.7917", "p2"),
+    ("HOP 8K 2-hop random (valid depths)", 0.3333,
+     lambda: (pk("pk_8k_B64_hop2_random.json", 0.1) + pk("pk_8k_B64_hop2_random.json", 0.5)) / 2,
+     5e-4, "0.3333", "p2"),
+    ("HOP 8K 3-hop significance (valid depths)", 0.5417,
+     lambda: (pk("pk_8k_B64_hop3_sig.json", 0.1) + pk("pk_8k_B64_hop3_sig.json", 0.5)) / 2,
+     5e-4, "0.5417", "p2"),
+    ("HOP 8K 3-hop random -- nominally HIGHER (valid depths)", 0.7500,
+     lambda: (pk("pk_8k_B64_hop3_random.json", 0.1) + pk("pk_8k_B64_hop3_random.json", 0.5)) / 2,
+     5e-4, "0.7500", "p2"),
+    ("HOP 128K 2-hop significance (length, not compression)", 0.4722,
+     lambda: pk("pk_128k_B64_hop2_sig.json", require={"hops": 2}), 5e-4, "0.4722", "p2"),
+    ("HOP 128K 3-hop significance", 0.0278,
+     lambda: pk("pk_128k_B64_hop3_sig.json", require={"hops": 3}), 5e-4, "0.0278", "p2"),
+    ("CENSUS: committed cells that faced ZERO compressions", 12,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,
      lambda: json.loads((KVS / "frac0.25-rf0.25-b6f0__rag_dev" / "run_manifest.json")

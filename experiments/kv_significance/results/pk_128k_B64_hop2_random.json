@@ -1,0 +1,265 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 16,
+  "recent_flag": 16,
+  "trials": 12,
+  "window": 16,
+  "sinks": 4,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 2,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "random",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 2200.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125818,
+      "budget": 64,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 27,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 85667,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the code that is not in the prev",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 19457,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 95822,
+          "got": "the code that is used to represe",
+          "hit": false
+        },
+        {
+          "key": 35360,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 86009,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 72855,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "the code that is not present in ",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125818,
+      "budget": 64,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 15,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 85667,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the code that is not in the prev",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 19457,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 95822,
+          "got": "the code that is used to represe",
+          "hit": false
+        },
+        {
+          "key": 35360,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 86009,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 72855,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "the code that is not present in ",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125818,
+      "budget": 64,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 3,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 85667,
+          "got": "the code that is not in the prev",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the one that is not present in t",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 19457,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 95822,
+          "got": "the code that is not repeated in",
+          "hit": false
+        },
+        {
+          "key": 35360,
+          "got": "the one that is not repeated in ",
+          "hit": false
+        },
+        {
+          "key": 86009,
+          "got": "the one that is not present in t",
+          "hit": false
+        },
+        {
+          "key": 72855,
+          "got": "the code that is not present in ",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "the one that is repeated after t",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

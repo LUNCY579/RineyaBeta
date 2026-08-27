@@ -1,0 +1,265 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 16,
+  "recent_flag": 16,
+  "trials": 12,
+  "window": 16,
+  "sinks": 4,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 3,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 2200.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125821,
+      "budget": 64,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 27,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 99873,
+          "got": "85667.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "66365.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "96659.\n\nRemember the pass key is",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "60745.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 64283,
+          "got": "19457. \n\nRemember the pass key",
+          "hit": false
+        },
+        {
+          "key": 35360,
+          "got": "96613.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 53698,
+          "got": "86009.\n\nRemember to memorize the",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "63504.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 86434,
+          "got": "88363.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 82496,
+          "got": "78483.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 66573,
+          "got": "62910.\n\nRemember the code:",
+          "hit": false
+        },
+        {
+          "key": 86745,
+          "got": "15895. So the answer is",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125821,
+      "budget": 64,
+      "depth": 0.5,
+      "acc": 0.08333333333333333,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 15,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 99873,
+          "got": "85667. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "66365. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "66445.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "60745. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 64283,
+          "got": "19457. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 35360,
+          "got": "96613. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 53698,
+          "got": "86009.\n\nSo, the answer is",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "63504. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 86434,
+          "got": "86434. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 82496,
+          "got": "78483. \n\nRemember the pass key",
+          "hit": false
+        },
+        {
+          "key": 66573,
+          "got": "81514. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 86745,
+          "got": "15895. \n\nSo, the answer",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125820,
+      "budget": 64,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 3,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 99873,
+          "got": "85667. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "66365. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "66445. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "60745. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 64283,
+          "got": "19457. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 35360,
+          "got": "96613. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 53698,
+          "got": "61053. \n\nSo, the final",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "63504. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 86434,
+          "got": "88363. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 82496,
+          "got": "78483. So the answer is",
+          "hit": false
+        },
+        {
+          "key": 66573,
+          "got": "62910. So the answer is",
+          "hit": false
+        },
+        {
+          "key": 86745,
+          "got": "64302. So the answer is",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": 4.0,
+  "chunk": 4096,
+  "recent": 16,
+  "recent_flag": 16,
+  "trials": 12,
+  "window": 16,
+  "sinks": 4,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 2,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 2200.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": true,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 131072,
+      "real_tokens": 125818,
+      "budget": 64,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 27,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 85667,
+          "got": "75526.\n\nRemember that code is",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "99873.\n\nRemember to memorize it",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "66365.\n\nRemember to memorize the",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "96659.\n\nRemember that code is",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "70176.\n\nRemember the code:",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "60745. Remember that code is",
+          "hit": false
+        },
+        {
+          "key": 19457,
+          "got": "79208.\n\nRemember that code is",
+          "hit": false
+        },
+        {
+          "key": 95822,
+          "got": "64283.\n\nRemember that code is",
+          "hit": false
+        },
+        {
+          "key": 35360,
+          "got": "96613.\n\nRemember the pass key is",
+          "hit": false
+        },
+        {
+          "key": 86009,
+          "got": "61053.\n\nRemember to memorize the",
+          "hit": false
+        },
+        {
+          "key": 72855,
+          "got": "53698.\n\nRemember to memorize it",
+          "hit": false
+        },
+        {
+          "key": 19085,
+          "got": "63504.\n\nRemember that code is",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125818,
+      "budget": 64,
+      "depth": 0.5,
+      "acc": 1.0,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 15,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 85667,
+          "got": "85667.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 42649,
+          "got": "42649. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "90190.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 66445,
+          "got": "66445. \n\nSo, the answer",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "92722.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 84699,
+          "got": "84699.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 19457,
+          "got": "19457.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 95822,
+          "got": "95822.\n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 35360,
+          "got": "35360.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 86009,
+          "got": "86009.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 72855,
+          "got": "72855.\n\nSo, the answer is",
+          "hit": true
+        },
+        {
+          "key": 19085,
+          "got": "19085. \n\nSo, the answer",
+          "hit": true
+        }
+      ]
+    },
+    {
+      "length": 131072,
+      "real_tokens": 125818,
+      "budget": 64,
+      "depth": 0.9,
+      "acc": 0.4166666666666667,
+      "peak_mib": 1506.9,
+      "n_chunks": 31,
+      "compressions_faced": 3,
+      "exempt_from_compression": false,
+      "yarn": 4.0,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 85667,
+          "got": "75526. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "42649. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 90190,
+          "got": "66365. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "66445. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 92722,
+          "got": "70176. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "60745. \n\nSo the answer is",
+          "hit": false
+        },
+        {
+          "key": 19457,
+          "got": "19457. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 95822,
+          "got": "64283. So the answer is",
+          "hit": false
+        },
+        {
+          "key": 35360,
+          "got": "35360. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 86009,
+          "got": "61053. \n\nSo, the answer",
+          "hit": false
+        },
+        {
+          "key": 72855,
+          "got": "72855. \n\nSo the answer is",
+          "hit": true
+        },
+        {
+          "key": 19085,
+          "got": "63504. \n\nSo, the answer",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

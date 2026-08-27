@@ -1719,3 +1719,70 @@ replies and identical in aggregate score — while the same reduction chosen at 
 **0.241**. That is the deployable claim, and it is now measured on a capable model at two
 lengths rather than argued from a weak one.
 
+---
+
+## 2026-08-27: multi-hop — compression is free, LENGTH breaks the chain, and the score stops helping at 3 hops
+
+Multi-hop is the nearest thing this programme has to a reasoning test: the answer is not
+one span but N linked facts. Stage 3 gated it uncompressed at 8K — 2-hop 0.8333, 3-hop
+0.7222 — so a fall under compression would be the cache policy rather than the model.
+
+**Two confounds had to be closed before any of this could be read**, and the second was
+caught by a pin rather than by me.
+
+*First*, the initial arms ran at 128K against 8K gates, so length and policy moved
+together. Corrected by running 8K compressed arms at the gate's own length.
+
+*Second*, **the census pin fired the moment those 8K arms landed**: 8 → 12 committed cells
+facing zero compressions. At 8K with chunk 4096 the exempt region begins at 4096 and the
+depth-0.9 needle sits at ~7,072, so **the depth-0.9 cell of all four 8K arms measured
+nothing**. Every figure below therefore uses depths 0.1 and 0.5 only. The pin was added
+three days ago after exactly this defect was found in the Halo transfer claim; it has now
+caught the same defect in fresh data, before it reached a conclusion.
+
+| condition (depths 0.1 & 0.5) | 2-hop | 3-hop |
+|---|---:|---:|
+| 8K, uncompressed (gate) | 0.8333 | 0.6667 |
+| **8K, B=64 significance** | **0.7917** | **0.5417** |
+| 8K, B=64 random | 0.3333 | 0.7500 |
+| 128K, B=64 significance | 0.4722* | 0.0278* |
+
+\* 128K arms retain all three depths; none is exempt there.
+
+### Compression is free for multi-hop; length is what breaks it
+
+Exact McNemar on the paired needles, valid depths: **2-hop uncompressed vs compressed
+*p* = 1.0000** (5 against 4), **3-hop *p* = 0.3750** (4 against 1). A 128× cache reduction
+costs nothing measurable at either chain length.
+
+Holding policy and budget fixed and moving only length, 2-hop goes **0.8333 → 0.4722**.
+So *"multi-hop degrades badly under compression"* — which I wrote from the confounded
+arms — is **withdrawn**. Multi-hop degrades with **length**, and the eviction policy is
+not what breaks it.
+
+### At 2 hops the score is decisive; at 3 it stops helping
+
+| contrast (valid depths) | discordant | exact *p* |
+|---|---|---|
+| 2-hop, random vs significance | 4 against **15** of 19 | **0.0192 — the score wins** |
+| 3-hop, random vs significance | **6** against 1 of 7 | 0.1250 — indistinguishable |
+
+At two hops the score is worth the run: 0.7917 against 0.3333. At three hops random is
+nominally *higher* (0.7500 against 0.5417) and the difference does not reach significance
+on n = 12 needles. The honest statement is **"at three hops the score's advantage is not
+detectable"**, not "random wins" — but the direction is unfavourable and it is not what a
+mechanism with a general advantage would produce.
+
+A plausible shape: the score is built to find *one* region. With three required spans and
+64 slots it may concentrate where a spread would serve better — exactly the regime in
+which an unbiased keep-set is not obviously worse. We do not claim that mechanism. We
+report that the advantage is undetectable at three hops, that n = 12 is what limits the
+statement, and that a larger n is what would settle it.
+
+### What this adds to the deployment picture
+
+Single-span retrieval survives 4× compression at 16K **identically**. Two-hop chains
+survive a 128× reduction at 8K with the score, and collapse without it. Three-hop chains
+are where the advantage disappears, and long contexts are where chains break regardless
+of policy. **The mechanism's demonstrated domain is retrieval of spans**, and it does not
+extend, without further evidence, to chained inference over long contexts.
