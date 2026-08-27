@@ -1471,3 +1471,64 @@ verified-drained card. Re-cast as **five shards of 20 trials on five disjoint se
 multi-hour GPU work on an 8 GB card at 85–91 °C is not reliable here; short resumable
 cells are. That is an operational finding worth as much as the bound.
 
+---
+
+## 2026-08-26: the length series, and the correction it forces
+
+Every long-context arm so far compared *compressed-with-score* against *uncompressed* and
+found no difference. From that I concluded the cache was not the binding constraint at
+length and the model was. **That inference was wrong**, and it was wrong for a reason worth
+naming: there was no matched **random** arm at any length, so "compression is free" could
+not be distinguished from "any policy is free".
+
+With the controls, at matched budget, sinks, window and allocation:
+
+| length | streaming | random | **significance** | uncompressed | score − random | % of uncompressed |
+|---|---:|---:|---:|---:|---:|---:|
+| ~232 tok | 0.42740 | 0.34304 | **0.60834** | 0.66939 | **+0.26530** | 90.9% |
+| 4K | 0.04110 | 0.07366 | **0.38730** | 0.39102 | **+0.31363** | 99.0% |
+| 16K | 0.03004 | 0.04969 | **0.19637** | 0.18571 | **+0.14669** | **105.7%** |
+| 32K | — | 0.03935 | **0.10851** | 0.12827 | **+0.06916** | 84.6% |
+
+**The cache is a severe constraint at length, and the score absorbs it.** At 4K, random
+selection at the same budget holds 19% of uncompressed quality and streaming 11%, while
+the score holds **99%**. Compressed ≈ uncompressed not because the cache was slack, but
+because the score is doing nearly all of the work available to it.
+
+At 16K the score arm **exceeds** the full cache (105.7%), reproducing an earlier
+observation (+0.00988 twice, independently). Dropping three quarters of the cache *by
+score* beats keeping all of it — consistent with the score suppressing distractor evidence
+that the full cache still attends to. The 4K/16K/32K haystacks carry 46, 189 and 380
+plausible competing documents respectively, so there is a great deal to suppress.
+
+The corrected statement is stronger than the one it replaces, and both are recorded.
+
+## 2026-08-26: the fine-tuned model — disentangled, because the first comparison was confounded
+
+A LoRA checkpoint from a long-context fine-tune (250 of 800 steps) scored **0.68977** at
+4K uncompressed, against **0.39102** for the arm on file. That looked like +0.29875 from a
+third of a fine-tune.
+
+**It was confounded.** The arm on file ran on the research core `rineya-core-en32k-28L`;
+the adapter runs on `Rineya-Halo-1.2.0`. The number conflated *the fine-tune helped* with
+*Halo is a better model*. The confound was visible only because the manifest now records
+`model` and `adapter` — provenance fields added hours earlier, after an audit found the
+language harness recorded neither.
+
+The missing control, same 200 prompts, all uncompressed:
+
+| model | 4K quality | |
+|---|---:|---|
+| research core | 0.39102 | |
+| **Halo-1.2.0 base** | **0.49124** | +0.10022 over the core |
+| **Halo + adapter (250/800)** | **0.68977** | **+0.19853 over Halo** |
+
+So the raw gap is **34% model and 66% adapter**. The fine-tune is worth **+0.199** at 4K
+on its own — a third of the way through training — and it lifts 4K quality *above* the
+research core's native-length score of 0.66939.
+
+**This is preliminary and stays labelled so:** 250 of 800 steps, one length, uncompressed
+only, n=200. The policy question on the fine-tuned model — does the score still matter
+once the model can actually use the context — is the one that matters, and its two arms
+failed on host-RAM exhaustion before running. They are the resume point.
+

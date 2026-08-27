@@ -1017,6 +1017,27 @@ CLAIMS = [
          ["pk_128k_B16_power_s%s.json" % s for s in
           ("20260820", "771103", "404411", "918273", "552146")]),
      5e-4, "300/300", "p2"),
+    # --- the length series: random/streaming collapse, the score does not ---
+    ("LEN 4K random (19% of uncompressed)", 0.07366,
+     lambda: lang_quality2("long4k-random-k0.25", "rag_long4k"), 5e-6, "0.07366", "p2"),
+    ("LEN 4K streaming (11%)", 0.04110,
+     lambda: lang_quality2("long4k-streaming-k0.25", "rag_long4k"), 5e-6, "0.04110", "p2"),
+    ("LEN 4K significance (99%)", 0.38730,
+     lambda: lang_quality2("long4k-sig-k0.25-rf0.15", "rag_long4k"), 5e-6, "0.38730", "p2"),
+    ("LEN 16K random", 0.04969,
+     lambda: lang_quality2("long16k-random-k0.25", "rag_long16k"), 5e-6, "0.04969", "p2"),
+    ("LEN 16K significance EXCEEDS the full cache", 0.19637,
+     lambda: lang_quality2("long16k-sig-k0.25-rf0.15", "rag_long16k"), 5e-6, "0.19637", "p2"),
+    ("LEN 32K random", 0.03935,
+     lambda: lang_quality2("long32k-random-k0.25", "rag_long32k"), 5e-6, "0.03935", "p2"),
+    # --- the adapter, DISENTANGLED from the model it sits on -----------------
+    ("ADAPTER: Halo base at 4K (the control that split the confound)", 0.49124,
+     lambda: lang_quality2("long4k-off-halo", "rag_long4k"), 5e-6, "0.49124", "p2"),
+    ("ADAPTER: Halo + 250-step adapter at 4K", 0.68977,
+     lambda: lang_quality2("long4k-off-adapter250", "rag_long4k"), 5e-6, "0.68977", "p2"),
+    ("ADAPTER: gain attributable to the fine-tune alone", 0.19853,
+     lambda: lang_quality2("long4k-off-adapter250", "rag_long4k")
+             - lang_quality2("long4k-off-halo", "rag_long4k"), 5e-6, "0.19853", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,
