@@ -1654,3 +1654,35 @@ free"*. That is the `--cap-mib` ceiling doing exactly its job — refusing insid
 budget while leaving two thirds of the card untouched, rather than exhausting the device
 and taking a neighbouring job with it. Re-run at a 6000 MiB cap.
 
+---
+
+## 2026-08-27: at 16K on a capable model, 4x compression is not merely cheap — it is IDENTICAL
+
+The 4K block showed compression costing +0.00193, indistinguishable from zero. At 16K the
+result is stronger than "indistinguishable", and it is worth stating precisely because
+the distinction matters.
+
+| 16K, Baya + adapter, n=100 | quality | mean stored KV |
+|---|---:|---:|
+| uncompressed | **0.66108** | 16,441 |
+| **keep 0.25, significance** | **0.66108** | **4,109** |
+
+**Identical to five decimals.** Not a small difference — no difference. Broken down:
+
+- **95 of 100 replies are byte-identical**
+- **100 of 100 quality scores are identical**
+- the compression is real and verified in the manifest: `mean_kept_ratio` 0.25 against
+  1.0004, stored KV 16,441 → 4,109, a **4.0×** reduction
+- `heavy_zero_count` is **0**, so the policy ran with the score active throughout
+
+So on a model that can use its context, discarding three quarters of the KV cache by
+score changed five replies out of a hundred and moved the aggregate score not at all.
+
+**For contrast, the research core at 16K scored 0.18571** — with the entire cache. The
+same compression on that model was also free, but free in a regime where nothing worked.
+This is the first measurement of the mechanism being free where the model is *succeeding*:
+0.661 against a native-length reference of 0.669.
+
+The matched random arm at this length is the remaining piece; at 4K it cost **−0.20483**,
+and it is what separates "compression is free" from "compression by the score is free".
+

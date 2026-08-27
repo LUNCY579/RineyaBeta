@@ -1150,6 +1150,12 @@ CLAIMS = [
     ("MATCH: Baya 4K random vs significance differ only in select", 0,
      lambda: matched_pair("long4k-random-baya-ad", "long4k-sig-baya-ad",
                           "rag_long4k"), 0.5, "0.20676", "p2"),
+    ("BAYA 16K uncompressed", 0.66108,
+     lambda: lang_quality2("long16k-off-baya-ad", "rag_long16k"), 5e-6, "0.66108", "p2"),
+    ("BAYA 16K keep0.25 significance -- IDENTICAL to uncompressed", 0.0,
+     lambda: lang_quality2("long16k-sig-baya-ad", "rag_long16k")
+             - lang_quality2("long16k-off-baya-ad", "rag_long16k"),
+     1e-9, "0.66108", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,
