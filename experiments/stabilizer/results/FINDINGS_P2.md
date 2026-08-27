@@ -1597,3 +1597,60 @@ depends more on the floor being correct.
 So the final accounting on that defect: a genuine bug in the mechanism, correctly found,
 correctly fixed, correctly forced two retractions — and materially affecting exactly one
 of the six results measured against it. Both halves of that belong in the record.
+
+---
+
+## 2026-08-27: the mechanism on a model that can actually use long context
+
+Every long-context result in this campaign was measured on a core that scores **0.391 at
+4K with the entire cache present**. That made "does compression cost anything" answerable
+and "does the score matter on a *capable* model" unanswerable — a mechanism that rescues a
+failing model is a different claim from one that helps a working one.
+
+`Rineya-Baya-1.7.0` scores 48/64 on the project's long-context demo against Halo's 30/64,
+and now carries a 1200-step long-context LoRA. Four arms at 4K, same 200 prompts, the
+significance/random pair verified one-variable by manifest diff:
+
+| arm | quality | vs the arm above it |
+|---|---:|---:|
+| Baya base, uncompressed | **0.68905** | — |
+| Baya + adapter, uncompressed | 0.65777 | **−0.03129** |
+| Baya + adapter, keep 0.25 **significance** | **0.65970** | **+0.00193** |
+| Baya + adapter, keep 0.25 random | 0.45294 | −0.20483 |
+
+### Three results, and they are separable because each pair differs in one thing
+
+**1. Compression is free on a capable model.** Cutting the cache to a quarter costs
+**+0.00193** — indistinguishable from zero, and marginally positive. The model is not
+struggling here: it scores 0.658 uncompressed, against the research core's 0.391.
+
+**2. The score is worth +0.20676 at 4× compression.** Against a matched random keep-set of
+identical size, at identical budget, sinks, window, allocation, model and adapter. This is
+the central claim, and it now holds on a model that does not need rescuing. On the
+research core the same contrast was +0.31363; the effect is smaller on the stronger model
+but very much present, which is what one should expect — a capable model loses less when
+you evict badly, and still loses a great deal.
+
+**That generalisation is the result this campaign was missing.** Until now the language
+evidence came exclusively from a model failing the task, so "the score recovers what a bad
+eviction costs" could not be distinguished from "the score props up a weak model". It can
+now: the mechanism is worth **+0.207** on a model performing at 0.689 uncompressed.
+
+**3. The 1200-step fine-tune made Baya slightly WORSE at 4K** — 0.68905 → 0.65777,
+**−0.03129**. This is consistent with what the loss curve showed during training: Baya
+began at 0.67 where Halo began at 1.62, and its block-mean loss moved only 0.5051 → 0.4173
+across 1200 steps. Baya was already at this data's floor, so the adapter had little to
+teach it and a small amount to cost it. The Halo adapter, by contrast, was worth **+0.199**
+at 4K — because Halo had somewhere to climb.
+
+*A caveat kept attached:* the fine-tune targets a capability measured by the project's own
+long-context demo, not by this rag_dev rubric. "Worse at 4K on this benchmark" is not
+"worse in general", and the two should not be conflated.
+
+### A note on the memory cap, which worked as designed
+
+The 16K arms of this queue failed on an in-process OOM: *"2.93 GiB allowed... 4.06 GiB is
+free"*. That is the `--cap-mib` ceiling doing exactly its job — refusing inside our own
+budget while leaving two thirds of the card untouched, rather than exhausting the device
+and taking a neighbouring job with it. Re-run at a 6000 MiB cap.
+

@@ -1124,6 +1124,32 @@ CLAIMS = [
     ("LONG 32K compression delta vs uncompressed", -0.01976,
      lambda: lang_quality2("long32k-b6f0-k0.25-rf0.25", "rag_long32k")
              - lang_quality2("long32k-off", "rag_long32k"), 5e-6, "0.01976", "p2"),
+    # --- BAYA: the mechanism on a model that can use long context ----------
+    # The generalisation this campaign was missing. Every earlier language
+    # result came from a model failing the task, so "the score recovers a bad
+    # eviction" could not be told apart from "the score props up a weak model".
+    ("BAYA 4K base uncompressed", 0.68905,
+     lambda: lang_quality2("long4k-off-baya", "rag_long4k"), 5e-6, "0.68905", "p2"),
+    ("BAYA 4K +adapter uncompressed", 0.65777,
+     lambda: lang_quality2("long4k-off-baya-ad", "rag_long4k"), 5e-6, "0.65777", "p2"),
+    ("BAYA 4K +adapter keep0.25 significance", 0.65970,
+     lambda: lang_quality2("long4k-sig-baya-ad", "rag_long4k"), 5e-6, "0.65970", "p2"),
+    ("BAYA 4K +adapter keep0.25 random", 0.45294,
+     lambda: lang_quality2("long4k-random-baya-ad", "rag_long4k"), 5e-6, "0.45294", "p2"),
+    ("BAYA the score is worth this at 4x on a capable model", 0.20676,
+     lambda: lang_quality2("long4k-sig-baya-ad", "rag_long4k")
+             - lang_quality2("long4k-random-baya-ad", "rag_long4k"),
+     5e-6, "0.20676", "p2"),
+    ("BAYA compression costs this much (indistinguishable from 0)", 0.00193,
+     lambda: lang_quality2("long4k-sig-baya-ad", "rag_long4k")
+             - lang_quality2("long4k-off-baya-ad", "rag_long4k"),
+     5e-6, "0.00193", "p2"),
+    ("BAYA the 1200-step adapter COST this at 4K", -0.03129,
+     lambda: lang_quality2("long4k-off-baya-ad", "rag_long4k")
+             - lang_quality2("long4k-off-baya", "rag_long4k"), 5e-6, "0.03129", "p2"),
+    ("MATCH: Baya 4K random vs significance differ only in select", 0,
+     lambda: matched_pair("long4k-random-baya-ad", "long4k-sig-baya-ad",
+                          "rag_long4k"), 0.5, "0.20676", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,
