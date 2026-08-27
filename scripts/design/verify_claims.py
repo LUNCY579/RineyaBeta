@@ -1156,6 +1156,15 @@ CLAIMS = [
      lambda: lang_quality2("long16k-sig-baya-ad", "rag_long16k")
              - lang_quality2("long16k-off-baya-ad", "rag_long16k"),
      1e-9, "0.66108", "p2"),
+    ("BAYA 16K keep0.25 random", 0.42022,
+     lambda: lang_quality2("long16k-random-baya-ad", "rag_long16k"), 5e-6, "0.42022", "p2"),
+    ("BAYA the score is worth this at 16K", 0.24086,
+     lambda: lang_quality2("long16k-sig-baya-ad", "rag_long16k")
+             - lang_quality2("long16k-random-baya-ad", "rag_long16k"),
+     5e-6, "0.24086", "p2"),
+    ("MATCH: Baya 16K random vs significance differ only in select", 0,
+     lambda: matched_pair("long16k-random-baya-ad", "long16k-sig-baya-ad",
+                          "rag_long16k"), 0.5, "0.24086", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

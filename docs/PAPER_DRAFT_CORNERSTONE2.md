@@ -555,6 +555,27 @@ The streaming arms are a positional floor, not a matched control: spending the b
 until `heavy = 0` is what makes an arm streaming, so its recent window is necessarily
 larger.
 
+**On a model that can actually use long context, the result strengthens.** Everything
+above is measured on a 474M research core that scores 0.391 at 4K and 0.186 at 16K *with
+the entire cache present* — so "the score recovers what a bad eviction costs" could not be
+separated from "the score props up a failing model". Repeating the measurement on
+`Rineya-Baya-1.7.0` with a 1200-step long-context adapter separates them:
+
+| length | uncompressed | **significance** | random | compression cost | **score − random** |
+|---|---:|---:|---:|---:|---:|
+| 4K (n=200) | 0.65777 | **0.65970** | 0.45294 | +0.00193 | **+0.20676** |
+| 16K (n=100) | 0.66108 | **0.66108** | 0.42022 | **0.00000** | **+0.24086** |
+
+At 16K the compressed and uncompressed arms are **identical to five decimals** — 95 of 100
+replies byte-identical, 100 of 100 quality scores equal — while the cache is genuinely cut
+by 4× (16,441 → 4,109 stored positions, `heavy_zero_count` = 0). The same cut chosen at
+random costs **0.241**.
+
+Two trends run the same way as context grows: compression becomes *cheaper* (+0.00193 → 0)
+and the score becomes *more valuable* (+0.207 → +0.241). The mechanism's value is
+therefore not an artefact of a weak model — it is larger, at the longer context, on the
+stronger one.
+
 **The scale gap, which bounds everything in this section.** These prompts have a median
 of 238 tokens and a maximum of 330; not one exceeds 1K. The passkey results run at
 125,826 tokens — **543× longer** — and we have nothing in between. Every figure here

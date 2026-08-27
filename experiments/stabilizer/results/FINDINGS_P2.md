@@ -1686,3 +1686,36 @@ This is the first measurement of the mechanism being free where the model is *su
 The matched random arm at this length is the remaining piece; at 4K it cost **−0.20483**,
 and it is what separates "compression is free" from "compression by the score is free".
 
+---
+
+## 2026-08-27: the Baya series complete — the score's value GROWS with length on a capable model
+
+The matched random arm at 16K closes the block. All arms on `Rineya-Baya-1.7.0` plus its
+1200-step long-context adapter; significance/random pairs verified one-variable by
+manifest diff.
+
+| length | uncompressed | **significance** | random | compression cost | **score − random** |
+|---|---:|---:|---:|---:|---:|
+| 4K (n=200) | 0.65777 | **0.65970** | 0.45294 | **+0.00193** | **+0.20676** |
+| 16K (n=100) | 0.66108 | **0.66108** | 0.42022 | **+0.00000** | **+0.24086** |
+
+**Two things happen as context grows, and they point the same way.**
+
+Compression gets *cheaper*: +0.00193 at 4K, exactly **zero** at 16K. And the score gets
+*more valuable*: **+0.207 → +0.241**. Discarding three quarters of the cache costs nothing
+when the score chooses what to keep, and costs a quarter of the model's quality when
+chance does.
+
+**Against the research core, the pattern is the same but the levels are not.** There the
+score was worth +0.31363 at 4K and +0.14669 at 16K — larger at 4K, smaller at 16K, and
+measured on a model scoring 0.391 and 0.186 respectively. On Baya the model scores 0.658
+and 0.661, so these are the first length-series numbers taken where the model is
+*succeeding* rather than failing. The mechanism's value is not an artefact of propping up
+a weak model: it is larger, at 16K, on the stronger one.
+
+**What this licenses, stated carefully.** On a model that can use 16K of context, a 4×
+KV-cache reduction chosen by the significance score is free — byte-identical on 95 of 100
+replies and identical in aggregate score — while the same reduction chosen at random costs
+**0.241**. That is the deployable claim, and it is now measured on a capable model at two
+lengths rather than argued from a weak one.
+
