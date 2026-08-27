@@ -1485,10 +1485,33 @@ With the controls, at matched budget, sinks, window and allocation:
 
 | length | streaming | random | **significance** | uncompressed | score − random | % of uncompressed |
 |---|---:|---:|---:|---:|---:|---:|
-| ~232 tok | 0.42740 | 0.34304 | **0.60834** | 0.66939 | **+0.26530** | 90.9% |
+| ~232 tok | 0.42740 | 0.34304 | **0.59488** | 0.66939 | **+0.25184** | 88.9% |
 | 4K | 0.04110 | 0.07366 | **0.38730** | 0.39102 | **+0.31363** | 99.0% |
 | 16K | 0.03004 | 0.04969 | **0.19637** | 0.18571 | **+0.14669** | **105.7%** |
-| 32K | — | 0.03935 | **0.10851** | 0.12827 | **+0.06916** | 84.6% |
+| 32K | *pending* | 0.03935 | *pending* | 0.12827 | *pending* | — |
+
+**CORRECTED, and the correction is mine to own.** The first version of this table was
+wrong in two of its four rows, and a review found it before it reached the paper.
+
+*Row ~232* originally paired the random arm (`recent = 14.38`, from `rf = 0.25`) against
+the **best** significance arm (`recent = 8.70`, from `rf = 0.15`) and reported +0.26530.
+Those differ in allocation as well as in selection, so the number crossed two variables.
+The matched partner at `recent = 14.38` scores **0.59488**, giving **+0.25184** — the
+figure already pinned elsewhere in this document. Quoting the best available significance
+arm rather than the matched one inflates the contrast by 0.013, and does so in the
+flattering direction, which is exactly why it needs catching.
+
+*Row 32K* had the same fault with no matched partner in existence: random at `rf = 0.15`
+against significance at `rf = 0.25` (`recent` 1233.82 against 2056.42). Its +0.06916 is
+**withdrawn** and the row is marked pending until the matched arm runs.
+
+*Rows 4K and 16K were correct* — `recent` is identical within each row (158.56 and
+619.57), so those contrasts isolate selection alone. They are also the two rows carrying
+the result's weight.
+
+The streaming arms cannot be matched on `recent` by construction: spending the budget
+down until `heavy = 0` is what makes an arm streaming, so its window is necessarily
+larger. They are reported as a positional floor, not as a matched control.
 
 **The cache is a severe constraint at length, and the score absorbs it.** At 4K, random
 selection at the same budget holds 19% of uncompressed quality and streaming 11%, while

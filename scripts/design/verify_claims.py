@@ -265,6 +265,41 @@ def _cat_gain(category: str):
     return statistics.mean(d) if d else None
 
 
+def matched_pair(a: str, b: str, dataset: str) -> int:
+    """How many manifest fields differ between two arms, EXCLUDING `select`.
+
+    A contrast that attributes a difference to the score requires the two arms to
+    differ in nothing else. Checking the VALUES cannot detect a violation --
+    every number reproduces from its own file whether or not the comparison is
+    legitimate. This checks the COMPARISON.
+
+    It exists because the length-series table paired a random arm at
+    recent=14.38 against the best significance arm at recent=8.70 and reported
+    the difference as the score's contribution. Both numbers were correct; the
+    contrast was not. The inflation was 0.013, in the flattering direction.
+
+    Returns the count of differing fields, so a pin of 0 asserts a clean pair.
+    """
+    fields = ("keep_frac", "budget", "sinks", "recent", "pool", "pool_back",
+              "pool_fwd", "grow", "window", "dataset", "case_count", "model",
+              "adapter", "min_heavy_frac")
+    ma = KVS / f"{a}__{dataset}" / "run_manifest.json"
+    mb = KVS / f"{b}__{dataset}" / "run_manifest.json"
+    if not (ma.exists() and mb.exists()):
+        return None
+    A = json.loads(ma.read_text(encoding="utf-8"))
+    B = json.loads(mb.read_text(encoding="utf-8"))
+    n = 0
+    for f in fields:
+        va, vb = A.get(f), B.get(f)
+        if isinstance(va, float) and isinstance(vb, float):
+            if abs(va - vb) > 1e-6:
+                n += 1
+        elif va != vb:
+            n += 1
+    return n
+
+
 def cp_bound(n: int, tail: float) -> float:
     """Clopper-Pearson bound for a cell with zero failures: tail ** (1/n).
 
@@ -1038,6 +1073,21 @@ CLAIMS = [
     ("ADAPTER: gain attributable to the fine-tune alone", 0.19853,
      lambda: lang_quality2("long4k-off-adapter250", "rag_long4k")
              - lang_quality2("long4k-off-halo", "rag_long4k"), 5e-6, "0.19853", "p2"),
+    # --- MATCHING pins: assert the CONTRAST, not just the numbers -----------
+    # Every value pin below passed while the length-series table compared arms at
+    # different allocations. Values reproduce from their own files whether or not
+    # the comparison is legitimate, so no value pin can catch a bad pairing.
+    # These assert that the two arms of each headline contrast differ in NOTHING
+    # except `select`. 0 = clean pair.
+    ("MATCH: 4K random vs significance differ only in select", 0,
+     lambda: matched_pair("long4k-random-k0.25", "long4k-sig-k0.25-rf0.15",
+                          "rag_long4k"), 0.5, "158.56", "p2"),
+    ("MATCH: 16K random vs significance differ only in select", 0,
+     lambda: matched_pair("long16k-random-k0.25", "long16k-sig-k0.25-rf0.15",
+                          "rag_long16k"), 0.5, "619.57", "p2"),
+    ("MATCH: native random vs significance differ only in select", 0,
+     lambda: matched_pair("cpu-frac0.25-random-b6f0", "cpu-frac0.25-rf0.25-b6f0",
+                          "rag_dev"), 0.5, "0.25184", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,
