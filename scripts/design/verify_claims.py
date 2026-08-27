@@ -1098,6 +1098,32 @@ CLAIMS = [
     ("MATCH: 32K random vs significance differ only in select", 0,
      lambda: matched_pair("long32k-random-k0.25", "long32k-sig-k0.25-rf0.15",
                           "rag_long32k"), 0.5, "0.07904", "p2"),
+    ("REGROW keep0.50 language, fixed gate", 0.61437,
+     lambda: lang_quality("frac0.5-grow2-fixedgate"), 5e-6, "0.61437", "p2"),
+    # --- the remaining headline-table figures, pinned in BOTH documents -----
+    # An audit found these four asserted in the paper's length-series table with
+    # nothing checking them. A number in a headline table is the last place an
+    # unpinned figure should survive.
+    ("LEN 16K streaming", 0.03004,
+     lambda: lang_quality2("long16k-streaming-k0.25", "rag_long16k"),
+     5e-6, "0.03004", "p2,c2paper"),
+    ("LEN 16K score minus random", 0.14669,
+     lambda: lang_quality2("long16k-sig-k0.25-rf0.15", "rag_long16k")
+             - lang_quality2("long16k-random-k0.25", "rag_long16k"),
+     5e-6, "0.14669", "p2,c2paper"),
+    ("LEN 4K score minus random", 0.31363,
+     lambda: lang_quality2("long4k-sig-k0.25-rf0.15", "rag_long4k")
+             - lang_quality2("long4k-random-k0.25", "rag_long4k"),
+     5e-6, "0.31363", "p2,c2paper"),
+    ("LANG keep0.5 matched random arm", 0.44191,
+     lambda: lang_quality("cpu-frac0.5-random-b6f0"), 5e-6, "0.44191", "p2,c2paper"),
+    # the two long-context compression deltas the findings state
+    ("LONG 16K compression delta vs uncompressed", 0.00988,
+     lambda: lang_quality2("long16k-b6f0-k0.25-rf0.25", "rag_long16k")
+             - lang_quality2("long16k-off", "rag_long16k"), 5e-6, "0.00988", "p2"),
+    ("LONG 32K compression delta vs uncompressed", -0.01976,
+     lambda: lang_quality2("long32k-b6f0-k0.25-rf0.25", "rag_long32k")
+             - lang_quality2("long32k-off", "rag_long32k"), 5e-6, "0.01976", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 8,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

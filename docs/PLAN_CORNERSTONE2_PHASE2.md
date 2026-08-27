@@ -21,7 +21,7 @@ questions and gate different claims.
 | required reach tracks the span | d=7 at back=4 → 0.000 where d=5 at back=4 → 1.000; thresholds 3, 4, 8, 10 for d = 4, 5, 7, 9 |
 | deriving the reach beats **holding one reach fixed** | 1.000/1.000/0.889 at d=4/5/7 vs back=6's 0.972/1.000/0.778. *(NOT "beats the best tuned reach": a tuned back=8 scores 1.000 at d=7. Corrected 2026-08-25.)* |
 | competition costs capacity, not correctness | 1.000 → 0.611 with 16 query-shaped decoys, restored to 1.000 by budget alone |
-| transfers across checkpoints | Halo: 8 cells, 288 needles, zero failures, no code change |
+| transfers across checkpoints | Halo: 8 cells, **287/288** needles, no code change. *(Corrected 2026-08-26: 36 of those needles originally faced ZERO compressions — the depth-0.9 cells at 16K sat inside the never-compressed final chunk. Re-run at chunk 1024 they return the same 1.000, and one real failure appears at B=32 depth 0.1.)* |
 | inference-time only | 0 parameters, 1.5625% cache overhead, no retraining |
 
 **Known-invalid or unmeasured:**

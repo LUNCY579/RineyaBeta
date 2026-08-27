@@ -989,8 +989,16 @@ exempt fraction is 0.782 against a needle at 0.897. O5's own pre-declared test r
 a depth-0.9 needle faces zero rounds, that cell measures nothing and must be excluded from
 the headline."* It does, and it must.
 
-So §4.8's "8 cells, 288 needles, zero failures" is **252 valid needle-observations**, not
-288: the depth-0.9 column of the three 16K cells contributes nothing. The 32K and 128K
+So §4.8's "8 cells, 288 needles, zero failures" was, at the time this was written,
+**252 valid needle-observations**: the depth-0.9 column of the three 16K cells contributed
+nothing.
+
+> **Superseded the same day.** Those three cells were re-run at chunk 1024, where the
+> depth-0.9 needle faces two compressions instead of zero, and they return the same 1.000.
+> The count is therefore **287/288**, not 252 — the needles were recovered rather than
+> lost, and the one failure is a real one at B=32 depth 0.1 under the higher round count.
+> See the audit-closure section below. This paragraph is kept because the reasoning that
+> identified the problem is correct even though its arithmetic was overtaken. The 32K and 128K
 Halo cells are unaffected. Independent corroboration sits in the committed data:
 `passkey_ratio.json` at 16K/B=2048 scores 0.0 / 0.0 / **1.0** across depths — the only
 cell that succeeds is the only one never compressed.
@@ -1564,3 +1572,28 @@ only, n=200. The policy question on the fine-tuned model — does the score stil
 once the model can actually use the context — is the one that matters, and its two arms
 failed on host-RAM exhaustion before running. They are the resume point.
 
+---
+
+## Completing the grow-defect ledger: the keep-0.50 arm, which had been re-run but never reported
+
+A documentation audit found one result produced and never written down — the keep-0.50
+language arm re-run with the corrected noise floor. Recording it closes the ledger on how
+much the `grow_spans` flood actually cost.
+
+| arm | flooded gate | **fixed gate** | delta |
+|---|---:|---:|---:|
+| language, keep 0.25 | 0.33833 | 0.33820 | −0.00014 |
+| **language, keep 0.50** | 0.61346 | **0.61437** | **+0.00091** |
+| passkey d=4, `grow=2.0` | 1.0000 | 1.0000 | 0.0000 |
+| passkey d=5, `grow=2.0` | 1.0000 | 1.0000 | 0.0000 |
+| passkey d=7, `grow=2.0` | 0.8889 | 0.8889 | 0.0000 |
+| passkey d=7, **`grow=5.0`** | 0.6111 | **0.7222** | **+0.1111** |
+
+**Six arms re-run, five unmoved.** Every configuration at `grow = 2.0` — which is what
+every published derived-reach claim rests on — is unchanged to three decimals or better.
+The single arm that moved is `grow = 5.0`, and it moved because a stricter multiplier
+depends more on the floor being correct.
+
+So the final accounting on that defect: a genuine bug in the mechanism, correctly found,
+correctly fixed, correctly forced two retractions — and materially affecting exactly one
+of the six results measured against it. Both halves of that belong in the record.
