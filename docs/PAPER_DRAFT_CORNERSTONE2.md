@@ -531,6 +531,30 @@ promise, justifying a different deployment. It also means a benchmark of mostly-
 will under-report this mechanism and one weighted toward competing evidence will
 over-report it, so any comparison should state its category mix.
 
+**Across length, the cache is a severe constraint and the score absorbs it.** Every arm
+in a row is matched on budget, sinks, window, allocation, model and case count — differing
+only in how the heavy slots are chosen — and the matching is verified by a field-by-field
+manifest diff rather than by inspection.
+
+| length | streaming | random | **significance** | uncompressed | score − random | % of uncompressed |
+|---|---:|---:|---:|---:|---:|---:|
+| ~232 tok | 0.42740 | 0.34304 | **0.59488** | 0.66939 | **+0.25184** | 88.9% |
+| 4K | 0.04110 | 0.07366 | **0.38730** | 0.39102 | **+0.31363** | 99.0% |
+| 16K | 0.03004 | 0.04969 | **0.19637** | 0.18571 | **+0.14669** | **105.7%** |
+| 32K | 0.02795 | 0.03935 | **0.11839** | 0.12827 | **+0.07904** | 92.3% |
+
+At 4K a random keep-set of the same size holds **19%** of uncompressed quality and a
+positional one **11%**, while the score holds **99%**. So "compression is free at length"
+is not a statement about slack in the cache — the cache is being cut to a quarter and it
+matters enormously — it is a statement about the score recovering nearly all of what the
+cut costs. At 16K the score arm **exceeds** the full cache (105.7%), which we attribute to
+suppression of competing evidence the full cache still attends to; the 16K haystack
+carries 189 plausible distractor documents.
+
+The streaming arms are a positional floor, not a matched control: spending the budget
+until `heavy = 0` is what makes an arm streaming, so its recent window is necessarily
+larger.
+
 **The scale gap, which bounds everything in this section.** These prompts have a median
 of 238 tokens and a maximum of 330; not one exceeds 1K. The passkey results run at
 125,826 tokens — **543× longer** — and we have nothing in between. Every figure here

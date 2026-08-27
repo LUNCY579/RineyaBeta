@@ -1488,7 +1488,16 @@ With the controls, at matched budget, sinks, window and allocation:
 | ~232 tok | 0.42740 | 0.34304 | **0.59488** | 0.66939 | **+0.25184** | 88.9% |
 | 4K | 0.04110 | 0.07366 | **0.38730** | 0.39102 | **+0.31363** | 99.0% |
 | 16K | 0.03004 | 0.04969 | **0.19637** | 0.18571 | **+0.14669** | **105.7%** |
-| 32K | *pending* | 0.03935 | *pending* | 0.12827 | *pending* | — |
+| 32K | 0.02795 | 0.03935 | **0.11839** | 0.12827 | **+0.07904** | 92.3% |
+
+**COMPLETE, and every row now verified matched.** The 32K row's arms were re-run at
+`recent_frac = 0.15` so that random and significance differ in nothing but `select`; a
+field-by-field manifest diff reports zero differences. The withdrawn version of this row
+compared `rf = 0.15` against `rf = 0.25` and reported +0.06916; the matched contrast is
+**+0.07904** — slightly *larger*, so the error had been working against the mechanism
+there, in the opposite direction to the ~232 row's inflation. Neither direction is
+acceptable, which is the argument for checking the pairing mechanically rather than by
+eye.
 
 **CORRECTED, and the correction is mine to own.** The first version of this table was
 wrong in two of its four rows, and a review found it before it reached the paper.

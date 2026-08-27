@@ -100,3 +100,6 @@ artifacts/Rineya-Halo-*/
 _sel_*__rag_dev/
 _modelsmoke*
 _adapt*
+
+# queue logs and the single-instance lock: operational, never evidence
+experiments/*/results/_logs/
