@@ -343,6 +343,24 @@ def main() -> None:
     ap.add_argument("--normalize", action="store_true",
                     help="rank on MEAN score (sum / observations) rather than the "
                          "running sum, which otherwise freezes the heavy set")
+    # O11 -- IS THE SCORE MEASURING IMPORTANCE, OR SIMILARITY TO THE QUERY?
+    # Every compressed result in this programme uses query-aware scoring, so the
+    # mechanism's identity is untested. Toggling --query-aware off answers only
+    # half of it: chunks are then scored against their own last rows, which is a
+    # different policy rather than a query-blind version of the same one.
+    #
+    # --score-query substitutes a DIFFERENT question for the SCORING pass while
+    # the model is still asked the real one at answer time. That isolates the
+    # variable cleanly:
+    #   scored with the real question -> the score could be either thing
+    #   scored with an unrelated one  -> only INTRINSIC importance survives
+    # If accuracy holds under a wrong scoring query the score measures what
+    # matters in the text; if it collapses the score is query-conditioned
+    # retrieval, and "significance" is the wrong name for it.
+    ap.add_argument("--score-query", default=None,
+                    help="O11: text to use for the SCORING pass instead of the "
+                         "real question. The asked question is unchanged. "
+                         "Recorded in the manifest.")
     ap.add_argument("--query-aware", action="store_true",
                     help="score each chunk against the QUESTION instead of its "
                          "own trailing rows; the question is never cached")
@@ -474,6 +492,9 @@ def main() -> None:
                             qtext = QUESTION_WORDS
                         else:
                             qtext = QUESTION
+                        # O11: the SCORING query may differ from the one actually asked.
+                        if args.score_query:
+                            qtext = args.score_query
                         qids = (tok(qtext, return_tensors="pt")
                                 .to(args.device)["input_ids"]
                                 if args.query_aware else None)
@@ -569,7 +590,8 @@ def main() -> None:
          "distractor_style": args.distractor_style,
          "cap_mib": args.cap_mib, "device_total_mib": round(tot, 1),
          "count_exponent": args.count_exponent, "normalize": args.normalize,
-         "query_aware": args.query_aware, "seed": args.seed,
+         "query_aware": args.query_aware, "score_query": args.score_query,
+         "seed": args.seed,
          "results": rows},
         indent=2) + "\n", encoding="utf-8")
     print(f"\nwrote {args.out}")
