@@ -1200,6 +1200,15 @@ CLAIMS = [
     ("O11 no query pass at all", 0.0000,
      lambda: pk("pk_8k_o11_noqa.json", require={"query_aware": False}),
      5e-4, "0.0000", "p2"),
+    # --- O12 decode half, from data already committed ----------------------
+    ("O12 scoring cost at decode, 16K", 0.2025,
+     lambda: (measured(KVS / "measure_decode_full_16384.json", "ms_per_token", arm="evict")
+              / measured(KVS / "measure_decode_full_16384.json", "ms_per_token",
+                         arm="evict_noscore")) - 1.0, 5e-4, "20.3%", "p2"),
+    ("O12 compression is SLOWER at 4K", 0.8259,
+     lambda: measured(KVS / "measure_decode_full_4096.json", "ms_per_token", arm="full")
+             / measured(KVS / "measure_decode_full_4096.json", "ms_per_token", arm="evict"),
+     5e-4, "0.83", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 12,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

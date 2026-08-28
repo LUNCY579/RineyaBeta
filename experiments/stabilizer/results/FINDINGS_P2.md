@@ -1882,3 +1882,53 @@ attributes decoder collapse to whichever policy happened to be running. Future p
 comparisons on passkey-with-distractors should separate the two, and the reconstruction
 above is cheap enough to do routinely.
 
+---
+
+## 2026-08-27: O12, partly answered from data already committed — the score costs ~22% of decode
+
+O12 asks for the mechanism's runtime cost, and notes that every number in this programme
+is a benefit. Part of the answer has been sitting in `measure_decode.json` unanalysed: the
+harness already runs three arms — `full`, `evict`, `evict_noscore` — interleaved
+round-robin, and `evict` against `evict_noscore` is the same eviction policy with the
+**score switched off**. That difference *is* the scoring cost.
+
+| length | evict (ms/tok) | score off (ms/tok) | **cost of scoring** |
+|---:|---:|---:|---:|
+| 4,096 | 45.903 | 38.198 | **+20.2%** |
+| 16,384 | 46.494 | 38.664 | **+20.3%** |
+| 32,768 | 47.944 | 39.008 | **+22.9%** |
+| 65,536 | 47.204 | 38.490 | **+22.6%** |
+| 131,072 | 47.987 | 39.167 | **+22.5%** |
+
+**Scoring costs about 22% of decode throughput, and the cost is flat in context length.**
+That is a real price and it belongs beside every accuracy number in this work.
+
+### Where the mechanism pays for itself, and where it does not
+
+| length | full cache | evict | speedup |
+|---:|---:|---:|---:|
+| 4,096 | 37.909 | 45.903 | **0.83× — compression is SLOWER** |
+| 16,384 | 82.573 | 46.494 | 1.78× |
+| 32,768 | 259.569 | 47.944 | **5.41×** |
+
+**There is a crossover.** At 4K the full cache is cheap and the mechanism's overhead
+dominates: compression makes decode **21% slower**. By 16K it is 1.78× faster, and by 32K
+it is 5.41×. So the practicability claim is length-conditioned, and short-context
+deployment is a case where this mechanism costs on both axes — throughput *and*, per §4.10,
+nothing gained on quality either.
+
+### What is still missing, and why O12 stays open
+
+**Every one of these 19 rows records no temperature.** The runs predate the thermal
+instrumentation, so they are interleaved — which controls drift across arms — but not
+thermally attributed. On a host whose own throughput band is **2.17× between cool and
+84 °C**, a 22% figure deserves the attribution it does not yet have.
+
+Also unmeasured: per-compression wall clock across the pooling variants (centred, fixed
+backward, derived reach), and prefill with and without the query pass. The derived-reach
+figure we do have — 1.7–2.5× — came from back-to-back language runs at 85–94 °C and is a
+direction rather than a measurement.
+
+**O12 therefore stays open with its decode half answered.** The remaining half needs a
+quiet machine, which is a scheduling constraint rather than a research one.
+
