@@ -300,6 +300,22 @@ def matched_pair(a: str, b: str, dataset: str) -> int:
     return n
 
 
+def _sel(n: int, arm: str):
+    """Minimum per-compression selection time for one arm, from measure_select.
+
+    Ratios rather than absolutes are what this pins: the absolute milliseconds
+    are machine- and load-dependent, but the ratio between two arms measured in
+    the same interleaved run is the quantity the claim rests on.
+    """
+    p = KVS / "measure_select.json"
+    if not p.exists():
+        return None
+    for r in json.loads(p.read_text(encoding="utf-8"))["rows"]:
+        if r["n"] == n and r["arm"] == arm:
+            return r["ms_min"]
+    return None
+
+
 def cp_bound(n: int, tail: float) -> float:
     """Clopper-Pearson bound for a cell with zero failures: tail ** (1/n).
 
@@ -1209,6 +1225,16 @@ CLAIMS = [
      lambda: measured(KVS / "measure_decode_full_4096.json", "ms_per_token", arm="full")
              / measured(KVS / "measure_decode_full_4096.json", "ms_per_token", arm="evict"),
      5e-4, "0.83", "p2"),
+    # --- O12: per-compression selection cost, measured without a model ------
+    ("O12 directional pooling is FREE vs centred at 32K", 1.02,
+     lambda: _sel(32768, "centred (3,3)") / _sel(32768, "causal (6,0)"),
+     0.02, "1.02", "p2"),
+    ("O12 derived reach costs 2.14x at 2K", 2.14,
+     lambda: _sel(2048, "derived reach grow=2.0") / _sel(2048, "causal (6,0)"),
+     0.02, "2.14", "p2"),
+    ("O12 derived reach costs only 1.12x at 128K", 1.12,
+     lambda: _sel(131072, "derived reach grow=2.0") / _sel(131072, "causal (6,0)"),
+     0.02, "1.12", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 12,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

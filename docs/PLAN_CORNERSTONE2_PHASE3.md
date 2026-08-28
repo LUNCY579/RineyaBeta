@@ -133,12 +133,23 @@ implied.
 
 </details>
 
-### P2. A5 / O12 — the runtime cost, thermally controlled
+### P2. A5 / O12 — MOSTLY DONE 2026-08-27. One item left.
+
+Decode-time scoring cost: **~22%**, flat in length, from committed data. Per-compression
+selection cost across pooling variants: measured without a model — **directional pooling
+is free**, derived reach costs 1.12–2.14×. Remaining: the query-aware prefill pass, which
+needs a model and a quiet machine.
+
+<details><summary>the original P2 design, kept for the record</summary>
+
+### the runtime cost, thermally controlled
 
 Every number in this programme is a benefit; the only cost measured is derived reach at
 1.7–2.5x, taken back-to-back at 85–94 C. The programme's own rule is that no sub-2x
 throughput claim survives a 2.17x thermal band. Fixed clocks, interleaved arms, cooldown
 between. *Cost: about 2 hours.*
+
+</details>
 
 ### P3. The three-hop anomaly at larger n
 

@@ -1932,3 +1932,51 @@ direction rather than a measurement.
 **O12 therefore stays open with its decode half answered.** The remaining half needs a
 quiet machine, which is a scheduling constraint rather than a research one.
 
+---
+
+## 2026-08-27: O12 continued — the per-compression cost of each pooling variant
+
+The machine could not load a model (1.04 GB of RAM free, GPU held by another process), so
+this was measured where the variants actually differ. A compression round is two steps:
+choosing what to keep — `select_keep`, which is the only part that differs between
+variants — and gathering it out of the cache, which is identical for all of them. Timing
+`select_keep` directly on score tensors of the real shape isolates exactly the difference,
+with no model, no decode noise and no thermal drift. Arms interleaved, statistic is the
+minimum across rounds.
+
+| cache length | no pooling | centred (3,3) | **causal (6,0)** | grow 2.0 | grow 5.0 |
+|---:|---:|---:|---:|---:|---:|
+| 2,048 | 0.38 ms | 0.51 | **0.51** | 1.09 | 1.03 |
+| 8,192 | 0.31 | 1.01 | **1.01** | 1.97 | 1.73 |
+| 32,768 | 0.35 | 3.01 | **2.95** | 3.49 | 3.11 |
+| 131,072 | 2.21 | 11.05 | **11.62** | 13.07 | 14.28 |
+
+### Three results
+
+**1. Directional pooling is free.** Causal (6,0) against centred (3,3): **0.99×, 1.01×,
+1.02×, 0.95×** across the four lengths — indistinguishable from parity at every one. The
+cornerstone-2 discovery costs nothing over the centred window it replaces. Given the
+directional window is worth **+0.152** at keep 0.25 on language, that is the cheapest
+result in this programme.
+
+**2. Derived reach costs 1.1–2.1×, and the multiple SHRINKS with length**: 2.14× at 2K,
+1.96× at 8K, 1.18× at 32K, 1.12× at 128K. At short cache the dilation loop dominates; at
+long cache the top-k dominates and growth becomes a rounding error. This **revises** the
+1.7–2.5× figure taken from end-to-end language runs — those were at ~232-token prompts,
+the worst case for this ratio.
+
+**3. Pooling itself is the dominant selection cost at long context** — 0.35 ms against
+2.95 ms at 32K, a factor of **8.5**. If selection time ever becomes the binding constraint,
+the pooling window is where to look, not the growth.
+
+### Caveats, and what O12 still lacks
+
+These are **CPU** timings. On GPU the ratios may compress — the pooling kernel parallelises
+differently from the dilation loop — so these are the *relative* costs of the variants on
+one device, not a portable constant. And this is the **selection step only**: it excludes
+the gather (identical across arms), the attention-time score accumulation (already measured
+at **~22% of decode**), and the query-aware prefill pass.
+
+**That last one is all O12 still needs**, and it is the one item here that genuinely
+requires a model and a quiet machine.
+

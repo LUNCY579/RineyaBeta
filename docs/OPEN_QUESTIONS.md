@@ -325,7 +325,32 @@ still containing the answer, and compare against the current framing at matched 
 
 ---
 
-## O12 — the mechanism's own runtime cost is unmeasured
+## O12 — MOSTLY RESOLVED 2026-08-27; one item remains
+
+> **Two of the three parts are measured.**
+>
+> **Decode-time scoring cost — answered from committed data.** `measure_decode`'s
+> `evict` against `evict_noscore` arms are the same policy with the score off:
+> **+20.2% / +20.3% / +22.9% / +22.6% / +22.5%** at 4K / 16K / 32K / 64K / 128K.
+> **Scoring costs ~22% of decode throughput, flat in context length.** The same data
+> shows a crossover: compression is **0.83× (slower)** at 4K, 1.78× at 16K, **5.41×** at
+> 32K.
+>
+> **Per-compression selection cost — measured without a model** (`measure_select.py`,
+> because the machine had 1.04 GB free and could not load one). Directional pooling is
+> **free** against centred (0.95–1.02× at four lengths); derived reach costs **1.12–2.14×**,
+> shrinking with length; pooling itself is **8.5×** the no-pooling cost at 32K and is the
+> dominant term.
+>
+> **STILL OPEN: the query-aware prefill pass.** `score_with_query` runs an extra forward
+> over the question at every chunk boundary and its cost has never been timed. This is the
+> one item that genuinely needs a model and a quiet machine.
+>
+> One caveat carried forward: the decode rows record **no temperature** — they predate the
+> thermal instrumentation, so they are interleaved but not thermally attributed, on a host
+> with a 2.17× thermal band.
+
+### The question as originally posed
 
 **Observed.** Every number in this programme is a benefit: accuracy retained, memory
 saved. `grow_spans` iterates up to `grow_max` times per compression, and query-aware

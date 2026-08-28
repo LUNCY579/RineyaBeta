@@ -1,0 +1,171 @@
+{
+  "budget": 64,
+  "sinks": 4,
+  "recent": 16,
+  "rounds": 5,
+  "reps": 20,
+  "device": "cpu",
+  "statistic": "minimum across interleaved rounds",
+  "rows": [
+    {
+      "n": 2048,
+      "n_kv": 8,
+      "arm": "no pooling (pool=1)",
+      "ms_min": 0.38225,
+      "ms_median": 0.41413,
+      "vs_causal": 0.7468
+    },
+    {
+      "n": 2048,
+      "n_kv": 8,
+      "arm": "centred (3,3)",
+      "ms_min": 0.50539,
+      "ms_median": 0.52062,
+      "vs_causal": 0.9874
+    },
+    {
+      "n": 2048,
+      "n_kv": 8,
+      "arm": "causal (6,0)",
+      "ms_min": 0.51184,
+      "ms_median": 0.53818,
+      "vs_causal": 1.0
+    },
+    {
+      "n": 2048,
+      "n_kv": 8,
+      "arm": "derived reach grow=2.0",
+      "ms_min": 1.09368,
+      "ms_median": 1.15478,
+      "vs_causal": 2.1368
+    },
+    {
+      "n": 2048,
+      "n_kv": 8,
+      "arm": "derived reach grow=5.0",
+      "ms_min": 1.03258,
+      "ms_median": 1.14571,
+      "vs_causal": 2.0174
+    },
+    {
+      "n": 8192,
+      "n_kv": 8,
+      "arm": "no pooling (pool=1)",
+      "ms_min": 0.31032,
+      "ms_median": 0.3607,
+      "vs_causal": 0.3088
+    },
+    {
+      "n": 8192,
+      "n_kv": 8,
+      "arm": "centred (3,3)",
+      "ms_min": 1.01009,
+      "ms_median": 1.06408,
+      "vs_causal": 1.005
+    },
+    {
+      "n": 8192,
+      "n_kv": 8,
+      "arm": "causal (6,0)",
+      "ms_min": 1.00503,
+      "ms_median": 1.07954,
+      "vs_causal": 1.0
+    },
+    {
+      "n": 8192,
+      "n_kv": 8,
+      "arm": "derived reach grow=2.0",
+      "ms_min": 1.97016,
+      "ms_median": 2.01756,
+      "vs_causal": 1.9603
+    },
+    {
+      "n": 8192,
+      "n_kv": 8,
+      "arm": "derived reach grow=5.0",
+      "ms_min": 1.73458,
+      "ms_median": 1.84748,
+      "vs_causal": 1.7259
+    },
+    {
+      "n": 32768,
+      "n_kv": 8,
+      "arm": "no pooling (pool=1)",
+      "ms_min": 0.34637,
+      "ms_median": 0.60894,
+      "vs_causal": 0.1173
+    },
+    {
+      "n": 32768,
+      "n_kv": 8,
+      "arm": "centred (3,3)",
+      "ms_min": 3.01138,
+      "ms_median": 3.34121,
+      "vs_causal": 1.0195
+    },
+    {
+      "n": 32768,
+      "n_kv": 8,
+      "arm": "causal (6,0)",
+      "ms_min": 2.95364,
+      "ms_median": 3.37981,
+      "vs_causal": 1.0
+    },
+    {
+      "n": 32768,
+      "n_kv": 8,
+      "arm": "derived reach grow=2.0",
+      "ms_min": 3.48567,
+      "ms_median": 4.58428,
+      "vs_causal": 1.1801
+    },
+    {
+      "n": 32768,
+      "n_kv": 8,
+      "arm": "derived reach grow=5.0",
+      "ms_min": 3.10581,
+      "ms_median": 4.0391,
+      "vs_causal": 1.0515
+    },
+    {
+      "n": 131072,
+      "n_kv": 8,
+      "arm": "no pooling (pool=1)",
+      "ms_min": 2.21385,
+      "ms_median": 2.42002,
+      "vs_causal": 0.1905
+    },
+    {
+      "n": 131072,
+      "n_kv": 8,
+      "arm": "centred (3,3)",
+      "ms_min": 11.0517,
+      "ms_median": 12.53687,
+      "vs_causal": 0.9509
+    },
+    {
+      "n": 131072,
+      "n_kv": 8,
+      "arm": "causal (6,0)",
+      "ms_min": 11.62262,
+      "ms_median": 12.35162,
+      "vs_causal": 1.0
+    },
+    {
+      "n": 131072,
+      "n_kv": 8,
+      "arm": "derived reach grow=2.0",
+      "ms_min": 13.06585,
+      "ms_median": 15.43369,
+      "vs_causal": 1.1242
+    },
+    {
+      "n": 131072,
+      "n_kv": 8,
+      "arm": "derived reach grow=5.0",
+      "ms_min": 14.27661,
+      "ms_median": 14.97048,
+      "vs_causal": 1.2283
+    }
+  ]
+}
