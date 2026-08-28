@@ -16,7 +16,21 @@ measurement, not an argument.
 
 ---
 
-## O1 — a 20-token span scores 0.528 where 5-token spans score 1.000
+## O1 — CLOSED 2026-08-27 as SUPERSEDED: the measurement behind it was withdrawn
+
+> **Closed without an answer, and the distinction matters.** O1 asked why a 20-token span
+> scored 0.528 where 5-token spans scored 1.000. That figure came from the **word-phrase
+> task**, which was later withdrawn as confounded: its filler is also words, so the model
+> can answer with filler and be scored wrong for reasons unrelated to the cache —
+> recitation accounts for **100% of failures in the uncompressed control** (see O1/O8).
+>
+> So the phenomenon O1 was asking about was never established. It is closed as
+> *superseded*, not as *answered*: nobody has shown that long spans are harder, and on
+> this model nobody can — the digit axis hits a **~11-token verbatim recall ceiling with a
+> full cache** (A4), and the word axis is confounded. The question is unanswerable here
+> rather than resolved.
+
+### The question as originally posed
 
 **Observed.** Stage 2, 128K, B=256, derived reach `grow=2.0`, 20-word payload:
 0.83 / 0.42 / 0.33 across depths, mean **0.528**. The same policy scores 1.000 at
@@ -60,7 +74,25 @@ claim rather than weaken it.
 
 ---
 
-## O3 — derived reach leaves 0.889 at d=7, not 1.000
+## O3 — CLOSED 2026-08-27: answered by the reach ladder, and it cost a published claim
+
+> **Answered.** O3 asked why derived reach stops at 0.889 at d=7 instead of reaching
+> 1.000. The reach ladder answers it directly: a **tuned `back=8` scores 1.000** at d=7
+> (and `back=7` scores 0.944), so the 0.111 shortfall is not a limit of the task — it is
+> derived reach losing to per-span tuning.
+>
+> That answer cost a published claim. *"Derived reach matches or beats the best hand-tuned
+> fixed reach at every span length"* appeared in **four documents** and is false at d=7.
+> It survived a checker at 136/136 because both falsifying arms were pinned **at their
+> true values** — no number was stale; the false claim was a RELATION between numbers, and
+> no pin had ever checked a relation. Relational pins were added as a result.
+>
+> What survives is the deployment-relevant form: derived reach beats any *single* fixed
+> reach held constant across span lengths (1.000 / 1.000 / 0.889 at d = 4/5/7 against
+> back=6's 0.972 / 1.000 / 0.778). Per-span oracle tuning wins at d=7 — it is simply not
+> available at inference time.
+
+### The question as originally posed
 
 **Observed.** `grow=2.0` beats the best tuned fixed reach at every span length
 (1.000 / 1.000 / 0.889 against 0.972 / 1.000 / 0.778) but does not reach 1.000 at d=7.

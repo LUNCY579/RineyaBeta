@@ -23,7 +23,11 @@ Certified at **n = 100** on passkey: 300/300 needles, Clopper–Pearson lower bo
 **0.9705**. On a model that can *use* long context the score is worth **+0.24086** at 16K
 while the compression itself costs **exactly zero**.
 
-**The caveat that governs everything below:** all of this is *query-aware* scoring. See O11.
+**The caveat that governs everything below, now measured (O11, resolved 2026-08-27):** the
+passkey score is **query-conditioned retrieval, not an importance measure**. Scored with an
+unrelated question the same configuration retrieves **0.0000–0.0556** against **1.0000**
+with the real one. The language results come from a *different* scoring path — no query
+pass, attention accumulated during generation — so the two must be described separately.
 
 ### 2. Backward-only pooling — the cornerstone-2 discovery
 
@@ -83,7 +87,27 @@ unchanged. The claim is *"catastrophic failures on the hard subset are prevented
 
 ## Part 3 — the next plan
 
-### P1. O11 — is the score measuring IMPORTANCE, or SIMILARITY TO THE QUERY? *(highest value)*
+### P1. O11 — RESOLVED 2026-08-27. It is similarity to the query.
+
+| scoring signal | mean |
+|---|---:|
+| the real question | **1.0000** |
+| wrong question (weather) | 0.0556 |
+| wrong question (sky) | 0.0000 |
+| no query pass | 0.0000 |
+
+Replicated on two independent wrong queries. The mechanism is a **query-conditioned
+KV-cache retrieval index**. Consequences — the name, multi-turn re-scoring, and the
+separation of the passkey and language scoring paths — are in FINDINGS_P2 and paper §4.12.
+
+**What this promotes to P1 in its place: B4 multi-turn, now with a prediction.** O11
+predicts a cache scored for turn 1 is not scored for turn 2, so multi-turn should fail
+without per-turn re-scoring. That is a falsifiable claim about the mechanism's main
+application surface, and it is cheap to test.
+
+<details><summary>the original P1 design, kept for the record</summary>
+
+### O11 — is the score measuring IMPORTANCE, or SIMILARITY TO THE QUERY?
 
 **Every compressed result in this campaign uses query-aware scoring.** All seven
 query-unaware runs on file are uncompressed memory probes. The mechanism's identity is
@@ -105,7 +129,9 @@ implied.
   every multi-turn claim needs the query held constant.
 - Partial → state the split rather than picking the flattering half.
 
-*Cost: about 40 minutes of GPU.*
+*Cost: about 40 minutes of GPU. Actual: ran on CPU at 8K in ~40 minutes.*
+
+</details>
 
 ### P2. A5 / O12 — the runtime cost, thermally controlled
 

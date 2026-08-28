@@ -1120,11 +1120,18 @@ stored positions) with only two discordant cases in fifty.
 **But the model collapses with length on its own.** Uncompressed quality falls to 58% of
 native at 4K, 28% at 16K, 19% at 32K — with the *entire* cache present.
 
-The inference that follows is clean despite the collapse, and it is the important one:
-**a full cache and a quarter cache perform identically at these lengths, so the cache is
-not the binding constraint. The model is.** Had this been competition-as-capacity — the
-§5.1 mechanism, where budget restores accuracy — more budget would have helped. It does
-not; `off` holds 100% of the cache and scores the same as keep 0.25.
+The inference I drew at the time — *"a full cache and a quarter cache perform identically
+at these lengths, so the cache is not the binding constraint; the model is"* — is
+**WRONG and superseded.**
+
+> **Superseded by the matched random arms.** That reasoning compared *compressed-with-score*
+> against *uncompressed* and found no gap, but there was no **random** arm at any length,
+> so "compression is free" could not be distinguished from "any policy is free". With the
+> controls: at 4K a random keep-set of the same size holds **19%** of uncompressed quality
+> and a positional one **11%**, while the score holds **99%**. The cache is a *severe*
+> constraint at length; the score absorbs it almost entirely. See the length-series section
+> below. The paragraph is kept because the `off` arm reasoning around it is sound — it is
+> only the attribution that was wrong.
 
 **This is the same shape as A4, and the `off` arm is why we can say so.** Without it,
 "4x compression retains quality at 16K" would have read as a triumph. It is instead a
