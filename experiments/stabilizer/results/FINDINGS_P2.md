@@ -1850,3 +1850,35 @@ is stated.
 That is a narrower claim than "significance matrix" suggests, and it is the one the
 evidence supports.
 
+---
+
+## 2026-08-27: O6 resolved — a third of stage-1 failures are the DECODER, not the policy
+
+O6 recorded that classifying 21 stage-1 failures left **33% "other"** — degenerate output
+like `75526` → `555222` — and asked whether that was a missing retrieval category or a
+decode pathology. It specified the decisive test: read the full replies and name the
+category or show it is decode.
+
+The decoys are generated from a seeded RNG, so for every failure the exact decoy set that
+was in the prompt can be reconstructed and the emitted number checked against it. Thirty
+failures across nine distractor arms:
+
+| origin of the emitted number | n | share | what it is |
+|---|---:|---:|---|
+| a decoy actually present in the prompt | 12 | 40% | retrieval — crowded out |
+| a prefix of the true key | 9 | 30% | retrieval — partial span |
+| **not in the prompt at all** | **9** | **30%** | **decode pathology** |
+
+The nine are **invented** strings and they are not arbitrary: `555222`, `77777`,
+`999999999`, `222222`, `12345678`, `112`. Degenerate repetition and counting patterns. The
+model is not retrieving the wrong number — it is failing to produce a number at all.
+
+Two of the nine (`65667` for 85667, `23649` for 42649) are near-misses rather than
+degenerate runs, so the boundary is not perfectly sharp; seven of nine are unambiguous.
+
+**Consequence, and it applies to every comparison on this task.** A third of stage-1
+failures carry no information about the eviction policy. Counting them against a policy
+attributes decoder collapse to whichever policy happened to be running. Future policy
+comparisons on passkey-with-distractors should separate the two, and the reconstruction
+above is cheap enough to do routinely.
+

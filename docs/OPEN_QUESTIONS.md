@@ -142,7 +142,37 @@ be excluded from the headline. Currently under review.
 
 ---
 
-## O6 — a third of stage-1 failures are neither truncation nor substitution
+## O6 — RESOLVED 2026-08-27: a third are a DECODE pathology, not a retrieval one
+
+> **Answered by the decisive test O6 itself specified.** The decoys are generated from a
+> seeded RNG (`random.Random(f"{key}:decoys")`), so for every failure the exact decoy set
+> that was in the prompt can be reconstructed and the emitted number checked against it.
+>
+> Thirty stage-1 failures, classified by **where the emitted number came from**:
+>
+> | origin of the emitted number | n | share | what it is |
+> |---|---:|---:|---|
+> | a decoy actually present in the prompt | 12 | 40% | retrieval failure — crowded out |
+> | a prefix of the true key | 9 | 30% | retrieval failure — partial span |
+> | **not in the prompt at all** | **9** | **30%** | **decode pathology** |
+>
+> The third category is named. Those nine are **invented digit strings**, and they are not
+> arbitrary — they are degenerate runs: `555222`, `77777`, `999999999`, `222222`,
+> `12345678`, `112`. The model is not retrieving a wrong number; it is failing to decode a
+> number at all and emitting a repetition or a counting pattern.
+>
+> **So the "other" third is not a missing retrieval category.** It is the decoder
+> collapsing under severe cache damage, which is a different failure from eviction picking
+> the wrong positions. Two of the nine (`65667` for 85667, `23649` for 42649) are
+> near-misses on the true key rather than degenerate runs, so the boundary is not perfectly
+> sharp — but seven of nine are unambiguous repetition or counting artefacts.
+>
+> **Consequence for how failures should be counted.** A third of stage-1 "failures" are
+> not evidence about the eviction policy. Any future comparison of policies on this task
+> should separate decode pathologies from retrieval errors, or it will attribute decoder
+> collapse to whichever policy was running.
+
+### The question as originally posed
 
 **Observed.** Classifying 21 stage-1 failures: 52% fragmented true span, 14% crowded out
 by a decoy, **33% "other"** — degenerate output such as `75526` → `555222`.
