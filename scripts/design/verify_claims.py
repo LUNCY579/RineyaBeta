@@ -1185,6 +1185,21 @@ CLAIMS = [
      lambda: pk("pk_128k_B64_hop2_sig.json", require={"hops": 2}), 5e-4, "0.4722", "p2"),
     ("HOP 128K 3-hop significance", 0.0278,
      lambda: pk("pk_128k_B64_hop3_sig.json", require={"hops": 3}), 5e-4, "0.0278", "p2"),
+    # --- O11: the score is QUERY-CONDITIONED, not an importance measure -----
+    # The reference and three controls differ in ONE field: the scoring query.
+    # Both wrong queries collapse retrieval, so a single unlucky phrasing cannot
+    # carry the result. Pinned because this is the finding that most changes how
+    # the mechanism must be described.
+    ("O11 reference: scored with the real question", 1.0000,
+     lambda: pk("pk_8k_o11_realq.json", require={"query_aware": True}),
+     5e-4, "1.0000", "p2"),
+    ("O11 scored with a wrong question (weather)", 0.0556,
+     lambda: pk("pk_8k_o11_wrongq.json"), 5e-4, "0.0556", "p2"),
+    ("O11 scored with a second wrong question (sky)", 0.0000,
+     lambda: pk("pk_8k_o11_wrongq2.json"), 5e-4, "0.0000", "p2"),
+    ("O11 no query pass at all", 0.0000,
+     lambda: pk("pk_8k_o11_noqa.json", require={"query_aware": False}),
+     5e-4, "0.0000", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 12,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

@@ -609,6 +609,42 @@ resumable cells are not.
 
 ---
 
+### 4.12 What the score actually measures
+
+Every compressed result above uses *query-aware* scoring: the question is run as queries
+against the cache, the resulting attention mass is recorded, and the question is then
+truncated away. Whether that score measures **importance** or **relevance to the question**
+had never been tested, and the distinction determines what the mechanism is.
+
+We substituted a *different* question for the scoring pass while the model was still asked
+the real one at answer time — 8K, B=16, back=6, chunk 1024 chosen so every depth faces at
+least one compression, twelve needles per depth, one variable:
+
+| scoring signal | d0.1 | d0.5 | d0.9 | mean |
+|---|---:|---:|---:|---:|
+| **the real question** | 1.000 | 1.000 | 1.000 | **1.0000** |
+| wrong question — *"What is the weather in the garden?"* | 0.083 | 0.083 | 0.000 | 0.0556 |
+| wrong question — *"Describe the colour of the sky."* | 0.000 | 0.000 | 0.000 | 0.0000 |
+| no query pass at all | 0.000 | 0.000 | 0.000 | 0.0000 |
+
+**The score is query-conditioned retrieval, not an importance measure.** With the right
+question it retrieves perfectly; with an unrelated one, or none, it retrieves nothing.
+Replicated on two independent wrong queries.
+
+This narrows the claim and should be read into every result above. What is demonstrated is
+**a query-conditioned KV-cache retrieval index**: given a question, it identifies which
+cached positions that question needs. It does not identify what matters in a document
+independently of a question.
+
+Two consequences follow. Multi-turn use requires **re-scoring per turn** — a cache scored
+for one question is not scored for the next — at the cost of one forward pass over the
+question against the cache. And the natural-language results of §4.10 come from a
+*different* scoring path: that harness uses no query pass, scoring attention accumulated
+during generation with the question already in the prompt. Both are query-conditioned, by
+different routes, and they should not be described as one mechanism.
+
+---
+
 ## 5. Where it fails
 
 ### 5.1 Competition is a capacity cost, not a scoring failure

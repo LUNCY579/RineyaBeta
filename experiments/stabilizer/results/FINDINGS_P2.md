@@ -1786,3 +1786,60 @@ survive a 128× reduction at 8K with the score, and collapse without it. Three-h
 are where the advantage disappears, and long contexts are where chains break regardless
 of policy. **The mechanism's demonstrated domain is retrieval of spans**, and it does not
 extend, without further evidence, to chained inference over long contexts.
+
+---
+
+## 2026-08-27: O11 RESOLVED — the score is QUERY-CONDITIONED RETRIEVAL, not intrinsic importance
+
+Every compressed result in this programme used query-aware scoring, so the mechanism's
+identity had never been tested. Toggling the flag off would only have answered half of it
+— chunks are then scored against their own last rows, which is a different policy, not a
+query-blind version of the same one. So a `--score-query` control was added: it
+substitutes a **different question for the scoring pass** while the model is still asked
+the real one at answer time.
+
+8K, B=16, back=6, chunk 1024 (chosen so every depth faces at least one compression:
+7 / 4 / 1). Twelve needles, three depths, one variable.
+
+| scoring signal | d0.1 | d0.5 | d0.9 | mean |
+|---|---:|---:|---:|---:|
+| **the real question** | 1.000 | 1.000 | 1.000 | **1.0000** |
+| wrong question — *"What is the weather in the garden?"* | 0.083 | 0.083 | 0.000 | **0.0556** |
+| wrong question — *"Describe the colour of the sky."* | 0.000 | 0.000 | 0.000 | **0.0000** |
+| no query pass at all | 0.000 | 0.000 | 0.000 | **0.0000** |
+
+**Perfect retrieval with the right question; essentially nothing without it.** Replicated
+on two independent wrong queries, so a single unlucky phrasing cannot carry it.
+
+### What this means, stated without softening
+
+The passkey mechanism does **not** measure what is intrinsically important in the text. It
+measures **what the question reaches for**. Given an unrelated question the same score,
+the same window, the same budget and the same sinks retrieve nothing at all.
+
+**Consequences.**
+
+1. **The name is misleading for this configuration.** "Significance matrix" implies an
+   importance measure. What is demonstrated is a *query-conditioned retrieval index*. The
+   paper should say so.
+2. **Multi-turn is far weaker than implied.** A cache scored for turn 1's question is not
+   scored for turn 2's. B4 was listed as "the biggest untested application surface"; this
+   result predicts it will fail unless the cache is re-scored per turn, and re-scoring
+   costs a forward pass over the question against the whole cache.
+3. **It does not weaken the language results — it separates them.** `run_eval_sig.py`
+   never uses a query pass at all: its score is attention accumulated *during generation*,
+   with the question already in the prompt. So the +0.207 to +0.252 language gains come
+   from a **different scoring path** than the passkey headline. Both are query-conditioned
+   — one through an explicit pass, one through the model's own attention while answering —
+   but they are not the same mechanism and the paper has been treating them as one.
+
+### The honest one-line statement of what this programme has built
+
+**A query-conditioned KV-cache retrieval index**: given the question, it identifies which
+cached positions that question needs, and keeps those. It does not identify what matters
+in a document independently of a question, and no result here claims otherwise once this
+is stated.
+
+That is a narrower claim than "significance matrix" suggests, and it is the one the
+evidence supports.
+

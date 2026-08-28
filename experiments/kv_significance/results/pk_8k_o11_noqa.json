@@ -1,0 +1,266 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "yarn": null,
+  "chunk": 1024,
+  "recent": 4,
+  "recent_flag": 4,
+  "trials": 12,
+  "window": 16,
+  "sinks": 4,
+  "pool": 7,
+  "pool_back": 6,
+  "pool_fwd": 0,
+  "key_digits": 5,
+  "grow": null,
+  "grow_max": 64,
+  "needle_words": 0,
+  "hops": 1,
+  "hop_depths": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "select": "significance",
+  "distractors": 0,
+  "distractor_style": "framed",
+  "cap_mib": 6144.0,
+  "device_total_mib": 8187.5,
+  "count_exponent": 1.0,
+  "normalize": false,
+  "query_aware": false,
+  "score_query": null,
+  "seed": 20260820,
+  "results": [
+    {
+      "length": 8192,
+      "real_tokens": 7866,
+      "budget": 16,
+      "depth": 0.1,
+      "acc": 0.0,
+      "peak_mib": 0.0,
+      "n_chunks": 8,
+      "compressions_faced": 7,
+      "exempt_from_compression": false,
+      "yarn": null,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "the key that you use to open the",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "the key that you use to unlock t",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "the key that allows you to pass ",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the key that you use to open the",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "the key to unlock the door. The ",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the key that you use to open the",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "the key that you use to open the",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the key that you use to unlock t",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "the key that you use to open the",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the key that you use to encrypt ",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "the key that you use to open the",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the key that you use to open the",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 8192,
+      "real_tokens": 7866,
+      "budget": 16,
+      "depth": 0.5,
+      "acc": 0.0,
+      "peak_mib": 0.0,
+      "n_chunks": 8,
+      "compressions_faced": 4,
+      "exempt_from_compression": false,
+      "yarn": null,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "the key that allows you to pass ",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "the key that allows you to pass ",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "the number of times the word \"th",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the key that allows you to pass ",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "the key that you use to unlock t",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the key to unlock the door. The ",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "the number of times the word \"gr",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the key that you use to encrypt ",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "the number of times the word \"th",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the key that you use to unlock t",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "the key that allows you to pass ",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the key to unlock the door. The ",
+          "hit": false
+        }
+      ]
+    },
+    {
+      "length": 8192,
+      "real_tokens": 7866,
+      "budget": 16,
+      "depth": 0.9,
+      "acc": 0.0,
+      "peak_mib": 0.0,
+      "n_chunks": 8,
+      "compressions_faced": 1,
+      "exempt_from_compression": false,
+      "yarn": null,
+      "trials_ok": 12,
+      "ooms": 0,
+      "rank_exponent": 1.0,
+      "trials": [
+        {
+          "key": 75526,
+          "got": "the number of times the grass is",
+          "hit": false
+        },
+        {
+          "key": 85667,
+          "got": "the number of letters in the wor",
+          "hit": false
+        },
+        {
+          "key": 99873,
+          "got": "the number of letters in the wor",
+          "hit": false
+        },
+        {
+          "key": 42649,
+          "got": "the number of times the grass is",
+          "hit": false
+        },
+        {
+          "key": 66365,
+          "got": "the number of times the grass is",
+          "hit": false
+        },
+        {
+          "key": 90190,
+          "got": "the number of times the grass is",
+          "hit": false
+        },
+        {
+          "key": 96659,
+          "got": "the number of letters in the wor",
+          "hit": false
+        },
+        {
+          "key": 66445,
+          "got": "the number of letters in the wor",
+          "hit": false
+        },
+        {
+          "key": 70176,
+          "got": "the number of times the grass is",
+          "hit": false
+        },
+        {
+          "key": 92722,
+          "got": "the number of letters in the wor",
+          "hit": false
+        },
+        {
+          "key": 60745,
+          "got": "the number of letters in the wor",
+          "hit": false
+        },
+        {
+          "key": 84699,
+          "got": "the number of letters in the wor",
+          "hit": false
+        }
+      ]
+    }
+  ]
+}

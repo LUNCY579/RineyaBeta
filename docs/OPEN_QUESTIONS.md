@@ -222,7 +222,25 @@ significance-chosen. A collapse at sinks=0 bounds what the score alone achieves.
 
 ---
 
-## O11 — is the score measuring importance, or similarity to the query?
+## O11 — RESOLVED 2026-08-27: it is SIMILARITY TO THE QUERY
+
+> **Answered, and it changes the mechanism's description.** A `--score-query` control
+> substituted a different question for the scoring pass while the model was still asked
+> the real one. At 8K/B=16/back=6, chunk 1024 (every depth compressed):
+>
+> | scoring signal | mean |
+> |---|---:|
+> | the real question | **1.0000** |
+> | wrong question (weather) | 0.0556 |
+> | wrong question (sky) | 0.0000 |
+> | no query pass | 0.0000 |
+>
+> The score does not measure intrinsic importance. It measures what the question reaches
+> for. Replicated on two independent wrong queries. Consequences for the name, for
+> multi-turn (B4), and for separating the passkey path from the language path are in
+> FINDINGS_P2. The original framing is kept below.
+
+### The question as originally posed
 
 **Observed.** P2.2 measured that the score retains query-shaped framing at 54% and the
 payload it introduces at 35%, and §5.1 showed query-shaped distractors cost 0.361 where
