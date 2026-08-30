@@ -242,27 +242,38 @@ def lang_quality2(tag: str, dataset: str):
 
 
 def _cat_gain(category: str):
-    """Mean per-case quality gain of the best allocation over matched random,
-    restricted to one RAG category.
+    """Per-category quality gain of the best allocation over matched random.
 
-    Reads the per-case records directly and returns None when they are absent,
-    so a fresh clone reports MISSING rather than a wrong number. The category
-    breakdown is the evidence that the mean is the wrong summary: the gain is
-    concentrated in cases where evidence competes, and is slightly NEGATIVE on
-    `social`, where there is nothing to retrieve.
+    Reads the committed `per_category.json` aggregates, NOT the per-case
+    `results.jsonl`. The jsonl is excluded by .gitignore (`experiments/**/
+    results/**/results.jsonl`), so the earlier per-case implementation made
+    these two claims verifiable only on the machine that produced them and
+    MISSING on every clone -- including a clean checkout of this branch --
+    even though the evidence for them is committed.
+
+    Reading the aggregate is exact here, not an approximation: both runs cover
+    the identical 752-case set and identical per-category n, so the difference
+    of the per-category means equals the mean of the paired per-case
+    differences. Verified across all 16 categories, max deviation 6.7e-16.
+
+    Still returns None when the aggregates are absent, so a repository that
+    genuinely lacks the evidence reports MISSING rather than a wrong number.
+
+    The category breakdown is the evidence that the mean is the wrong summary:
+    the gain is concentrated in cases where evidence competes, and is slightly
+    NEGATIVE on `social`, where there is nothing to retrieve.
     """
-    import statistics
-    a = KVS / "cpu-frac0.25-random-b6f0__rag_dev" / "results.jsonl"
-    b = KVS / "cpu-frac0.25-rf0.15-b6f0__rag_dev" / "results.jsonl"
+    a = KVS / "cpu-frac0.25-random-b6f0__rag_dev" / "per_category.json"
+    b = KVS / "cpu-frac0.25-rf0.15-b6f0__rag_dev" / "per_category.json"
     if not (a.exists() and b.exists()):
         return None
-    A = {json.loads(l)["id"]: json.loads(l)
-         for l in a.read_text(encoding="utf-8").splitlines() if l.strip()}
-    B = {json.loads(l)["id"]: json.loads(l)
-         for l in b.read_text(encoding="utf-8").splitlines() if l.strip()}
-    d = [B[i]["quality_score"] - A[i]["quality_score"]
-         for i in A if i in B and A[i].get("category") == category]
-    return statistics.mean(d) if d else None
+    A = json.loads(a.read_text(encoding="utf-8"))
+    B = json.loads(b.read_text(encoding="utf-8"))
+    if category not in A or category not in B:
+        return None
+    if A[category].get("n") != B[category].get("n"):
+        return None          # unpaired: the difference of means is not the gain
+    return B[category]["mean_quality_score"] - A[category]["mean_quality_score"]
 
 
 def matched_pair(a: str, b: str, dataset: str) -> int:
