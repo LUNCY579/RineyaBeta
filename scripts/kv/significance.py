@@ -466,10 +466,22 @@ def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
     # A pool_back/pool_fwd set while pool <= 1 would silently do nothing, which
     # is precisely the failure the pool=1 default already produced once in this
     # program -- a knob that looked set and was inert for every measurement.
-    if policy.pool <= 1 and (policy.pool_back or policy.pool_fwd):
+    #
+    # `grow` was NOT covered by this guard until 2026-08-29, and it is reached
+    # through the same `pool > 1` branch: `Policy(pool=1, grow=2.0)` silently
+    # disabled derived reach and reported a fixed-window run under a derived-reach
+    # label. No committed result used that combination -- every result tree was
+    # scanned before the guard was added, 0 of 205 config-bearing nodes hit it --
+    # so nothing needs re-running. It is fixed because the next one would not have
+    # been caught either: the guard named the failure class and then checked two of
+    # the three knobs in it.
+    if policy.pool <= 1 and (policy.pool_back or policy.pool_fwd
+                             or policy.grow is not None):
         raise ValueError(
-            "pool_back/pool_fwd require pool > 1; pooling is disabled at "
-            f"pool={policy.pool} and the window would be ignored")
+            "pool_back/pool_fwd/grow require pool > 1; pooling is disabled at "
+            f"pool={policy.pool} and the window would be ignored "
+            f"(pool_back={policy.pool_back}, pool_fwd={policy.pool_fwd}, "
+            f"grow={policy.grow})")
     if policy.pool > 1 and n > policy.pool:
         import torch.nn.functional as F
         # The window is asymmetric in general. A centred window is the SnapKV

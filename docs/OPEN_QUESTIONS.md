@@ -14,6 +14,19 @@ a detour.
 Status: **open** until the cause is named and demonstrated. Closing an entry requires a
 measurement, not an argument.
 
+**Register state, 2026-08-29: 13 entries (O1–O13), 13 closed, 0 open.** Counted by
+distinct question, not by heading — several entries carry more than one heading because
+they were re-opened and re-resolved, and counting headings inflates the total. *(An
+earlier status line in this programme said "16 closed"; that was a heading count and is
+corrected here.)*
+
+Two of the closures are **supersessions rather than answers** (O1, O8): the phenomenon
+they asked about was never established, because the task that produced it was withdrawn as
+confounded. Saying a question is unanswerable on this model is not the same as explaining
+it, and the distinction is preserved in each entry. The register is kept in full because a
+resolved anomaly records how the mechanism actually behaves, and that reasoning outlives
+the verdict.
+
 ---
 
 ## O1 — CLOSED 2026-08-27 as SUPERSEDED: the measurement behind it was withdrawn
@@ -325,7 +338,7 @@ still containing the answer, and compare against the current framing at matched 
 
 ---
 
-## O12 — MOSTLY RESOLVED 2026-08-27; one item remains
+## O12 — RESOLVED 2026-08-29: all three costs measured, and the docstring was wrong
 
 > **Two of the three parts are measured.**
 >
@@ -342,9 +355,39 @@ still containing the answer, and compare against the current framing at matched 
 > shrinking with length; pooling itself is **8.5×** the no-pooling cost at 32K and is the
 > dominant term.
 >
-> **STILL OPEN: the query-aware prefill pass.** `score_with_query` runs an extra forward
-> over the question at every chunk boundary and its cost has never been timed. This is the
-> one item that genuinely needs a model and a quiet machine.
+> **The query-aware prefill pass — measured 2026-08-29, CPU only, GPU untouched.** The
+> `score_with_query` docstring predicted the pass would cost `len(query)/chunk` of a chunk
+> and be "negligible". That prediction assumes forward cost is proportional to token count.
+> **It is not.** Fitting t(T) = a + bT over T = 8…512 gives **164.82 ms + 2.1138 ms/token**
+> (R² = 0.9972), so **82.97%** of a 16-token forward is the fixed intercept — the cost of
+> streaming every weight once, paid to move sixteen tokens. Measured end to end the pass is
+> **15.49% / 8.46% / 5.54%** of prefill at chunk 512 / 1024 / 2048, which is **7.9× / 8.0× /
+> 11.3×** the token-ratio prediction. A second term the docstring never mentioned:
+> `_restore` copies every retained key and value on every layer, **12.4 → 99.5 ms** across
+> cache 512 → 4096, linear in bytes at ~18 GB/s and independent of question length.
+>
+> **And the direction of the headline is the opposite of what "cost" implies.** Against
+> vanilla chunked prefill with no mechanism at all, the complete query-aware mechanism runs
+> at **0.84–0.96×** the wall-clock while holding 4× less cache: every chunk after the first
+> attends to a capped cache instead of a growing one, and that saving exceeds what the query
+> pass costs. **At prefill, compression pays for itself.**
+>
+> One more null worth recording: score accumulation costs **nothing measurable at prefill**
+> (1.073× and 1.011×, with an independent run at 0.983× and 0.994× — the two straddle
+> unity). That does not contradict the ~22% decode figure, it explains it: at decode the
+> forward is one token, so accumulating over the whole cache is comparable work; at prefill
+> the forward is hundreds of tokens and the accumulation covers a 16-row window.
+>
+> **A defect in this measurement, caught by its own implausibility.** The first version of
+> the `_restore` timing built a stub cache at length n and restored it to n, so the slice
+> was the whole tensor, `.contiguous()` returned `self`, and it timed a no-op — reading
+> **0.15 ms for a 939 MB copy**, i.e. 6 TB/s. The tell was the implied bandwidth. Fixed by
+> growing the stub by q first so the truncation is real. Same class as `grow_spans` and the
+> B1 floor: a measurement that does not reproduce its caller's preconditions measures the
+> wrong function.
+>
+> **O12 is closed.** The docstring is corrected in place, and a fusion optimisation is
+> registered in `CORNERSTONE_LEDGER.md` §8 with a bit-equality kill test.
 >
 > One caveat carried forward: the decode rows record **no temperature** — they predate the
 > thermal instrumentation, so they are interleaved but not thermally attributed, on a host
@@ -838,3 +881,47 @@ budgets*, and the deployment rule becomes "size the budget to the span with head
 not "avoid chunk 2048". The current documents say only that the axis is non-monotonic and
 unexplained.
 
+
+---
+
+## O13 — RESOLVED 2026-08-26: marginal capacity, confirmed; the mechanism story refuted
+
+Both pre-registered predictions were tested. **The hypothesis survived; the reasoning
+behind it did not**, and that split is the whole value of having registered them
+separately.
+
+| arm | d0.1 | d0.5 | d0.9 | overall |
+|---|---:|---:|---:|---:|
+| B=16 chunk 4096 (baseline) | 1.000 | 1.000 | 1.000 | 1.000 |
+| B=16 chunk 2048 (the anomaly) | 1.000 | 0.417 | 1.000 | **0.806** |
+| **B=32 chunk 2048** | 1.000 | **1.000** | 1.000 | **1.000** |
+| B=32 chunk 4096 (control) | 1.000 | 1.000 | 1.000 | 1.000 |
+| B=16 back=8 chunk 2048 | 1.000 | 0.000 | 0.667 | **0.556** |
+
+**Prediction 1 confirmed.** Doubling the budget removes the chunk-2048 deficit entirely,
+and the matched B=32 / chunk-4096 control also scores 1.000 — so the budget is not merely
+lifting everything, and the effect is specific. **The chunk axis is not a property of the
+schedule. It is a marginal-capacity effect that exists only where the budget is thin.**
+O13 is closed after five hypotheses, four of them dead.
+
+**Prediction 2 refuted, and it cost the explanation rather than the finding.** `back=8`
+was predicted to help, on the account that a longer reach lifts the span's trailing edge
+above the competition. It made things much worse — 0.556 against back=6's 0.806, depth 0.5
+falling to 0.000. The registered kill condition said that refutes the trailing-edge
+tie-break story, and it does.
+
+**What survives both results.** A longer backward reach **inflates the candidate set** —
+more positions inherit the span's high score — and at a thin budget that is strictly
+harmful, because more high-scoring positions compete for the same eight slots. Backward
+reach therefore **trades against budget** rather than being monotonically good. This is
+the same shape as the competition result (§5.1 of the paper): sixteen query-shaped decoys
+took B=64 from 1.000 to 0.611 and budget alone restored it.
+
+**Deployment rule.** Size the budget to the span with headroom. Do not tune the chunk
+schedule, and do not assume more reach is safer.
+
+*Recorded 2026-08-29: this resolution was established on 2026-08-26 and written into
+`FINDINGS_P2.md` the same day, but neither this register nor §5.3 of the paper was
+updated, so both read "no candidate explanation currently survives" for three days. The
+finding was never wrong; the documents were. Both are now corrected, and this note stays
+because a resolution that only lives in one file is one refactor away from being lost.*

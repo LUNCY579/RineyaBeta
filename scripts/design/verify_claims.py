@@ -316,6 +316,52 @@ def _sel(n: int, arm: str):
     return None
 
 
+def _qp(section: str, *path):
+    """Read a value out of measure_query_prefill.json.
+
+    Same rationale as `_sel`: the absolute milliseconds are machine- and
+    load-dependent, so what gets pinned is a RATIO or a SHARE measured inside a
+    single interleaved run. The one exception is the fixed-floor fraction, which
+    is itself a ratio of two fitted coefficients.
+
+    `section` is "component_ladder" or "end_to_end"; for end_to_end the first
+    path element selects a row by chunk size.
+    """
+    p = KVS / "measure_query_prefill.json"
+    if not p.exists():
+        return None
+    doc = json.loads(p.read_text(encoding="utf-8"))
+    node = doc[section]
+    if section == "end_to_end":
+        chunk = path[0]
+        match = [r for r in node if r["chunk"] == chunk]
+        if len(match) != 1:
+            raise RuntimeError(
+                f"measure_query_prefill.json: {len(match)} end_to_end rows have "
+                f"chunk={chunk}. A silent multi-match is how this repository "
+                f"once pinned the wrong twin of a file pair.")
+        node, path = match[0], path[1:]
+    for key in path:
+        node = node[key]
+    return node
+
+
+def _qp_floor_share(q: int = 16) -> float:
+    """Fraction of a q-token forward that is FIXED cost, from the fitted line.
+
+    This is the number that decides whether the `score_with_query` docstring's
+    premise holds. The docstring predicts the pass costs q/chunk of a chunk,
+    which assumes cost is proportional to token count. If the intercept
+    dominates at q = 16, the premise is false and the prediction is wrong by
+    whatever this fraction implies.
+    """
+    a = _qp("component_ladder", "fit_intercept_ms")
+    b = _qp("component_ladder", "fit_slope_ms_per_token")
+    if a is None or b is None:
+        return None
+    return a / (a + b * q)
+
+
 def cp_bound(n: int, tail: float) -> float:
     """Clopper-Pearson bound for a cell with zero failures: tail ** (1/n).
 
@@ -1235,6 +1281,42 @@ CLAIMS = [
     ("O12 derived reach costs only 1.12x at 128K", 1.12,
      lambda: _sel(131072, "derived reach grow=2.0") / _sel(131072, "causal (6,0)"),
      0.02, "1.12", "p2"),
+    # --- O12 final: the query-aware prefill pass, CPU-only ------------------
+    # The structural claim. The docstring predicted cost proportional to token
+    # count; this is the fraction that is NOT, and it is what makes the naive
+    # prediction wrong by ~8x. Pinned to three documents because a number that
+    # carries an argument in three places can drift in two of them.
+    ("O12 fixed floor is 83% of a 16-token forward", 0.8297,
+     _qp_floor_share, 5e-4, "82.97%", "p2,c2paper"),
+    ("O12 forward-cost fit R^2", 0.99721,
+     lambda: _qp("component_ladder", "fit_r2"), 5e-5, "0.9972", "p2,c2paper"),
+    ("O12 query pass share of prefill, chunk 512", 0.1549,
+     lambda: _qp("end_to_end", 512, "query_share_of_aware"), 5e-4,
+     "15.49%", "p2,c2paper"),
+    ("O12 query pass share of prefill, chunk 2048", 0.0554,
+     lambda: _qp("end_to_end", 2048, "query_share_of_aware"), 5e-4,
+     "5.54%", "p2,c2paper"),
+    ("O12 docstring overstated, chunk 512", 7.9,
+     lambda: _qp("end_to_end", 512, "overstatement_factor"), 0.05, "7.9", "p2,c2paper"),
+    ("O12 docstring overstated, chunk 2048", 11.3,
+     lambda: _qp("end_to_end", 2048, "overstatement_factor"), 0.05,
+     "11.3", "p2,c2paper"),
+    # RELATIONAL pin. The claim is not "restore is slow", it is "restore scales
+    # with the CACHE and not with the question". A pin on the absolute ms cannot
+    # catch that being stated backwards; this one can. 8x length -> 8x cost.
+    ("O12 _restore scales linearly with cache length", 8.0,
+     lambda: _qp("component_ladder", "restore", 3, "ms_min")
+             / _qp("component_ladder", "restore", 0, "ms_min"),
+     0.3, "99.47", "p2,c2paper"),
+    # THE DIRECTION THAT MATTERS. Cross-arm ratios carry ~0.05 of run-to-run
+    # spread, so the tolerance is deliberately loose: what is being pinned is
+    # that the mechanism is FASTER than no mechanism, not the third digit.
+    ("O12 full mechanism is FASTER than no compression, chunk 2048", 0.844,
+     lambda: _qp("end_to_end", 2048, "aware_over_plain"), 5e-3, "0.844", "p2,c2paper"),
+    ("O12 the GPU was never touched", 0.0,
+     lambda: float(bool(json.loads(
+         (KVS / "measure_query_prefill.json").read_text(encoding="utf-8")
+     )["cuda_initialized"])), 1e-9, "no GPU touched", "p2"),
     ("CENSUS: committed cells that faced ZERO compressions", 12,
      exempt_cells, 0.5, "8 faced zero compressions", "p2"),
     ("LANG heavy_zero under PROPORTIONAL recent", 0,

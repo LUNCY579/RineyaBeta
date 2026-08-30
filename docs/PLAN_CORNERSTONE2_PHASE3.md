@@ -1,7 +1,8 @@
 # Cornerstone 2, phase 3 — what is established, and what to do next
 
 Written 2026-08-27, after the phase-2 experimental plan completed.
-State: **234/234 pins**, 0 integrity problems, 11 open questions closed, 5 open.
+State at writing: **234/234 pins**, 11 questions closed, 5 open.
+**Updated 2026-08-29: 252/252 pins, 0 integrity problems, all 13 questions closed.**
 
 ---
 
@@ -71,7 +72,9 @@ unchanged. The claim is *"catastrophic failures on the hard subset are prevented
 ## Part 2 — what does NOT work, recorded as plainly
 
 - **Derived reach (grow_spans)** loses on language at both keep fractions (−0.03513,
-  −0.07466) and costs **1.7–2.5x** the runtime. Its case rests entirely on passkey, and
+  −0.07466) and costs **1.12–2.14×** the runtime — revised down from the 1.7–2.5x quoted
+  from end-to-end language runs, which were at ~232-token prompts, the worst case for this
+  ratio. Its case rests entirely on passkey, and
   even there it loses to a per-span-tuned back=8 at d=7.
 - **B1 self-sizing floor ties the tuned ratio** — −0.00537, p = 0.92. A null against a bar
   set before the runs. Its value is *safety* (the degenerate state becomes unreachable),
@@ -133,12 +136,18 @@ implied.
 
 </details>
 
-### P2. A5 / O12 — MOSTLY DONE 2026-08-27. One item left.
+### P2. A5 / O12 — DONE 2026-08-29. O12 is closed.
 
 Decode-time scoring cost: **~22%**, flat in length, from committed data. Per-compression
 selection cost across pooling variants: measured without a model — **directional pooling
-is free**, derived reach costs 1.12–2.14×. Remaining: the query-aware prefill pass, which
-needs a model and a quiet machine.
+is free**, derived reach costs 1.12–2.14×. **The query-aware prefill pass is now measured
+too, CPU-only with the GPU untouched**: it costs 5.5–15.5% of prefill at chunk 512–2048,
+which is 7.9–11.3× the token-ratio prediction its docstring rested on, because 82.97% of a
+16-token forward is a fixed weight-streaming floor. The docstring is corrected in place.
+
+The result that was not anticipated: **at prefill the mechanism is cheaper than no
+mechanism** (0.84–0.96× wall-clock at 4× less cache), because every chunk after the first
+attends to a capped cache rather than a growing one.
 
 <details><summary>the original P2 design, kept for the record</summary>
 
@@ -168,10 +177,16 @@ are. *Cost: about 2 hours, CPU only.*
 O1 is superseded by the O1/O8 withdrawal. O3 is answered — back=8 gives 1.000 at d=7, so
 derived reach loses to per-span tuning. Both need a paragraph, not a GPU.
 
-### P6. The paper
+### P6. The paper — DONE 2026-08-29
 
-It is the deliverable and it is current, but it has never been read end to end for flow
-rather than for correctness.
+Read end to end and revised into a submission draft. What the read found, which is the
+argument for doing it: **the abstract quoted +0.184 against "a matched positional
+control"** — a figure §4.10 explicitly supersedes, against a control that differed in three
+things at once. Every pin passed throughout, because the pins check numbers and this was a
+*characterisation*. Also fixed: §4.10 promised a re-run that had been completed three days
+earlier, and §5.3 said O13 had no surviving explanation when it had been resolved against a
+pre-registered kill condition. Added: §0 plain-language summary, §4.13 cost, §7 deployment,
+Appendix C reproduction, Figure 2, and verified references.
 
 ---
 

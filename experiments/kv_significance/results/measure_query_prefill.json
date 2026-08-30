@@ -1,0 +1,208 @@
+{
+  "model": "artifacts/rineya-core-en32k-28L",
+  "device": "cpu",
+  "dtype": "float32",
+  "threads": 16,
+  "rounds": 4,
+  "rounds_components": 5,
+  "statistic": "minimum across interleaved rounds",
+  "cuda_initialized": false,
+  "component_ladder": {
+    "cache_len": 512,
+    "rows": [
+      {
+        "tokens": 8,
+        "ms_min": 204.427
+      },
+      {
+        "tokens": 16,
+        "ms_min": 213.419
+      },
+      {
+        "tokens": 32,
+        "ms_min": 235.09
+      },
+      {
+        "tokens": 64,
+        "ms_min": 287.316
+      },
+      {
+        "tokens": 128,
+        "ms_min": 418.506
+      },
+      {
+        "tokens": 256,
+        "ms_min": 675.449
+      },
+      {
+        "tokens": 512,
+        "ms_min": 1267.179
+      }
+    ],
+    "fit_intercept_ms": 164.8246,
+    "fit_slope_ms_per_token": 2.113793,
+    "fit_r2": 0.99721,
+    "restore": [
+      {
+        "cache_len": 512,
+        "q": 16,
+        "ms_min": 12.4406,
+        "mb_kept": 117.44,
+        "effective_gb_s": 18.9
+      },
+      {
+        "cache_len": 1024,
+        "q": 16,
+        "ms_min": 27.8641,
+        "mb_kept": 234.88,
+        "effective_gb_s": 16.9
+      },
+      {
+        "cache_len": 2048,
+        "q": 16,
+        "ms_min": 52.774,
+        "mb_kept": 469.76,
+        "effective_gb_s": 17.8
+      },
+      {
+        "cache_len": 4096,
+        "q": 16,
+        "ms_min": 99.467,
+        "mb_kept": 939.52,
+        "effective_gb_s": 18.9
+      }
+    ],
+    "recording": [
+      {
+        "tokens": 16,
+        "cache_len": 512,
+        "ms_off": 201.418,
+        "ms_on": 216.102,
+        "tax": 1.0729
+      },
+      {
+        "tokens": 512,
+        "cache_len": 512,
+        "ms_off": 1238.63,
+        "ms_on": 1251.862,
+        "tax": 1.0107
+      }
+    ]
+  },
+  "end_to_end": [
+    {
+      "n_tokens": 2048,
+      "chunk": 512,
+      "budget": 128,
+      "q_tokens": 16,
+      "boundaries": 3,
+      "arms": {
+        "plain": {
+          "total_ms": 5544.94,
+          "chunk_ms": 5544.94,
+          "query_ms": 0,
+          "compress_ms": 0,
+          "kept": 2048
+        },
+        "blind": {
+          "total_ms": 4711.8,
+          "chunk_ms": 4650.74,
+          "query_ms": 0,
+          "compress_ms": 61.06,
+          "kept": 640
+        },
+        "aware": {
+          "total_ms": 5324.73,
+          "chunk_ms": 4433.55,
+          "query_ms": 824.71,
+          "compress_ms": 66.47,
+          "kept": 640
+        }
+      },
+      "query_share_of_aware": 0.15488,
+      "ms_per_boundary": 274.9,
+      "ms_per_chunk_aware": 1108.39,
+      "token_ratio_prediction": 0.03125,
+      "overstatement_factor": 7.94,
+      "aware_over_blind": 1.1301,
+      "aware_over_plain": 0.9603,
+      "blind_over_plain": 0.8497
+    },
+    {
+      "n_tokens": 4096,
+      "chunk": 1024,
+      "budget": 256,
+      "q_tokens": 16,
+      "boundaries": 3,
+      "arms": {
+        "plain": {
+          "total_ms": 13391.02,
+          "chunk_ms": 13391.02,
+          "query_ms": 0,
+          "compress_ms": 0,
+          "kept": 4096
+        },
+        "blind": {
+          "total_ms": 10870.15,
+          "chunk_ms": 10742.53,
+          "query_ms": 0,
+          "compress_ms": 127.62,
+          "kept": 1280
+        },
+        "aware": {
+          "total_ms": 11504.24,
+          "chunk_ms": 10428.65,
+          "query_ms": 973.7,
+          "compress_ms": 101.9,
+          "kept": 1280
+        }
+      },
+      "query_share_of_aware": 0.08464,
+      "ms_per_boundary": 324.57,
+      "ms_per_chunk_aware": 2607.16,
+      "token_ratio_prediction": 0.015625,
+      "overstatement_factor": 7.97,
+      "aware_over_blind": 1.0583,
+      "aware_over_plain": 0.8591,
+      "blind_over_plain": 0.8117
+    },
+    {
+      "n_tokens": 6144,
+      "chunk": 2048,
+      "budget": 512,
+      "q_tokens": 16,
+      "boundaries": 2,
+      "arms": {
+        "plain": {
+          "total_ms": 22471.1,
+          "chunk_ms": 22471.1,
+          "query_ms": 0,
+          "compress_ms": 0,
+          "kept": 6144
+        },
+        "blind": {
+          "total_ms": 18245.72,
+          "chunk_ms": 18072.86,
+          "query_ms": 0,
+          "compress_ms": 172.87,
+          "kept": 2560
+        },
+        "aware": {
+          "total_ms": 18953.73,
+          "chunk_ms": 17762.15,
+          "query_ms": 1049.46,
+          "compress_ms": 142.12,
+          "kept": 2560
+        }
+      },
+      "query_share_of_aware": 0.05537,
+      "ms_per_boundary": 524.73,
+      "ms_per_chunk_aware": 5920.72,
+      "token_ratio_prediction": 0.007812,
+      "overstatement_factor": 11.34,
+      "aware_over_blind": 1.0388,
+      "aware_over_plain": 0.8435,
+      "blind_over_plain": 0.812
+    }
+  ]
+}

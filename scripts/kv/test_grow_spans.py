@@ -122,6 +122,30 @@ def main() -> None:
     check("growth covers the 20-token span too", long_grow,
           f"covered {int((grown[150:170] >= 1.0 - 1e-6).sum())}/20 positions")
 
+    # --- the INERT KNOB guard ------------------------------------------------
+    # `grow` is reached through select_keep's `pool > 1` branch, so pool=1 with
+    # grow set used to disable derived reach SILENTLY and report a fixed-window
+    # run under a derived-reach label. select_keep already raised for pool_back
+    # and pool_fwd in that state; grow was the third knob in the same class and
+    # was not covered. The guard is only worth anything if a test holds it, and
+    # the reason this file exists is that eleven passing tests once missed the
+    # composition their caller actually uses.
+    inert_raised = False
+    try:
+        select_keep(s3, s3.shape[-1],
+                    Policy(budget=64, sinks=4, recent=16, pool=1, grow=2.0),
+                    torch.device("cpu"))
+    except ValueError as e:
+        inert_raised = "grow" in str(e)
+    check("pool=1 with grow set RAISES rather than silently no-op", inert_raised)
+
+    # ...and the legitimate combination must still work.
+    ok_grow = select_keep(s3, s3.shape[-1],
+                          Policy(budget=64, sinks=4, recent=16, pool=7, grow=2.0),
+                          torch.device("cpu"))
+    check("pool=7 with grow set still selects a full budget",
+          ok_grow.shape[-1] == 64, f"got {ok_grow.shape[-1]}")
+
     # --- convergence --------------------------------------------------------
     g_short = grow_spans(s3, 2.0, 4)[0, 0]
     check("max_reach bounds the growth",

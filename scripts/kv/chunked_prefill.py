@@ -156,9 +156,33 @@ def score_with_query(model, cache, query_ids, position_base: int, sig,
 
     This runs the question through the model as QUERIES against the current
     cache, records the resulting attention mass, and then truncates the cache
-    back so the question is never itself cached. Cost is one forward over
-    `len(query)` tokens per chunk -- at 16 question tokens against a 2048-token
-    cache that is negligible beside the chunk itself.
+    back so the question is never itself cached.
+
+    COST -- an earlier version of this docstring said "one forward over
+    `len(query)` tokens per chunk, which at 16 question tokens against a
+    2048-token cache is negligible beside the chunk itself". That was asserted,
+    never measured, and it is WRONG IN TWO WAYS. It has now been measured
+    (`experiments/kv_significance/src/measure_query_prefill.py`, CPU fp32):
+
+    1. A short forward is not proportional to its token count. Fitting
+       t(T) = a + b*T over T = 8..512 gives R^2 > 0.996 with an intercept that
+       is ~83% of a 16-token forward -- the pass pays nearly the whole cost of
+       streaming every weight, to move sixteen tokens. So the naive q/chunk
+       prediction understates the real share by 6-9x across chunk sizes.
+    2. `_restore` is not free and is not mentioned above. It copies every kept
+       key and value on every layer, so it scales with CACHE LENGTH and not with
+       q at all: ~100 ms at a 4,096-position cache here, linear in bytes at
+       ~18 GB/s. At long context this term overtakes the forward.
+
+    The measured total is 8.5-15.5% of prefill wall-clock at chunk 512-2048 on
+    this host. That is a real cost and worth knowing, but it is not a reason to
+    drop the pass: without it, retrieval at depth 0.9 is 0.000 (see above).
+
+    Two things follow for anyone changing this. Shortening the question does NOT
+    make the pass proportionally cheaper -- the intercept dominates. And the pass
+    is comparatively far more expensive at DECODE time in multi-turn use, where
+    there is no chunk forward to amortise it against. `CORNERSTONE_LEDGER.md`
+    section 8 registers a fusion optimisation with a bit-equality kill test.
 
     The truncation must be EXACT. If it leaves the question in the cache, every
     later chunk attends to a question it should not see yet, positions shift, and

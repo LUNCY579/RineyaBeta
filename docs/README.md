@@ -4,10 +4,14 @@ A routing map. There are ~50 markdown files in this tree and most of them belong
 to datasets; this lists the ones that describe the *work*, says what each is for,
 and flags which have been superseded.
 
-**If you read one thing:** [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) —
-the consolidated record of the KV-compression and long-context program, with
-every statistic, the procedure that reproduces it, and every retraction stated
-rather than overwritten.
+**If you read one thing:** [`PAPER_DRAFT_CORNERSTONE2.md`](PAPER_DRAFT_CORNERSTONE2.md) —
+the submission draft. It opens with a plain-language summary, states every
+limitation, and reproduces from committed data via Appendix C.
+
+**If you want the raw record instead:**
+[`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) — the consolidated record of
+the KV-compression and long-context program, with every statistic, the procedure
+that reproduces it, and every retraction stated rather than overwritten.
 
 ---
 
@@ -19,6 +23,7 @@ rather than overwritten.
 | [`MINI_MODEL_ROADMAP.md`](MINI_MODEL_ROADMAP.md) | Execution log for the vocabulary trim, the size ladder and the healing harness. R2's provenance. | current |
 | [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) | **Consolidated findings** for KV compression and long context. Mechanism spec, all measurements, all nine bugs, all retractions, and an explicit "not established" list. | current |
 | [`NEGATIVE_RESULTS.md`](NEGATIVE_RESULTS.md) | Things that were tried and do not work, with the measurement that killed each. | current |
+| [`PAPER_DRAFT_CORNERSTONE2.md`](PAPER_DRAFT_CORNERSTONE2.md) | **The submission draft, and the thing to read if you read one paper.** Span-aware KV eviction: why the unit is wrong, why the pooling window must reach backward only, why its reach must be derived rather than tuned, what it costs, and what can be deployed. Opens with a plain-language summary; Appendix C reproduces every figure. | **current** |
 | [`PAPER_DRAFT_SIGNIFICANCE.md`](PAPER_DRAFT_SIGNIFICANCE.md) | Paper-shaped draft scoped to the significance matrix as the single contribution: abstract, related work, method, experiments, limitations, retraction table. | current |
 | [`EXPERIMENT_DESIGN_STABILIZER.md`](EXPERIMENT_DESIGN_STABILIZER.md) | Pre-registration for the **stabilizer matrix**: a persistent global projector that selects which FFN neurons fire. **Phase 0 run and closed** — the predictor works (0.70 recall) but the significance matrix adds +0.0002 and the speed claim fails on this host, so the hypothesis was abandoned. What the branch produced instead is **cornerstone 2**: span-aware selection over the significance scores, in [`experiments/stabilizer/results/FINDINGS_P2.md`](../experiments/stabilizer/results/FINDINGS_P2.md). | **closed — negative** |
 | [`EXPERIMENT_DESIGN_KV_LONGCTX.md`](EXPERIMENT_DESIGN_KV_LONGCTX.md) | Pre-registration for the KV-head × long-context study. Written before any result, deliberately not revised into agreement with them. | **§2a superseded** — the asset gap it describes has since been partly filled |
@@ -38,6 +43,9 @@ rather than overwritten.
 | `scripts/kv/significance.py` | The working mechanism. Significance-gated KV eviction: per-position, per-KV-head accumulated attention mass; keep = sinks + recent + top-B. Zero added parameters. |
 | `scripts/kv/chunked_prefill.py` | Chunked prefill with inter-chunk compression, so peak cache is `B + C` with prompt length eliminated. Also `score_with_query`, which makes eviction query-aware. |
 | `experiments/stabilizer/src/trace_needle_eviction.py` | Carries original position identity through every gather, so you can ask whether a specific span survived compression and how much of it. This is what showed the needle was fragmented rather than evicted. |
+| `experiments/kv_significance/src/measure_query_prefill.py` | **What the query-aware prefill pass costs.** CPU-only by design — it asserts `torch.cuda.is_initialized()` is False before writing output, so a run that accidentally reaches the card fails rather than reporting contended numbers. Fits t(T) = a + bT to show the pass is dominated by a fixed weight-streaming floor, then self-instruments a real prefill so the tax needs no matched-arm assumption. |
+| `experiments/kv_significance/src/measure_select.py` | Per-compression selection cost across pooling variants, with no model at all — it times the one step where the variants differ, on tensors of the real shape, in a few hundred MB. |
+| `scripts/design/figure_query_cost.py` | Figure 2, generated from the same JSON `verify_claims.py` reads, so it cannot drift from the data behind it. |
 | `experiments/kv_significance/src/measure_decode.py` | Decode throughput against an uncompressed baseline, three arms, arms rotated per round and minimum-of-rounds reported because this host's thermal band is 2.17×. |
 | `experiments/kv_significance/src/probe_decode_floor.py` | What actually sets decode latency. Sweeps cache size with nothing else varying and fits a hinge; answers whether the runtime or memory traffic is the limit. |
 | `experiments/kv_significance/src/store_probe.py` | What to STORE each kept position as — quantisation, low-rank, cross-layer sharing — measured against three eviction settings whose end-to-end cost is known, so the relative errors have a scale. |
@@ -91,10 +99,15 @@ deliberately isolates retrieval from comprehension. Multi-hop reasoning at lengt
 has never been measured, and the frozen demo suite indicates that is where this
 checkpoint is genuinely weak.
 
-> **Newest result, §4f of FINDINGS.** SnapKV span pooling was off by default in
-> every long-context run. With `--pool 7`, 128K is **lossless at 1.56% keep**
-> (B=2,048, 1,743 MiB) rather than at 12.5%. The table below is the `pool=1`
-> measurement and is being re-run.
+> **The table below is the `pool=1` record and is superseded.** Span pooling was
+> off by default in every early long-context run; turning it on (`--pool 7`) made
+> 128K lossless at 1.56% keep rather than 12.5%. Cornerstone 2 then went much
+> further by making the pooling window **backward-only** — 128K is lossless at a
+> **16-position budget**, of which eight are score-chosen, certified at n = 100
+> with a 0.9705 lower bound. See
+> [`PAPER_DRAFT_CORNERSTONE2.md`](PAPER_DRAFT_CORNERSTONE2.md) §4.7 and §4.11.
+> The table is kept because it is the matched-length evidence that keep *fraction*,
+> not length, is the governing variable.
 
 **"Works at 128K" needs a budget attached.** Uncompressed, this checkpoint is
 1.00 at every depth to **32K** — the largest reference this card can hold, since

@@ -31,7 +31,7 @@ questions and gate different claims.
 - **One task family.** Passkey filler contains no digits, so the answer is the only
   object of its kind — a regex scores 1.000 with no model.
 - **n = 12** independent needles per cell; 95% lower bound on a perfect cell is 0.779.
-- **The mechanism's own runtime cost is unmeasured.**
+- ~~**The mechanism's own runtime cost is unmeasured.**~~ **CLOSED 2026-08-29** — all three costs measured; see `PAPER_DRAFT_CORNERSTONE2.md` §4.13. Kept struck through rather than deleted, because this list is what phase 2 was planned against.
 - **One prefill chunk size** in 124 of 132 result files.
 
 ---

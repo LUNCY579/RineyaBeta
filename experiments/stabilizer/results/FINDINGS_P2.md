@@ -851,6 +851,11 @@ cost*. The language runs supply one for free, since the arms differ only in poli
 | derived (`grow=2.0`) | 115.6 s / 100 cases | 240.5 s / 100 cases |
 | **derived / causal** | **1.71x** | **2.48x** |
 
+*(**The runtime half of this is superseded.** These are end-to-end language runs at
+~232-token prompts taken back-to-back at 85–94 °C. Isolating the step where the variants
+actually differ gives **1.12–2.14×**, shrinking with context length — see the O12 entry
+below. The quality half stands unchanged.)*
+
 So on natural language **derived reach is worse on both axes at once** — it costs 1.7–2.5x
 the runtime *and* scores lower (−0.035 paired against the causal window, p = 1.48e-05).
 Whatever case exists for geodesic dilation rests on passkey, where it was the best arm;
@@ -908,7 +913,8 @@ mechanism.
 | derived (`grow=2.0`, centred) | 0.33833 | **-0.07452**, p = 5.52e-12 |
 
 Consistent with keep 0.50 (-0.03513). Derived reach is worse on natural language at both
-keep fractions tested, on top of costing 1.7-2.5x the runtime. Its case rests entirely on
+keep fractions tested, on top of costing 1.7-2.5x the runtime *(superseded: 1.12–2.14×
+when the differing step is isolated — see the O12 entry below)*. Its case rests entirely on
 passkey.
 
 ### Consequence for the plan
@@ -1929,6 +1935,8 @@ backward, derived reach), and prefill with and without the query pass. The deriv
 figure we do have — 1.7–2.5× — came from back-to-back language runs at 85–94 °C and is a
 direction rather than a measurement.
 
+*(Superseded 2026-08-29: O12 is CLOSED — see the final entry in this file.)*
+
 **O12 therefore stays open with its decode half answered.** The remaining half needs a
 quiet machine, which is a scheduling constraint rather than a research one.
 
@@ -1980,3 +1988,146 @@ at **~22% of decode**), and the query-aware prefill pass.
 **That last one is all O12 still needs**, and it is the one item here that genuinely
 requires a model and a quiet machine.
 
+> **Superseded 2026-08-29 — see the O12 CLOSED entry at the end of this file.** It did not
+> need a quiet GPU after all: the question is a ratio of two costs inside one process, so it
+> was measured on CPU with the card untouched. The answer is that the pass costs 7.9–11.3×
+> what its docstring predicted, and that the mechanism as a whole is *faster* at prefill
+> than no mechanism.
+
+
+---
+
+## 2026-08-29: O12 CLOSED — the query-aware prefill pass, and the docstring that was wrong
+
+The last item in O12 was the query-aware prefill pass. It is measured, **entirely on CPU,
+with no GPU touched** — `measure_query_prefill.py` asserts `torch.cuda.is_initialized()`
+is `False` before it writes its output, so a run that accidentally reached the card fails
+rather than reporting contended numbers.
+
+### The claim under test was in a docstring, and it was wrong twice
+
+`scripts/kv/chunked_prefill.py` said of `score_with_query`:
+
+> "Cost is one forward over `len(query)` tokens per chunk — at 16 question tokens against
+> a 2048-token cache that is negligible beside the chunk itself."
+
+That was asserted and never measured. It contains an arithmetic assumption — that a
+forward's cost is proportional to its token count — and that assumption is false at small
+token counts, because a short forward is bound by **streaming the weights**, not by the
+arithmetic on the tokens.
+
+### 1. A short forward is nearly all fixed cost
+
+Forward of T tokens against a fixed 512-position cache, five interleaved rounds, minimum
+per T, CPU float32:
+
+| T | 8 | 16 | 32 | 64 | 128 | 256 | 512 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ms | 204.4 | 213.4 | 235.1 | 287.3 | 418.5 | 675.4 | 1267.2 |
+| ms/token | 25.55 | 13.34 | 7.35 | 4.49 | 3.27 | 2.64 | 2.48 |
+
+Least squares gives **t(T) = 164.82 ms + 2.1138 ms/token**, R² = **0.99721**. So of a
+16-token forward's 198.6 fitted ms, **82.97% is the intercept** — the cost of touching
+every weight once, paid in full to move sixteen tokens. Per token, T=8 is **10.3× more
+expensive** than T=512.
+
+**Consequence for anyone tuning this: shortening the question does not make the pass
+proportionally cheaper.** Halving it from 32 to 16 tokens saves 34 ms out of 232.
+
+### 2. `_restore` is a real copy, scales with the CACHE, and the docstring never mentioned it
+
+`score_with_query` truncates the question back off the cache with
+`keys[:, :, :n].contiguous()` on every layer. That is a full copy of everything *kept*, so
+it scales with cache length and not with the question length at all:
+
+| cache length | 512 | 1,024 | 2,048 | 4,096 |
+|---|---:|---:|---:|---:|
+| ms | 12.44 | 27.86 | 52.77 | 99.47 |
+| MB kept | 117.4 | 234.9 | 469.8 | 939.5 |
+| effective GB/s | 18.9 | 16.9 | 17.8 | 18.9 |
+
+Linear in bytes at a flat ~18 GB/s, which is what a memcpy looks like.
+
+**A defect in the first version of this measurement, recorded because it is the house
+failure mode.** The stub cache was built at length *n* and restored to *n*, so the slice
+`keys[:, :, :n]` was the whole tensor, `.contiguous()` returned `self`, and the timer
+measured a **no-op**: it read **0.15 ms for a 939 MB copy**, i.e. 6 TB/s. The tell was the
+implied bandwidth, not the code. The fixed version grows the stub by q first so the
+truncation is real. A measurement that does not reproduce its caller's preconditions
+measures the wrong function — the same gap that let `grow_spans` flood its gate under
+eleven green tests.
+
+### 3. Score accumulation costs nothing measurable at PREFILL
+
+Same forward, recording flag on and off, interleaved:
+
+| T | recording off | recording on | ratio |
+|---|---:|---:|---:|
+| 16 | 201.4 ms | 216.1 ms | 1.073× |
+| 512 | 1238.6 ms | 1251.9 ms | 1.011× |
+
+An earlier independent run of the identical arms gave **0.983×** and **0.994×**. The two
+runs **straddle unity**, so the honest statement is *no measurable prefill-side tax, below
+this instrument's resolution of roughly ±5%* — not a speedup, and not the ~22% figure.
+
+**This does not contradict the ~22% decode number, it explains it.** At decode the forward
+is one token, so accumulating over the whole cache is comparable work to the forward
+itself. At prefill the forward is hundreds of tokens and the accumulation is over a
+16-row window. The same code costs ~22% in one regime and nothing measurable in the other.
+
+### 4. What the pass costs end to end
+
+Self-instrumented: the `aware` run reports its own split, so the tax is a within-run ratio
+with no matched-arm assumption. Four interleaved rounds, minimum, CPU float32, Q = 16.
+
+| chunk | budget | boundaries | ms/boundary | ms/chunk | **share of prefill** | token-ratio prediction | **overstatement** |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 512 | 128 | 3 | 274.9 | 1,108.4 | **15.49%** | 3.12% | **7.9×** |
+| 1024 | 256 | 3 | 324.6 | 2,607.2 | **8.46%** | 1.56% | **8.0×** |
+| 2048 | 512 | 2 | 524.7 | 5,920.7 | **5.54%** | 0.78% | **11.3×** |
+
+**The docstring's prediction is wrong by 8–11× and the error grows with chunk size.** The
+share itself *falls* with chunk size, as it must — the fixed cost is amortised over more
+work — but the ratio the naive arithmetic gets wrong grows, because the naive model has
+the pass shrinking linearly while in reality it is pinned near its floor.
+
+Partial decomposition, stated as partial: the measured floor plus the measured restore
+account for **83%** of the per-boundary cost at chunk 512, **77%** at 1024 and **53%** at
+2048. The unaccounted remainder grows with cache length, consistent with score
+accumulation and trimming over a longer cache. We did not isolate it further.
+
+### 5. The result nobody predicted: at prefill, compression PAYS FOR ITSELF
+
+| chunk | aware / blind | aware / plain | blind / plain |
+|---:|---:|---:|---:|
+| 512 | 1.130 | 0.960 | 0.850 |
+| 1024 | 1.058 | 0.859 | 0.812 |
+| 2048 | 1.039 | 0.844 | 0.812 |
+
+`plain` is vanilla chunked prefill with no compression and no scoring. Compression makes
+prefill **faster**, because every chunk after the first attends to a capped cache instead
+of a growing one — and it is faster by *more* than the query pass costs. Even with
+query-aware scoring on, the whole mechanism runs at **0.84–0.96×** the wall-clock of no
+mechanism at all, while holding 4× less cache.
+
+**How much to trust each column.** The within-run share (column "share of prefill" above)
+replicates to 0.2 percentage points across independent runs. These cross-arm ratios do
+not: `blind / plain` at chunk 512 read 0.827, 0.902 and 0.850 in three separate runs. The
+**direction is robust — all six cross-arm observations across three runs are below 1.0** —
+but the magnitude carries roughly ±0.05. Quote the direction, not the third digit.
+
+### What this is, and is not
+
+It is a CPU measurement, and the *magnitude* is device-specific. What transfers is the
+**structure**: the pass is dominated by a fixed floor rather than by the token count, and
+that is a property of weight streaming, which holds on a GPU too — a 474M bf16 model reads
+~0.95 GB of weights per forward regardless of whether it is moving 16 tokens or 4,096. The
+arithmetic on a card at ~400 GB/s puts the floor near 2.4 ms against a ~77 ms 4,096-token
+chunk, so the GPU-side tax is of order 3% rather than 15% — but still roughly **8× the
+0.4% the token ratio predicts**, which is the point.
+
+**O12 is closed.** Decode-time scoring ~22%; per-compression selection measured across
+pooling variants (directional pooling free, derived reach 1.12–2.14×); query-aware prefill
+measured here. The docstring has been corrected in place, and a fusion optimisation is
+registered in `CORNERSTONE_LEDGER.md` §8 with a bit-equality kill test and an explicit
+instruction not to implement it on the CPU number alone.

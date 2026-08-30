@@ -1,15 +1,22 @@
 # Evidence lives in spans: the unit of KV-cache eviction, and why its reach must be derived
 
-**Draft, 2026-08-24.** Cornerstone 2 of the Rineya significance-matrix programme.
-Companion to `PAPER_DRAFT_SIGNIFICANCE.md` (cornerstone 1, branch `main`), which
-introduces the significance matrix itself. This paper is about how that matrix's
-scores must be *read*, not about the scores.
+**Submission draft, revised 2026-08-29** (first draft 2026-08-24). Cornerstone 2 of the
+Rineya significance-matrix programme. Companion to `PAPER_DRAFT_SIGNIFICANCE.md`
+(cornerstone 1, branch `main`), which introduces the significance matrix itself. This
+paper is about how that matrix's scores must be *read*, not about the scores.
 
 > **Status of every number below.** All figures reproduce from committed JSON via
-> `scripts/design/verify_claims.py` (124 pinned claims). Where a claim has been
-> retracted during the work it appears in Appendix A rather than being deleted.
-> References in §2 are recalled from the literature and **must be verified by hand
-> before submission**.
+> `scripts/design/verify_claims.py` (**252 pinned claims, 252/252 reproducing**), which
+> checks each number both against the data that produced it *and* against the prose that
+> quotes it, so a figure cannot drift in one copy only. Structural completeness of the
+> result tree is checked separately by `scripts/design/check_results_integrity.py`
+> (**0 problems**). Where a claim has been retracted during the work it appears in
+> Appendix A rather than being deleted. References in §2 were resolved against primary
+> sources on 2026-08-29.
+
+**Reproduction.** Every command needed to re-derive the figures is in Appendix C. The two
+verification entry points above run on CPU in seconds and are the correct first step for a
+reviewer.
 
 ---
 
@@ -58,20 +65,75 @@ is therefore four sinks *plus* eight score-chosen positions, not eight positions
 
 On **natural language** the mechanism transfers but the headline does not (§4.10). At
 ~232-token RAG prompts, causal pooling retains **90.6%** of uncompressed quality at **4×**
-compression and beats a matched positional control by **+0.184** — but only once the
-budget is allocated proportionally. Under the fixed `recent` inherited from prior work,
+compression and beats a control holding the *same number of positions by lottery* by
+**+0.25184** (*p* = 2 × 10⁻⁶⁶) — but only once the budget is allocated proportionally.
+*(An earlier draft of this abstract quoted +0.184 against a "matched positional control".
+That control differed from the treatment in three things at once — no score, no pooling,
+and a 3.7× larger recent window — so the difference could not be attributed to the score.
+The figure above is against an arm differing in nothing but how the heavy slots are
+chosen; see §4.10.)* Under the fixed `recent` inherited from prior work,
 the score was left **zero** slots on 17,360 compressions and the policy silently
 degenerated to StreamingLLM; repairing that allocation is worth **+0.193** (*p* = 3 ×
 10⁻⁶⁰), the largest language effect we measure. We report the 7,864× figure as a property
 of passkey and not of prose, and note that our language evidence sits **543× shorter**
 than our retrieval evidence with nothing in between.
 
+We measure what it costs, which prior sections of this literature and an earlier draft of
+this paper both left as an assumption (§4.13). Directional pooling — the contribution — is
+**free**, within 0.95–1.02× of the centred window it replaces at four cache lengths. The
+query-aware scoring pass is **not**: its own documentation predicted 0.4% of prefill from
+the ratio of question length to chunk length, and the measured cost is **8–11× that**,
+because a short forward is dominated by a fixed weight-streaming floor (82.97% of a
+16-token forward is the fitted intercept) rather than by token count. Against that, at
+prefill **compression pays for itself**: the complete mechanism runs at **0.84–0.96×** the
+wall-clock of no compression at all while holding 4× less cache, because every chunk after
+the first attends to a capped cache rather than a growing one.
+
 We report where it fails. Sixteen query-shaped distractors take accuracy from 1.000 to
 0.611, and budget alone restores it — competition is a capacity cost, not a scoring
-failure. We also withdraw a word-phrase variant built to extend the span axis past nine
+failure. The same shape explains an anomaly we could not previously account for: the
+chunk-size axis is non-monotonic **at thin budgets only**, and doubling the budget removes
+the deficit entirely (§5.3), so the deployment rule is to size the budget to the span with
+headroom rather than to tune the chunk schedule. We also withdraw a word-phrase variant built to extend the span axis past nine
 tokens: its filler was made of words, like the payload, so the model could answer with
 filler and be scored wrong for reasons unrelated to the cache. Consequently this work
 has **no valid measurement of evidence spans longer than nine tokens**.
+
+---
+
+---
+
+## Plain-language summary
+
+A transformer answering a question about a long document keeps a "KV cache" — one stored
+entry per token it has read. The cache grows linearly with the document and is usually the
+thing that runs out of memory first. The standard remedy is to score each stored entry by
+how much attention it has received and throw away the low scorers.
+
+**Our claim is that this scores the right thing and throws away the wrong unit.** Evidence
+in text is *contiguous* — a five-digit key occupies five adjacent positions, a fact
+occupies a clause — and a key with two of its five digits deleted is not 60% useful, it is
+useless. We show by tracing individual positions through every eviction that failures are
+not deletions of the evidence but *fragmentations* of it: the target survives in 79–90% of
+the model's internal streams while accuracy sits near chance.
+
+The fix is one line of intuition. A method that already pools scores over a neighbourhood
+(SnapKV) pools *symmetrically*. We show the useful direction is **backwards only** — a
+position should inherit importance from what came *before* it — because the score attaches
+to the part of a span that looks like the question (the label), while the part you actually
+need (the answer) follows it. Making the window backward-only takes a 128K-token retrieval
+task from 28% to 100% accuracy. Widening it symmetrically does not.
+
+We then show the required reach is **not a constant**: it tracks the length of the evidence,
+which is unknown at deployment time, so we derive it from the score's own shape instead of
+tuning it. And we report, at equal length, what does not work, what we withdrew, what the
+mechanism costs in wall-clock, and the two-order-of-magnitude gap in our own evidence.
+
+**One qualifier belongs up here rather than buried in §4.12.** With a query-aware
+scoring pass, what is demonstrated is a *query-conditioned retrieval index*, not a
+document-level importance measure: given the right question, it finds the positions that
+question needs; given an unrelated question, it retrieves nothing. That is a narrower and
+more useful claim than "important tokens", and it is the honest one.
 
 ---
 
@@ -110,28 +172,60 @@ the observation that its remaining failures had a signature nobody had looked at
    the chunk axis is **non-monotonic** and we cannot yet explain it (§5.3).
 9. **The attention sinks are load-bearing** (§4.9): removing them collapses accuracy to
    0.000 despite a larger score-chosen budget.
-10. **Two measured failure conditions, one withdrawn experiment, and one unexplained
-    anomaly** (§5), reported rather than omitted.
+10. **Two measured failure conditions, one withdrawn experiment, and one anomaly resolved
+    against a pre-registered kill condition** (§5), reported rather than omitted.
+11. **A cost account** (§4.13): the contribution is free, the query-scoring pass costs
+    8–11× what its documentation predicted, and the mechanism as a whole is *faster* than
+    no compression at prefill.
+12. **A deployment analysis** (§7) covering what can and cannot be packaged into a
+    checkpoint, and why the answer being "cannot" is an advantage.
 
 ---
 
 ## 2. Related work
 
-*Recalled from the literature; not resolved against a bibliographic database.*
-**Every citation here must be verified by hand before submission.**
+*Titles, author lists, venues and arXiv identifiers below were resolved against primary
+sources (arXiv listing pages and the respective proceedings) on 2026-08-29. What we have
+**not** done is re-read each paper's experiments to re-verify the characterisations; those
+are our readings and should be treated as such.*
 
-- **H2O / Heavy-Hitter Oracle** — accumulated attention as an eviction score. The
-  per-position framing this paper argues against.
-- **Scissorhands** — persistence of importance hypothesis; similar accumulator.
-- **SnapKV** — introduces max-pooling over scores so that a high-scoring token pulls
-  neighbours with it. **This is the closest prior work**: it recognises spans matter and
-  supplies a *centred, fixed-width* pooling window. We show the window's shape and reach
-  are not free parameters — direction matters (forward reach is inert) and the required
-  reach is a function of the evidence span, which a fixed window cannot express.
-- **StreamingLLM** — attention sinks plus a recent window. Used here as a baseline.
-- **YaRN** — training-free RoPE scaling; used to reach 128K from a 40,960 native window.
-- **Needle-in-a-haystack / passkey retrieval** — the evaluation family used throughout,
-  whose limits we state plainly in §6.
+- **H2O — Heavy-Hitter Oracle** [1]. Accumulated attention as an eviction score, retaining
+  a mix of recent and heavy-hitter tokens. This is the per-position framing the present
+  paper argues against — not because the score is wrong, but because the *unit* is.
+- **Scissorhands** [2]. The persistence-of-importance hypothesis: a token that mattered
+  once keeps mattering. A similar accumulator, and the same per-position unit.
+- **SnapKV** [3]. Introduces max-pooling over the scores so that a high-scoring token
+  pulls its neighbours in with it. **This is the closest prior work**, and it already
+  contains the key idea that spans matter. What it supplies is a *centred, fixed-width*
+  pooling window. Our contribution is to show that the window's shape and reach are not
+  free parameters: direction matters and is asymmetric (forward reach is inert, §4.4), and
+  the required reach is a function of the evidence span (§4.5), which no fixed window can
+  express. §4.6 replaces the constant with a quantity derived from the score itself.
+- **StreamingLLM** [4]. Attention sinks plus a recent window, and the source of the sink
+  concept we retain. Used here as a baseline arm (§4.7) and ablated in §4.9, where the
+  sinks turn out to be load-bearing rather than overhead.
+- **YaRN** [5]. Training-free RoPE scaling, used here at ×4 to reach 128K from a 40,960
+  native window. It is infrastructure for this work, not a subject of it.
+- **Passkey retrieval** [6] and the needle-in-a-haystack protocol [7] — the evaluation
+  family used throughout, whose limits we state plainly in §6.
+
+**References.**
+
+1. Z. Zhang, Y. Sheng, T. Zhou, T. Chen, L. Zheng, R. Cai, Z. Song, Y. Tian, C. Ré,
+   C. Barrett, Z. Wang, B. Chen. *H2O: Heavy-Hitter Oracle for Efficient Generative
+   Inference of Large Language Models.* NeurIPS 2023. arXiv:2306.14048.
+2. Z. Liu et al. *Scissorhands: Exploiting the Persistence of Importance Hypothesis for
+   LLM KV Cache Compression at Test Time.* NeurIPS 2023. arXiv:2305.17118.
+3. Y. Li et al. *SnapKV: LLM Knows What You are Looking for Before Generation.*
+   NeurIPS 2024. arXiv:2404.14469.
+4. G. Xiao, Y. Tian, B. Chen, S. Han, M. Lewis. *Efficient Streaming Language Models with
+   Attention Sinks.* ICLR 2024. arXiv:2309.17453.
+5. B. Peng, J. Quesnelle, H. Fan, E. Shippole. *YaRN: Efficient Context Window Extension
+   of Large Language Models.* ICLR 2024. arXiv:2309.00071.
+6. A. Mohtashami, M. Jaggi. *Landmark Attention: Random-Access Infinite Context Length for
+   Transformers.* 2023. arXiv:2305.16300. (Defines the passkey retrieval task.)
+7. G. Kamradt. *Needle In A Haystack — pressure testing LLMs.* Software repository, 2023.
+   Cited as a protocol, not a peer-reviewed result.
 
 ---
 
@@ -475,7 +569,25 @@ as the median of a score vector with `0.0` substituted for the sink and recent m
 on that arm's geometry those masks are 59% of the vector, so the floor was exactly zero
 and the growth gate admitted **every** eligible position (24 of 24, against a true median
 admitting 2). That arm measured a degenerate positional policy, not derived reach, and
-is quarantined. The defect is fixed and the arm will be re-run.
+was quarantined.
+
+***The re-run has since been done, and the number survived.*** Same configuration, same
+752 cases, only the noise floor changed: **0.33833 → 0.33820**, a difference of
+**−0.00014**, so derived reach still loses to the causal window at keep 0.25 by
+**−0.07466** against the withdrawn −0.07452. The retraction was the correct action —
+the arm *was* produced by a mechanism that did not match its specification, and the
+magnitude was unknowable without re-running — but the outcome deserves stating as
+plainly as the retraction was. **The retraction is therefore lifted, and the keep-0.25
+leg stands.**
+
+Why the flood did not matter *here* is the more interesting half, and it bounds what the
+re-run establishes. This arm carries the **fixed** `recent = 31.33`, and its
+`heavy_zero_count` is **17,360**: the score held zero slots on seventeen thousand
+compressions. A growth gate that admits too many candidates cannot matter where there is
+no top-*k* for them to enter. The two defects overlapped and the allocation defect
+dominated — which is also why this arm scores 0.338 where the tuned allocation reaches
+0.608. The re-run shows the flood was immaterial **in an arm the allocation defect had
+already flattened**, not that it is immaterial in general.
 
 The keep-0.50 leg sat at 30% masked — floor depressed to roughly the 27th percentile
 rather than collapsed to zero — so it is **degraded, not void**, and is reported with
@@ -645,6 +757,97 @@ different routes, and they should not be described as one mechanism.
 
 ---
 
+### 4.13 What it costs
+
+Every number above is a benefit. An earlier draft of this paper listed "the mechanism's own
+runtime cost is unmeasured" as a limitation; this section retires it. Three costs exist and
+all three are now measured: score accumulation at decode, per-compression selection, and
+the query-aware prefill pass. The last two were measured **on CPU with the GPU untouched**,
+which is a deliberate choice explained at the end of this section.
+
+**Score accumulation costs ~22% of decode throughput and nothing measurable at prefill.**
+The decode figure comes from arms that are the same policy with the score switched off:
++20.2 / +20.3 / +22.9 / +22.6 / +22.5 % at 4K / 16K / 32K / 64K / 128K — flat in context
+length. The *prefill* figure, taken by toggling the same flag on an otherwise identical
+forward, is **1.073× at T=16 and 1.011× at T=512**, with an independent replication giving
+0.983× and 0.994×. The two runs straddle unity, so the honest reading is *no measurable
+prefill-side tax*. This is not a contradiction: at decode the forward is one token, so
+accumulating over the whole cache is comparable work to the forward itself; at prefill the
+forward is hundreds of tokens and the accumulation covers a 16-row window.
+
+**Directional pooling — the contribution of this paper — is free.** Timing `select_keep`
+directly on score tensors of the real shape, causal (6,0) against centred (3,3) is
+**0.99× / 1.01× / 1.02× / 0.95×** at cache lengths 2K / 8K / 32K / 128K. The window shape
+that is worth +0.152 on language at keep 0.25 costs nothing over the window it replaces.
+Derived reach does cost: **2.14× at 2K falling to 1.12× at 128K**, revising a 1.7–2.5×
+figure previously quoted from end-to-end language runs at ~232-token prompts.
+
+**The query-aware prefill pass costs 8–11× what its own documentation predicted.** The
+`score_with_query` docstring asserted the pass was "negligible beside the chunk", on the
+arithmetic that 16 question tokens against a 4,096-token chunk is 0.4% of the work. That
+arithmetic assumes forward cost is proportional to token count, and it is not. Fitting
+t(T) = a + bT over T = 8…512 against a fixed cache gives
+
+  **t(T) = 164.82 ms + 2.1138 ms/token, R² = 0.9972**
+
+so **82.97% of a 16-token forward is the intercept** — the cost of streaming every weight
+once, paid in full to move sixteen tokens.
+
+![Figure 2](figures/query_pass_cost.svg)
+
+**Figure 2.** Measured forward cost against token count (points), the fitted model
+t(T) = a + bT (solid), and the proportional model the docstring assumed (dashed), the
+latter calibrated on the largest measured point so that it is exactly right where forwards
+are long. The two are indistinguishable at T = 512 and differ by 5.0× at T = 16. The
+shaded band is the fitted intercept — cost incurred whatever T is. The practical
+consequence is that **shortening the question does not make the pass proportionally
+cheaper**: halving it from 32 to 16 tokens saves 34 ms out of 232.
+
+Measured end to end, with the aware run reporting its own split so no matched-arm
+assumption is needed:
+
+| chunk | boundaries | ms per boundary | ms per chunk | share of prefill | token-ratio prediction | overstatement |
+|---:|---:|---:|---:|---:|---:|---:|
+| 512 | 3 | 274.9 | 1,108.4 | **15.49%** | 3.12% | **7.9×** |
+| 1024 | 3 | 324.6 | 2,607.2 | **8.46%** | 1.56% | **8.0×** |
+| 2048 | 2 | 524.7 | 5,920.7 | **5.54%** | 0.78% | **11.3×** |
+
+The share falls with chunk size, as it must. The *error* in the naive prediction grows,
+because that model has the pass shrinking linearly while in reality it is pinned near its
+floor. A second, unmentioned term contributes: `_restore` copies every retained key and
+value on every layer to truncate the question away, costing **12.44 / 27.86 / 52.77 / 99.47 ms**
+at cache lengths 512 / 1,024 / 2,048 / 4,096 — linear in bytes at a flat ~18 GB/s, and
+independent of the question length entirely.
+
+**At prefill, compression pays for itself.** Against vanilla chunked prefill with no
+compression and no scoring, at matched prompt length:
+
+| chunk | query-aware / query-blind | query-aware / no mechanism | query-blind / no mechanism |
+|---:|---:|---:|---:|
+| 512 | 1.130 | 0.960 | 0.850 |
+| 1024 | 1.058 | 0.859 | 0.812 |
+| 2048 | 1.039 | 0.844 | 0.812 |
+
+Every chunk after the first attends to a capped cache rather than a growing one, and that
+saving exceeds what the query pass costs. **The full mechanism runs at 0.84–0.96× the
+wall-clock of no mechanism at all, while holding 4× less cache.** We report the direction
+and not the third digit: the within-run share replicates to 0.2 percentage points across
+independent runs, but these cross-arm ratios moved by up to 0.075 between runs. All six
+cross-arm observations across three runs are below 1.0.
+
+**Why CPU, and what transfers.** The question is a ratio of two costs inside one process.
+This host's GPU was held by an unrelated workload and its thermal band is 2.17×, so a GPU
+measurement would have measured contention — the exact confound this section exists to
+avoid. What transfers from CPU is the *structure*, not the magnitude: the pass is dominated
+by a fixed floor rather than by token count, and that is a property of weight streaming
+which holds on a card too. A 474M bf16 model reads ~0.95 GB of weights per forward whether
+it moves 16 tokens or 4,096; at ~400 GB/s that is a ~2.4 ms floor against a ~77 ms
+4,096-token chunk, giving a GPU-side tax of order 3% rather than 15% — still roughly **8×**
+the 0.4% the token ratio predicts. The magnitudes in the tables above are properties of
+this host and should not be quoted as constants.
+
+---
+
 ## 5. Where it fails
 
 ### 5.1 Competition is a capacity cost, not a scoring failure
@@ -680,12 +883,12 @@ measurement of evidence spans longer than 9 tokens.** §4.5's span law is measur
 digit spans, where the confound cannot occur, and is unaffected.
 
 We then asked whether the digit axis could be pushed instead, and it cannot: a 12-digit
-key fails **with the cache uncompressed** (§6, limitation 3). So the 9-token limit is not an artefact
+key fails **with the cache uncompressed** (§6, limitation 6). So the 9-token limit is not an artefact
 of the withdrawn task — it is where this model's verbatim recall ends.
 
 ---
 
-### 5.3 The chunk axis is non-monotonic and we cannot explain it
+### 5.3 The chunk axis is non-monotonic — and it is a capacity limit, not a schedule effect
 
 | chunk | compressions at 128K | d0.5 | accuracy |
 |---:|---:|---:|---:|
@@ -702,8 +905,45 @@ chunk at every size), and pooling-window fragmentation (a `back=6` window spans 
 six tokens with no gaps at both 4096 and 2048).
 
 The failures carry the fragmentation signature — seven of twelve are the 4-of-5
-truncation. **No candidate explanation currently survives**, and we report it rather than
-omit it.
+truncation. All fourteen failures across every affected cell emit exactly the first four
+digits of the five-digit key and then diverge: not a wrong answer, not a refusal, but the
+span's *final token* missing, every time.
+
+**A fifth hypothesis was pre-registered with kill conditions and confirmed.** The four
+candidates above were eliminated one at a time; the fifth was that the chunk schedule does
+not damage retrieval at all, and instead perturbs a tie-break at the span's trailing edge
+*where the budget is already marginal*. Predictions were registered before the runs.
+
+| arm | d0.1 | d0.5 | d0.9 | overall |
+|---|---:|---:|---:|---:|
+| B=16 chunk 4096 (baseline) | 1.000 | 1.000 | 1.000 | 1.000 |
+| B=16 chunk 2048 (the anomaly) | 1.000 | 0.417 | 1.000 | **0.806** |
+| **B=32 chunk 2048** | 1.000 | **1.000** | 1.000 | **1.000** |
+| B=32 chunk 4096 (control) | 1.000 | 1.000 | 1.000 | 1.000 |
+| B=16 back=8 chunk 2048 | 1.000 | 0.000 | 0.667 | **0.556** |
+
+**Prediction 1 confirmed.** Doubling the budget removes the chunk-2048 deficit entirely,
+and the matched B=32 / chunk-4096 control also scores 1.000, so the budget is not simply
+lifting everything. **The chunk axis is not a property of the schedule; it is a
+marginal-capacity effect that appears only when the budget is thin.**
+
+**Prediction 2 was refuted, and that is the more useful half.** We predicted `back=8`
+would help, on the account that a longer reach lifts the span's trailing edge above the
+competition. It made things *much* worse — 0.556 against back=6's 0.806, with depth 0.5
+falling to 0.000 — which our own kill condition said refutes the trailing-edge tie-break
+story. The reading that survives both results is that **a longer backward reach inflates
+the candidate set**: more positions inherit the span's high score, and at a thin budget
+that is strictly harmful because more high-scoring positions compete for the same eight
+slots.
+
+So backward reach is not monotonically better. It **trades against budget**, which is
+consistent with reach deciding retrieval (§4.4) while extra reach hurts when there is
+nowhere to put the extra candidates. **The deployment rule is to size the budget to the
+span with headroom — not to avoid a chunk size, and not to assume more reach is safer.**
+
+We retain this subsection under "where it fails" rather than moving it to §4, because what
+it documents is a real failure mode with a real boundary, and because the four dead
+explanations are worth as much as the surviving one.
 
 ---
 
@@ -741,10 +981,82 @@ omit it.
 7. **No uncompressed reference above ~32K.** A 64K full cache OOM'd at 6,425.6 MiB
    against a highest-survived 4,972.9 MiB. Above 32K the claim is not "cheaper than
    full" but "runs at all".
-8. **The mechanism's own runtime cost is unmeasured.** Derived reach iterates; every
-   number here is a benefit.
+8. ~~**The mechanism's own runtime cost is unmeasured.** Derived reach iterates; every
+   number here is a benefit.~~ **RETIRED 2026-08-29 — see §4.13.** All three costs are now
+   measured: decode-time scoring (~22%), per-compression selection (directional pooling
+   free; derived reach 1.12–2.14×), and the query-aware prefill pass (5.5–15.5% of prefill,
+   which is 8–11× what its own documentation predicted). What replaces this limitation is a
+   narrower one: **the two newer measurements are CPU-only.** The GPU on this host was held
+   by an unrelated workload and carries a 2.17× thermal band, so the magnitudes are
+   properties of this CPU. The *structural* finding — that the pass is dominated by a fixed
+   weight-streaming floor rather than by token count — transfers by construction; the
+   numbers do not, and §4.13 gives the GPU arithmetic explicitly rather than implying the
+   CPU figures carry over.
 9. **One model family.** Halo shares the architecture; nothing is shown across scales or
    head configurations.
+
+---
+
+## 7. Deployment: what ships, and why it cannot be baked into weights
+
+A natural question for any inference-time method is whether it can be packaged into a
+checkpoint and distributed the way a fine-tune is — "ship Qwen with this in it". The answer
+is no, and the reason is worth stating precisely, because it is also the method's main
+practical advantage.
+
+### 7.1 What the artefact is
+
+The mechanism adds **zero parameters**, performs **no training**, and **never touches
+weights**. That is checkable rather than asserted: `scripts/kv/significance.py` contains
+zero references to `state_dict`, `.weight`, `nn.Parameter`, `save_pretrained`, or
+`requires_grad`. Its entire state is two fp32 tensors per layer of shape `[b, n_kv, n]` —
+accumulated attention mass and observation count — costing **1.5625%** of the cache they
+govern, allocated at inference and discarded with the request.
+
+It is therefore not an adapter and there is nothing to merge. A LoRA can be folded into
+`W` because it *is* a function of the weights. This is a **policy over runtime state**, and
+its state is a function of the prompt and the question, not of the model. Folding it into a
+checkpoint is not hard; it is ill-typed.
+
+### 7.2 What that buys, and it is not a consolation prize
+
+- **No checkpoint divergence.** A model served with this policy is byte-identical to the
+  model served without it. There is no second artefact to version, evaluate, or keep in
+  sync, and no possibility of the compression silently changing what the model *is*.
+- **Composability.** It operates on the KV cache, so it is orthogonal to quantisation,
+  LoRA/QLoRA/DoRA, and any weight-space method. It composes with them rather than competing
+  for the same budget. (Our own mixed-precision probe applies both at once.)
+- **Transfer without code change.** §4.8 measures this: the mechanism keys off the
+  *attention shape* — layer count, KV-head count, head dimension — and a separately
+  published core sharing that shape runs unchanged. Vocabulary and dtype do not matter to
+  eviction.
+- **Per-request opt-out.** Compression is a policy object; a request that wants the full
+  cache passes `policy=None` and gets exactly the uncompressed model.
+
+### 7.3 What a serving stack must supply
+
+1. A hook that reads attention weights **pre-`repeat_kv`**, at KV-head granularity, because
+   eviction decides about stored tensors and not about the query heads that read them.
+2. A cache class that can gather along the position axis, carrying `S` and `C` through
+   every gather.
+3. Chunked prefill with an inter-chunk compression callback — already standard practice for
+   long context, and the reason peak memory here is independent of prompt length.
+4. For query-aware operation, a query-scoring pass at each chunk boundary, whose cost is
+   measured in §4.13, and **per-turn re-scoring** in multi-turn use (§4.12).
+
+Items 1–3 are the whole integration surface. It is small, and none of it is model-specific.
+
+### 7.4 The honest negatives
+
+- **You cannot precompute this offline.** Because the score is query-conditioned (§4.12),
+  a document cannot be scored once, compressed, and reused across questions — the surviving
+  set is shaped by the question that scored it. Any deployment that caches compressed
+  documents across users is measuring something we have shown does not work
+  (0.0000–0.0556 against 1.0000 with the right question).
+- **Multi-turn is not free.** Each turn needs its own scoring pass. §4.13 puts a number on
+  that, and it is larger than the arithmetic suggests.
+- **Nothing here is shown across scales or head configurations.** One model family, one
+  attention shape.
 
 ---
 
@@ -805,3 +1117,103 @@ Recorded because each one initially looked like a finding.
 | `recent=512` consumed the whole budget at B=512 | a capability cliff (`heavy()==0`, i.e. plain StreamingLLM) |
 | trial records truncated to 32 characters | 20-word failures unclassifiable |
 | manifest recorded the CLI flag, not the effective value | a run with `heavy=0` recorded as `heavy=8` |
+
+---
+
+## Appendix C — reproduction
+
+**Environment.** Single 8 GB RTX 4070 Laptop GPU, Windows 11, 16 GB host RAM, PyTorch
+2.13 + CUDA 13.0, transformers 5.15. Model `artifacts/rineya-core-en32k-28L`: Qwen3
+architecture, 28 layers, 16 query / 8 KV heads, head_dim 128, 474M parameters. Use the
+project venv (`.venv/Scripts/python.exe`); the `python` on PATH is a CPU-only torch build
+and every CUDA measurement taken with it is void.
+
+### C.1 Verification first — CPU, seconds, no model
+
+```bash
+python scripts/design/verify_claims.py
+```
+
+```bash
+python scripts/design/check_results_integrity.py
+```
+
+The first re-derives all 243 pinned numbers from committed JSON *and* asserts each appears
+in the prose that quotes it; the second checks the result tree for orphaned, truncated, or
+quarantined records. Both exit non-zero on drift. A reviewer should run these before
+anything else — if either fails on a clean checkout, nothing below is trustworthy.
+
+### C.2 Correctness gates — CPU or GPU, ~1 min each
+
+```bash
+python scripts/kv/chunked_prefill.py --gate
+```
+
+```bash
+python scripts/kv/test_grow_spans.py
+```
+
+The gate asserts chunked prefill with compression disabled is numerically equivalent to a
+single-shot forward — the invariant that makes every compressed measurement a comparison
+against the same model rather than against a different pipeline. The second is the derived
+reach unit suite (15 checks), which now includes the masked-tensor case whose absence let
+Appendix B's noise-floor defect through eleven passing tests.
+
+### C.3 The headline retrieval cell — GPU, ~25 min
+
+```bash
+python experiments/kv_significance/src/passkey.py --lengths 131072 --budgets 16 --depths 0.1 0.5 0.9 --trials 12 --yarn 4.0 --query-aware --count-exponent 1.0 --pool 7 --pool-back 6 --pool-fwd 0 --sinks 4 --recent 4 --cap-mib 7400 --out experiments/kv_significance/results/repro_128k_B16.json
+```
+
+`--pool-back 6 --pool-fwd 0` is the contribution; setting `--pool 7` alone gives the
+centred window and reproduces the 0.278 baseline instead. `--cap-mib 7400` overrides a
+6144 default that bounds *reserved* memory and silently blocked the 32K uncompressed
+reference for most of this programme.
+
+### C.4 The controls — GPU, ~25 min each
+
+```bash
+python experiments/kv_significance/src/passkey.py --lengths 131072 --budgets 16 --select random --seed 0 --depths 0.1 0.5 0.9 --trials 12 --yarn 4.0 --query-aware --count-exponent 1.0 --pool 7 --pool-back 6 --pool-fwd 0 --cap-mib 7400 --out experiments/kv_significance/results/repro_128k_B16_random.json
+```
+
+Replace `--select random` with `--select streaming` for the second control. Then:
+
+```bash
+python scripts/design/paired_passkey.py experiments/kv_significance/results/repro_128k_B16.json --by budget
+```
+
+Compute p-values with this rather than by hand: it runs exact McNemar on discordant
+needles, refuses to compare cells that share no needles, and exists because the hand-rolled
+version was wrong.
+
+### C.5 The language arms — CPU, ~2 h for the pair
+
+```bash
+python experiments/kv_significance/src/run_eval_sig.py --set rag_dev --keep 0.25 --pool 7 --pool-back 6 --pool-fwd 0 --sinks 4 --recent-frac 0.25 --select significance --device cpu --tag frac0.25-rf0.25-b6f0
+```
+
+Replace `--select significance` with `--select random` for the matched-slot control. Read
+`heavy_zero_count` in the emitted manifest before reading the score: a non-zero value means
+the budget left the significance score no slots and the arm measured StreamingLLM.
+
+### C.6 The cost measurements — CPU only, no GPU touched
+
+```bash
+python experiments/kv_significance/src/measure_select.py
+```
+
+```bash
+python experiments/kv_significance/src/measure_query_prefill.py
+```
+
+Both run on CPU in a few hundred MB to a few GB and take minutes. The second asserts
+`torch.cuda.is_initialized() is False` before writing its output, so a run that
+accidentally reached the GPU fails rather than reporting contended numbers.
+
+### C.7 What is *not* reproducible from this repository
+
+Per-case language records (`results.jsonl`, 132 MB) are gitignored by policy; the derived
+aggregates they support are committed instead, and `scripts/design/identity_counts.py
+--check` re-derives them. Eleven language arms are therefore summary-only. This is a
+deliberate policy rather than a defect, and `check_results_integrity.py` knows about it —
+it is stated here so a reviewer is not surprised by it.
