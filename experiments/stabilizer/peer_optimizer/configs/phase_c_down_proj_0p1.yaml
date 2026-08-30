@@ -1,0 +1,77 @@
+# PCSM Phase-C v1: cheapest decisive real-gradient causal screen.
+# No Rineya quality claim is made by this experiment alone.
+
+experiment:
+  name: pcsm_phase_c_down_proj_0p1_v1
+  seeds: [20260831, 20260907, 20260913, 20260921, 20260929]
+  arms:
+    - random
+    - gradient_topk
+    - target_only
+    - shuffled_peers_calibrated
+    - real_peers_bootstrap
+    - real_peers_calibrated
+    - layer_shuffled_peers_calibrated
+  primary_real_arm: real_peers_calibrated
+  primary_shuffled_arm: shuffled_peers_calibrated
+  primary_layer_control_arm: layer_shuffled_peers_calibrated
+  min_win_fraction: 0.80
+
+model:
+  path: artifacts/rineya-core-en32k-28L
+  device: auto
+  dtype: bfloat16
+  attn_implementation: eager
+  local_files_only: true
+  trust_remote_code: false
+  strict_determinism: true
+  hash_weights: true
+
+data:
+  # The B0 healing mix intentionally drops template_family. Phase C therefore
+  # reads its audited component corpora directly so grouped leakage isolation is possible.
+  source_files:
+    - Rineya_General_Reasoning_and_Natural_Communication_Corpus_v3.0/data/sft/rineya_v3_recommended_combined_124000.jsonl
+    - Aegis_RAG_v3_train_4410/rag_v3_train.sft.jsonl
+  expected_source_sha256:
+    Rineya_General_Reasoning_and_Natural_Communication_Corpus_v3.0/data/sft/rineya_v3_recommended_combined_124000.jsonl: 32ec39d30a1d99df94f758333070f24c662f175887c4180f7f14901487062cb7
+    Aegis_RAG_v3_train_4410/rag_v3_train.sft.jsonl: ed615a6d67fe4148af0baa5e6120cb6ea03089687daf31feb4cecd7ab847f0f7
+  group_fields:
+    - metadata.template_family
+  split:
+    seed: 20260830
+    ratios:
+      META_TRAIN: 0.50
+      MASK_CAL: 0.20
+      ONE_STEP_DEV: 0.20
+      SEALED: 0.10
+  meta_train_rows: 32
+  mask_cal_rows: 16
+  one_step_dev_rows: 32
+  max_len: 256
+
+pcsm:
+  module_path: mlp.down_proj
+  budget: 0.001
+  common_step_scale: 1.0
+  hidden_dim: 64
+  cosine_temperature: 0.75
+  min_step_scale: 0.20
+  max_step_scale: 1.20
+  meta:
+    steps: 12
+    inner_step_lr: 3.0e-4
+    optimizer_lr: 1.0e-3
+    weight_decay: 0.0
+    mask_temperature: 0.30
+    grad_clip: 5.0
+    schedule_seed_offset: 70001
+
+optimizer:
+  lr: 3.0e-4
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+  weight_decay: 0.0
+
+output:
+  dir: runs/pcsm_phase_c/down_proj_0p1_v1
