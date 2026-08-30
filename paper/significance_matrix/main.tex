@@ -1,0 +1,273 @@
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[margin=0.72in,columnsep=0.25in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{balance}
+\usepackage{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+
+\title{Observation-Normalized Significance Matrices\\for Repeated KV-Cache Eviction}
+\author{Cheng Li\\McKelvey School of Engineering\\Washington University in St. Louis}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Long-context inference can be limited by key--value (KV) cache memory even when model parameters fit comfortably on consumer hardware. We study a narrow failure mode of attention-based KV eviction under \emph{repeated} chunked prefill. A persistent per-position attention score is not observed uniformly: positions that survive early compression rounds are scored more times than positions arriving later. Consequently, raw accumulated attention can confound estimated importance with observation exposure. We track both accumulated score $S$ and observation count $C$ and rank retained positions by $S/C^e$. On one 0.6B Qwen3-derived checkpoint, a 128K passkey retrieval experiment with 12 paired keys shows a large late-context effect: at depth 0.9, raw accumulation ($e=0$) retrieves 0/12 keys whereas observation-normalized ranking ($e=1$) retrieves 10/12 (exact two-sided McNemar $p=0.0020$). A five-point exponent sweep is monotone at this depth. After correcting cache accounting to include the final uncompressed chunk, matched 64K and 128K runs retain approximately 8.83\% and 8.85\% of their actual prompt tokens and obtain mean retrieval accuracy 0.97 and 0.92, respectively. These results support observation normalization as a mechanism-level correction for repeated-compression schedules, but they do not establish a generally superior KV-cache method: evaluation uses one model, one host, a synthetic retrieval task, and exploratory statistics, and direct comparisons with prior bias-corrected methods remain necessary.
+\end{abstract}
+
+\noindent\textbf{Keywords:} KV cache compression; long-context inference; attention-based eviction; chunked prefill; observation bias; small language models
+
+\section{Introduction}
+Autoregressive transformers retain key and value states from earlier tokens so that decoding does not recompute the complete prefix. This KV cache grows linearly with sequence length and can become the dominant inference-memory term at long context. On the checkpoint studied here, the nominal full KV cache at 128K tokens is 14,336 MiB, whereas the model weights occupy about 904 MiB in bfloat16. Thus, on an 8 GiB laptop GPU, cache management is required before 128K full-cache inference is feasible.
+
+A large literature addresses this problem by retaining only selected cache entries. StreamingLLM retains attention sinks and a recent window \citep{xiao2023streamingllm}; H$_2$O and Scissorhands exploit historical importance \citep{zhang2023h2o,liu2023scissorhands}; SnapKV selects important positions from an observation window \citep{li2024snapkv}; and subsequent methods improve allocation, query awareness, or robustness \citep{chen2024nacl,cai2024pyramidkv,tang2024quest,gu2025ahakv,kim2025kvzip}. Our retention rule is therefore not novel simply because it uses attention-derived importance.
+
+This paper isolates a narrower systems interaction. If prefill is processed in chunks and the cache is compressed between chunks, the same position may be scored on many successive rounds. A position retained from an early chunk can receive substantially more score updates than a semantically identical position that arrives late. Raw accumulation therefore mixes two quantities: estimated importance and the number of opportunities a position had to be observed.
+
+We evaluate an explicit correction that stores an observation count next to the accumulated score and ranks by
+\begin{equation}
+R_i(e)=\frac{S_i}{C_i^e},\qquad e\in[0,1].
+\end{equation}
+The endpoints are raw accumulation ($e=0$) and the mean observed score ($e=1$). The contribution is not a claim that accumulated-attention bias is previously unknown. In particular, AhaKV identifies position-dependent bias in accumulated attention and proposes a recent-accumulation correction \citep{gu2025ahakv}, while NACL also discusses biased accumulated-attention statistics \citep{chen2024nacl}. Instead, we study explicit per-position \emph{observation exposure} under repeated inter-chunk compression and show that correcting this variable produces a large effect in one controlled long-context retrieval setting.
+
+The empirical claims are deliberately limited. First, at 128K and a 2,048-token compressed-prefix budget, normalization changes the depth-0.9 passkey result from 0/12 to 10/12. Second, 64K and 128K runs with matched effective final resident fractions obtain similar retrieval accuracy. Third, an auxiliary 752-item short-context regression suite shows a crossover against a matched sinks+recent positional control: significance-based selection helps at moderate keep fractions but loses at a tight keep fraction. These results characterize a mechanism and its operating range; they do not establish state-of-the-art performance.
+
+\section{Related Work}
+\paragraph{Position-based retention.}
+StreamingLLM shows that retaining initial attention-sink tokens together with a recent window can stabilize streaming inference beyond a fixed window \citep{xiao2023streamingllm}. Position-only retention is an important control here because it separates content-dependent ranking from guaranteed sink and recency protection.
+
+\paragraph{Accumulated-attention eviction.}
+H$_2$O retains heavy hitters identified from historical attention contributions \citep{zhang2023h2o}, and Scissorhands exploits persistence in token importance \citep{liu2023scissorhands}. These methods motivate persistent statistics but also make the interpretation of cumulative scores important when the number of observations differs across positions.
+
+\paragraph{Prefill and observation-window compression.}
+SnapKV selects clustered important positions using an observation window near the end of the prompt \citep{li2024snapkv}. PyramidKV adapts cache allocation across layers \citep{cai2024pyramidkv}. NACL combines importance-based and probabilistic components and explicitly argues that accumulated-attention statistics can be biased \citep{chen2024nacl}. Quest exploits query-aware sparsity for efficient long-context inference \citep{tang2024quest}.
+
+\paragraph{Bias correction and cache reuse.}
+AhaKV directly identifies position-dependent bias in accumulated attention and introduces an adaptive correction \citep{gu2025ahakv}. KVzip studies query-agnostic compression with context reconstruction \citep{kim2025kvzip}. These works substantially narrow the novelty available to the present study: our candidate distinction is not bias correction in general, but explicit normalization by the number of scoring events generated by a repeated-compression schedule.
+
+\section{Method}
+\subsection{Persistent significance state}
+For a transformer layer, let $H$ be the number of query heads, $H_{kv}$ the number of KV heads, $G=H/H_{kv}$ the number of query heads sharing each KV head, and $d$ the head dimension. Let post-RoPE queries and pre-repeat keys be
+\begin{equation}
+Q\in\mathbb{R}^{b\times H\times q\times d},\qquad
+K\in\mathbb{R}^{b\times H_{kv}\times n\times d}.
+\end{equation}
+Using an observation window of the final $w$ query rows, we compute an auxiliary attention distribution
+\begin{equation}
+A=\operatorname{softmax}\!\left(\frac{Q_wK^\top}{\sqrt d}\right),
+\end{equation}
+with the same causal restriction as the underlying forward pass. Summing over the query-head groups and observation rows gives a per-KV-head, per-position contribution
+\begin{equation}
+s=\sum_G\sum_w A.
+\end{equation}
+For each layer we maintain
+\begin{equation}
+S\leftarrow S+s,\qquad C\leftarrow C+1,
+\end{equation}
+where both $S$ and $C$ have shape $[b,H_{kv},n]$. When the cache grows, earlier accumulated state is carried onto the corresponding prefix. When eviction occurs, scores and counts are gathered using exactly the same retained indices as the KV tensors.
+
+\subsection{Observation-normalized ranking}
+Under repeated compression, older survivors have $C_i>C_j$ for newly arrived positions even if their expected per-observation attention is identical. Raw accumulation therefore rewards exposure. We rank by
+\begin{equation}
+R_i(e)=\frac{S_i}{\max(C_i,1)^e},\qquad e\in[0,1].
+\end{equation}
+The endpoint $e=0$ is the raw accumulated sum. The endpoint $e=1$ is the observed mean. Intermediate values partially retain the advantage of repeated evidence while reducing pure exposure bias. We treat $e=1$ as the best tested endpoint for the principal configuration, not as a universal optimum or as a claim about the implementation's historical default.
+
+\subsection{Retention rule}
+For each layer and KV head, a total prefix budget $B$ is divided among sink positions, a recent suffix, and content-selected positions:
+\begin{equation}
+\mathcal{K}=\mathcal{K}_{\mathrm{sink}}\cup
+\operatorname{TopK}(R(e))\cup
+\mathcal{K}_{\mathrm{recent}}.
+\end{equation}
+The implementation uses four sink tokens and a configurable recent window. When pooling is enabled, sink and recent regions are masked before max pooling and masked again after pooling. This ordering prevents large sink scores from leaking into adjacent positions through the pooling operator.
+
+\subsection{Query-conditioned inter-chunk scoring}
+A standard passkey prompt places the question at the end. If early chunks are scored only against their own trailing rows, the scoring signal is query-blind: evidence can be evicted before the final question is available. For the long-context experiments, the method therefore runs the known question as queries against the current cache after each chunk, records the resulting attention contribution, and then restores the cache exactly so the question is not retained or allowed to alter future positions.
+
+This procedure changes the problem setting. It is appropriate for offline question answering in which the query is known while a long context is processed, but it is not equivalent to generic streaming where future queries are unavailable. Query-agnostic methods should therefore be compared only under equal information access.
+
+\subsection{Memory and compute accounting}
+The checkpoint has $H_{kv}=8$, $d=128$, and bfloat16 keys and values. KV storage per token per layer is
+\begin{equation}
+8\times128\times2\times2=4096\ \text{bytes}.
+\end{equation}
+The current implementation stores both $S$ and $C$ in fp32, each costing $8\times4=32$ bytes per token per layer. The direct auxiliary-state ratio is therefore
+\begin{equation}
+\frac{64}{4096}=1.5625\%.
+\end{equation}
+This corrects an earlier internal estimate that counted only one state tensor. It excludes allocator and object overhead. The method also performs an auxiliary score matrix over $w$ query rows, a softmax and reduction, top-$k$ selection and gather at compression, and, in query-conditioned mode, one short question forward pass per chunk boundary. We make no throughput claim from the current laptop measurements.
+
+\section{Experimental Design}
+\subsection{Model and hardware}
+We evaluate one Qwen3-derived 0.6B checkpoint (R2, \texttt{rineya-core-en32k-28L}) with 28 layers, hidden dimension 1024, 16 query heads, 8 KV heads, and head dimension 128. The nominal maximum position setting is 40,960. Experiments run on a single NVIDIA RTX 4070 Laptop GPU with 8,188 MiB reported device memory under Windows/WDDM. For positions beyond the native range, long-context runs use YaRN with factor 4 \citep{peng2023yarn}.
+
+\subsection{Long-context retrieval task}
+The primary long-context task is passkey retrieval. A five-digit key is inserted at controlled depth into repetitive filler, followed by a question asking for the key. This task intentionally isolates retrieval from long-document comprehension. Each comparison cell uses the same sequence of 12 generated keys so conditions are paired by key. Earlier experiments used a single RNG stream across cells and thereby confounded depth with key identity; those results are excluded from the present inference.
+
+Chunked prefill uses 4,096-token chunks and compresses between chunks. The committed 64K and 128K prompt instances contain 62,898 and 125,826 actual tokens, respectively. Per-cell records preserve the key, decoded answer, and hit indicator.
+
+\subsection{Nominal budget versus effective resident fraction}
+The compressed-prefix budget $B$ is not equal to final resident KV length because the last chunk is not compressed before answer generation. Let $r=n\bmod C$ denote the final-chunk remainder for prompt length $n$ and chunk size $C$. The approximate final resident fraction is
+\begin{equation}
+\phi_{\mathrm{resident}}=\frac{B+r}{n}.
+\end{equation}
+For the two principal lengths, $r=1,458$ at 64K and $r=2,946$ at 128K. Thus nominally matched $B/n$ settings remain closely matched after correction, but their actual resident fractions are larger than the nominal budget ratios. We report both.
+
+\subsection{Statistics and scope}
+For two paired conditions at a fixed depth we use exact two-sided McNemar tests on discordant keys \citep{mcnemar1947}. With six total keys, statistical significance is possible only in the extreme case of all six keys being discordant in one direction ($p=0.03125$); five discordant pairs give $p=0.0625$. Six keys are therefore fragile rather than incapable of significance. Principal cells use 12 paired keys.
+
+For ordered exponent or budget sweeps, the repository uses a within-key permutation trend test with 200,000 permutations. Because the same keys appear at multiple depths, we do \emph{not} pool the 36 key--depth outcomes into a conventional McNemar test; doing so would treat clustered observations as independent. The experiments were developed adaptively and the resulting $p$-values are exploratory, not preregistered confirmatory tests.
+
+\subsection{Auxiliary short-context evaluation}
+We also report an internal 752-item \texttt{rag\_dev} sweep on 41--330-token prompts. Its ``quality'' score is a project-specific composite heuristic, not a standardized public benchmark. We therefore use it only to identify operating-range behavior under a common local scorer. We do not interpret absolute score differences as generally transferable benchmark improvements.
+
+\section{Results}
+\subsection{Count normalization at 128K}
+Table~\ref{tab:exp} reports the central ablation at 128K, prefix budget $B=2,048$, query-conditioned scoring, and 12 paired keys per depth.
+
+\begin{table}[t]
+\centering
+\caption{128K passkey retrieval versus observation-count exponent. Each depth uses the same 12 keys.}
+\label{tab:exp}
+\small
+\begin{tabular}{ccccc}
+\toprule
+$e$ & depth .1 & depth .5 & depth .9 & mean \\
+\midrule
+0.00 & 0.58 & 0.08 & 0.00 & 0.22 \\
+0.25 & 0.67 & 0.08 & 0.08 & 0.28 \\
+0.50 & 0.67 & 0.00 & 0.33 & 0.33 \\
+0.75 & 0.58 & 0.17 & 0.67 & 0.47 \\
+1.00 & 0.42 & 0.33 & 0.83 & 0.53 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At depth 0.9, raw accumulation retrieves 0/12 keys and mean normalization retrieves 10/12. All ten discordant keys favor $e=1$, giving exact two-sided McNemar $p=0.0020$. The ordered exponent trend is also strong at this depth (within-key permutation $p<10^{-4}$). At depth 0.5 the endpoint change is 1/12 to 4/12 ($+3/-0$, exact $p=0.25$), although the five-level trend has permutation $p=0.0125$. At depth 0.1, the endpoint moves in the opposite direction, 7/12 to 5/12 ($+0/-2$, exact $p=0.50$; trend $p=0.9762$).
+
+The evidence therefore supports a substantial late-context exposure effect in this configuration, not uniform superiority of normalization at every position. The monotone depth-0.9 column suggests that increasing normalization removes a disadvantage faced by later-arriving evidence, while the shallow-depth reversal shows that accumulated exposure may also contain genuine repeated evidence that full normalization discards.
+
+\subsection{Matched effective resident fractions across lengths}
+Table~\ref{tab:length} compares the 64K and 128K budget ladders after correcting for the uncompressed final chunk.
+
+\begin{table}[t]
+\centering
+\caption{Retrieval at matched effective resident fractions. ``Prefix'' is $B/n$; ``Resident'' includes the final uncompressed chunk.}
+\label{tab:length}
+\small
+\begin{tabular}{rrrrr}
+\toprule
+Length & $B$ & Prefix & Resident & Mean acc. \\
+\midrule
+64K & 1,024 & 1.56\% & 3.95\% & 0.61 \\
+128K & 2,048 & 1.56\% & 3.97\% & 0.53 \\
+64K & 4,096 & 6.25\% & 8.83\% & 0.97 \\
+128K & 8,192 & 6.25\% & 8.85\% & 0.92 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At 128K, raising $B$ from 2,048 to 8,192 gives depth-wise changes 0.42$\rightarrow$1.00, 0.33$\rightarrow$0.83, and 0.83$\rightarrow$0.92. Exact McNemar gives $p=0.0156$, $0.0312$, and $1.0$, respectively; with a Bonferroni threshold of $0.0167$ over these three depths, only depth 0.1 crosses the adjusted threshold. At 64K, the ordered budget trend has permutation $p=0.0015$, $0.0369$, and $0.0168$ at depths 0.1, 0.5, and 0.9. The consistent direction supports a budget effect, while the small key sample prevents fine-grained effect estimation.
+
+The high-budget pair has nearly identical actual final resident fractions (8.83\% and 8.85\%) and mean accuracy 0.97 and 0.92. The low-budget pair likewise retains approximately 3.95\% and 3.97\% and scores 0.61 and 0.53. This is consistent with effective resident fraction being more predictive than absolute sequence length across the two tested lengths. It is not sufficient evidence that sequence length is generally irrelevant.
+
+\subsection{Auxiliary short-context operating range}
+Table~\ref{tab:short} reports the internal \texttt{rag\_dev} composite score. The significance policy performs better than a matched sinks+recent positional control at keep fractions 0.75 and 0.50, but worse at 0.25. We call this control ``StreamingLLM-style'' rather than treating it as a complete reproduction of the original StreamingLLM system.
+
+\begin{table}[t]
+\centering
+\caption{Auxiliary short-context results on the internal 752-item composite metric. These are not public-benchmark scores.}
+\label{tab:short}
+\small
+\begin{tabular}{rrrr}
+\toprule
+Keep & Significance & Positional & Difference \\
+\midrule
+0.75 & 0.65677 & 0.47545 & +0.18132 \\
+0.50 & 0.61401 & 0.47682 & +0.13719 \\
+0.25 & 0.33863 & 0.42208 & -0.08345 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Against the uncompressed short-context run (0.66939), significance retention scores 0.65677 at keep 0.75 and 0.61401 at keep 0.50; 711/752 and 605/752 replies, respectively, are byte-identical to the no-eviction run. A pooling variant at keep 0.50 reaches 0.63371 with 631/752 identical replies. These results indicate an operating-range crossover on short prompts rather than monotone superiority of content-based eviction.
+
+\section{Discussion}
+\subsection{What the experiment supports}
+The strongest supported statement is local: under one repeated chunked-prefill schedule, raw cumulative attention can severely disadvantage late-arriving evidence because observation counts differ, and explicit normalization by those counts materially changes retention. The depth-0.9 endpoint contrast is large enough to be visible even with 12 paired keys.
+
+The cross-length data are also informative once cache accounting is corrected. Matching only $B/n$ would overstate compression because the final chunk remains uncompressed. After including that chunk, the two tested lengths still have nearly identical resident fractions and similar retrieval. This makes the observation more credible, but it remains a two-length case study rather than evidence that context length is generally ``free.''
+
+\subsection{Relationship to AhaKV and other bias corrections}
+AhaKV directly identifies position-dependent bias in accumulated attention and proposes an adaptive correction \citep{gu2025ahakv}; NACL similarly argues that accumulated-attention statistics can be biased \citep{chen2024nacl}. Our evidence therefore does not justify a novelty claim at the level of ``discovering accumulated-attention bias.'' The potentially distinct contribution is the use of an explicit observation-count state tied to a repeated compression schedule and the empirical demonstration that the resulting exposure variable predicts a large late-context failure in this implementation.
+
+A submission-quality comparison should implement AhaKV's correction, an H$_2$O-style cumulative baseline, a SnapKV-style single-shot baseline, and at least one recent query-aware or query-agnostic method under the same chunk schedule and final resident budget. Without those comparisons, the present study establishes a mechanism and a correction candidate, not state-of-the-art eviction performance.
+
+\subsection{Exploratory mixed-precision result}
+The repository also contains a proxy experiment in which significance scores allocate bit width: pure int8 gives attention-output relative error 0.00762 at 1.94$\times$ storage reduction, while a significance-gated bf16/int8/int4 mixture gives 0.00693 at 3.04$\times$. This is interesting but not yet an end-to-end result: the mixed representation is not implemented in the live cache path, repeated requantization can compound error, and local attention-output error need not translate monotonically to generation quality. We therefore treat mixed precision as future work rather than a primary contribution.
+
+\section{Limitations and Threats to Validity}
+\paragraph{Single checkpoint and host.}
+All principal measurements use one 0.6B checkpoint and one laptop GPU. Sink concentration, score persistence, allocator behavior, and thermal characteristics may differ across architectures and devices.
+
+\paragraph{Retrieval only at long context.}
+The 64K and 128K tasks hide a five-digit key in repetitive filler. They test retrieval, not long-document reasoning, generation, code understanding, or multi-hop composition. Stronger work must include natural long-context tasks and multiple models.
+
+\paragraph{No matched full-cache control above 32K.}
+The 64K uncompressed KV cache alone requires 7,168 MiB, before model weights, activations, allocator fragmentation, and desktop memory use. The current host therefore lacks a full-cache baseline at 64K or 128K. The existing 32K full-cache run also differs in RoPE configuration from the compressed YaRN runs. Consequently, the long-context numbers do not isolate compression loss from every other positional or model effect.
+
+\paragraph{Query-conditioned information.}
+The long-context method uses the future question at every chunk boundary. This is a legitimate offline QA setting but is not equivalent to generic streaming. Query-agnostic baselines should not be compared without equalizing information access.
+
+\paragraph{Small and adaptively developed statistical design.}
+Twelve keys provide evidence only for large effects. The current experiment family was refined after observing earlier results, so the reported tests are exploratory. A confirmatory study should freeze the method and analysis, generate fresh held-out keys or documents, and report key-cluster bootstrap intervals or a hierarchical model across multiple tasks and checkpoints.
+
+\paragraph{Project-specific short-context metric.}
+The 752-item short-context score is an internal composite heuristic. It is useful for local regression testing but lacks the external validity of a standard benchmark or human-rated evaluation.
+
+\paragraph{Implementation overhead.}
+The direct auxiliary-state cost is 1.5625\% of bfloat16 KV storage in the current fp32 implementation, not zero. The score computation, top-$k$, gather, and query-forward passes add compute. The paper makes no throughput claim because previous timing runs on this laptop were thermally unstable.
+
+\section{Reproducibility and Audit Trail}
+The implementation and principal evidence are committed in the repository. Key paths are:
+\begin{itemize}[leftmargin=*,nosep]
+    \item \path{scripts/kv/significance.py} and \path{scripts/kv/chunked_prefill.py};
+    \item \path{experiments/kv_significance/src/passkey.py};
+    \item \path{scripts/design/paired_passkey.py};
+    \item paired 128K exponent artifacts \path{pk_128k_pe*.json}; and
+    \item matched budget ladders \path{pk_64k_ladder.json} and \path{pk_128k_grid12.json}.
+\end{itemize}
+The repository preserves superseded and invalidated artifacts rather than deleting them, together with a claim-verification script.
+
+This audit trail matters because several earlier conclusions changed after correcting confounded key assignment, invalid positional controls, OOM accounting, cache-byte accounting, and statistical tests. The present paper intentionally uses narrower language than the original internal draft. Numerical provenance alone, however, is not a substitute for external replication or stronger controls.
+
+\section{Conclusion}
+Repeated chunked prefill introduces a simple but consequential exposure variable into persistent attention-based KV eviction: cached positions that survive longer are scored more often. In the studied implementation, ranking by raw accumulated attention can therefore conflate importance with observation count. Explicitly tracking that count and ranking by $S/C^e$ substantially improves one late-context retrieval condition, changing 128K depth-0.9 accuracy from 0/12 at $e=0$ to 10/12 at $e=1$. Correcting final-cache accounting also shows that the 64K and 128K runs were more closely matched than the nominal budget ratio alone suggests, while providing less compression than that ratio implied.
+
+These findings support observation normalization as a concrete mechanism-level correction for repeated-compression schedules. They do not yet establish a generally superior KV-cache method. Direct comparison with prior bias-corrected eviction methods, fresh confirmatory data, natural long-context tasks, multiple models, and matched full-cache controls are required before making a broader performance or novelty claim.
+
+\balance
+\begin{thebibliography}{11}
+\bibitem[Xiao et~al.(2023)Xiao, Tian, Chen, Han, and Lewis]{xiao2023streamingllm} Guangxuan Xiao, Yuandong Tian, Beidi Chen, Song Han, and Mike Lewis. \newblock Efficient streaming language models with attention sinks. \newblock \emph{arXiv preprint arXiv:2309.17453}, 2023.
+\bibitem[Zhang et~al.(2023)Zhang et~al.]{zhang2023h2o} Zhenyu Zhang, Ying Sheng, Tianyi Zhou, Tianlong Chen, Lianmin Zheng, Ruisi Cai, Zhao Song, Yuandong Tian, Christopher R\'e, Clark Barrett, Zhangyang Wang, and Beidi Chen. \newblock H2O: Heavy-Hitter Oracle for efficient generative inference of large language models. \newblock \emph{arXiv preprint arXiv:2306.14048}, 2023.
+\bibitem[Liu et~al.(2023)Liu et~al.]{liu2023scissorhands} Zichang Liu, Aditya Desai, Fangshuo Liao, Weitao Wang, Victor Xie, Zhaozhuo Xu, Anastasios Kyrillidis, and Anshumali Shrivastava. \newblock Scissorhands: Exploiting the persistence of importance hypothesis for LLM KV cache compression at test time. \newblock In \emph{Advances in Neural Information Processing Systems}, volume 36, 2023.
+\bibitem[Li et~al.(2024)Li et~al.]{li2024snapkv} Yuhong Li, Yingbing Huang, Bowen Yang, Bharat Venkitesh, Acyr Locatelli, Hanchen Ye, Tianle Cai, Patrick Lewis, and Deming Chen. \newblock SnapKV: LLM knows what you are looking for before generation. \newblock \emph{arXiv preprint arXiv:2404.14469}, 2024.
+\bibitem[Chen et~al.(2024)Chen et~al.]{chen2024nacl} Yilong Chen, Guoxia Wang, Junyuan Shang, Shiyao Cui, Zhenyu Zhang, Tingwen Liu, Shuohuan Wang, Yu Sun, Dianhai Yu, and Hua Wu. \newblock NACL: A general and effective KV cache eviction framework for LLMs at inference time. \newblock In \emph{Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics}, 2024.
+\bibitem[Cai et~al.(2024)Cai et~al.]{cai2024pyramidkv} Zefan Cai, Yichi Zhang, Bofei Gao, Yuliang Liu, Tianyu Liu, Keming Lu, Wayne Xiong, Yue Dong, Baobao Chang, Junjie Hu, and Wen Xiao. \newblock PyramidKV: Dynamic KV cache compression based on pyramidal information funneling. \newblock \emph{arXiv preprint arXiv:2406.02069}, 2024.
+\bibitem[Tang et~al.(2024)Tang et~al.]{tang2024quest} Jiaming Tang, Yilong Zhao, Kan Zhu, Guangxuan Xiao, Baris Kasikci, and Song Han. \newblock Quest: Query-aware sparsity for efficient long-context LLM inference. \newblock \emph{arXiv preprint arXiv:2406.10774}, 2024.
+\bibitem[Gu et~al.(2025)Gu et~al.]{gu2025ahakv} Yifeng Gu, Zicong Jiang, Jianxiu Jin, Kailing Guo, Ziyang Zhang, and Xiangmin Xu. \newblock AhaKV: Adaptive holistic attention-driven KV cache eviction for efficient inference of large language models. \newblock \emph{arXiv preprint arXiv:2506.03762}, 2025.
+\bibitem[Kim et~al.(2025)Kim et~al.]{kim2025kvzip} Jang-Hyun Kim, Jinuk Kim, Sangwoo Kwon, Jae~W. Lee, Sangdoo Yun, and Hyun~Oh Song. \newblock KVzip: Query-agnostic KV cache compression with context reconstruction. \newblock \emph{arXiv preprint arXiv:2505.23416}, 2025.
+\bibitem[Peng et~al.(2023)Peng, Quesnelle, Fan, and Shippole]{peng2023yarn} Bowen Peng, Jeffrey Quesnelle, Honglu Fan, and Enrico Shippole. \newblock YaRN: Efficient context window extension of large language models. \newblock \emph{arXiv preprint arXiv:2309.00071}, 2023.
+\bibitem[McNemar(1947)]{mcnemar1947} Quinn McNemar. \newblock Note on the sampling error of the difference between correlated proportions or percentages. \newblock \emph{Psychometrika}, 12(2):153--157, 1947.
+\end{thebibliography}
+\end{document}
