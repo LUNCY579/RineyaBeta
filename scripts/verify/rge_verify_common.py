@@ -101,12 +101,16 @@ def metric_sequence(run_dir: Path) -> list[tuple[int, float, float]]:
     return [(int(row["step"]), float(row["loss"]), float(row["lr"])) for row in rows]
 
 
-def geometry_rows(run_dir: Path) -> list[dict]:
-    path = run_dir / "geometry.jsonl"
+def artifact_rows(run_dir: Path, name: str) -> list[dict]:
+    path = run_dir / name
     if not path.exists():
         return []
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()
             if line.strip()]
+
+
+def geometry_rows(run_dir: Path) -> list[dict]:
+    return artifact_rows(run_dir, "geometry.jsonl")
 
 
 def write_evidence(path: Path, payload: dict) -> None:

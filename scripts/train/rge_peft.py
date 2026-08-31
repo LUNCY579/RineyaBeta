@@ -32,6 +32,7 @@ import determinism  # noqa: E402
 import heal  # noqa: E402
 import memory as mem  # noqa: E402
 from optim.delta_geometry import (  # noqa: E402
+    DeltaBallProjector,
     DeltaGeometryTracker,
     append_geometry,
     reconcile_geometry_log,
@@ -69,6 +70,15 @@ def load_rge_config(path: Path) -> dict:
         raise ValueError("M1 permits only curriculum.mode=reference")
     if bool(cfg["cma"].get("enabled")):
         raise ValueError("CMA is gated by M5 and cannot be enabled in M1")
+    deltaball = cfg["geometry"].get("deltaball", {"enabled": False})
+    if not isinstance(deltaball, dict) or "enabled" not in deltaball:
+        raise ValueError("geometry.deltaball.enabled must be explicit when configured")
+    if deltaball["enabled"]:
+        required = {"enabled", "epsilon_max", "warmin_steps", "schedule", "artifact"}
+        missing_deltaball = sorted(required - set(deltaball))
+        if missing_deltaball:
+            raise ValueError(
+                f"geometry.deltaball is missing required keys: {missing_deltaball}")
     cfg["_config_path"] = str(path.resolve())
     return cfg
 
@@ -208,7 +218,7 @@ def logged_training_seconds(path: Path) -> float:
 
 def _manifest(cfg: dict, legacy: dict, model, tokenizer, data, plans,
               plan_hash: str, contract: dict, geometry: DeltaGeometryTracker,
-              device: torch.device) -> dict:
+              deltaball: DeltaBallProjector, device: torch.device) -> dict:
     model_dir = ROOT / legacy["model"]["path"]
     eval_manifest = json.loads((ROOT / "manifests/eval_assets.json").read_text(
         encoding="utf-8"))
@@ -259,6 +269,7 @@ def _manifest(cfg: dict, legacy: dict, model, tokenizer, data, plans,
         "trainable_initial_state": _tensor_hashes(model),
         "optimizer": {**dict(cfg["optimizer"]), **contract},
         "geometry": geometry.contract,
+        "deltaball": deltaball.contract,
         "schedule": dict(cfg["schedule"]),
         "curriculum": dict(cfg["curriculum"]),
         "cma": dict(cfg["cma"]),
@@ -332,6 +343,13 @@ def main() -> None:
             cadence_steps=int(cfg["geometry"]["cadence_steps"]),
             include_radius_angle=bool(cfg["geometry"]["include_radius_angle"]),
             run_id=str(cfg["run"]["id"]))
+        deltaball_cfg = cfg["geometry"].get("deltaball", {"enabled": False})
+        deltaball = DeltaBallProjector(
+            model, enabled=bool(deltaball_cfg["enabled"]),
+            epsilon_max=float(deltaball_cfg.get("epsilon_max", 0.0)),
+            warmin_steps=int(deltaball_cfg.get("warmin_steps", 0)),
+            schedule=str(deltaball_cfg.get("schedule", "linear")),
+            run_id=str(cfg["run"]["id"]))
         previous_manifest = {}
         if args.resume != "none" and manifest_path.exists():
             try:
@@ -339,7 +357,7 @@ def main() -> None:
             except (json.JSONDecodeError, OSError):
                 previous_manifest = {}
         manifest = _manifest(cfg, legacy, model, tokenizer, data, plans, plan_hash,
-                             opt_contract, geometry, device)
+                             opt_contract, geometry, deltaball, device)
         manifest["resume_events"] = list(previous_manifest.get("resume_events", []))
         _atomic_json(manifest_path, manifest)
         (run_dir / "resolved_config.yaml").write_text(
@@ -408,6 +426,7 @@ def main() -> None:
                 set_peft_model_state_dict(model, payload["adapter_state"])
                 optimizer.load_state_dict(payload["optimizer_state"])
                 geometry.load_state_dict(rge_state["geometry_state"])
+                deltaball.load_state_dict(rge_state["deltaball_state"])
                 payload["rng_state"].restore()
                 position = payload["position_obj"]
                 resumed_from = _relative(path)
@@ -416,14 +435,18 @@ def main() -> None:
                 print(f"resumed {path.name} at step {position.global_step}")
 
         geometry_path = run_dir / str(cfg["geometry"]["artifact"])
+        projection_path = run_dir / str(deltaball_cfg.get(
+            "artifact", "deltaball_projection.jsonl"))
         log_path = run_dir / "train_log.jsonl"
         if resumed_from:
             reconcile_geometry_log(geometry_path, through_step=position.global_step)
+            reconcile_geometry_log(projection_path, through_step=position.global_step)
             reconciliation = reconcile_train_log(log_path,
                                                  through_step=position.global_step)
             manifest["resume_events"][-1]["train_log_reconciliation"] = reconciliation
-        elif geometry_path.exists():
-            geometry_path.unlink()
+        else:
+            geometry_path.unlink(missing_ok=True)
+            projection_path.unlink(missing_ok=True)
         _atomic_json(manifest_path, manifest)
 
         if args.dry_run:
@@ -465,6 +488,8 @@ def main() -> None:
                     "optimizer_contract": opt_contract,
                     "geometry_contract": geometry.contract,
                     "geometry_state": geometry.state_dict(),
+                    "deltaball_contract": deltaball.contract,
+                    "deltaball_state": deltaball.state_dict(),
                     "curriculum": cfg["curriculum"], "cma": cfg["cma"],
                 }})
             ledger_row = {
@@ -522,6 +547,7 @@ def main() -> None:
                     [param for param in model.parameters() if param.requires_grad], clip)
                 optimizer.step()
                 next_step = position.global_step + 1
+                append_geometry(projection_path, deltaball.project(next_step))
                 append_geometry(geometry_path, geometry.measure(next_step))
                 if use_cuda:
                     torch.cuda.synchronize()

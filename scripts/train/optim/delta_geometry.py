@@ -17,6 +17,7 @@ from typing import Any, Iterator
 import torch
 
 GEOMETRY_IMPLEMENTATION_VERSION = "rge-delta-geometry-v1"
+DELTABALL_IMPLEMENTATION_VERSION = "rge-deltaball-v1"
 
 
 def _work(tensor: torch.Tensor) -> torch.Tensor:
@@ -274,6 +275,130 @@ class DeltaGeometryTracker:
             }
             for name, payload in previous.items()
         }
+
+
+class DeltaBallProjector:
+    """Base-relative trust-region projection on each induced LoRA delta."""
+
+    def __init__(self, model, *, enabled: bool, epsilon_max: float,
+                 warmin_steps: int, schedule: str, run_id: str) -> None:
+        if epsilon_max < 0.0 or not math.isfinite(epsilon_max):
+            raise ValueError("DeltaBall epsilon_max must be finite and non-negative")
+        if warmin_steps < 0:
+            raise ValueError("DeltaBall warmin_steps must be non-negative")
+        if schedule != "linear":
+            raise ValueError("DeltaBall v1 supports only schedule=linear")
+        self.enabled = bool(enabled)
+        self.epsilon_max = float(epsilon_max)
+        self.warmin_steps = int(warmin_steps)
+        self.schedule = str(schedule)
+        self.run_id = str(run_id)
+        self.targets = list(iter_lora_targets(model)) if self.enabled else []
+        if self.enabled and not self.targets:
+            raise ValueError("DeltaBall enabled but no PEFT LoRA targets were found")
+        self.base_norms = {
+            target.name: math.sqrt(float(_work(target.base).square().sum().item()))
+            for target in self.targets
+        }
+        self.steps_projected = 0
+        self.matrix_checks = 0
+        self.boundary_hits = 0
+
+    @property
+    def contract(self) -> dict:
+        return {
+            "implementation": DELTABALL_IMPLEMENTATION_VERSION,
+            "enabled": self.enabled,
+            "epsilon_max": self.epsilon_max,
+            "warmin_steps": self.warmin_steps,
+            "schedule": self.schedule,
+            "target_count": len(self.targets),
+            "optimizer_state_projection": "none",
+            "factor_projection": "symmetric_sqrt_c",
+        }
+
+    def epsilon_at(self, step: int) -> float:
+        if step < 1:
+            return 0.0
+        fraction = (1.0 if self.warmin_steps == 0 else
+                    min(float(step) / float(self.warmin_steps), 1.0))
+        return self.epsilon_max * fraction
+
+    @torch.no_grad()
+    def project(self, step: int) -> list[dict]:
+        if not self.enabled:
+            return []
+        epsilon = self.epsilon_at(step)
+        rows = []
+        step_hit = False
+        for target in self.targets:
+            base_norm = self.base_norms[target.name]
+            delta_norm = float(low_rank_frobenius_norm(
+                target.b, target.a, scale=target.scale).item())
+            relative_before = delta_norm / base_norm
+            hit = relative_before > epsilon
+            projection_c = 1.0
+            if hit:
+                if delta_norm <= 0.0 or epsilon <= 0.0:
+                    projection_c = 0.0
+                else:
+                    projection_c = epsilon * base_norm / delta_norm
+                factor_scale = math.sqrt(max(projection_c, 0.0))
+                target.a.mul_(factor_scale)
+                target.b.mul_(factor_scale)
+                step_hit = True
+                self.boundary_hits += 1
+            relative_after = relative_before * projection_c
+            if hit and not math.isclose(relative_after, epsilon,
+                                        rel_tol=2e-5, abs_tol=2e-8):
+                raise FloatingPointError(
+                    f"DeltaBall projection missed boundary for {target.name}: "
+                    f"{relative_after} != {epsilon}")
+            self.matrix_checks += 1
+            rows.append({
+                "schema_version": 1,
+                "record_type": "deltaball_projection",
+                "run_id": self.run_id,
+                "step": int(step),
+                "module": target.name,
+                "epsilon": float(epsilon),
+                "base_norm": float(base_norm),
+                "relative_delta_before": float(relative_before),
+                "relative_delta_after": float(relative_after),
+                "boundary_hit": bool(hit),
+                "projection_c": float(projection_c),
+                "factor_scale": float(math.sqrt(max(projection_c, 0.0))),
+                "implementation": DELTABALL_IMPLEMENTATION_VERSION,
+            })
+        self.steps_projected += 1
+        for row in rows:
+            row["cumulative_matrix_hit_rate"] = (
+                self.boundary_hits / max(self.matrix_checks, 1))
+            row["step_had_boundary_hit"] = step_hit
+        return rows
+
+    def state_dict(self) -> dict:
+        return {
+            "implementation": DELTABALL_IMPLEMENTATION_VERSION,
+            "contract": self.contract,
+            "steps_projected": self.steps_projected,
+            "matrix_checks": self.matrix_checks,
+            "boundary_hits": self.boundary_hits,
+            "base_norms": self.base_norms,
+        }
+
+    def load_state_dict(self, state: dict) -> None:
+        if not self.enabled:
+            return
+        if state.get("implementation") != DELTABALL_IMPLEMENTATION_VERSION:
+            raise ValueError("DeltaBall implementation/version changed across resume")
+        if state.get("contract") != self.contract:
+            raise ValueError("DeltaBall contract changed across resume")
+        if state.get("base_norms") != self.base_norms:
+            raise ValueError("DeltaBall base norms changed across resume")
+        self.steps_projected = int(state["steps_projected"])
+        self.matrix_checks = int(state["matrix_checks"])
+        self.boundary_hits = int(state["boundary_hits"])
 
 
 def append_geometry(path: Path, rows: list[dict]) -> None:

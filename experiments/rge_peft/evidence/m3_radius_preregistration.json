@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "status": "PREREGISTERED_BEFORE_M3_RUNS",
+  "program_version": "rge-peft-v1.2",
+  "source_run": "artifacts/rge_peft/m2_o_a_adamw_r16_t104371",
+  "source_run_commit": "f99fdd38276035b30fb40b6b622febf50fbf175e",
+  "source_mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+  "source_plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+  "source_geometry_step": 100,
+  "source_modules": 196,
+  "d_ref_definition": "linear 95th percentile of per-module relative_delta at final available AdamW pilot measurement",
+  "d_ref": 0.014355268562212586,
+  "epsilon_multipliers": [0.5, 1.0, 2.0],
+  "epsilon_candidates": [
+    0.007177634281106293,
+    0.014355268562212586,
+    0.028710537124425173
+  ],
+  "radius_schedule": {
+    "name": "linear",
+    "warmin_steps": 40
+  },
+  "optimizer": "AdamW only; Muon rejected at M2",
+  "requested_supervised_token_budget": 104371,
+  "screening_rules": {
+    "stable_required": true,
+    "post_warmin_matrix_hit_rate_min": 0.01,
+    "post_warmin_matrix_hit_rate_max": 0.50,
+    "selection": "among eligible stable radii, lowest token-weighted training loss; exact ties choose the larger radius",
+    "inactive_interpretation": "a radius below 1 percent post-warm-in hits does not test DeltaBall causally",
+    "overconstrained_interpretation": "a radius above 50 percent post-warm-in matrix hits is rejected as excessive radial pressure"
+  },
+  "evaluation_selection_used": false,
+  "sealed_data_accessed": false
+}

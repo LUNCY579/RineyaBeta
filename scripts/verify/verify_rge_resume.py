@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from rge_verify_common import (  # noqa: E402
-    RGE, exact_problems, geometry_rows, load_latest, metric_sequence, run_entry,
+    RGE, artifact_rows, exact_problems, geometry_rows, load_latest, metric_sequence, run_entry,
     write_evidence,
 )
 
@@ -53,6 +53,10 @@ def main() -> None:
                                "resume.loss_lr_sequence")
     problems += exact_problems(geometry_rows(straight), geometry_rows(resumed),
                                "resume.geometry_artifact")
+    projection_left = artifact_rows(straight, "deltaball_projection.jsonl")
+    projection_right = artifact_rows(resumed, "deltaball_projection.jsonl")
+    problems += exact_problems(projection_left, projection_right,
+                               "resume.deltaball_projection_artifact")
     manifest = json.loads((resumed / "run_manifest.json").read_text(encoding="utf-8"))
     if not manifest.get("resume_events"):
         problems.append("resumed manifest contains no resume event")
@@ -63,6 +67,7 @@ def main() -> None:
         "adapter_tensor_count": len(right["adapter_state"]),
         "optimizer_state_entries": len(right["optimizer_state"]["state"]),
         "geometry_record_count": len(geometry_rows(resumed)),
+        "deltaball_projection_record_count": len(projection_right),
         "generic_optimizer_state_compared": True,
         "geometry_resume_state_compared": True,
         "stale_train_log_tail_injected_and_removed": True,

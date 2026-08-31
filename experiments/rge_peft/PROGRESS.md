@@ -6,7 +6,7 @@
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
 **Current milestone:** M3 — DeltaBall factorial (AdamW path)
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 NOT_STARTED
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 IN_PROGRESS
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -32,7 +32,7 @@ RETIRED
 | M0 | Approved SSOT and dashboard committed to the remote research branch | Aug 30 | 3% | GATE_PASSED | canonical commit `fe34db9`; exact blobs and cleanup verified |
 | M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | GATE_PASSED | all ten exit items pass in `evidence/m1_gate_audit.json` |
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
-| M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | NOT_STARTED | G-* evidence and frozen geometry recipe or retirement |
+| M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | IN_PROGRESS | AdamW-only radius screen preregistered; mechanism tests pass |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | NOT_STARTED | C-* evidence and ingredient decision |
 | M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | NOT_STARTED | CMA math/export proof and endpoint decision |
 | M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | NOT_STARTED | frozen control/candidate, seed evidence, retention/efficiency decision |
@@ -139,9 +139,16 @@ RETIRED
 
 ### M3 — DeltaBall factorial
 
-- **Status:** NOT_STARTED
+- **Opened:** 2026-08-31 (America/Chicago)
+- **Status:** IN_PROGRESS
 - **Planned window:** 2026-09-14 to 2026-09-27
 - **Required evidence:** projection verification; bounded radius screen; G-A/G-M/G-AD/G-MD results; boundary-hit diagnostics; recipe freeze or retirement.
+- **M2 dependency decision:** Muon is rejected. M3 proceeds only with G-A AdamW control and G-AD radius arms, as allowed by the SSOT's separability rule.
+- **Radius derivation:** AdamW step-100 geometry across 196 modules gives `d_ref = p95(relative_delta) = 0.01435526856`. Frozen candidates are `0.5x/1x/2x`: `0.00717763428`, `0.01435526856`, `0.02871053712`, with 40-step linear warm-in.
+- **Selection rule:** stable post-warm-in matrix-hit rate must be 1%–50%; among eligible arms choose lowest token-weighted loss, exact ties choose larger radius. Retention/evaluation does not select the screen radius.
+- **Mechanism verification:** `verify_deltaball_projection.py` — PASS, 9 checks: inside no-op, exact boundary, symmetric `sqrt(c)`, dense product scale, frozen base, linear schedule, gauge equivalence, exact counter restore, no RNG.
+- **Sealed data accessed:** no.
+- **Next bounded action:** commit implementation/preregistration, run GPU DeltaBall smoke plus exact resume, then execute the four-arm AdamW radius screen.
 
 ### M4 — curriculum/tail
 
@@ -187,7 +194,7 @@ RETIRED
 | 2026-08-30 | M0 | Close M0 and advance the operational focus to M1 without starting implementation | exact Git blobs, successful hash gate, clean two-file diff | Actions `33344630813`; `fe34db9` |
 | 2026-08-30 | M1 | Open implementation after re-verifying remote/current SHAs and frozen SSOT | Tier-0 math, CPU parity/resume, legacy regression, sealed refusal all pass; GPU gates still open | pending implementation commit; evidence under `experiments/rge_peft/evidence/` |
 | 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | gate record `a59a340`; `experiments/rge_peft/evidence/m1_gate_audit.json` |
-| 2026-08-31 | M2 | Reject Muon for the general Rineya recipe and advance DeltaBall only under AdamW | training loss improved, but chat non-inferiority failed and RAG gained four critical defects | `experiments/rge_peft/evidence/m2_gate_audit.json`; gate-record commit pending |
+| 2026-08-31 | M2 | Reject Muon for the general Rineya recipe and advance DeltaBall only under AdamW | training loss improved, but chat non-inferiority failed and RAG gained four critical defects | gate record `8f69c9d`; `experiments/rge_peft/evidence/m2_gate_audit.json` |
 
 ## 6. Blocker log
 

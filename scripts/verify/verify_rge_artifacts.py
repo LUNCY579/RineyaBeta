@@ -18,7 +18,7 @@ from rge_peft import REQUIRED_SECTIONS  # noqa: E402
 MANIFEST_FIELDS = {
     "schema_version", "run_id", "program_version", "designation", "git",
     "model", "tokenizer", "data", "evaluation_assets", "seed", "environment",
-    "precision", "lora", "trainable_initial_state", "optimizer", "geometry",
+    "precision", "lora", "trainable_initial_state", "optimizer", "geometry", "deltaball",
     "schedule", "curriculum", "cma", "supervised_token_budget", "plan_hash",
     "plan_summaries", "first_batches_sha256", "memory", "source_fingerprint",
     "wall_time_s", "active_gpu_hours", "peak_allocated_mib",
@@ -65,6 +65,7 @@ def main() -> None:
         problems.append("checkpoint is missing RGE extra state")
     else:
         for field in ("optimizer_contract", "geometry_contract", "geometry_state",
+                      "deltaball_contract", "deltaball_state",
                       "curriculum", "cma"):
             if field not in rge:
                 problems.append(f"RGE checkpoint state missing {field}")
@@ -81,8 +82,18 @@ def main() -> None:
     if config["geometry"]["enabled"] and checkpoint["position"]["global_step"] >= \
             int(config["geometry"]["cadence_steps"]) and not rows:
         problems.append("geometry enabled and due, but artifact contains no records")
+    deltaball = config["geometry"].get("deltaball", {"enabled": False})
+    projection_rows = []
+    projection_path = run_dir / str(deltaball.get(
+        "artifact", "deltaball_projection.jsonl"))
+    if projection_path.exists():
+        projection_rows = [json.loads(line) for line in projection_path.read_text(
+            encoding="utf-8").splitlines() if line.strip()]
+    if deltaball.get("enabled") and not projection_rows:
+        problems.append("DeltaBall enabled but projection artifact is empty")
     result = {"status": "FAIL" if problems else "PASS", "run_dir": str(run_dir),
               "manifest_fields": len(manifest), "geometry_records": len(rows),
+              "deltaball_projection_records": len(projection_rows),
               "checkpoint_format_version": checkpoint.get("format_version"),
               "problems": problems}
     print(json.dumps(result, indent=2))

@@ -1,0 +1,22 @@
+program_version: rge-peft-v1.2
+seed: 20260819
+device: auto
+model: {path: artifacts/rineya-core-en32k-28L, dtype: bfloat16, attn_implementation: eager}
+data: {mix: artifacts/heal_mixes/SMOKE/heal_mix_smoke.jsonl, max_len: 128, megabatch_rows: 64, width_bucket: 1}
+lora: {r: 16, alpha: 32, dropout: 0.0, target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]}
+optimizer: {name: adamw, implementation: torch.optim.AdamW, version: torch-2.13, lr: 1.0e-4, betas: [0.9, 0.999], eps: 1.0e-8, weight_decay: 0.0}
+geometry:
+  enabled: true
+  implementation: low_rank
+  cadence_steps: 1
+  include_radius_angle: true
+  artifact: geometry.jsonl
+  deltaball: {enabled: true, epsilon_max: 0.007177634281106293, warmin_steps: 4, schedule: linear, artifact: deltaball_projection.jsonl}
+schedule: {name: cosine, warmup_steps: 2, min_lr_ratio: 0.0}
+curriculum: {mode: reference, manifest: null}
+cma: {enabled: false, eligible: false}
+train: {epochs: 1, supervised_token_budget: null, grad_clip: 1.0, grad_accum: 2, gradient_checkpointing: false}
+memory: {cap_mib: 5120, margin_mib: 512, max_tokens_per_microbatch: 512, max_rows_per_microbatch: 4}
+determinism: {strict: true}
+resume: {allow_env_drift: false, allow_code_drift: false}
+run: {id: rge_v1__m3__deltaball_smoke__r16__seed20260819, designation: exploratory, dir: artifacts/rge_peft/m3_deltaball_smoke, save_every_steps: 1, log_every_steps: 1, keep_last_checkpoints: 8}

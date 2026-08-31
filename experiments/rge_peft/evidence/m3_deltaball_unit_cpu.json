@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "checks": 9,
+  "check_names": [
+    "inside-ball factors unchanged",
+    "outside delta projected to boundary",
+    "symmetric sqrt(c) scaling",
+    "dense product scaled by c",
+    "frozen base untouched",
+    "linear warm-in schedule",
+    "gauge-equivalent products project identically",
+    "projection counters restore exactly",
+    "projection consumes no RNG"
+  ],
+  "sealed_data_accessed": false
+}
