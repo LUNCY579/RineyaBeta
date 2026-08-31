@@ -148,8 +148,12 @@ RETIRED
 - **Selection rule:** stable post-warm-in matrix-hit rate must be 1%–50%; among eligible arms choose lowest token-weighted loss, exact ties choose larger radius. Retention/evaluation does not select the screen radius.
 - **Mechanism verification:** `verify_deltaball_projection.py` — PASS, 9 checks: inside no-op, exact boundary, symmetric `sqrt(c)`, dense product scale, frozen base, linear schedule, gauge equivalence, exact counter restore, no RNG.
 - **GPU integration/resume:** PASS at rank 16/all targets. Straight versus resumed trajectories match across 392 adapter/optimizer entries, RNG, geometry state, projection counters, 588 geometry records, 588 projection records, and an injected stale train-log tail. Format-v2 artifact schema passes.
+- **Radius screen:** complete. Control weighted/final loss `1.95586/0.94659`. Epsilon 0.5x: 37.14% post-warm-in matrix hits, 83.61% hit steps, `1.98109/1.04580` loss (overconstrained and worse). Epsilon 1x: 1.054% matrix hits, 34.43% hit steps, `1.95628/0.95234` (eligible, near-neutral/slightly worse). Epsilon 2x: zero hits through fully warmed checkpoint 40 and stopped early as inactive.
+- **Selected radius:** epsilon `0.014355268562212586` (1x `d_ref`) by the preregistered best-eligible weighted-loss rule. Selection used no retention/evaluation result.
+- **Control reuse proof:** the M3 G-A checkpoint is bit-identical across all 392 adapter tensors to the already evaluated M2 AdamW control, with identical position and plan. Its frozen retention results may be reused without regeneration.
+- **M3 compute so far:** approximately 1.36 measured optimizer-step GPU-hours for the screen; timing is exploratory single-order only.
 - **Sealed data accessed:** no.
-- **Next bounded action:** execute the four-arm AdamW control plus 0.5x/1x/2x DeltaBall radius screen sequentially.
+- **Next bounded action:** export the frozen 1x DeltaBall endpoint and compare `chat_dev`/`rag_dev` retention against the bit-identical AdamW control.
 
 ### M4 — curriculum/tail
 

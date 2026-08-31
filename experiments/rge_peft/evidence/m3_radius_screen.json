@@ -1,0 +1,274 @@
+{
+  "arms": [
+    {
+      "active_gpu_hours": 0.38432834152777307,
+      "actual_supervised_tokens": 104571,
+      "artifact_reconciliation": null,
+      "completed_budget": true,
+      "deltaball": {
+        "enabled": false,
+        "epsilon_max": 0.0,
+        "factor_projection": "symmetric_sqrt_c",
+        "implementation": "rge-deltaball-v1",
+        "optimizer_state_projection": "none",
+        "schedule": "linear",
+        "target_count": 0,
+        "warmin_steps": 40
+      },
+      "final_loss": 0.9465909394065255,
+      "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "median_projection_c_on_hits": null,
+      "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+      "model_sha256": "c248c28f9bb2aaca152d65a852394335c6c26063b83830546f686080d2cc9654",
+      "most_projected_modules": [],
+      "peak_reserved_mib": 4330.0,
+      "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+      "post_warmin_matrix_checks": 0,
+      "post_warmin_matrix_hit_rate": 0.0,
+      "post_warmin_matrix_hits": 0,
+      "post_warmin_step_hit_rate": 0.0,
+      "run_dir": "artifacts/rge_peft/m3_g_a_adamw_r16_t104371",
+      "run_id": "rge_v1__m3__g_a__r16__t104371__seed20260819",
+      "source_commit": "866fea4ef50dbcecf93f5573f3b014d3f7f716dc",
+      "source_fingerprint": "44e89a2c6169a99d686a2ac0b8462f844ee901bf5e3154558c911fb57751d33d",
+      "stable": true,
+      "steps": 101,
+      "token_weighted_mean_loss": 1.9558595678363209,
+      "tokenizer_sha256": "249fa5ad6183e98ab44786bbbf95b072250773c69d8573c0cb8f2d44212d6958"
+    },
+    {
+      "active_gpu_hours": 0.4090886385277746,
+      "actual_supervised_tokens": 104571,
+      "artifact_reconciliation": null,
+      "completed_budget": true,
+      "deltaball": {
+        "enabled": true,
+        "epsilon_max": 0.007177634281106293,
+        "factor_projection": "symmetric_sqrt_c",
+        "implementation": "rge-deltaball-v1",
+        "optimizer_state_projection": "none",
+        "schedule": "linear",
+        "target_count": 196,
+        "warmin_steps": 40
+      },
+      "early_stopped_inactive": false,
+      "final_loss": 1.045795606258582,
+      "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "median_projection_c_on_hits": 0.9896680190195708,
+      "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+      "model_sha256": "c248c28f9bb2aaca152d65a852394335c6c26063b83830546f686080d2cc9654",
+      "most_projected_modules": [
+        [
+          "base_model.model.model.layers.19.mlp.gate_proj",
+          0.8360655737704918
+        ],
+        [
+          "base_model.model.model.layers.26.mlp.gate_proj",
+          0.8360655737704918
+        ],
+        [
+          "base_model.model.model.layers.17.mlp.up_proj",
+          0.819672131147541
+        ],
+        [
+          "base_model.model.model.layers.19.self_attn.k_proj",
+          0.819672131147541
+        ],
+        [
+          "base_model.model.model.layers.19.self_attn.v_proj",
+          0.819672131147541
+        ],
+        [
+          "base_model.model.model.layers.20.mlp.gate_proj",
+          0.819672131147541
+        ],
+        [
+          "base_model.model.model.layers.17.mlp.gate_proj",
+          0.8032786885245902
+        ],
+        [
+          "base_model.model.model.layers.18.mlp.gate_proj",
+          0.8032786885245902
+        ],
+        [
+          "base_model.model.model.layers.18.mlp.up_proj",
+          0.7868852459016393
+        ],
+        [
+          "base_model.model.model.layers.19.mlp.up_proj",
+          0.7868852459016393
+        ],
+        [
+          "base_model.model.model.layers.20.mlp.up_proj",
+          0.7868852459016393
+        ],
+        [
+          "base_model.model.model.layers.22.mlp.gate_proj",
+          0.7868852459016393
+        ]
+      ],
+      "peak_reserved_mib": 4330.0,
+      "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+      "post_warmin_matrix_checks": 11956,
+      "post_warmin_matrix_hit_rate": 0.37144529943124793,
+      "post_warmin_matrix_hits": 4441,
+      "post_warmin_step_hit_rate": 0.8360655737704918,
+      "prefix_matches_control": false,
+      "run_dir": "artifacts/rge_peft/m3_g_ad_eps05_r16_t104371",
+      "run_id": "rge_v1__m3__g_ad_eps05__r16__t104371__seed20260819",
+      "source_commit": "866fea4ef50dbcecf93f5573f3b014d3f7f716dc",
+      "source_fingerprint": "44e89a2c6169a99d686a2ac0b8462f844ee901bf5e3154558c911fb57751d33d",
+      "stable": true,
+      "steps": 101,
+      "token_weighted_mean_loss": 1.9810860109532062,
+      "tokenizer_sha256": "249fa5ad6183e98ab44786bbbf95b072250773c69d8573c0cb8f2d44212d6958"
+    },
+    {
+      "active_gpu_hours": 0.4137942383055573,
+      "actual_supervised_tokens": 104571,
+      "artifact_reconciliation": null,
+      "completed_budget": true,
+      "deltaball": {
+        "enabled": true,
+        "epsilon_max": 0.014355268562212586,
+        "factor_projection": "symmetric_sqrt_c",
+        "implementation": "rge-deltaball-v1",
+        "optimizer_state_projection": "none",
+        "schedule": "linear",
+        "target_count": 196,
+        "warmin_steps": 40
+      },
+      "early_stopped_inactive": false,
+      "final_loss": 0.9523433445637502,
+      "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "median_projection_c_on_hits": 0.9848122476175191,
+      "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+      "model_sha256": "c248c28f9bb2aaca152d65a852394335c6c26063b83830546f686080d2cc9654",
+      "most_projected_modules": [
+        [
+          "base_model.model.model.layers.26.mlp.gate_proj",
+          0.3442622950819672
+        ],
+        [
+          "base_model.model.model.layers.25.mlp.gate_proj",
+          0.2786885245901639
+        ],
+        [
+          "base_model.model.model.layers.23.mlp.gate_proj",
+          0.26229508196721313
+        ],
+        [
+          "base_model.model.model.layers.22.mlp.gate_proj",
+          0.22950819672131148
+        ],
+        [
+          "base_model.model.model.layers.19.mlp.gate_proj",
+          0.21311475409836064
+        ],
+        [
+          "base_model.model.model.layers.24.mlp.gate_proj",
+          0.19672131147540983
+        ],
+        [
+          "base_model.model.model.layers.20.mlp.gate_proj",
+          0.18032786885245902
+        ],
+        [
+          "base_model.model.model.layers.18.mlp.gate_proj",
+          0.16393442622950818
+        ],
+        [
+          "base_model.model.model.layers.21.mlp.gate_proj",
+          0.13114754098360656
+        ],
+        [
+          "base_model.model.model.layers.17.mlp.gate_proj",
+          0.04918032786885246
+        ],
+        [
+          "base_model.model.model.layers.27.mlp.gate_proj",
+          0.01639344262295082
+        ],
+        [
+          "base_model.model.model.layers.0.mlp.down_proj",
+          0.0
+        ]
+      ],
+      "peak_reserved_mib": 4330.0,
+      "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+      "post_warmin_matrix_checks": 11956,
+      "post_warmin_matrix_hit_rate": 0.01053864168618267,
+      "post_warmin_matrix_hits": 126,
+      "post_warmin_step_hit_rate": 0.3442622950819672,
+      "prefix_matches_control": false,
+      "run_dir": "artifacts/rge_peft/m3_g_ad_eps10_r16_t104371",
+      "run_id": "rge_v1__m3__g_ad_eps10__r16__t104371__seed20260819",
+      "source_commit": "866fea4ef50dbcecf93f5573f3b014d3f7f716dc",
+      "source_fingerprint": "44e89a2c6169a99d686a2ac0b8462f844ee901bf5e3154558c911fb57751d33d",
+      "stable": true,
+      "steps": 101,
+      "token_weighted_mean_loss": 1.956284070136419,
+      "tokenizer_sha256": "249fa5ad6183e98ab44786bbbf95b072250773c69d8573c0cb8f2d44212d6958"
+    },
+    {
+      "active_gpu_hours": 0.1529230210000009,
+      "actual_supervised_tokens": 41383,
+      "artifact_reconciliation": {
+        "input_rows": 40,
+        "output_rows": 40,
+        "removed_rows": 0
+      },
+      "completed_budget": false,
+      "deltaball": {
+        "enabled": true,
+        "epsilon_max": 0.028710537124425173,
+        "factor_projection": "symmetric_sqrt_c",
+        "implementation": "rge-deltaball-v1",
+        "optimizer_state_projection": "none",
+        "schedule": "linear",
+        "target_count": 196,
+        "warmin_steps": 40
+      },
+      "early_stopped_inactive": true,
+      "final_loss": 1.9655817998408776,
+      "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "median_projection_c_on_hits": null,
+      "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+      "model_sha256": "c248c28f9bb2aaca152d65a852394335c6c26063b83830546f686080d2cc9654",
+      "most_projected_modules": [],
+      "peak_reserved_mib": 4330.0,
+      "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+      "post_warmin_matrix_checks": 0,
+      "post_warmin_matrix_hit_rate": 0.0,
+      "post_warmin_matrix_hits": 0,
+      "post_warmin_step_hit_rate": 0.0,
+      "prefix_matches_control": true,
+      "run_dir": "artifacts/rge_peft/m3_g_ad_eps20_r16_t104371",
+      "run_id": "rge_v1__m3__g_ad_eps20__r16__t104371__seed20260819",
+      "source_commit": "866fea4ef50dbcecf93f5573f3b014d3f7f716dc",
+      "source_fingerprint": "44e89a2c6169a99d686a2ac0b8462f844ee901bf5e3154558c911fb57751d33d",
+      "stable": true,
+      "steps": 40,
+      "token_weighted_mean_loss": 2.84699746394052,
+      "tokenizer_sha256": "249fa5ad6183e98ab44786bbbf95b072250773c69d8573c0cb8f2d44212d6958"
+    }
+  ],
+  "comparability_mismatches": {},
+  "configs": [
+    "configs/rge_peft/m3_g_a_adamw.yaml",
+    "configs/rge_peft/m3_g_ad_eps05.yaml",
+    "configs/rge_peft/m3_g_ad_eps10.yaml",
+    "configs/rge_peft/m3_g_ad_eps20.yaml"
+  ],
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "selected_epsilon_max": 0.014355268562212586,
+  "selected_run_id": "rge_v1__m3__g_ad_eps10__r16__t104371__seed20260819",
+  "selection_rule": "eligible stable arm with lowest token-weighted loss; ties choose larger radius",
+  "status": "PASS",
+  "timing_interpretation": "EXPLORATORY_SINGLE_ORDER_ONLY"
+}
