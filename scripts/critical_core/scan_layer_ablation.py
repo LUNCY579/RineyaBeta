@@ -233,21 +233,33 @@ def _evaluate_condition(model, cases, tokenizer, generation, *, device, torch) -
 
 
 @contextmanager
-def _bypass_layer(layers, layer_index: int, torch) -> Iterator[None]:
-    class BypassDecoderLayer(torch.nn.Module):
-        def forward(self, hidden_states, *args, **kwargs):  # noqa: ANN001
-            if kwargs.get("use_cache"):
-                raise RuntimeError("CRCC bypass requires use_cache=False")
-            if kwargs.get("output_attentions"):
-                return hidden_states, None
-            return (hidden_states,)
+def _bypass_layer(layers, layer_index: int) -> Iterator[None]:
+    """Override one block's visible output with its input while preserving API shape.
 
-    original = layers[layer_index]
-    layers[layer_index] = BypassDecoderLayer()
+    Qwen3 decoder layers return a tensor in recent Transformers releases and a tuple
+    in older releases. A forward hook observes the real return contract and replaces
+    only its hidden-state component, avoiding a version-specific surrogate module.
+    The layer still executes, but with ``use_cache=False`` it has no stateful effect;
+    downstream layers receive the exact pre-block residual stream.
+    """
+
+    layer = layers[layer_index]
+
+    def identity_output(module, inputs, output):  # noqa: ANN001, ARG001
+        if not inputs:
+            raise RuntimeError("CRCC bypass could not observe positional hidden_states")
+        hidden_states = inputs[0]
+        if isinstance(output, tuple):
+            return (hidden_states, *output[1:])
+        if isinstance(output, list):
+            return [hidden_states, *output[1:]]
+        return hidden_states
+
+    handle = layer.register_forward_hook(identity_output)
     try:
         yield
     finally:
-        layers[layer_index] = original
+        handle.remove()
 
 
 def _validate_completed_result(path: Path, expected_ids: Sequence[str]) -> dict[str, Any]:
@@ -434,7 +446,7 @@ def main() -> None:
             result = _validate_completed_result(result_path, expected_ids)
         else:
             print(f"layer {layer_index:02d}: bypass and evaluate")
-            with _bypass_layer(layers, layer_index, torch):
+            with _bypass_layer(layers, layer_index):
                 result = _evaluate_condition(
                     model,
                     tokenized,

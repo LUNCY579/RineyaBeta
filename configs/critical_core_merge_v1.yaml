@@ -1,0 +1,106 @@
+# Delta reinsertion matrix. Run only after the matched recovery adapters exist.
+experiment_id: crcc-v1
+recovery_matrix: runs/critical_core/crcc-v1/recovery/recovery_matrix.json
+
+dtype: bfloat16
+seed: 20260831
+
+paths:
+  plan_root: runs/critical_core/crcc-v1/merge/plans
+  model_root: runs/critical_core/crcc-v1/merge/models
+  matrix_output: runs/critical_core/crcc-v1/merge/merge_matrix.json
+  execution_ledger: runs/critical_core/crcc-v1/merge/execution_ledger.json
+
+targets:
+  qwen:
+    path: Qwen3-0.6B
+  halo:
+    # Expected local published-core path; readiness is recorded rather than assumed.
+    path: artifacts/Rineya-Halo-1.2.0
+  supa_a1_1:
+    path: artifacts/Rineya-Supa-A1.1
+
+donors:
+  monster:
+    arm: crcc_monster
+    seed: 20260831
+  random:
+    arm: control_random
+    seed: 20260831
+  low_criticality:
+    arm: control_low_criticality
+    seed: 20260831
+  angular_high:
+    arm: control_angular_high
+    seed: 20260831
+  aegis:
+    arm: aegis_19_reference
+    seed: 20260831
+
+coefficient_sets:
+  donor_sweep: [0.10, 0.25, 0.50, 0.75, 1.00, 1.25]
+  composition_sweep: [0.25, 0.50, 0.75, 1.00]
+
+# beta=0.50 is the predeclared matched-control comparison. Other coefficients
+# are exploratory until one recipe is frozen on development data.
+primary_matched_coefficient: 0.50
+
+recipes:
+  - id: qwen_monster
+    stage: donor_qualification
+    target: qwen
+    donors:
+      - id: monster
+        coefficients: donor_sweep
+  - id: qwen_random
+    stage: donor_qualification
+    target: qwen
+    donors:
+      - id: random
+        coefficients: donor_sweep
+  - id: qwen_low_criticality
+    stage: donor_qualification
+    target: qwen
+    donors:
+      - id: low_criticality
+        coefficients: donor_sweep
+  - id: qwen_angular_high
+    stage: donor_qualification
+    target: qwen
+    donors:
+      - id: angular_high
+        coefficients: donor_sweep
+  - id: qwen_aegis
+    stage: reference_reconstruction
+    target: qwen
+    donors:
+      - id: aegis
+        coefficients: composition_sweep
+  - id: qwen_aegis_monster
+    stage: complementary_composition
+    target: qwen
+    donors:
+      - id: aegis
+        coefficients: composition_sweep
+      - id: monster
+        coefficients: composition_sweep
+  - id: halo_monster
+    stage: family_transfer
+    target: halo
+    donors:
+      - id: monster
+        coefficients: donor_sweep
+  - id: supa_a1_1_monster
+    stage: family_transfer
+    target: supa_a1_1
+    donors:
+      - id: monster
+        coefficients: donor_sweep
+
+development_evaluation:
+  # scripts/eval/run_gates.py independently refuses SEALED datasets.
+  datasets: [chat_dev, rag_dev]
+  cap_mib: 4096
+  # The historical 64-row long-context showcase is not present as a canonical
+  # evaluator on current main; it must be registered before final selection.
+  require_registered_long_context_64_before_claim: true
