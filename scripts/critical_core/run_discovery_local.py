@@ -2,12 +2,13 @@
 """Run the complete CRCC v1 unsealed discovery pipeline on a local/private machine.
 
 Execution order:
-  1. runtime doctor + frozen discovery contract;
-  2. official pinned checkpoint SHA-256 verification;
-  3. integrity validation of any resumable artifacts;
-  4. intact baseline + all 28 one-layer bypasses;
-  5. independent resume validation after inference;
-  6. audited discovery evidence assembly and G0 decision.
+  1. clean branch + pinned runtime verification;
+  2. runtime doctor + frozen discovery contract;
+  3. official pinned checkpoint SHA-256 verification;
+  4. integrity validation of any resumable artifacts;
+  5. intact baseline + all 28 one-layer bypasses;
+  6. independent resume validation after inference;
+  7. audited discovery evidence assembly and G0 decision.
 
 The script never invokes DEV, the historical 64-row evaluator, recovery training,
 donor merging, or sealed evaluation. Interrupted scans are resumable after integrity
@@ -188,6 +189,12 @@ def main() -> None:
     )
 
     try:
+        context_cmd = [
+            sys.executable,
+            "scripts/verify/verify_crcc_execution_context.py",
+        ]
+        run_checked(context_cmd, stage="execution_context", ledger=ledger)
+
         doctor_cmd = [
             sys.executable,
             "scripts/verify/doctor_crcc_runtime.py",
