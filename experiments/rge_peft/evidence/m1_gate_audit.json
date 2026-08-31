@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "milestone": "M1",
+  "status": "GATE_PASSED",
+  "training_source_commit": "840b04ed7b4993e369c46e3d633945acd283c2c6",
+  "gate_record_commit": "pending",
+  "sealed_data_accessed": false,
+  "items": [
+    {"id": 1, "name": "frozen substrate and identities", "status": "PASS", "evidence": "experiments/rge_peft/evidence/m1_substrate_freeze.json"},
+    {"id": 2, "name": "sealed boundary", "status": "PASS", "evidence": "experiments/rge_peft/evidence/m1_sealed_boundary.json"},
+    {"id": 3, "name": "AdamW baseline parity", "status": "PASS", "evidence": "CPU, rank-16 GPU, and actual B0-plan parity JSON files"},
+    {"id": 4, "name": "exact resume", "status": "PASS", "evidence": "CPU and rank-16 GPU resume JSON files"},
+    {"id": 5, "name": "geometry mathematical verification", "status": "PASS", "evidence": "68 deterministic dense-oracle, gauge, mutation, RNG, and fingerprint checks"},
+    {"id": 6, "name": "instrumentation has no training side effect", "status": "PASS", "evidence": "geometry-off/on bit equality on CPU and rank-16 GPU"},
+    {"id": 7, "name": "bounded memory", "status": "PASS", "evidence": "1,974 MiB actual-B0 probe; 2,708 MiB principal smoke; 0 MiB post-warmup growth in all 10-step overhead arms under 5,120 MiB cap"},
+    {"id": 8, "name": "measured overhead", "status": "PASS", "evidence": "cadence-10 paired within-trajectory amortized overhead 0.06793452362192065; cross-process references explicitly inconclusive from thermal drift"},
+    {"id": 9, "name": "strict source and environment drift", "status": "PASS", "evidence": "strict configs, schema-v2 recursive source fingerprint, nested addition/modification/removal tests"},
+    {"id": 10, "name": "reproducible commands and artifacts", "status": "PASS", "evidence": "experiments/rge_peft/README.md, PROGRESS.md, run manifests, ledgers, and verifier entrypoints"}
+  ],
+  "timing_caveat": "Two cross-process overhead attempts had +13.7% and -37.9% disabled-reference drift on the shared thermally variable laptop; cross-arm timing is not used for the cadence decision. The paired same-process cadence arm is used and the confound remains recorded.",
+  "active_gpu_hours": {
+    "measured_rge_training_steps_approx": 0.071,
+    "definition": "synchronized optimizer-step time only; model load and memory-probe engineering time excluded",
+    "legacy_reference_active_time": "not separately instrumented"
+  },
+  "scientific_scope": {
+    "established": [
+      "RGE AdamW reproduces the legacy substrate under tested CPU, principal GPU, and actual-B0 conditions",
+      "effective-delta instrumentation is mathematically correct and observational under tested conditions",
+      "RGE exact resume includes generic optimizer and geometry state"
+    ],
+    "not_established": [
+      "Muon improves Rineya",
+      "DeltaBall improves retention",
+      "curriculum ordering helps",
+      "Delta-CMA helps",
+      "any candidate improves frozen capability"
+    ]
+  },
+  "next_bounded_action": "Implement the minimal attributed M2 Muon optimizer and pass synthetic math, parameter-routing, finite-update, and exact-state-restore tests before any LR calibration run."
+}

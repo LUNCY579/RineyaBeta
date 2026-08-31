@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M1 — substrate/parity
-**Current status:** M0 GATE_PASSED; M1 IN_PROGRESS
+**Current milestone:** M2 — Muon transfer pilot
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 NOT_STARTED
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -30,7 +30,7 @@ RETIRED
 | ID | Work | Planned window | Weight | Status | Evidence / next gate |
 |---|---|---|---:|---|---|
 | M0 | Approved SSOT and dashboard committed to the remote research branch | Aug 30 | 3% | GATE_PASSED | canonical commit `fe34db9`; exact blobs and cleanup verified |
-| M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | IN_PROGRESS | CPU smoke parity/resume and Tier-0 math pass; principal GPU parity/overhead remain |
+| M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | GATE_PASSED | all ten exit items pass in `evidence/m1_gate_audit.json` |
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | NOT_STARTED | O-A/O-M fixed-token evidence and optimizer decision |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | NOT_STARTED | G-* evidence and frozen geometry recipe or retirement |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | NOT_STARTED | C-* evidence and ingredient decision |
@@ -48,7 +48,7 @@ RETIRED
 
 | Work package | Planning envelope | Actual GPU-hours | Status |
 |---|---:|---:|---|
-| M1 parity/smoke | 0–3 | 0 | NOT_STARTED |
+| M1 parity/smoke | 0–3 | 0.071 measured RGE training-step hours | GATE_PASSED |
 | M2 optimizer pilot | 2–6 | 0 | NOT_STARTED |
 | M3 DeltaBall | 4–12 | 0 | NOT_STARTED |
 | M4 curriculum/tail | 4–12 | 0 | NOT_STARTED |
@@ -81,7 +81,8 @@ RETIRED
 ### M1 — substrate/parity
 
 - **Opened:** 2026-08-30 23:01:11 -05:00 (America/Chicago)
-- **Status:** IN_PROGRESS
+- **Closed:** 2026-08-30 23:37:53 -05:00 (America/Chicago)
+- **Status:** GATE_PASSED
 - **Planned window:** 2026-08-31 to 2026-09-06
 - **Required evidence:** frozen environment/model/tokenizer/data/eval hashes; sealed-boundary check; AdamW parity; exact resume; geometry side-effect test; instrumentation overhead.
 - **Branch/start:** `research/rge-peft-v1 @ e66bcddec8869b7f9fbbc87627bad848cad2f963`
@@ -98,7 +99,8 @@ RETIRED
 - **Evidence:** `experiments/rge_peft/evidence/m1_parity_smoke_adamw.json`, `m1_parity_m1_principal_smoke.json`, `m1_parity_pilot_adamw.json`, `m1_resume_smoke_adamw.json`, `m1_resume_m1_principal_smoke.json`, `m1_sealed_boundary.json`, `m1_overhead.json`, `m1_overhead_repeat.json`.
 - **Compute so far:** RGE training-step manifests/logs record approximately 0.0576 active GPU-hours; legacy reference active time was not separately instrumented. CPU RGE subprocess manifests recorded at least 75.88 seconds aggregate process wall time (legacy verifier wall time not aggregated here).
 - **Sealed data accessed:** no.
-- **Open gate items:** committed substrate-freeze evidence and final reproducibility/claims audit. Final-format artifact-schema verification has passed on both actual-B0 and GPU-resumed checkpoints.
+- **Gate audit:** all ten required exit items PASS in `experiments/rge_peft/evidence/m1_gate_audit.json`. Final-format artifact-schema verification passes on both actual-B0 and GPU-resumed checkpoints.
+- **Next gate:** M2 minimal Muon math/routing/state verification, then bounded effective-step LR calibration; no optimizer pilot until Tier-0 is green.
 - **SSOT amendment required:** no.
 
 ### M2 — Muon pilot
@@ -156,6 +158,7 @@ RETIRED
 | 2026-08-30 | M0 | Project owner approved the SSOT; v1.1 adds execution governance without changing the scientific design | approval recorded before implementation/results | canonical `fe34db9` |
 | 2026-08-30 | M0 | Close M0 and advance the operational focus to M1 without starting implementation | exact Git blobs, successful hash gate, clean two-file diff | Actions `33344630813`; `fe34db9` |
 | 2026-08-30 | M1 | Open implementation after re-verifying remote/current SHAs and frozen SSOT | Tier-0 math, CPU parity/resume, legacy regression, sealed refusal all pass; GPU gates still open | pending implementation commit; evidence under `experiments/rge_peft/evidence/` |
+| 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | `experiments/rge_peft/evidence/m1_gate_audit.json`; gate-record commit pending |
 
 ## 6. Blocker log
 
@@ -181,3 +184,16 @@ Append one entry each Sunday in America/Chicago:
 - Sealed data accessed: no/yes (authorization reference required)
 - SSOT amendment required: yes/no
 ```
+
+### 2026-08-30 weekly closeout
+
+- Current milestone/status: M1 GATE_PASSED; M2 NOT_STARTED.
+- Commits added: `13ee3cd`, `a860afc`, `0033d91`, `8db1e95`, `fe632a6`, `840b04e`; gate-record commit pending.
+- Runs completed or interrupted: Tier-0 geometry suite; CPU parity/resume; legacy determinism/resume/interrupt; principal GPU parity/resume; actual B0 parity; two overhead attempts; substrate dry-run. No interrupted RGE run.
+- Supervised tokens this week / cumulative: engineering smoke only; actual-B0 parity consumed one 1,121-supervised-token step per arm. No M2 pilot or confirmatory token budget consumed.
+- Active GPU-hours this week / cumulative: approximately 0.071 measured RGE optimizer-step hours; model-load/probe engineering time and legacy reference active time are not separately instrumented.
+- Evidence obtained: all ten M1 gate items pass; see `experiments/rge_peft/evidence/m1_gate_audit.json`.
+- Open blockers: none for M1. M2 has not started.
+- Next bounded action or gate decision: implement minimal attributed Muon and pass synthetic math/routing/state tests.
+- Sealed data accessed: no.
+- SSOT amendment required: no.

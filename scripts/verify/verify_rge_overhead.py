@@ -22,6 +22,7 @@ def summarize(path: Path) -> dict:
     rows = [json.loads(line) for line in (path / "train_log.jsonl").read_text(
         encoding="utf-8").splitlines() if line.strip()]
     times = [float(row["step_time_s"]) for row in rows]
+    reserved = [float(row.get("peak_reserved_mib", 0.0)) for row in rows]
     manifest = json.loads((path / "run_manifest.json").read_text(encoding="utf-8"))
     geometry_path = path / "geometry.jsonl"
     geometry_records = (len(geometry_path.read_text(encoding="utf-8").splitlines())
@@ -33,6 +34,10 @@ def summarize(path: Path) -> dict:
         "step_times_s": times,
         "peak_reserved_mib": max((float(row.get("peak_reserved_mib", 0.0))
                                   for row in rows), default=0.0),
+        "peak_reserved_series_mib": reserved,
+        "reserved_growth_mib": (reserved[-1] - reserved[0] if reserved else 0.0),
+        "post_warmup_reserved_growth_mib": (
+            max(reserved[1:]) - reserved[1] if len(reserved) > 1 else 0.0),
         "geometry_records": geometry_records,
         "active_gpu_hours": manifest["active_gpu_hours"],
     }

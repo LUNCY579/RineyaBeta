@@ -1,0 +1,116 @@
+{
+  "branch": "research/rge-peft-v1",
+  "commit": "840b04ed7b4993e369c46e3d633945acd283c2c6",
+  "data_rows": 128365,
+  "environment": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_available": true,
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "devices": [
+      {
+        "capability": "8.9",
+        "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+        "total_mib": 8187
+      }
+    ],
+    "peft": "0.20.0",
+    "python": "3.11.15 (main, Jun  2 2026, 22:29:49) [MSC v.1944 64 bit (AMD64)]",
+    "requested_device": "auto",
+    "run_device": "cuda:0",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.15.0"
+  },
+  "eval_sets": {
+    "chat_dev_510": {
+      "note": "C5 gate set; upstream sha256 e059e548f684c76e1520d98fb4184ea7b8eda2053c3c23eed46794bcadfef954",
+      "path": "artifacts/eval_sets/chat_dev.jsonl",
+      "rows": 510,
+      "sha256": "e059e548f684c76e1520d98fb4184ea7b8eda2053c3c23eed46794bcadfef954"
+    },
+    "rag_dev_752": {
+      "note": "C6 gate set",
+      "path": "artifacts/eval_sets/rag_dev.jsonl",
+      "rows": 752,
+      "sha256": "97d65422d4affd429245037fa7ab37ec381b31d8022eb64c7d40dd0835224dd0"
+    },
+    "rag_test_738_SEALED": {
+      "note": "sealed; do not use until a rung is frozen",
+      "path": "artifacts/eval_sets/rag_test_SEALED.jsonl",
+      "rows": 738,
+      "sha256": "6d51b2fcca8a51f1771d9b81f3cf02358c57288f377ee67ceef6ddcfb39fc4e8"
+    }
+  },
+  "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+  "geometry": {
+    "base_norm_cache": "detached_fp32_frobenius_at_run_start",
+    "cadence_steps": 10,
+    "enabled": true,
+    "implementation": "rge-delta-geometry-v1",
+    "include_radius_angle": true,
+    "successive_step_semantics": "difference_since_previous_measurement",
+    "target_count": 196,
+    "targets_sha256": "64e8b325756366fdc32e7d4d098709450a5cbce2ef4f66ca509dddf676305a0e"
+  },
+  "manifest_peak_allocated_mib": 1732.20361328125,
+  "manifest_peak_reserved_mib": 1974.0,
+  "memory_probe": {
+    "cap_mib": 5120.0,
+    "device": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "margin_mib": 512.0,
+    "max_len": 334,
+    "ok": true,
+    "padded_cost": 38452,
+    "peak_alloc_mib": 1732.20361328125,
+    "peak_reserved_mib": 1974.0,
+    "ran": true,
+    "rows": 4,
+    "suggestion": null
+  },
+  "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+  "model_combined_sha256": "c248c28f9bb2aaca152d65a852394335c6c26063b83830546f686080d2cc9654",
+  "model_tensor_sha256": "a6bc04ca357d446d092789c998ddae658a6e405946f6449ae68be28dbe10c562",
+  "optimizer": {
+    "contract_version": "rge-optim-v1",
+    "implementation": "torch.optim.AdamW",
+    "name": "adamw",
+    "routes": [
+      {
+        "parameter_count": 10092544,
+        "route": "adamw",
+        "tensor_count": 392
+      }
+    ],
+    "version": "torch-2.13"
+  },
+  "origin_main": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+  "origin_research": "840b04ed7b4993e369c46e3d633945acd283c2c6",
+  "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+  "problems": [],
+  "schema_version": 1,
+  "sealed_identity_source": "committed manifests/eval_assets.json only",
+  "sealed_payload_read": false,
+  "source_fingerprint": {
+    "combined": "29177ee4076a1a0a08bea3d1f6739cee783398c3d84ad86559bc8c35f7f5d026",
+    "files": {
+      "checkpoint.py": "f39840966961aa919afead788ba247d277817f6ccdab72661b72a7ff4c6f82ff",
+      "dataset.py": "22f664e657dc1e06ffb43d20a9d95d783423b3677beb3f8ad9bdb9db662d0b35",
+      "determinism.py": "5732cbcda171e58f2f1851788f14188de2540e9102aacbb8e5c210c563752aec",
+      "export_adapter.py": "3121176494b33f58873d80d1c21d007cea63007aba70e4b40de7d12efca18137",
+      "heal.py": "3ea0fbe9b0e4c69a862fabac2152a72828b327c68a753f79ceeb7b0e7cc3a8c6",
+      "memory.py": "d93f853dc79b67dc43b46e0959829bd8ec4bcf622266367a931331a27b491d81",
+      "optim/__init__.py": "03e9ec9ba9a2be2de75e5449638520d8317c1cecc8dddeba64ffe94dbc381a82",
+      "optim/delta_geometry.py": "43e7905c817e352d0831dffb2e63f17ca067f8509f58d5540eedb3422c92c082",
+      "optim/factory.py": "5499c094966f08834c3a596d9a019377d7c0c0a0851472892c0e316268ca6872",
+      "plan.py": "a2eab0ba743803e4bfd0a4cf284982218613649ba082726ac11bdfd2f675d2b4",
+      "rge_peft.py": "41db1a05b16fcd6656dac56656c13f0a7a6c52f3c8540638e30a3541f3d65f86"
+    },
+    "schema_version": 2
+  },
+  "status": "PASS",
+  "tokenizer_sha256": "249fa5ad6183e98ab44786bbbf95b072250773c69d8573c0cb8f2d44212d6958",
+  "tracked_dirty": false,
+  "trainable_parameter_count": 10092544,
+  "untracked_user_artifacts_present": true
+}
