@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "source": {
+    "owner_staging_commits": [
+      "066210979aaa6fcf6374ec85522e49b612ae8f54",
+      "4cf1404e235cabbfe9c4a0c929264bb2e82110c3",
+      "3186aa3033c2c1dee76526a0947cb9a9be679bfc",
+      "c3acd96a3db1d229ec32a8ab0d47e20d91d56415",
+      "c8e8ccea77b833de7cc1e50aece80df8cff58af9",
+      "99881c8424f8798db60d24554aac0b0238686ce5",
+      "4ebfb9ac28656d08accf4ea38b3b00daa268de9d"
+    ],
+    "archive_sha256": "bbf0ed9cea4eb3420da5ceeee49fac90ef7d090f0dac24ebd68877121b1e8cb0",
+    "file_manifest_count": 19,
+    "archive_paths_safe": true,
+    "all_file_hashes_matched_before_local_review_edits": true
+  },
+  "hosted_materialization": {
+    "github_actions_run": "33358150973",
+    "status": "NOT_RUN_BILLING_BLOCK",
+    "reason": "job was not started because account payments/spending limit blocked GitHub Actions"
+  },
+  "local_materialization": {
+    "temporary_directory_verification": true,
+    "stale_m1_ledger_overwrites_avoided": true,
+    "m2_ledger_additions_merged_manually": true,
+    "staging_chunks_and_one_shot_workflow_removed_after_validation": true,
+    "staging_recoverable_from_git_history": true
+  },
+  "upstream_review": {
+    "project": "NVIDIA-NeMo/Emerging-Optimizers",
+    "commit": "02b6ec843b392475a9dd29fc68dbdb27c48bea4c",
+    "commit_exists": true,
+    "license": "Apache-2.0",
+    "license_verified": true,
+    "math_matches_pinned_source": [
+      "EMA momentum and Nesterov interpolation",
+      "five-step quintic coefficient schedule",
+      "Frobenius normalization and transpose rule",
+      "spectral shape scaling",
+      "0.2 AdamW-RMS matching rationale"
+    ]
+  },
+  "local_review_changes": [
+    "explicit NaN/Inf rejection",
+    "strict FP32 parameter/state policy",
+    "rank-1 and highly rectangular LoRA tests",
+    "frozen-base non-mutation test",
+    "M1-authorized bounded-smoke gate",
+    "full-pair refusal until effective-step calibration is frozen"
+  ],
+  "sealed_data_accessed": false
+}

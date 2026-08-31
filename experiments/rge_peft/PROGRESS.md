@@ -6,7 +6,7 @@
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
 **Current milestone:** M2 — Muon transfer pilot
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 NOT_STARTED
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 IN_PROGRESS
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -31,7 +31,7 @@ RETIRED
 |---|---|---|---:|---|---|
 | M0 | Approved SSOT and dashboard committed to the remote research branch | Aug 30 | 3% | GATE_PASSED | canonical commit `fe34db9`; exact blobs and cleanup verified |
 | M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | GATE_PASSED | all ten exit items pass in `evidence/m1_gate_audit.json` |
-| M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | NOT_STARTED | O-A/O-M fixed-token evidence and optimizer decision |
+| M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | IN_PROGRESS | 40 Muon and 20 pair-protocol CPU checks pass; GPU smoke/calibration pending |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | NOT_STARTED | G-* evidence and frozen geometry recipe or retirement |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | NOT_STARTED | C-* evidence and ingredient decision |
 | M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | NOT_STARTED | CMA math/export proof and endpoint decision |
@@ -105,9 +105,17 @@ RETIRED
 
 ### M2 — Muon pilot
 
-- **Status:** NOT_STARTED
+- **Opened:** 2026-08-30 (America/Chicago)
+- **Status:** IN_PROGRESS
 - **Planned window:** 2026-09-07 to 2026-09-13
 - **Required evidence:** Muon math/parameter routing; bounded LR calibration; O-A/O-M fixed-token runs; proceed/reject decision.
+- **Implementation:** minimal Apache-2.0 FP32 matrix-only Muon; explicit no-fallback routing; matched sequential pair launcher; fixed-token/post-run comparability gates.
+- **CPU math/routing:** `verify_rge_muon.py` — PASS, 40 checks including pinned dense reference, rank-1 and 16x1024/3072 aspects, finite refusal, FP32 state, frozen-base protection, bit-exact state continuation, deterministic no-RNG trajectory, and AdamW factory identity.
+- **Pair protocol:** `verify_rge_optimizer_pair.py` — PASS, 20 checks including substrate/budget/sealed/claim negative controls, post-run matching, M1 authorization, and full-pair refusal while calibration is provisional.
+- **Import/provenance:** owner payload archive and 19 file hashes verified locally after hosted Actions run `33358150973` was blocked by billing; see `evidence/m2_import_audit.json`. Pinned NVIDIA upstream and Apache-2.0 license independently verified.
+- **Execution status:** bounded GPU smoke authorized; full 1M-token pair blocked until effective-step LR bracket is frozen.
+- **Sealed data accessed:** no.
+- **Next bounded action:** commit reviewed M2 implementation, then run two-step matched GPU smoke and Muon exact-resume verification.
 
 ### M3 — DeltaBall factorial
 

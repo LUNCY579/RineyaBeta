@@ -1,0 +1,96 @@
+schema_version: rge-optimizer-pair-v1
+experiment_id: rge_v1__m2__optimizer_pair__r16__t1m__seed20260819
+designation: exploratory
+
+execution_gate:
+  required_milestone: M1
+  status: AUTHORIZED
+  reason: M1 GATE_PASSED with all ten exit items satisfied; bounded M2 smoke is authorized.
+  authorization_evidence: experiments/rge_peft/evidence/m1_gate_audit.json
+  authorization_commit: a59a3408c6d6a2e1386c6de622d8cc0597ad7969
+
+execution_policy:
+  hardware_class: single_consumer_gpu
+  concurrency: sequential_only
+  default_order: control-candidate
+  reverse_order_repeat: required_before_any_confirmatory_hardware_speed_claim
+  bounded_smoke_run_root: must_be_disposable_and_distinct_from_registered_run_dirs
+
+arms:
+  control:
+    label: O-A AdamW-LoRA
+    config: configs/rge_peft/m2_o_a_adamw.yaml
+  candidate:
+    label: O-M Muon-LoRA
+    config: configs/rge_peft/m2_o_m_muon.yaml
+
+fixed_budget:
+  unit: supervised_tokens
+  requested_supervised_tokens: 1000000
+  step_boundary_policy: both arms may stop at the first identical plan boundary at or beyond the request
+  equality_requirement: effective supervised tokens must match exactly across completed arms
+
+optimizer_calibration:
+  status: provisional_screening_configuration
+  control_lr: 1.0e-4
+  candidate_lr: 1.0e-4
+  candidate_extra_scale_factor: 0.2
+  rationale: same nominal LR with the upstream-recommended AdamW-RMS matching scale; no confirmatory LR claim
+  selection_rule: a later frozen LR may be selected only from bounded exploratory evidence before Phase 6
+  full_pair_gate: BLOCKED until status is frozen_exploratory after the registered effective-step bracket
+
+dataset_roles:
+  learning:
+    path: artifacts/heal_mixes/B0/heal_mix_b0.jsonl
+    role: accepted deterministic healing/capability mix for optimizer mechanism screening
+  retention:
+    status: frozen
+    assets:
+      - name: chat_dev
+        path: artifacts/eval_sets/chat_dev.jsonl
+        sha256: e059e548f684c76e1520d98fb4184ea7b8eda2053c3c23eed46794bcadfef954
+      - name: rag_dev
+        path: artifacts/eval_sets/rag_dev.jsonl
+        sha256: 97d65422d4affd429245037fa7ab37ec381b31d8022eb64c7d40dd0835224dd0
+  capability:
+    status: not_frozen
+    path: null
+    consequence: this M2 pair cannot establish a general intelligence or OOD capability claim
+  sealed:
+    path: artifacts/eval_sets/rag_test_SEALED.jsonl
+    access: forbidden_until_m7
+
+evaluation:
+  training_curve_axis: supervised_tokens_seen
+  required_final_metrics:
+    - token_weighted_mean_loss
+    - final_loss
+    - supervised_tokens_per_s
+    - active_gpu_hours
+    - peak_reserved_mib
+    - optimizer_state_tensor_bytes
+  datasets:
+    - name: chat_dev
+      role: retention
+      enabled: true
+      limit: null
+    - name: rag_dev
+      role: retention
+      enabled: true
+      limit: null
+  intermediate_capability_evaluation: unavailable_until_capability_bank_is_frozen
+
+claim_boundary:
+  maximum_claim: mechanism_and_retention_only
+  prohibited_claims:
+    - general intelligence improvement
+    - broad OOD generalization
+    - confirmatory consumer-hardware speedup
+    - quality preservation beyond the named frozen retention sets
+  promotion_requires:
+    - M1 gate passed
+    - both arms matched by run-manifest hashes and effective token count
+    - final frozen retention evaluation
+    - later capability/OOD bank frozen before Phase 6
+
+output_dir: artifacts/rge_peft/pairs/m2_optimizer_pair_r16_t1m

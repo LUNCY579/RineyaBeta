@@ -1,0 +1,37 @@
+{
+  "check_names": [
+    "registered pair passes strict preflight",
+    "negative control rejected: differ outside optimizer and run",
+    "negative control rejected: differ outside optimizer and run",
+    "negative control rejected: differ outside optimizer and run",
+    "negative control rejected: differ outside optimizer and run",
+    "negative control rejected: differ outside optimizer and run",
+    "negative control rejected: active evaluation datasets",
+    "negative control rejected: unfrozen capability bank",
+    "negative control rejected: forbidden_until_m7",
+    "negative control rejected: sequential_only",
+    "negative control rejected: reverse-order",
+    "negative control rejected: optimizer_calibration.status",
+    "run summarizer preserves tokens, hardware, state bytes, and timing",
+    "post-run matcher accepts identical scientific substrate",
+    "post-run matcher emits token-aligned loss curve",
+    "post-run matcher rejects plan-hash drift",
+    "full pair requires budget while bounded smoke may stop early",
+    "blocked execution gate fails closed before model loading",
+    "provisional calibration blocks full pair before model loading",
+    "bounded smoke requires a positive step count"
+  ],
+  "checks": 20,
+  "execution_gate": {
+    "authorization_commit": "a59a3408c6d6a2e1386c6de622d8cc0597ad7969",
+    "authorization_evidence": "experiments/rge_peft/evidence/m1_gate_audit.json",
+    "reason": "M1 GATE_PASSED with all ten exit items satisfied; bounded M2 smoke is authorized.",
+    "required_milestone": "M1",
+    "status": "AUTHORIZED"
+  },
+  "maximum_claim": "mechanism_and_retention_only",
+  "registered_pair": "manifests/rge_peft/m2_optimizer_pair.yaml",
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS"
+}
