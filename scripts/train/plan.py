@@ -160,6 +160,7 @@ def build_plan(
     max_len: int,
     width_bucket: int = 1,
     drop_overlong: bool = True,
+    order_mode: str = "reference_shuffle",
 ) -> Plan:
     if len(total_lengths) != len(supervised_lengths):
         raise ValueError("length arrays must match")
@@ -174,6 +175,12 @@ def build_plan(
         "drop_overlong": drop_overlong,
         "n_rows_input": len(total_lengths),
     }
+    if order_mode not in {"reference_shuffle", "curriculum"}:
+        raise ValueError("order_mode must be reference_shuffle or curriculum")
+    # Keep the historical reference plan hash byte-identical by recording this
+    # field only for the new curriculum path.
+    if order_mode != "reference_shuffle":
+        config["order_mode"] = order_mode
 
     eligible = [i for i, n in enumerate(total_lengths)
                 if n <= max_len or not drop_overlong]
@@ -188,7 +195,8 @@ def build_plan(
     # many RNG draws the training loop happened to make.
     rng = random.Random((seed * 1_000_003) ^ (epoch + 1))
     order = list(eligible)
-    rng.shuffle(order)
+    if order_mode == "reference_shuffle":
+        rng.shuffle(order)
 
     def bucketed(width: int) -> int:
         if width_bucket <= 1:
@@ -200,6 +208,7 @@ def build_plan(
         mega = order[start:start + megabatch_rows]
         # Descending length, index as tiebreak -> total order, no ties to chance.
         mega.sort(key=lambda i: (-min(total_lengths[i], max_len), i))
+        local_micro: list[MicroBatch] = []
         current: list[int] = []
         current_max = 0
         for idx in mega:
@@ -208,17 +217,23 @@ def build_plan(
             fits = ((len(current) + 1) * new_max <= max_tokens_per_microbatch
                     and len(current) < max_rows_per_microbatch)
             if current and not fits:
-                micro.append(_seal(current, current_max, supervised_lengths, max_len,
-                                   total_lengths))
+                local_micro.append(_seal(current, current_max, supervised_lengths,
+                                         max_len, total_lengths))
                 current, current_max = [], 0
                 new_max = bucketed(row_len)
             current.append(idx)
             current_max = new_max
         if current:
-            micro.append(_seal(current, current_max, supervised_lengths, max_len,
-                                   total_lengths))
+            local_micro.append(_seal(current, current_max, supervised_lengths,
+                                     max_len, total_lengths))
+        if order_mode == "curriculum":
+            # Preserve coarse materialized curriculum buckets/megabatches while
+            # avoiding a deterministic length sweep inside each one.
+            rng.shuffle(local_micro)
+        micro.extend(local_micro)
 
-    rng.shuffle(micro)
+    if order_mode == "reference_shuffle":
+        rng.shuffle(micro)
 
     steps = [Step(tuple(micro[i:i + micro_batches_per_step]))
              for i in range(0, len(micro), micro_batches_per_step)]

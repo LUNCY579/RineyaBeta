@@ -1,0 +1,48 @@
+{
+  "bucket_counts": [
+    12843,
+    12832,
+    12841,
+    12832,
+    12840,
+    12833,
+    12842,
+    12831,
+    12842,
+    12829
+  ],
+  "buckets": 10,
+  "component_bucket_counts_sha256": "44f2164a52570cfa008c1e097181cbd89b67385a60494cfb5e08ba5a34ad4710",
+  "component_count": 78,
+  "difficulty_counts": {
+    "basic": 31526,
+    "compositional": 38877,
+    "fixed_random": 8365,
+    "intermediate": 49597
+  },
+  "difficulty_order": {
+    "basic": 0,
+    "compositional": 2,
+    "intermediate": 1
+  },
+  "membership_identical": true,
+  "membership_sha256": "68811006f3752ba2dfa14bff29982882edc24d998efc59fa0a3a85758f738820",
+  "metadata_source": "Rineya_General_Reasoning_and_Natural_Communication_Corpus_v3.0/data/sft/rineya_v3_recommended_combined_124000.jsonl",
+  "metadata_source_sha256": "32ec39d30a1d99df94f758333070f24c662f175887c4180f7f14901487062cb7",
+  "order_sha256": "da146c35166ca4c2ea76665e6b55d0cccfe06768c836668969262549e4526767",
+  "ordered_mix": "artifacts/heal_mixes/RGE_M4/curriculum_mix.jsonl",
+  "ordered_mix_sha256": "f2a2d8076a4257342d2eda90dc7bf3b54d0af01de122ce4ca9fc00a7353c6566",
+  "rows": 128365,
+  "schema_version": 1,
+  "score_provenance_counts": {
+    "fixed_random_no_comparable_score": 4410,
+    "fixed_random_no_difficulty_metadata": 3955,
+    "v3_metadata_difficulty": 120000
+  },
+  "sealed_data_accessed": false,
+  "seed": 20260819,
+  "source_mix": "artifacts/heal_mixes/B0/heal_mix_b0.jsonl",
+  "source_mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+  "source_order_sha256": "ee8a5371610bfda3f522bc2ddb133728fda2eb9b824a874d2f1e1ce036ca6341",
+  "status": "FROZEN_BEFORE_M4_RUNS"
+}

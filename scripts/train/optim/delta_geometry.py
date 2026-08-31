@@ -281,17 +281,27 @@ class DeltaBallProjector:
     """Base-relative trust-region projection on each induced LoRA delta."""
 
     def __init__(self, model, *, enabled: bool, epsilon_max: float,
-                 warmin_steps: int, schedule: str, run_id: str) -> None:
+                 warmin_steps: int, schedule: str, run_id: str,
+                 schedule_unit: str = "steps",
+                 warmin_supervised_tokens: int | None = None) -> None:
         if epsilon_max < 0.0 or not math.isfinite(epsilon_max):
             raise ValueError("DeltaBall epsilon_max must be finite and non-negative")
         if warmin_steps < 0:
             raise ValueError("DeltaBall warmin_steps must be non-negative")
         if schedule != "linear":
             raise ValueError("DeltaBall v1 supports only schedule=linear")
+        if schedule_unit not in {"steps", "supervised_tokens"}:
+            raise ValueError("DeltaBall schedule_unit must be steps or supervised_tokens")
+        if schedule_unit == "supervised_tokens" and (
+                warmin_supervised_tokens is None or warmin_supervised_tokens < 1):
+            raise ValueError("token-based DeltaBall requires positive warmin_supervised_tokens")
         self.enabled = bool(enabled)
         self.epsilon_max = float(epsilon_max)
         self.warmin_steps = int(warmin_steps)
         self.schedule = str(schedule)
+        self.schedule_unit = str(schedule_unit)
+        self.warmin_supervised_tokens = (None if warmin_supervised_tokens is None
+                                         else int(warmin_supervised_tokens))
         self.run_id = str(run_id)
         self.targets = list(iter_lora_targets(model)) if self.enabled else []
         if self.enabled and not self.targets:
@@ -312,23 +322,31 @@ class DeltaBallProjector:
             "epsilon_max": self.epsilon_max,
             "warmin_steps": self.warmin_steps,
             "schedule": self.schedule,
+            "schedule_unit": self.schedule_unit,
+            "warmin_supervised_tokens": self.warmin_supervised_tokens,
             "target_count": len(self.targets),
             "optimizer_state_projection": "none",
             "factor_projection": "symmetric_sqrt_c",
         }
 
-    def epsilon_at(self, step: int) -> float:
+    def epsilon_at(self, step: int, *, supervised_tokens_seen: int | None = None) -> float:
         if step < 1:
             return 0.0
-        fraction = (1.0 if self.warmin_steps == 0 else
-                    min(float(step) / float(self.warmin_steps), 1.0))
+        if self.schedule_unit == "supervised_tokens":
+            if supervised_tokens_seen is None:
+                raise ValueError("token-based DeltaBall requires supervised token position")
+            fraction = min(float(supervised_tokens_seen)
+                           / float(self.warmin_supervised_tokens), 1.0)
+        else:
+            fraction = (1.0 if self.warmin_steps == 0 else
+                        min(float(step) / float(self.warmin_steps), 1.0))
         return self.epsilon_max * fraction
 
     @torch.no_grad()
-    def project(self, step: int) -> list[dict]:
+    def project(self, step: int, *, supervised_tokens_seen: int | None = None) -> list[dict]:
         if not self.enabled:
             return []
-        epsilon = self.epsilon_at(step)
+        epsilon = self.epsilon_at(step, supervised_tokens_seen=supervised_tokens_seen)
         rows = []
         step_hit = False
         for target in self.targets:
@@ -360,6 +378,7 @@ class DeltaBallProjector:
                 "record_type": "deltaball_projection",
                 "run_id": self.run_id,
                 "step": int(step),
+                "supervised_tokens_seen": supervised_tokens_seen,
                 "module": target.name,
                 "epsilon": float(epsilon),
                 "base_norm": float(base_norm),

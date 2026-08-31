@@ -1,0 +1,25 @@
+{
+  "bucket_counts": [
+    12843,
+    12832,
+    12841,
+    12832,
+    12840,
+    12833,
+    12842,
+    12831,
+    12842,
+    12829
+  ],
+  "checks": 10,
+  "component_count": 78,
+  "curriculum_order_sha256": "da146c35166ca4c2ea76665e6b55d0cccfe06768c836668969262549e4526767",
+  "membership_sha256": "68811006f3752ba2dfa14bff29982882edc24d998efc59fa0a3a85758f738820",
+  "rows": 128365,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "source_order_sha256": "ee8a5371610bfda3f522bc2ddb133728fda2eb9b824a874d2f1e1ce036ca6341",
+  "status": "PASS",
+  "subset_membership_sha256": "8365fecdf98e5a0fbb9ac635500a4a8fa16aabca97ccb2042fd5032533748e28",
+  "subset_rows": 12875
+}

@@ -1,0 +1,21 @@
+{
+  "component_count": 78,
+  "component_counts_sha256": "815b86148fe8d01fe7179699821209495625ff694f71a710d9679cab9671e43b",
+  "consume_complete_epoch": true,
+  "curriculum_mix": "artifacts/heal_mixes/RGE_M4/curriculum_subset10.jsonl",
+  "curriculum_mix_sha256": "ab7545b0d4bbf73f9ab63c3e2732c509f76a81a93733c74a3730eef56a2e1af3",
+  "curriculum_order_sha256": "7e8814b999c648e5b316db4698ee05dd7b3f05eb12ab858bb9b1136c6460350f",
+  "membership_identical": true,
+  "membership_sha256": "8365fecdf98e5a0fbb9ac635500a4a8fa16aabca97ccb2042fd5032533748e28",
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "seed": 20260819,
+  "selected_rows": 12875,
+  "selection": "sha256(seed|m4_subset|source_id) mod 10 == 0",
+  "selection_fraction": 0.10029992599228761,
+  "source_rows": 128365,
+  "status": "FROZEN_BEFORE_M4_RUNS",
+  "uniform_mix": "artifacts/heal_mixes/RGE_M4/uniform_subset10.jsonl",
+  "uniform_mix_sha256": "b6d7f6e1fa17d3e7d79928efa6c498f1937548c24ff5388ca02ab7905aeb4ac3",
+  "uniform_order_sha256": "0d7151ed282ac453e698adce7f58ae12661f172b2fa780875eecf21e0e5b9575"
+}

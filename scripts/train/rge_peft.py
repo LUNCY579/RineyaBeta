@@ -66,8 +66,15 @@ def load_rge_config(path: Path) -> dict:
             raise ValueError(f"resume.{key} must be explicit")
     if cfg["resume"]["allow_env_drift"] or cfg["resume"]["allow_code_drift"]:
         raise ValueError("RGE configs must default to strict environment/code drift refusal")
-    if cfg["curriculum"].get("mode") != "reference":
-        raise ValueError("M1 permits only curriculum.mode=reference")
+    curriculum_mode = cfg["curriculum"].get("mode")
+    if curriculum_mode not in {"reference", "component_local"}:
+        raise ValueError("curriculum.mode must be reference or component_local")
+    if curriculum_mode == "component_local":
+        if not cfg["curriculum"].get("manifest") or not cfg["curriculum"].get(
+                "membership_sha256") or not cfg["curriculum"].get("order_sha256"):
+            raise ValueError("component-local curriculum requires frozen manifest/membership/order hashes")
+        if cfg["data"].get("order_mode") != "curriculum":
+            raise ValueError("component-local curriculum requires data.order_mode=curriculum")
     if bool(cfg["cma"].get("enabled")):
         raise ValueError("CMA is gated by M5 and cannot be enabled in M1")
     deltaball = cfg["geometry"].get("deltaball", {"enabled": False})
@@ -79,6 +86,15 @@ def load_rge_config(path: Path) -> dict:
         if missing_deltaball:
             raise ValueError(
                 f"geometry.deltaball is missing required keys: {missing_deltaball}")
+        if deltaball.get("schedule_unit", "steps") == "supervised_tokens" and not \
+                deltaball.get("warmin_supervised_tokens"):
+            raise ValueError("token-based DeltaBall requires warmin_supervised_tokens")
+    schedule_unit = cfg["schedule"].get("unit", "steps")
+    if schedule_unit not in {"steps", "supervised_tokens"}:
+        raise ValueError("schedule.unit must be steps or supervised_tokens")
+    if schedule_unit == "supervised_tokens" and not cfg["schedule"].get(
+            "warmup_supervised_tokens"):
+        raise ValueError("token-based schedule requires warmup_supervised_tokens")
     cfg["_config_path"] = str(path.resolve())
     return cfg
 
@@ -330,9 +346,12 @@ def main() -> None:
             micro_batches_per_step=int(legacy["train"]["grad_accum"]),
             megabatch_rows=int(legacy["data"]["megabatch_rows"]),
             max_len=int(legacy["data"]["max_len"]),
-            width_bucket=int(legacy["data"].get("width_bucket", 1)))
+            width_bucket=int(legacy["data"].get("width_bucket", 1)),
+            order_mode=str(legacy["data"].get("order_mode", "reference_shuffle")))
             for epoch in range(int(legacy["train"]["epochs"]))]
         total_steps = sum(len(plan.steps) for plan in plans)
+        total_supervised_tokens = sum(plan.summary()["supervised_tokens"]
+                                      for plan in plans)
         plan_hash = ";".join(plan.hash() for plan in plans)
         print(f"plan: {len(plans)} epoch(s), {total_steps:,d} optimizer steps")
 
@@ -349,7 +368,9 @@ def main() -> None:
             epsilon_max=float(deltaball_cfg.get("epsilon_max", 0.0)),
             warmin_steps=int(deltaball_cfg.get("warmin_steps", 0)),
             schedule=str(deltaball_cfg.get("schedule", "linear")),
-            run_id=str(cfg["run"]["id"]))
+            run_id=str(cfg["run"]["id"]),
+            schedule_unit=str(deltaball_cfg.get("schedule_unit", "steps")),
+            warmin_supervised_tokens=deltaball_cfg.get("warmin_supervised_tokens"))
         previous_manifest = {}
         if args.resume != "none" and manifest_path.exists():
             try:
@@ -520,9 +541,18 @@ def main() -> None:
                     torch.cuda.synchronize()
                 step_started = time.perf_counter()
                 step = steps[step_index]
+                schedule_unit = cfg["schedule"].get("unit", "steps")
+                schedule_position = (position.global_step if schedule_unit == "steps"
+                                     else position.supervised_tokens_seen
+                                     + step.supervised_tokens - 1)
+                schedule_total = (total_steps if schedule_unit == "steps"
+                                  else total_supervised_tokens)
+                schedule_warmup = (int(cfg["schedule"]["warmup_steps"])
+                                   if schedule_unit == "steps" else
+                                   int(cfg["schedule"]["warmup_supervised_tokens"]))
                 lr = heal.lr_at(
-                    position.global_step, base_lr=float(cfg["optimizer"]["lr"]),
-                    total=total_steps, warmup=int(cfg["schedule"]["warmup_steps"]),
+                    schedule_position, base_lr=float(cfg["optimizer"]["lr"]),
+                    total=schedule_total, warmup=schedule_warmup,
                     schedule=str(cfg["schedule"]["name"]),
                     min_ratio=float(cfg["schedule"]["min_lr_ratio"]))
                 for group in optimizer.param_groups:
@@ -547,7 +577,9 @@ def main() -> None:
                     [param for param in model.parameters() if param.requires_grad], clip)
                 optimizer.step()
                 next_step = position.global_step + 1
-                append_geometry(projection_path, deltaball.project(next_step))
+                append_geometry(projection_path, deltaball.project(
+                    next_step, supervised_tokens_seen=(
+                        position.supervised_tokens_seen + step.supervised_tokens)))
                 append_geometry(geometry_path, geometry.measure(next_step))
                 if use_cuda:
                     torch.cuda.synchronize()

@@ -1736,6 +1736,28 @@ These are **snapshot anchors**, not eternal assumptions. Implementation Phase 0 
 
 # 23. Amendment log
 
+## v1.3 — 2026-08-31
+
+M4 curriculum fairness amendment, recorded before any M4 training outcome.
+
+Exact issue: reference-shuffled and component-local row orders can pack into
+different optimizer-step counts and per-step supervised-token masses. Reusing a
+step-indexed cosine schedule or stopping both at the first step beyond a token
+request would therefore change the LR-versus-token trajectory and actual token
+count alongside order.
+
+Resolution: freeze a deterministic 10% component-stratified subset (12,875 rows)
+with identical IDs/content in both arms and consume the complete subset epoch.
+Parameterize LR warmup/decay and DeltaBall warm-in by supervised tokens, using
+41,383 warmup tokens (the frozen M3 control's step-40 cumulative position). This
+keeps total membership, exact supervised tokens, and schedule-versus-token
+semantics matched even when packing produces different step counts.
+
+No M4 loss, retention, or capability outcome had been observed. The amendment
+changes no curriculum ranking, optimizer, LoRA capacity, DeltaBall radius,
+evaluation policy, promotion threshold, or sealed boundary. Commit reference:
+pending.
+
 ## v1.2 — 2026-08-31
 
 M2 pilot-budget correction, recorded before any O-A/O-M pilot endpoint or

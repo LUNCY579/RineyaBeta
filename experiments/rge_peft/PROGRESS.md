@@ -6,7 +6,7 @@
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
 **Current milestone:** M4 — curriculum and late-tail isolation
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 NOT_STARTED
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 IN_PROGRESS
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -33,7 +33,7 @@ RETIRED
 | M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | GATE_PASSED | all ten exit items pass in `evidence/m1_gate_audit.json` |
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | GATE_PASSED | active eps1x retained on small positive named-retention frontier |
-| M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | NOT_STARTED | C-* evidence and ingredient decision |
+| M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | IN_PROGRESS | same-membership subset/order manifests frozen; planner tests pass |
 | M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | NOT_STARTED | CMA math/export proof and endpoint decision |
 | M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | NOT_STARTED | frozen control/candidate, seed evidence, retention/efficiency decision |
 | M7 | One-time sealed promotion gate | Oct 26–Oct 28 | 1% | NOT_STARTED | exactly one authorized sealed result after candidate freeze |
@@ -161,9 +161,18 @@ RETIRED
 
 ### M4 — curriculum/tail
 
-- **Status:** NOT_STARTED
+- **Opened:** 2026-08-31 (America/Chicago)
+- **Status:** IN_PROGRESS
 - **Planned window:** 2026-09-28 to 2026-10-04
 - **Required evidence:** deterministic same-membership order hashes; C-U/C-C/C-CT/C-CTM results; ingredient decision.
+- **Frozen recipe entering M4:** AdamW + DeltaBall epsilon `0.014355268562212586`; Muon excluded.
+- **Metadata audit:** 120,000 rows carry explicit `basic/intermediate/compositional` difficulty and receive component-local ranking. 3,955 preservation rows lack difficulty and 4,410 RAG rows lack a comparable score; both receive deterministic fixed-random replay rather than inferred ranking.
+- **Full order manifest:** 128,365 rows, 78 components, 10 aligned buckets, membership hash `688110...8820`, curriculum order `da146c...7607`.
+- **Exact pilot subset:** 12,875 rows selected before outcomes by `sha256(seed|m4_subset|source_id) mod 10 == 0`; both arms consume the complete identical subset. Membership hash `8365fe...8e28`; uniform/curriculum order hashes `0d7151...9575` / `7e8814...350f`.
+- **Schedule fairness:** amendment v1.3 freezes LR and DeltaBall warm-in by supervised tokens (41,383 warmup tokens), preventing order-dependent packing/step counts from changing schedule-versus-token semantics.
+- **Verification:** `verify_rge_curriculum.py` PASS, 10 membership/hash/planner checks.
+- **Sealed data accessed:** no.
+- **Next bounded action:** commit M4 manifests/planner, then execute complete-subset C-U/C-C pair and select order by token-weighted loss before retention evaluation.
 
 ### M5 — Delta-CMA
 
@@ -204,7 +213,7 @@ RETIRED
 | 2026-08-30 | M1 | Open implementation after re-verifying remote/current SHAs and frozen SSOT | Tier-0 math, CPU parity/resume, legacy regression, sealed refusal all pass; GPU gates still open | pending implementation commit; evidence under `experiments/rge_peft/evidence/` |
 | 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | gate record `a59a340`; `experiments/rge_peft/evidence/m1_gate_audit.json` |
 | 2026-08-31 | M2 | Reject Muon for the general Rineya recipe and advance DeltaBall only under AdamW | training loss improved, but chat non-inferiority failed and RAG gained four critical defects | gate record `8f69c9d`; `experiments/rge_peft/evidence/m2_gate_audit.json` |
-| 2026-08-31 | M3 | Retain AdamW + active eps1x DeltaBall for M4 | small positive/non-inferior chat and RAG retention with no critical regression; targeted capability untested | `experiments/rge_peft/evidence/m3_gate_audit.json`; gate-record commit pending |
+| 2026-08-31 | M3 | Retain AdamW + active eps1x DeltaBall for M4 | small positive/non-inferior chat and RAG retention with no critical regression; targeted capability untested | gate record `b689530`; `experiments/rge_peft/evidence/m3_gate_audit.json` |
 
 ## 6. Blocker log
 
