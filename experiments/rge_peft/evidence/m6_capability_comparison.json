@@ -1,0 +1,156 @@
+{
+  "accuracy_delta": -0.007598039215686274,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 20260831,
+  "by_family": {
+    "arithmetic_constraints": {
+      "accuracy_delta": 0.0,
+      "candidate_accuracy": 0.0625,
+      "candidate_correct": 17,
+      "control_accuracy": 0.0625,
+      "control_correct": 17,
+      "total": 272
+    },
+    "boolean_switches": {
+      "accuracy_delta": 0.03308823529411765,
+      "candidate_accuracy": 0.5441176470588235,
+      "candidate_correct": 148,
+      "control_accuracy": 0.5110294117647058,
+      "control_correct": 139,
+      "total": 272
+    },
+    "calendar_reasoning": {
+      "accuracy_delta": 0.014705882352941176,
+      "candidate_accuracy": 0.09191176470588236,
+      "candidate_correct": 25,
+      "control_accuracy": 0.07720588235294118,
+      "control_correct": 21,
+      "total": 272
+    },
+    "code_breaking": {
+      "accuracy_delta": 0.0,
+      "candidate_accuracy": 0.003676470588235294,
+      "candidate_correct": 1,
+      "control_accuracy": 0.003676470588235294,
+      "control_correct": 1,
+      "total": 272
+    },
+    "epistemic_hats": {
+      "accuracy_delta": -0.022058823529411766,
+      "candidate_accuracy": 0.33088235294117646,
+      "candidate_correct": 90,
+      "control_accuracy": 0.35294117647058826,
+      "control_correct": 96,
+      "total": 272
+    },
+    "family_relations": {
+      "accuracy_delta": -0.025735294117647058,
+      "candidate_accuracy": 0.014705882352941176,
+      "candidate_correct": 4,
+      "control_accuracy": 0.04044117647058824,
+      "control_correct": 11,
+      "total": 272
+    },
+    "hanoi_planning": {
+      "accuracy_delta": 0.0,
+      "candidate_accuracy": 0.0,
+      "candidate_correct": 0,
+      "control_accuracy": 0.0,
+      "control_correct": 0,
+      "total": 272
+    },
+    "knights_knaves": {
+      "accuracy_delta": -0.003676470588235294,
+      "candidate_accuracy": 0.0,
+      "candidate_correct": 0,
+      "control_accuracy": 0.003676470588235294,
+      "control_correct": 1,
+      "total": 272
+    },
+    "linear_order": {
+      "accuracy_delta": 0.003676470588235294,
+      "candidate_accuracy": 0.20588235294117646,
+      "candidate_correct": 56,
+      "control_accuracy": 0.20220588235294118,
+      "control_correct": 55,
+      "total": 272
+    },
+    "logic_grid": {
+      "accuracy_delta": 0.0,
+      "candidate_accuracy": 0.25735294117647056,
+      "candidate_correct": 70,
+      "control_accuracy": 0.25735294117647056,
+      "control_correct": 70,
+      "total": 272
+    },
+    "mislabeled_boxes": {
+      "accuracy_delta": -0.0625,
+      "candidate_accuracy": 0.025735294117647058,
+      "candidate_correct": 7,
+      "control_accuracy": 0.08823529411764706,
+      "control_correct": 24,
+      "total": 272
+    },
+    "object_tracking": {
+      "accuracy_delta": -0.051470588235294115,
+      "candidate_accuracy": 0.17279411764705882,
+      "candidate_correct": 47,
+      "control_accuracy": 0.22426470588235295,
+      "control_correct": 61,
+      "total": 272
+    },
+    "prisoner_alibis": {
+      "accuracy_delta": -0.025735294117647058,
+      "candidate_accuracy": 0.23161764705882354,
+      "candidate_correct": 63,
+      "control_accuracy": 0.25735294117647056,
+      "control_correct": 70,
+      "total": 272
+    },
+    "rule_deduction": {
+      "accuracy_delta": 0.025735294117647058,
+      "candidate_accuracy": 0.5514705882352942,
+      "candidate_correct": 150,
+      "control_accuracy": 0.5257352941176471,
+      "control_correct": 143,
+      "total": 272
+    },
+    "shortest_path": {
+      "accuracy_delta": 0.0,
+      "candidate_accuracy": 0.0625,
+      "candidate_correct": 17,
+      "control_accuracy": 0.0625,
+      "control_correct": 17,
+      "total": 272
+    }
+  },
+  "candidate_accuracy": 0.17034313725490197,
+  "candidate_adapter": "artifacts\\adapters\\rge_m5_cma_rank16",
+  "cases": 4080,
+  "clear_improvement": false,
+  "clear_improvement_rule": "delta>0, paired bootstrap 95% CI lower>0, exact McNemar p<0.05",
+  "control_accuracy": 0.17794117647058824,
+  "control_adapter": "artifacts\\adapters\\rge_m5_uniform_matched_cma_rank16",
+  "dataset_sha256": "f717d9f19a904a0278ba932afca76976a331dd4e184fd8a997af93843cd93b95",
+  "decision": "candidate does not demonstrate a clear targeted-capability improvement",
+  "mcnemar_exact_two_sided_p": 0.029685116378403407,
+  "paired_bootstrap_95_ci": [
+    -0.014215686274509804,
+    -0.000980392156862745
+  ],
+  "paired_cells": {
+    "both_correct": 615,
+    "both_wrong": 3274,
+    "candidate_only_correct": 80,
+    "control_only_correct": 111
+  },
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "FAIL",
+  "test_and_challenge_accessed": false,
+  "win_tie_loss": [
+    80,
+    3889,
+    111
+  ]
+}

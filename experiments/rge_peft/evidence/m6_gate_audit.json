@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "milestone": "M6",
+  "status": "GATE_FAILED",
+  "source_commit": "890fc7d",
+  "pair": {
+    "control": "artifacts/adapters/rge_m5_uniform_matched_cma_rank16",
+    "candidate": "artifacts/adapters/rge_m5_cma_rank16",
+    "scientific_difference": "main-segment order only",
+    "rank": 16,
+    "lora_alpha": 32,
+    "total_supervised_tokens_per_arm": 118115,
+    "structural_match_checks": 36
+  },
+  "targeted_capability": {
+    "dataset": "Rineya-Puzzle-Reasoning-51k/data/validation.jsonl",
+    "dataset_sha256": "f717d9f19a904a0278ba932afca76976a331dd4e184fd8a997af93843cd93b95",
+    "cases": 4080,
+    "control_correct": 726,
+    "candidate_correct": 695,
+    "control_accuracy": 0.17794117647058824,
+    "candidate_accuracy": 0.17034313725490197,
+    "accuracy_delta": -0.007598039215686274,
+    "paired_bootstrap_95_ci": [-0.014215686274509804, -0.000980392156862745],
+    "mcnemar_exact_two_sided_p": 0.029685116378403407,
+    "candidate_win_tie_loss": [80, 3889, 111],
+    "candidate_only_correct": 80,
+    "control_only_correct": 111,
+    "positive_family_count": 4,
+    "negative_family_count": 6,
+    "tied_family_count": 5,
+    "worst_family_deltas": {
+      "mislabeled_boxes": -0.0625,
+      "object_tracking": -0.051470588235294115,
+      "family_relations": -0.025735294117647058,
+      "prisoner_alibis": -0.025735294117647058
+    },
+    "clear_improvement": false,
+    "status": "FAIL"
+  },
+  "retention": {
+    "status": "PASS_POINT_GUARDRAIL",
+    "chat_mean_delta": -0.00803764705882353,
+    "chat_paired_bootstrap_95_ci": [-0.017519627450980388, 0.0013509999999999954],
+    "rag_mean_delta": 0.001616799645390071,
+    "rag_paired_bootstrap_95_ci": [-0.002415226063829787, 0.005652149822695035],
+    "rag_contract_violation_rate_delta": -0.0026595744680851068,
+    "critical_regression_present": false
+  },
+  "execution_audit": {
+    "control_unique_predictions": 4080,
+    "candidate_unique_predictions": 4080,
+    "duplicate_prediction_ids": 0,
+    "coverage": 1.0,
+    "candidate_resume_event": "transient CUDA allocation failure after 2272 flushed rows; fingerprint-checked resume completed the remaining rows",
+    "concurrent_writer_lock_added_after_execution_audit": true,
+    "scientific_output_integrity": "PASS"
+  },
+  "decision": "REJECT_CANDIDATE_AND_STOP_BEFORE_MULTI_SEED_OR_SEALED",
+  "rationale": "the frozen candidate is significantly worse on the primary targeted-capability bank; only candidates that beat the matched control may receive replicated or sealed escalation",
+  "multi_seed_confirmation_run": false,
+  "test_and_challenge_accessed": false,
+  "sealed_data_accessed": false
+}

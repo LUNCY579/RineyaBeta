@@ -42,9 +42,10 @@ CPU proof obligations:
   --evidence experiments\rge_peft\evidence\m2_pair_protocol_cpu.json
 ```
 
-M1 is now `GATE_PASSED`. M2 execution remains governed by the checked-in pair
-manifest: arms run sequentially, scientific substrate and effective token counts
-must match, and only frozen `chat_dev`/`rag_dev` retention evaluation is eligible.
+The v1 program is closed and retired. M1 proved the substrate, M2 rejected Muon,
+M3 retained a small exploratory DeltaBall signal, M4 found no curriculum/tail
+standalone benefit, M5 verified Delta-CMA and a fully matched final pair, and M6
+rejected the frozen candidate on targeted capability. See `FINDINGS.md`.
 
-No RGE command in this directory authorizes sealed evaluation. The existing
-evaluator must continue to refuse `rag_test_SEALED` until the M7 boundary.
+No RGE command in this directory authorizes sealed evaluation. M7 was closed
+without running because its M6 prerequisite failed.

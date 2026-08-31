@@ -1750,7 +1750,7 @@ tokens, optimizer, DeltaBall, tail LR/steps, checkpoint weights, final rank, and
 evaluation protocol must match; only main-segment order differs.
 
 The capability validation bank was hash-frozen but had not been run on either
-endpoint. No test/challenge/sealed asset was accessed. Commit reference: pending.
+endpoint. No test/challenge/sealed asset was accessed. Commit reference: `857c85d`.
 
 ## v1.4 — 2026-08-31
 

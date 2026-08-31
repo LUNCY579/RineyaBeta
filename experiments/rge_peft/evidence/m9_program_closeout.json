@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "milestone": "M9",
+  "status": "RETIRED",
+  "source_commit_before_closeout": "890fc7d",
+  "program_success": false,
+  "success_criteria": {
+    "target_capability_clear_improvement": false,
+    "retention_noninferiority": true,
+    "robust_across_confirmatory_seeds": false,
+    "capacity_matched": true,
+    "consumer_gpu_regime": true,
+    "isolated_mechanism_evidence": true,
+    "reproducible_artifacts": true,
+    "sealed_evidence": false
+  },
+  "component_findings": {
+    "adamw_rge_substrate": "verified mechanism and exact resume",
+    "muon": "rejected: lower training loss but chat noninferiority failure and four RAG critical defects",
+    "deltaball": "exploratory small named-retention positive; no isolated targeted-capability confirmation",
+    "curriculum_order": "rejected: fully matched capability accuracy delta -0.007598 with 95% CI entirely below zero",
+    "constant_tail": "exploratory negative/neutral",
+    "rank16_delta_cma": "mechanically verified and exploratory tiny retention positive; no isolated targeted-capability confirmation"
+  },
+  "final_candidate": "artifacts/adapters/rge_m5_cma_rank16",
+  "final_control": "artifacts/adapters/rge_m5_uniform_matched_cma_rank16",
+  "final_candidate_disposition": "REJECTED",
+  "sealed_gate_disposition": "NOT_RUN_PREREQUISITE_FAILED",
+  "transfer_study_disposition": "NOT_RUN_CORE_RESULT_NEGATIVE",
+  "approx_measured_program_gpu_hours": 5.06,
+  "decision": "RETIRE_RGE_PEFT_V1_WITHOUT_PROMOTION",
+  "future_work_boundary": "a direct native low-rank delta optimizer would require a separately approved v2 SSOT; no post-hoc checkpoint or validation-bank selection is authorized",
+  "test_and_challenge_accessed": false,
+  "sealed_data_accessed": false
+}

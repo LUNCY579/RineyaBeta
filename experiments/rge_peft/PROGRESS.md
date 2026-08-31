@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M6 — frozen targeted capability validation
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 GATE_PASSED; M6 IN_PROGRESS
+**Current milestone:** M9 — program closeout
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 GATE_PASSED; M6 GATE_FAILED; M7 CLOSED; M8 CLOSED; M9 CLOSED; PROGRAM RETIRED
 **Implementation started:** yes
 **Experimental outcomes observed:** yes; all claims remain bounded by the ledgers
 **Sealed evaluation accessed:** no
@@ -35,10 +35,10 @@ RETIRED
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | GATE_PASSED | active eps1x retained on small positive named-retention frontier |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | CLOSED | curriculum mixed/unsupported; tail neutral; six CMA inputs valid |
 | M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | GATE_PASSED | corrected interaction control passes 36 match checks and retention non-inferiority |
-| M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | IN_PROGRESS | full frozen capability validation unlocked; escalation requires clear paired gain |
-| M7 | One-time sealed promotion gate | Oct 26–Oct 28 | 1% | NOT_STARTED | exactly one authorized sealed result after candidate freeze |
-| M8 | Phase 7: rank/family transfer | Oct 29–Nov 15 | 1% | NOT_STARTED | conditional transfer-scope decision |
-| M9 | Findings, reproducibility audit, and v1 closeout | Nov 16–Nov 22 | 2% | NOT_STARTED | promote, revise, retire, or authorize v2 |
+| M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | GATE_FAILED | candidate significantly worse on frozen targeted capability |
+| M7 | One-time sealed promotion gate | Oct 26–Oct 28 | 1% | CLOSED | not run: M6 prerequisite failed; sealed asset untouched |
+| M8 | Phase 7: rank/family transfer | Oct 29–Nov 15 | 1% | CLOSED | not run: core result negative |
+| M9 | Findings, reproducibility audit, and v1 closeout | Nov 16–Nov 22 | 2% | CLOSED | v1 retired without promotion or post-hoc reselection |
 
 **Core target:** Phase-6 evidence frozen by October 25, 2026.  
 **Positive-path target:** v1 closed by November 22, 2026.  
@@ -53,9 +53,9 @@ RETIRED
 | M3 DeltaBall | 4–12 | 1.483 measured training/eval hours | GATE_PASSED |
 | M4 curriculum/tail | 4–12 | 1.186 measured training/eval hours | CLOSED |
 | M5 CMA validation | 1–6 | ~0.56 measured training/evaluation hours including invalidated control | GATE_PASSED |
-| M6 confirmation | 12–36 | 0 | NOT_STARTED |
-| **Core v1 target** | **23–69** | **0** | NOT_STARTED |
-| Conditional M8 transfer | 12–30 | 0 | NOT_STARTED |
+| M6 confirmation | 12–36 | ~0.078 capability-evaluation hours | GATE_FAILED_EARLY_STOP |
+| **Core v1 target** | **23–69** | **~5.06 measured hours** | **RETIRED_EARLY** |
+| Conditional M8 transfer | 12–30 | 0 | CLOSED_NOT_RUN |
 
 **Review ceiling:** crossing 75 active GPU-hours before M7 requires an approved SSOT amendment.
 
@@ -206,7 +206,7 @@ RETIRED
 - **M5 compute:** approximately 0.235 evaluation GPU-hours; construction/math primarily CPU.
 - **First interaction-control audit:** INVALID. The uniform tail used its own shuffled tail plan and consumed 12,489 supervised tokens/1,535 rows, versus 12,713/1,536 for the candidate. The resulting CMA/retention comparison is superseded and scientifically ineligible despite passing pointwise retention gates.
 - **Corrective preregistration:** initialize from the unchanged 105,402-token uniform main endpoint, then reuse the candidate's exact tail mix/plan hash, 12 batches, 12,713 tokens, checkpoint steps, LR, DeltaBall, and CMA weights. This restores the v1.5 contract so only the main-segment order differs.
-- **Capability implementation:** deterministic exact-match runner and paired audit pass 14 CPU checks. A 16-row control-only diagnostic verified GPU integration; it is not eligible evidence, no candidate output was observed, and the full bank remains unopened.
+- **Capability implementation:** deterministic exact-match runner and paired audit pass 15 CPU checks, including exclusive-writer refusal. A 16-row control-only diagnostic verified GPU integration; it is not eligible evidence, no candidate output was observed, and the full bank remained unopened until the corrected retention gate passed.
 - **Corrected control:** COMPLETE. It uses the uniform main endpoint plus the exact candidate tail plan; 36 post-run checks prove equal membership, 118,115 total supervised tokens, tail data/plan/LR/DeltaBall, CMA inputs/weights, rank/alpha/targets, model, and optimizer. Only main-segment order differs.
 - **Corrected retention:** PASS at the provisional −0.01 point guardrail. Candidate vs control: chat `−0.008038` (95% CI `[-0.017520, +0.001351]`, 52/395/63 W/T/L); RAG `+0.001617` (CI `[-0.002415, +0.005652]`, 4/746/2), contract-violation rate `−0.002660`; no critical regressions.
 - **M5 corrected decision:** `GATE_PASSED`; unlock the full frozen capability validation. This is not a capability or success claim.
@@ -214,28 +214,39 @@ RETIRED
 
 ### M6 — confirmation
 
-- **Status:** IN_PROGRESS
+- **Status:** GATE_FAILED
 - **Planned window:** 2026-10-12 to 2026-10-25
 - **Required evidence:** frozen control/candidate; matched full-budget run(s); seed plan; capability, retention, and GPU-hour comparison.
 - **Entry gate:** corrected M5 structural match and retention audit PASS; full validation generation authorized. Test/challenge/sealed remain forbidden.
+- **Capability execution:** COMPLETE, 4,080 unique paired cases per endpoint at full coverage. A transient CUDA allocation failure after 2,272 flushed candidate rows resumed under exact fingerprints; the final audit found no duplicate IDs or protocol drift. The runner now also holds an exclusive output lock.
+- **Primary result:** control 726/4,080 (`0.177941`), candidate 695/4,080 (`0.170343`), delta `−0.007598`; paired bootstrap 95% CI `[-0.014216, -0.000980]`; exact two-sided McNemar `p=0.029685`; candidate W/T/L `80/3889/111`.
+- **Family audit:** 4 positive, 5 tied, and 6 negative families. Largest regressions: mislabeled boxes `−0.0625`, object tracking `−0.05147`, family relations and prisoner alibis each `−0.02574`.
+- **M6 decision:** `GATE_FAILED`. The candidate is significantly worse on the primary targeted-capability bank. Do not run additional seeds, puzzle test/challenge, or the Rineya sealed gate.
+- **Sealed data accessed:** no.
 
 ### M7 — sealed gate
 
-- **Status:** NOT_STARTED
+- **Status:** CLOSED — NOT RUN
 - **Planned window:** 2026-10-26 to 2026-10-28
 - **Prerequisite:** M6 passed and candidate/config/checkpoint frozen before sealed access.
+- **Disposition:** prerequisite failed; sealed asset remained untouched.
 
 ### M8 — transfer
 
-- **Status:** NOT_STARTED
+- **Status:** CLOSED — NOT RUN
+- **Disposition:** the core result is negative; transfer work would be an unauthorized search for a favorable subgroup.
+
 - **Planned window:** 2026-10-29 to 2026-11-15
 - **Prerequisite:** positive or mechanistically informative core result.
 
 ### M9 — closeout
 
-- **Status:** NOT_STARTED
+- **Status:** CLOSED — PROGRAM RETIRED
 - **Planned window:** 2026-11-16 to 2026-11-22
 - **Required evidence:** findings, claims, negative results, reproduction commands, final program decision.
+- **Decision:** retire RGE-PEFT v1 without promotion. Do not replace the frozen candidate after observing validation. Any native-delta optimizer is a separately approved v2.
+- **Findings:** `experiments/rge_peft/FINDINGS.md`; terminal audit `evidence/m9_program_closeout.json`.
+- **Test/challenge/sealed access:** none.
 
 ## 5. Decision log
 
@@ -248,6 +259,9 @@ RETIRED
 | 2026-08-31 | M2 | Reject Muon for the general Rineya recipe and advance DeltaBall only under AdamW | training loss improved, but chat non-inferiority failed and RAG gained four critical defects | gate record `8f69c9d`; `experiments/rge_peft/evidence/m2_gate_audit.json` |
 | 2026-08-31 | M3 | Retain AdamW + active eps1x DeltaBall for M4 | small positive/non-inferior chat and RAG retention with no critical regression; targeted capability untested | gate record `b689530`; `experiments/rge_peft/evidence/m3_gate_audit.json` |
 | 2026-08-31 | M4 | Close curriculum/tail isolation without a standalone benefit; authorize CMA construction | curriculum mixed, tail neutral, exact six-checkpoint trajectory available | gate record `888d3e6`; `experiments/rge_peft/evidence/m4_gate_audit.json` |
+| 2026-08-31 | M5 | Invalidate the first interaction control, then pass the corrected exact-tail control | first tail was 224 tokens short; corrected pair passes 36 only-order-differs checks and retention point gates | `857c85d`, `8ba3301`, `890fc7d` |
+| 2026-08-31 | M6 | Reject the frozen curriculum-CMA candidate and forbid sealed escalation | targeted capability −0.007598, CI entirely below zero, p=0.0297 | `experiments/rge_peft/evidence/m6_gate_audit.json` |
+| 2026-08-31 | M9 | Retire RGE-PEFT v1 without promotion | final candidate fails primary capability; no post-hoc reselection, sealed, or transfer run | `experiments/rge_peft/FINDINGS.md` |
 
 ## 6. Blocker log
 
