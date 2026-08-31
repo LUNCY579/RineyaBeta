@@ -1,0 +1,52 @@
+name: DAST qualification
+
+on:
+  push:
+    branches:
+      - research/depth-aligned-semantic-transitions-v1
+    paths:
+      - "experiments/depth_aligned_semantic_transitions/**"
+      - "docs/PLAN_DEPTH_ALIGNED_SEMANTIC_TRANSITIONS.md"
+      - ".github/workflows/dast-ci.yml"
+  pull_request:
+    paths:
+      - "experiments/depth_aligned_semantic_transitions/**"
+      - "docs/PLAN_DEPTH_ALIGNED_SEMANTIC_TRANSITIONS.md"
+      - ".github/workflows/dast-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: experiments/depth_aligned_semantic_transitions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: experiments/depth_aligned_semantic_transitions/pyproject.toml
+      - name: Install CPU torch
+        run: python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
+      - name: Install DAST development dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Static compilation
+        run: python -m compileall -q src tests
+      - name: Lint
+        run: python -m ruff check src tests
+      - name: Unit and integration tests
+        run: pytest -q
+      - name: Offline end-to-end smoke
+        run: python -m dast.cli smoke --output-dir runs/ci-smoke
+      - name: Upload engineering report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-ci-smoke-report
+          path: experiments/depth_aligned_semantic_transitions/runs/ci-smoke/
+          if-no-files-found: warn

@@ -1,0 +1,5 @@
+extends: base.yaml
+experiment:
+  name: dast-state-final-repeated-dev
+  arm: state_final_repeated
+  output_dir: ../runs/state_final_repeated_seed17

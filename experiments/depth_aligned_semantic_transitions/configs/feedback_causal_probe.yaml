@@ -1,0 +1,14 @@
+extends: state_ordered.yaml
+experiment:
+  name: dast-feedback-causal-probe-dev
+  output_dir: ../runs/feedback_causal_probe_seed17
+model:
+  feedback_enabled: true
+  feedback_scale: 0.05
+training:
+  gradient_checkpointing: false
+# Feedback is a Phase-3 causal probe. Cached generation is deliberately blocked
+# until a no-cache generation path is separately qualified.
+
+evaluation:
+  do_generation: false

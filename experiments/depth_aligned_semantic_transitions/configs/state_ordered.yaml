@@ -1,0 +1,5 @@
+extends: base.yaml
+experiment:
+  name: dast-state-ordered-dev
+  arm: state_ordered
+  output_dir: ../runs/state_ordered_seed17

@@ -1,0 +1,89 @@
+experiment:
+  name: dast-state-ordered-dev
+  arm: state_ordered
+  seed: 17
+  output_dir: ../runs/state_ordered_seed17
+  preregistration_frozen: false
+  preregistration_sha256: ""
+  allow_sealed_test: false
+
+model:
+  name_or_path: Qwen/Qwen3-0.6B
+  revision: main
+  local_files_only: true
+  trust_remote_code: false
+  precision: auto
+  quantization: none
+  device_map: null
+  attn_implementation: null
+  max_length: 512
+  checkpoint_fractions: [0.25, 0.50, 0.75, 1.0]
+  pooling: mean
+  feedback_enabled: false
+  feedback_scale: 0.05
+
+data:
+  path: ../../../Rineya_state_experiment_bundle/rineya_sequence_independence_dataset_v1/data/manifests/problem_manifest.jsonl
+  train_split: train
+  eval_split: dev
+  max_train_records: 4000
+  max_eval_records: 800
+  num_workers: 0
+  system_prompt: Solve the problem carefully. Give a concise reasoning trace and make the final answer explicit.
+  truncation: preserve_target
+
+semantic:
+  state_dim: 128
+  projector_hidden_dim: 256
+  target_projection_seed: 1701
+  target_max_tokens: 64
+  state_weight: 1.0
+  contrastive_weight: 0.10
+  contrastive_temperature: 0.07
+  stage_weights: []
+
+operators:
+  enabled: false
+  num_operators: 8
+  rank: 8
+  router_temperature: 1.0
+  transition_weight: 0.0
+  consistency_weight: 0.0
+  diversity_weight: 0.0
+  balance_weight: 0.0
+  frozen_random: false
+
+lora:
+  enabled: true
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  bias: none
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+training:
+  epochs: 1
+  batch_size: 1
+  eval_batch_size: 2
+  gradient_accumulation_steps: 16
+  learning_rate: 0.0002
+  auxiliary_learning_rate: 0.0002
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  max_grad_norm: 1.0
+  gradient_checkpointing: true
+  fp32_trainable_params: true
+  freeze_base_without_lora: true
+  log_every_steps: 10
+  eval_every_steps: 0
+  save_every_steps: 0
+  dataloader_shuffle: true
+  deterministic_algorithms: false
+
+evaluation:
+  max_new_tokens: 128
+  do_generation: true
+  generation_batch_size: 4
+  temperature: 0.0
+  top_p: 1.0
+  bootstrap_samples: 5000

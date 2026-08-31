@@ -1,0 +1,5 @@
+extends: base.yaml
+experiment:
+  name: dast-state-reverse-dev
+  arm: state_reverse
+  output_dir: ../runs/state_reverse_seed17

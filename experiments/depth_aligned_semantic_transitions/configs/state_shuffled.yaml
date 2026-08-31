@@ -1,0 +1,5 @@
+extends: base.yaml
+experiment:
+  name: dast-state-shuffled-dev
+  arm: state_shuffled
+  output_dir: ../runs/state_shuffled_seed17

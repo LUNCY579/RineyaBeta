@@ -1,0 +1,5 @@
+extends: base.yaml
+experiment:
+  name: dast-literal-ordered-dev
+  arm: literal_ordered
+  output_dir: ../runs/literal_ordered_seed17

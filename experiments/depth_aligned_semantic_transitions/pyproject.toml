@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rineya-dast"
+version = "0.1.0"
+description = "Depth-Aligned Semantic Transitions research harness for RineyaBeta."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [{name = "RineyaBeta Research"}]
+keywords = ["reasoning", "transformers", "deep-supervision", "latent-states", "lora"]
+dependencies = [
+  "numpy>=1.24",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+train = [
+  "torch>=2.1",
+  "transformers>=4.51",
+  "peft>=0.10",
+  "accelerate>=0.28",
+  "safetensors>=0.4",
+]
+quant = ["bitsandbytes>=0.43"]
+dev = ["pytest>=7.4", "ruff>=0.4"]
+all = [
+  "torch>=2.1", "transformers>=4.51", "peft>=0.10", "accelerate>=0.28",
+  "safetensors>=0.4", "pytest>=7.4", "ruff>=0.4",
+]
+
+[project.scripts]
+dast = "dast.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+dast = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
+markers = [
+  "torch: requires torch",
+  "integration: exercises the end-to-end toy pipeline",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+ignore = ["E501", "B905"]

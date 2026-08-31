@@ -1,0 +1,11 @@
+extends: base.yaml
+experiment:
+  name: dast-operator-ordered-dev
+  arm: operator_ordered
+  output_dir: ../runs/operator_ordered_seed17
+operators:
+  enabled: true
+  transition_weight: 0.50
+  consistency_weight: 0.10
+  diversity_weight: 0.001
+  balance_weight: 0.001

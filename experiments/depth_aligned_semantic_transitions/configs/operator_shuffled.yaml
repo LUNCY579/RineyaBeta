@@ -1,0 +1,5 @@
+extends: operator_ordered.yaml
+experiment:
+  name: dast-operator-shuffled-dev
+  arm: operator_shuffled
+  output_dir: ../runs/operator_shuffled_seed17

@@ -1,0 +1,8 @@
+extends: base.yaml
+experiment:
+  name: dast-cot-baseline-dev
+  arm: cot_baseline
+  output_dir: ../runs/cot_baseline_seed17
+semantic:
+  state_weight: 0.0
+  contrastive_weight: 0.0
