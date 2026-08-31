@@ -3,10 +3,11 @@
 
 Execution order:
   1. runtime doctor + frozen discovery contract;
-  2. integrity validation of any resumable artifacts;
-  3. intact baseline + all 28 one-layer bypasses;
-  4. independent resume validation after inference;
-  5. audited discovery evidence assembly and G0 decision.
+  2. official pinned checkpoint SHA-256 verification;
+  3. integrity validation of any resumable artifacts;
+  4. intact baseline + all 28 one-layer bypasses;
+  5. independent resume validation after inference;
+  6. audited discovery evidence assembly and G0 decision.
 
 The script never invokes DEV, the historical 64-row evaluator, recovery training,
 donor merging, or sealed evaluation. Interrupted scans are resumable after integrity
@@ -16,7 +17,6 @@ validation. A machine-readable execution_state.json is updated at every stage.
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import shutil
 import subprocess
@@ -201,6 +201,14 @@ def main() -> None:
         if not args.skip_model_smoke:
             doctor_cmd.append("--model-smoke")
         run_checked(doctor_cmd, stage="runtime_doctor", ledger=ledger)
+
+        checkpoint_cmd = [
+            sys.executable,
+            "scripts/verify/verify_crcc_checkpoint.py",
+            "--config",
+            args.config,
+        ]
+        run_checked(checkpoint_cmd, stage="official_checkpoint_hash", ledger=ledger)
 
         expected_ids = expected_ids_from_contract(diagnostics_dir)
         before = validate_resume_stage(
