@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "bounded_smoke": true,
+  "execution_order": ["control", "candidate"],
+  "source_commit": "3df6cec3d0ad103eb25de0716d0ee889979edb93",
+  "pair_manifest_sha256": "1376a09303e6a577cdea1f82878318b14b7ce2a0007d6817c2ef2838e8418075",
+  "launcher_sha256": "194cab5f1ddfd0f26ef03535324082cc0091a84abd7d1c77969ee55368c563e8",
+  "comparability": {
+    "status": "PASS",
+    "mismatches": {},
+    "control_supervised_tokens": 2164,
+    "candidate_supervised_tokens": 2164,
+    "control_steps": 2,
+    "candidate_steps": 2
+  },
+  "screening_metrics": {
+    "control_final_loss": 4.029316985595718,
+    "candidate_final_loss": 4.0363602126204725,
+    "final_loss_delta_candidate_minus_control": 0.007043227024754906,
+    "weighted_loss_delta_candidate_minus_control": 0.003394679199084649,
+    "training_time_ratio_candidate_over_control": 1.0902036418830885,
+    "throughput_ratio_candidate_over_control": 0.9172598233782437,
+    "optimizer_state_bytes_ratio_candidate_over_control": 0.4999902900500756,
+    "control_peak_reserved_mib": 2464.0,
+    "candidate_peak_reserved_mib": 2426.0,
+    "peak_reserved_mib_delta_candidate_minus_control": -38.0,
+    "control_active_gpu_hours": 0.008385829500000202,
+    "candidate_active_gpu_hours": 0.00914226186111086
+  },
+  "interpretation": "integration evidence only; two steps cannot select an optimizer or support a capability/speed claim",
+  "sealed_data_accessed": false
+}

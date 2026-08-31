@@ -1,0 +1,23 @@
+{
+  "adapter_tensor_count": 392,
+  "bit_exact": true,
+  "break_at": 1,
+  "config": "configs/rge_peft/m2_muon_smoke.yaml",
+  "final_position": {
+    "epoch": 0,
+    "global_step": 2,
+    "rows_seen": 16,
+    "step_in_epoch": 2,
+    "supervised_tokens_seen": 103
+  },
+  "generic_optimizer_state_compared": true,
+  "geometry_record_count": 392,
+  "geometry_resume_state_compared": true,
+  "optimizer_state_entries": 392,
+  "plan_hash": "c4131d970751110b6a9dcc1be5cfdc2334bd738946f377b7dd0bd9425d10aaa1",
+  "problems": [],
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS",
+  "steps": 2
+}

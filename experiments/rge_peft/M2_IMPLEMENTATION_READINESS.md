@@ -37,7 +37,8 @@ execution, and provisional-calibration fail-closed behavior.
 
 ## Not yet claimed
 
-- No GPU Muon step has been run by this implementation commit.
+- Two-step B0 GPU integration and rank-16 Muon exact resume have passed; these
+  are mechanism smoke evidence only.
 - No O-A/O-M quality or speed result exists yet.
 - No capability/OOD bank is frozen.
 - No general-intelligence, broad-generalization, or confirmatory consumer-speedup

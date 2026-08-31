@@ -241,5 +241,9 @@ python -m py_compile \
   scripts/verify/verify_rge_optimizer_pair.py
 ```
 
-CPU proofs are implementation evidence only. The GPU integration smoke and
-registered O-A/O-M runs remain future bounded actions after M1 authorization.
+CPU proofs are implementation evidence only. Registered O-A/O-M training remains
+a future action after effective-step calibration.
+
+The two-step sequential GPU integration smoke subsequently passed on commit
+`3df6cec`; see `experiments/rge_peft/evidence/m2_pair_gpu_smoke.json`. This does
+not remove the effective-step calibration gate or support an optimizer winner.
