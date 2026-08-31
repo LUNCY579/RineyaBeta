@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_BEFORE_TAIL_RUN",
+  "source_run": "artifacts/rge_peft/m4_c_c_curriculum_r16_subset10",
+  "source_step": 101,
+  "tail_config": "configs/rge_peft/m4_c_ct_constant_tail.yaml",
+  "constant_lr": 0.00001,
+  "steps": 12,
+  "checkpoint_steps": [2, 4, 6, 8, 10, 12],
+  "state_retained": ["adapter", "AdamW", "RNG", "geometry reference factors", "curriculum membership/order"],
+  "state_reset": ["tail plan position", "DeltaBall projection counters"],
+  "deltaball": {"epsilon_max": 0.014355268562212586, "fully_warmed": true},
+  "averaging_performed": false,
+  "sealed_data_accessed": false
+}

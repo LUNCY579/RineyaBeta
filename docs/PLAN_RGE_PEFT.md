@@ -1736,6 +1736,19 @@ These are **snapshot anchors**, not eternal assumptions. Implementation Phase 0 
 
 # 23. Amendment log
 
+## v1.4 — 2026-08-31
+
+M4 constant-tail transition details, frozen before tail training. Continue the
+selected component-local endpoint for 12 optimizer steps at constant LR `1e-5`,
+with checkpoints at steps `{2,4,6,8,10,12}`. Retain adapter tensors, AdamW state,
+RNG, geometry reference factors, data membership/order, and the eps1x DeltaBall
+radius. Reset only the new tail plan position and projection counters; the radius
+begins fully warmed. No averaging is performed in M4.
+
+This specifies a previously planned ingredient rather than changing a hypothesis
+or evaluation gate. No tail/CMA outcome had been observed. Commit reference:
+pending.
+
 ## v1.3 — 2026-08-31
 
 M4 curriculum fairness amendment, recorded before any M4 training outcome.

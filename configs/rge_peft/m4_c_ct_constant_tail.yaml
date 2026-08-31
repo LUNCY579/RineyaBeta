@@ -1,0 +1,26 @@
+program_version: rge-peft-v1.3
+seed: 20260819
+device: auto
+model: {path: artifacts/rineya-core-en32k-28L, dtype: bfloat16, attn_implementation: eager}
+data: {mix: artifacts/heal_mixes/RGE_M4/curriculum_subset10.jsonl, max_len: 384, megabatch_rows: 2048, width_bucket: 1, order_mode: curriculum}
+lora: {r: 16, alpha: 32, dropout: 0.0, target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]}
+optimizer: {name: adamw, implementation: torch.optim.AdamW, version: torch-2.13, lr: 1.0e-5, betas: [0.9, 0.999], eps: 1.0e-8, weight_decay: 0.0}
+geometry:
+  enabled: true
+  implementation: low_rank
+  cadence_steps: 2
+  include_radius_angle: true
+  artifact: geometry.jsonl
+  deltaball: {enabled: true, epsilon_max: 0.014355268562212586, warmin_steps: 0, schedule: linear, schedule_unit: steps, artifact: deltaball_projection.jsonl}
+schedule: {name: constant, unit: steps, warmup_steps: 0, min_lr_ratio: 1.0}
+curriculum:
+  mode: component_local
+  manifest: experiments/rge_peft/evidence/m4_subset_manifest.json
+  membership_sha256: 8365fecdf98e5a0fbb9ac635500a4a8fa16aabca97ccb2042fd5032533748e28
+  order_sha256: 7e8814b999c648e5b316db4698ee05dd7b3f05eb12ab858bb9b1136c6460350f
+cma: {enabled: false, eligible: true, continuation_steps: 12, checkpoint_steps: [2, 4, 6, 8, 10, 12]}
+train: {epochs: 1, supervised_token_budget: null, grad_clip: 1.0, grad_accum: 32, gradient_checkpointing: true}
+memory: {cap_mib: 5120, margin_mib: 512, max_tokens_per_microbatch: 1536, max_rows_per_microbatch: 4}
+determinism: {strict: true}
+resume: {allow_env_drift: false, allow_code_drift: false}
+run: {id: rge_v1__m4__c_ct__r16__tail12__seed20260819, designation: exploratory, dir: artifacts/rge_peft/m4_c_ct_constant_tail_r16, save_every_steps: 2, log_every_steps: 1, keep_last_checkpoints: 16}
