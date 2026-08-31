@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -39,6 +40,8 @@ def main() -> None:
     parser.add_argument("--config", default="configs/rge_peft/smoke_adamw.yaml")
     parser.add_argument("--steps", type=int, default=3)
     parser.add_argument("--keep", action="store_true")
+    parser.add_argument("--cache-from", default=None,
+                        help="seed each run from an existing content-addressed tokenizer cache")
     parser.add_argument("--evidence", default=None)
     args = parser.parse_args()
     config = ROOT / args.config
@@ -47,6 +50,21 @@ def main() -> None:
     for path in (legacy_dir, off_dir, on_dir):
         shutil.rmtree(path, ignore_errors=True)
     base.mkdir(parents=True, exist_ok=True)
+    if args.cache_from:
+        cache_source = ROOT / args.cache_from
+        if not cache_source.is_dir():
+            raise SystemExit(f"--cache-from directory does not exist: {cache_source}")
+        for run_dir in (legacy_dir, off_dir, on_dir):
+            destination = run_dir / "cache"
+            destination.mkdir(parents=True, exist_ok=True)
+            for source in cache_source.iterdir():
+                if not source.is_file():
+                    continue
+                target = destination / source.name
+                try:
+                    os.link(source, target)
+                except OSError:
+                    shutil.copy2(source, target)
 
     rge_cfg = load_rge_config(config)
     legacy_cfg = as_legacy_config(rge_cfg)
