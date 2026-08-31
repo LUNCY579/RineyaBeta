@@ -109,6 +109,11 @@ worsened final-step loss by `0.145`. Retention was mixed: `chat_dev -0.00368`,
 no critical regression. Curriculum is retained only as weak exploratory input to
 the constant-tail test; an ordering benefit is not established.
 
+The 12-step constant-LR continuation was also endpoint-neutral: `chat_dev`
+changed by `-0.000884` and `rag_dev` was identical on all 752 cases. It receives
+no standalone credit, but its six equally spaced checkpoints are valid M5 CMA
+inputs.
+
 ## Sealed boundary
 
 The sealed RAG test set has not been accessed by RGE-PEFT. It remains prohibited

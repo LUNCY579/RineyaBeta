@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M4 — curriculum and late-tail isolation
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 IN_PROGRESS
+**Current milestone:** M5 — Delta-CMA
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 NOT_STARTED
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -33,7 +33,7 @@ RETIRED
 | M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | GATE_PASSED | all ten exit items pass in `evidence/m1_gate_audit.json` |
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | GATE_PASSED | active eps1x retained on small positive named-retention frontier |
-| M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | IN_PROGRESS | same-membership subset/order manifests frozen; planner tests pass |
+| M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | CLOSED | curriculum mixed/unsupported; tail neutral; six CMA inputs valid |
 | M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | NOT_STARTED | CMA math/export proof and endpoint decision |
 | M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | NOT_STARTED | frozen control/candidate, seed evidence, retention/efficiency decision |
 | M7 | One-time sealed promotion gate | Oct 26–Oct 28 | 1% | NOT_STARTED | exactly one authorized sealed result after candidate freeze |
@@ -51,7 +51,7 @@ RETIRED
 | M1 parity/smoke | 0–3 | 0.071 measured RGE training-step hours | GATE_PASSED |
 | M2 optimizer pilot | 2–6 | 1.681 measured training/eval hours | GATE_FAILED |
 | M3 DeltaBall | 4–12 | 1.483 measured training/eval hours | GATE_PASSED |
-| M4 curriculum/tail | 4–12 | 0 | NOT_STARTED |
+| M4 curriculum/tail | 4–12 | 1.186 measured training/eval hours | CLOSED |
 | M5 CMA validation | 1–6 | 0 | NOT_STARTED |
 | M6 confirmation | 12–36 | 0 | NOT_STARTED |
 | **Core v1 target** | **23–69** | **0** | NOT_STARTED |
@@ -162,7 +162,8 @@ RETIRED
 ### M4 — curriculum/tail
 
 - **Opened:** 2026-08-31 (America/Chicago)
-- **Status:** IN_PROGRESS
+- **Closed:** 2026-08-31 (America/Chicago)
+- **Status:** CLOSED
 - **Planned window:** 2026-09-28 to 2026-10-04
 - **Required evidence:** deterministic same-membership order hashes; C-U/C-C/C-CT/C-CTM results; ingredient decision.
 - **Frozen recipe entering M4:** AdamW + DeltaBall epsilon `0.014355268562212586`; Muon excluded.
@@ -181,7 +182,10 @@ RETIRED
 - **M4 compute:** approximately 1.03 measured training/evaluation GPU-hours so far.
 - **Constant-tail freeze:** 12 steps at LR `1e-5`; checkpoints `{2,4,6,8,10,12}`; retain adapter/AdamW/RNG/geometry state and selected curriculum membership/order; eps1x DeltaBall begins fully warmed; reset only tail plan position and projection counters. No averaging in M4.
 - **Constant-tail run:** PASS. 12 steps / 12,713 supervised tokens at LR `1e-5`; six checkpoints saved exactly at `{2,4,6,8,10,12}`; tail weighted/final loss `1.32867/1.26110`; 0 DeltaBall hits; 0.0427 active GPU-hours; no averaging performed.
-- **Next bounded action:** export tail step 12 and compare frozen retention against the pre-tail C-C endpoint before any M5 averaging.
+- **Tail retention:** versus pre-tail C-C, `chat_dev -0.000884` (CI crosses zero, 26/455/29 W/T/L); `rag_dev` exactly identical on 752/752 cases; no critical or contract regression.
+- **M4 decision:** phase `CLOSED`. Component-local order has mixed/unsupported standalone benefit; constant tail is endpoint-neutral. The six tail checkpoints remain valid inputs for the distinct M5 CMA hypothesis.
+- **M4 compute:** approximately 1.186 measured GPU-hours including evaluation.
+- **Next bounded action:** implement and verify exact Delta-space averaging plus rank-16 QR/SVD recompression over tail steps `{2,4,6,8,10,12}`.
 
 ### M5 — Delta-CMA
 
@@ -223,6 +227,7 @@ RETIRED
 | 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | gate record `a59a340`; `experiments/rge_peft/evidence/m1_gate_audit.json` |
 | 2026-08-31 | M2 | Reject Muon for the general Rineya recipe and advance DeltaBall only under AdamW | training loss improved, but chat non-inferiority failed and RAG gained four critical defects | gate record `8f69c9d`; `experiments/rge_peft/evidence/m2_gate_audit.json` |
 | 2026-08-31 | M3 | Retain AdamW + active eps1x DeltaBall for M4 | small positive/non-inferior chat and RAG retention with no critical regression; targeted capability untested | gate record `b689530`; `experiments/rge_peft/evidence/m3_gate_audit.json` |
+| 2026-08-31 | M4 | Close curriculum/tail isolation without a standalone benefit; authorize CMA construction | curriculum mixed, tail neutral, exact six-checkpoint trajectory available | `experiments/rge_peft/evidence/m4_gate_audit.json`; gate-record commit pending |
 
 ## 6. Blocker log
 

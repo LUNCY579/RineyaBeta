@@ -462,3 +462,16 @@ relative delta, it was stopped early and receives no DeltaBall causal credit.
 
 The 1x radius barely cleared the preregistered activity floor (1.054%) and is the
 only radius retained for the next exploratory tier.
+
+---
+
+## 10. Component-local curriculum and constant tail alone
+
+On an exact same-membership 12,875-row subset, curriculum ordering changed
+token-weighted loss by only `-0.00137`, worsened final-step loss by `+0.145`, and
+produced mixed retention (`chat -0.00368`, `RAG +0.00081`; both CIs cross zero).
+No standalone ordering benefit is established.
+
+A 12-step constant-LR continuation then changed chat by `-0.000884` and left all
+752 RAG cases identical. The tail is neutral as an endpoint and is retained only
+to test the distinct checkpoint-averaging hypothesis.

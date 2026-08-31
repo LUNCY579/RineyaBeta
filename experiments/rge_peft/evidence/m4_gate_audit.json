@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "milestone": "M4",
+  "status": "CLOSED",
+  "source_commit": "38d0c7a",
+  "sealed_data_accessed": false,
+  "curriculum": {
+    "membership_rows": 12875,
+    "supervised_tokens_per_arm": 105402,
+    "token_weighted_loss_delta": -0.0013657125458355068,
+    "final_loss_delta": 0.14515739509042613,
+    "chat_mean_delta": -0.00367843137254902,
+    "rag_mean_delta": 0.0008095079787234043,
+    "critical_regression_present": false,
+    "decision": "NO_STANDALONE_CURRICULUM_BENEFIT_ESTABLISHED"
+  },
+  "constant_tail": {
+    "steps": 12,
+    "supervised_tokens": 12713,
+    "constant_lr": 0.00001,
+    "checkpoint_steps": [2, 4, 6, 8, 10, 12],
+    "chat_mean_delta_vs_pretail": -0.0008839215686274529,
+    "rag_mean_delta_vs_pretail": 0.0,
+    "rag_cases_identical": 752,
+    "critical_regression_present": false,
+    "decision": "NEUTRAL_ENDPOINT_RETAINED_ONLY_AS_CMA_INPUT"
+  },
+  "measured_gpu_hours_approx": 1.186,
+  "claim_boundary": "no curriculum or constant-tail endpoint improvement established",
+  "next_bounded_action": "M5 Delta-space CMA over the six frozen constant-tail checkpoints, with exact and rank-16 endpoints distinguished."
+}
