@@ -148,6 +148,20 @@ bracket, then identify approximately 0.5x, 1x, and 2x robust
 candidate and record the selection without sealed evaluation. A provisional
 nominal-LR match cannot authorize the full pair.
 
+The first bracket is preregistered as raw Muon LR `{5e-5, 1e-4, 2e-4}` with the
+spectral `0.2` multiplier fixed, four B0 optimizer steps, per-step norm-only
+geometry, and step 1 excluded from the robust ratio. A target regime is covered
+when its median paired module-step ratio lies within a factor of 1.5. Selection
+uses only absolute log2 distance to the AdamW ratio 1.0; loss and evaluation do
+not select the LR.
+
+```powershell
+& .venv\Scripts\python.exe scripts\experiment\rge_muon_calibration.py `
+  --steps 4 `
+  --muon-lrs 5e-5 1e-4 2e-4 `
+  --cache-from artifacts\heal_runs\b0\cache
+```
+
 ### 6.4 Registered exploratory pair
 
 ```bash
