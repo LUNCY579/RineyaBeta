@@ -1,0 +1,51 @@
+name: Materialize RGE-PEFT SSOT
+
+on:
+  push:
+    branches:
+      - research/rge-peft-v1
+    paths:
+      - ".rge_import/**"
+      - ".github/workflows/materialize-rge-peft.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Materialize and verify approved documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs experiments/rge_peft
+
+          cat .rge_import/plan.part.* \
+            | base64 --decode \
+            | gzip --decompress \
+            > docs/PLAN_RGE_PEFT.md
+
+          cat .rge_import/progress.part.* \
+            | base64 --decode \
+            | gzip --decompress \
+            > experiments/rge_peft/PROGRESS.md
+
+          echo "da6b92cd4dcc818889ecf63ba8bfb7fce144677073cc2efaf4f17482e2509c6b  docs/PLAN_RGE_PEFT.md" \
+            | sha256sum --check --strict
+          echo "6eb4a612e6b7fb59680eac84f9fd23f8aa06dacc29cf246aa4e71d6c0bf20ef9  experiments/rge_peft/PROGRESS.md" \
+            | sha256sum --check --strict
+
+          rm -rf .rge_import
+          rm -f .github/workflows/materialize-rge-peft.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs: materialize approved RGE-PEFT roadmap and tracker"
+          git push origin HEAD:research/rge-peft-v1
