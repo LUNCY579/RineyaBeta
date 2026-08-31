@@ -640,6 +640,33 @@ def parse_order(value: str) -> tuple[str, str]:
     return mapping[value]
 
 
+def refuse_nonempty_run_dir(path: Path, *, arm: str) -> None:
+    """Require a fresh selected-arm directory when starting without resume."""
+    if not path.exists():
+        return
+    if not path.is_dir():
+        raise SystemExit(f"{arm} run path exists but is not a directory: {path}")
+    entries = sorted(item.name for item in path.iterdir())
+    if entries:
+        preview = ", ".join(entries[:8])
+        suffix = " ..." if len(entries) > 8 else ""
+        raise SystemExit(
+            "--resume none requires a fresh run directory; "
+            f"{arm} contains: {preview}{suffix}. Choose a new --run-root."
+        )
+
+
+def summarize_selected(
+    run_dirs: dict[str, Path], selected: tuple[str, ...]
+) -> dict[str, dict]:
+    """Summarize only arms selected by this invocation."""
+    available = {}
+    for arm in selected:
+        if (run_dirs[arm] / "summary.json").is_file():
+            available[arm] = summarize_run(run_dirs[arm])
+    return available
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pair", required=True)
@@ -731,11 +758,24 @@ def main() -> None:
         )
         for arm in ("control", "candidate")
     }
-    if run_root is not None and run_dirs["control"] == run_dirs["candidate"]:
-        raise SystemExit("run-root produced identical arm directories")
+    if run_dirs["control"].resolve() == run_dirs["candidate"].resolve():
+        raise SystemExit("control and candidate run directories must be distinct")
 
     order = parse_order(args.order)
     selected = order if args.arm == "both" else (args.arm,)
+    resolved_output = output.resolve()
+    for arm, run_dir in run_dirs.items():
+        resolved_run = run_dir.resolve()
+        if (resolved_output == resolved_run
+                or resolved_output in resolved_run.parents
+                or resolved_run in resolved_output.parents):
+            raise SystemExit(
+                f"pair output and {arm} run directory must not overlap: "
+                f"{output} vs {run_dir}"
+            )
+    if args.resume == "none":
+        for arm in selected:
+            refuse_nonempty_run_dir(run_dirs[arm], arm=arm)
     execution = {
         "schema_version": 1,
         "experiment_id": pair["experiment_id"],
@@ -749,6 +789,10 @@ def main() -> None:
         "max_steps": args.max_steps,
         "bounded_smoke": args.max_steps is not None,
         "run_dirs": {arm: display_path(path) for arm, path in run_dirs.items()},
+        "run_directory_policy": (
+            "fresh_selected_directories_required" if args.resume == "none"
+            else "strict_checkpoint_resume"
+        ),
         "output": display_path(output),
         "started_unix_s": time.time(),
         "torch": torch.__version__,
@@ -765,12 +809,10 @@ def main() -> None:
             out=run_dirs[arm] if run_root is not None else None,
         )
 
-    available = {}
-    for arm in ("control", "candidate"):
-        if (run_dirs[arm] / "summary.json").is_file():
-            available[arm] = summarize_run(run_dirs[arm])
+    available = summarize_selected(run_dirs, selected)
     comparison = None
-    if set(available) == {"control", "candidate"}:
+    if set(selected) == {"control", "candidate"} and set(available) == {
+            "control", "candidate"}:
         comparison = compare_completed_runs(
             available["control"], available["candidate"],
             require_budget=args.max_steps is None,

@@ -26,6 +26,7 @@
 |---|---|
 | `m2_muon_unit_cpu.json` | PASS — 40 checks |
 | `m2_pair_protocol_cpu.json` | PASS — 20 checks |
+| `m2_pair_isolation_cpu.json` | PASS — 6 checks |
 | pair validate-only preflight | PASS — zero protocol problems |
 | Python compilation | PASS |
 
@@ -46,3 +47,12 @@ execution, and provisional-calibration fail-closed behavior.
 - M1 is `GATE_PASSED`; bounded GPU integration smoke is authorized.
 - The full 1M-token pair remains blocked until effective-step LR calibration is
   frozen as required by the SSOT.
+
+## Execution-cohort hardening
+
+The launcher summarizes only arms selected by the current invocation, rejects
+non-empty selected-arm directories under `--resume none`, and refuses overlap
+between pair-output and run directories. This prevents a one-arm diagnostic from
+silently combining with an older opposite-arm summary. Six CPU negative controls
+are committed in `evidence/m2_pair_isolation_cpu.json`. This changes no optimizer
+math and authorizes no full M2 result.

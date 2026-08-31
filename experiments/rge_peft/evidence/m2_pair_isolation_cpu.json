@@ -1,0 +1,14 @@
+{
+  "check_names": [
+    "missing fresh directory accepted",
+    "empty fresh directory accepted",
+    "stale log directory rejected",
+    "non-directory run path rejected",
+    "single-arm invocation ignores stale opposite-arm summary",
+    "two-arm order retains both arms"
+  ],
+  "checks": 6,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS"
+}
