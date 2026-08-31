@@ -7,6 +7,7 @@ import argparse
 import json
 import shutil
 import statistics
+import subprocess
 import sys
 from pathlib import Path
 
@@ -36,6 +37,23 @@ def summarize(path: Path) -> dict:
     }
 
 
+def gpu_telemetry() -> dict | None:
+    proc = subprocess.run([
+        "nvidia-smi", "--query-gpu=temperature.gpu,power.draw,memory.used",
+        "--format=csv,noheader,nounits"], capture_output=True, text=True,
+        encoding="utf-8", errors="replace")
+    if proc.returncode != 0 or not proc.stdout.strip():
+        return None
+    values = [value.strip() for value in proc.stdout.splitlines()[0].split(",")]
+    def number(value: str) -> float | None:
+        try:
+            return float(value)
+        except ValueError:
+            return None
+    return {"temperature_c": number(values[0]), "power_w": number(values[1]),
+            "memory_used_mib": number(values[2])}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/rge_peft/m1_principal_smoke.yaml")
@@ -49,14 +67,16 @@ def main() -> None:
     shutil.rmtree(base, ignore_errors=True)
     base.mkdir(parents=True, exist_ok=True)
     modes = {
-        "reference_geometry_disabled": {"enabled": False, "cadence_steps": 1,
-                                         "include_radius_angle": False},
+        "reference_geometry_disabled_start": {"enabled": False, "cadence_steps": 1,
+                                               "include_radius_angle": False},
         "geometry_every_step_full": {"enabled": True, "cadence_steps": 1,
                                       "include_radius_angle": True},
         "geometry_every_step_low_rank_norms": {"enabled": True, "cadence_steps": 1,
                                                 "include_radius_angle": False},
         "geometry_every_n_full": {"enabled": True, "cadence_steps": args.cadence,
                                    "include_radius_angle": True},
+        "reference_geometry_disabled_end": {"enabled": False, "cadence_steps": 1,
+                                             "include_radius_angle": False},
     }
     summaries = {}
     for name, geometry in modes.items():
@@ -67,18 +87,30 @@ def main() -> None:
         cfg_path.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8",
                             newline="\n")
         out = base / name
+        before = gpu_telemetry()
         run_entry(RGE, cfg_path, out, args.steps, "none", geometry="config")
         summaries[name] = summarize(out)
-    baseline = summaries["reference_geometry_disabled"]["mean_step_time_s"]
+        summaries[name]["gpu_before"] = before
+        summaries[name]["gpu_after"] = gpu_telemetry()
+    reference_start = summaries["reference_geometry_disabled_start"]["mean_step_time_s"]
+    reference_end = summaries["reference_geometry_disabled_end"]["mean_step_time_s"]
+    baseline = statistics.fmean((reference_start, reference_end))
     for payload in summaries.values():
         payload["overhead_fraction_vs_reference"] = (
             payload["mean_step_time_s"] / baseline - 1.0)
     cadence_overhead = summaries["geometry_every_n_full"]["overhead_fraction_vs_reference"]
+    reference_drift = reference_end / reference_start - 1.0
+    stable_reference = abs(reference_drift) <= 0.10
+    status = ("PASS" if cadence_overhead <= 0.10 and stable_reference else
+              "INCONCLUSIVE_THERMAL_DRIFT" if not stable_reference else
+              "SCREENING_REQUIRED")
     evidence = {
         "schema_version": 1,
-        "status": "PASS" if cadence_overhead <= 0.10 else "SCREENING_REQUIRED",
+        "status": status,
         "config": args.config, "steps": args.steps, "cadence": args.cadence,
         "preferred_overhead_target": 0.10, "per_step_hard_threshold": 0.20,
+        "reference_mean_step_time_s": baseline,
+        "reference_repeat_drift_fraction": reference_drift,
         "modes": summaries,
         "selected_policy": (f"full metrics every {args.cadence} steps"
                             if cadence_overhead <= 0.10 else

@@ -89,13 +89,15 @@ RETIRED
 - **Tier-0 math:** `\.venv\Scripts\python.exe scripts\verify\verify_delta_geometry.py` — PASS, 68 checks; dense-oracle agreement, gauge invariance at three aspect ratios, no RNG/parameter/gradient mutation, nested addition/modification/removal detection.
 - **CPU smoke parity:** `verify_rge_baseline_parity.py --config configs/rge_peft/smoke_adamw.yaml --steps 2` — PASS; legacy/RGE and geometry-off/on bit equality; 112 LoRA tensors, 112 optimizer entries, 56 geometry targets, 112 geometry records.
 - **Principal GPU smoke parity:** `verify_rge_baseline_parity.py --config configs/rge_peft/m1_principal_smoke.yaml --steps 2` — PASS on RTX 4070 Laptop; rank 16/alpha 32, BF16 base/FP32 trainables, all q/k/v/o/gate/up/down targets; 392 LoRA tensors and optimizer entries bit-identical; 196 geometry targets; peak reserved 2,708 MiB under the 5,120 MiB cap.
+- **Actual B0-plan parity:** `verify_rge_baseline_parity.py --config configs/rge_peft/pilot_adamw.yaml --steps 1 --cache-from artifacts/heal_runs/b0/cache` — PASS; B0 mix SHA `53f87c...c178b`, 128,365 rows, 1,003-step plan hash `ded0ba...65c3`; first bounded principal step and all 392 adapter/optimizer entries bit-identical; peak reserved 1,974 MiB under cap.
 - **RGE exact resume:** `verify_rge_resume.py --config configs/rge_peft/smoke_adamw.yaml --steps 3 --break-at 1` — PASS; adapter, generic optimizer, RNG, position, plan, geometry checkpoint state, loss/LR sequence, and geometry artifact equal.
+- **RGE GPU exact resume:** `verify_rge_resume.py --config configs/rge_peft/m1_principal_smoke.yaml --steps 2 --break-at 1` — PASS; 392 adapter and optimizer entries, RNG, position, generic optimizer tree, geometry snapshots, loss/LR sequence, and 392 geometry records equal.
 - **Legacy regression:** `verify_determinism.py --steps 2`, `verify_resume.py --steps 3 --break-at 1`, and `verify_interrupt.py --steps 4 --signal-after 1` — PASS; 112 LoRA and 336 Adam tensors bit-identical in each applicable comparison.
 - **Sealed boundary:** `verify_rge_sealed_boundary.py` — PASS; evaluator refused before record/model loading and created no result file.
-- **Evidence:** `experiments/rge_peft/evidence/m1_parity_smoke_adamw.json`, `m1_parity_m1_principal_smoke.json`, `m1_resume_smoke_adamw.json`, `m1_sealed_boundary.json`.
-- **Compute so far:** RGE principal-smoke training steps recorded 0.00087 active GPU-hours; legacy reference active time was not separately instrumented. CPU RGE subprocess manifests recorded at least 75.88 seconds aggregate process wall time (legacy verifier wall time not aggregated here).
+- **Evidence:** `experiments/rge_peft/evidence/m1_parity_smoke_adamw.json`, `m1_parity_m1_principal_smoke.json`, `m1_parity_pilot_adamw.json`, `m1_resume_smoke_adamw.json`, `m1_resume_m1_principal_smoke.json`, `m1_sealed_boundary.json`.
+- **Compute so far:** RGE training-step manifests/logs record approximately 0.0197 active GPU-hours; legacy reference active time was not separately instrumented. CPU RGE subprocess manifests recorded at least 75.88 seconds aggregate process wall time (legacy verifier wall time not aggregated here).
 - **Sealed data accessed:** no.
-- **Open gate items:** actual B0-mix bounded parity; GPU exact resume; measured geometry overhead and selected cadence; final reproducibility/claims audit.
+- **Open gate items:** measured geometry overhead and selected cadence; rerun artifact-schema verification on the final checkpoint format; final reproducibility/claims audit.
 - **SSOT amendment required:** no.
 
 ### M2 — Muon pilot

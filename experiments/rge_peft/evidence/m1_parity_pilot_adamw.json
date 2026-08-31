@@ -1,0 +1,25 @@
+{
+  "available_devices": [
+    {
+      "capability": "8.9",
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "total_mib": 8187
+    }
+  ],
+  "config": "configs/rge_peft/pilot_adamw.yaml",
+  "geometry_record_count": 0,
+  "geometry_side_effect_bit_exact": true,
+  "geometry_target_count": 196,
+  "legacy_rge_bit_exact": true,
+  "lora_tensor_count": 392,
+  "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+  "optimizer_state_tensor_groups": 392,
+  "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+  "problems": [],
+  "run_device": "cuda:0",
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS",
+  "steps": 1,
+  "trainable_parameter_count": 10092544
+}
