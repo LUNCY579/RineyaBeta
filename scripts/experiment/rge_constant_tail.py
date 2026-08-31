@@ -66,6 +66,11 @@ def main() -> None:
     parser.add_argument("--steps", type=int, default=12)
     parser.add_argument("--evidence",
                         default="experiments/rge_peft/evidence/m4_constant_tail_transition.json")
+    parser.add_argument(
+        "--matched-tail-reference", default=None,
+        help=("Completed tail run whose exact data plan must be reused. This is "
+              "the only authorized way to transition from a same-membership "
+              "endpoint whose physical mix order differs from the tail mix."))
     args = parser.parse_args()
     source_run, config_path = ROOT / args.source_run, ROOT / args.config
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
@@ -84,14 +89,45 @@ def main() -> None:
     if source["config"]["curriculum"]["membership_sha256"] != config[
             "curriculum"]["membership_sha256"]:
         raise SystemExit("tail membership differs from source endpoint")
-    if source["mix_sha256"] != hashlib.sha256((ROOT / config["data"]["mix"])
-                                               .read_bytes()).hexdigest():
-        raise SystemExit("tail mix differs from source endpoint")
+    tail_mix_sha256 = hashlib.sha256((ROOT / config["data"]["mix"])
+                                     .read_bytes()).hexdigest()
+    matched_reference = None
+    if source["mix_sha256"] != tail_mix_sha256:
+        if not args.matched_tail_reference:
+            raise SystemExit("tail mix differs from source endpoint")
+        reference_run = ROOT / args.matched_tail_reference
+        reference_manifest = json.loads((reference_run / "run_manifest.json").read_text(
+            encoding="utf-8"))
+        reference_config = yaml.safe_load((reference_run / "resolved_config.yaml").read_text(
+            encoding="utf-8"))
+        for key in ("seed", "model", "data", "lora", "optimizer", "geometry",
+                    "schedule", "curriculum", "cma", "train", "memory",
+                    "determinism"):
+            if reference_config[key] != config[key]:
+                raise SystemExit(f"matched tail reference differs in {key}")
+        if reference_manifest["data"]["mix_sha256"] != tail_mix_sha256:
+            raise SystemExit("matched tail reference mix differs from requested tail")
+        reference_position = reference_manifest["final_position"]
+        if (int(reference_position["global_step"]) != args.steps
+                or int(reference_position["supervised_tokens_seen"]) <= 0):
+            raise SystemExit("matched tail reference did not complete the frozen tail")
+        if reference_manifest["curriculum"]["membership_sha256"] != config[
+                "curriculum"]["membership_sha256"]:
+            raise SystemExit("matched tail reference membership differs")
+        matched_reference = {
+            "run": args.matched_tail_reference,
+            "plan_hash": reference_manifest["plan_hash"],
+            "supervised_tokens": int(reference_position["supervised_tokens_seen"]),
+            "rows_seen": int(reference_position["rows_seen"]),
+            "mix_sha256": tail_mix_sha256,
+        }
 
     run([sys.executable, str(RGE), "--config", str(config_path),
          "--out", str(tail_run), "--dry-run", "--resume", "none"])
     dry_manifest = json.loads((tail_run / "run_manifest.json").read_text(
         encoding="utf-8"))
+    if matched_reference and dry_manifest["plan_hash"] != matched_reference["plan_hash"]:
+        raise SystemExit("generated tail plan differs from matched reference")
     tail_contract = {
         "implementation": "rge-deltaball-v1",
         "enabled": True,
@@ -120,6 +156,7 @@ def main() -> None:
         "epoch": 0, "step_in_epoch": 0, "global_step": 0,
         "rows_seen": 0, "supervised_tokens_seen": 0}
     transition["plan_hash"] = dry_manifest["plan_hash"]
+    transition["mix_sha256"] = tail_mix_sha256
     transition["plan_summary"] = {
         "epochs": dry_manifest["plan_summaries"],
         "total_steps": sum(item["steps"] for item in dry_manifest["plan_summaries"])}
@@ -153,6 +190,8 @@ def main() -> None:
         "projection_counters_reset": True,
         "averaging_performed": False,
         "allowed_inert_source_drift": source_drift,
+        "source_main_segment_curriculum": source["config"]["curriculum"],
+        "matched_tail_reference": matched_reference,
     }
     transition_path = tail_run / "transition_step_000000000.pt"
     atomic_torch_save(transition_path, transition)
@@ -163,6 +202,7 @@ def main() -> None:
         "tail_config": args.config,
         "tail_config_sha256": sha256_file(config_path),
         "tail_plan_hash": dry_manifest["plan_hash"],
+        "matched_tail_reference": matched_reference,
         "constant_lr": config["optimizer"]["lr"],
         "steps": args.steps,
         "checkpoint_steps": config["cma"]["checkpoint_steps"],

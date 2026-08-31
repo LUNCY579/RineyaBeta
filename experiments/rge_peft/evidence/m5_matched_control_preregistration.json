@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "milestone": "M5",
+  "status": "FROZEN_BEFORE_CORRECTED_CONTROL_RUN",
+  "source_control_main_run": "artifacts/rge_peft/m4_c_u_uniform_r16_subset10",
+  "source_control_main_supervised_tokens": 105402,
+  "source_candidate_main_run": "artifacts/rge_peft/m4_c_c_curriculum_r16_subset10",
+  "source_candidate_main_supervised_tokens": 105402,
+  "tail_reference_run": "artifacts/rge_peft/m4_c_ct_constant_tail_r16",
+  "tail_plan_hash": "c1298f9ed849b14dc6fb99700484830a735d48a289f97ea1970750c7ef8d468e",
+  "tail_steps": 12,
+  "tail_rows": 1536,
+  "tail_supervised_tokens": 12713,
+  "tail_lr": 0.00001,
+  "checkpoint_steps": [2, 4, 6, 8, 10, 12],
+  "checkpoint_weights": [0.16666666666666666, 0.16666666666666666, 0.16666666666666666, 0.16666666666666666, 0.16666666666666666, 0.16666666666666666],
+  "control_tail_config": "configs/rge_peft/m5_c_utm_uniform_matched_tail.yaml",
+  "corrected_control_tail_run": "artifacts/rge_peft/m5_c_utm_uniform_main_matched_tail_r16",
+  "corrected_control_cma_exact": "artifacts/adapters/rge_m5_uniform_matched_cma_exact_r96",
+  "corrected_control_cma_rank16": "artifacts/adapters/rge_m5_uniform_matched_cma_rank16",
+  "required_post_run_checks": [
+    "main membership and 105402 supervised tokens match",
+    "tail plan hash, 12 steps, 1536 rows, and 12713 supervised tokens match",
+    "optimizer, DeltaBall, LR, checkpoint steps/weights, final rank/alpha/targets, model, and evaluation protocol match",
+    "only main-segment order differs"
+  ],
+  "capability_escalation_rule": "positive exact-match delta with paired bootstrap 95% CI lower bound above zero and exact two-sided McNemar p<0.05, after retention non-inferiority",
+  "full_capability_bank_evaluated": false,
+  "test_and_challenge_accessed": false,
+  "sealed_data_accessed": false
+}

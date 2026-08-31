@@ -1,0 +1,26 @@
+{
+  "adapters": [
+    {
+      "adapter": "artifacts\\adapters\\rge_m5_uniform_cma_exact_r96",
+      "alpha": 96,
+      "finite_forward": true,
+      "label": "exact",
+      "max_logit_delta_peft_vs_merged": 0.21923828125,
+      "merge_and_unload": true,
+      "rank": 96
+    },
+    {
+      "adapter": "artifacts\\adapters\\rge_m5_uniform_cma_rank16",
+      "alpha": 32,
+      "finite_forward": true,
+      "label": "rank_matched",
+      "max_logit_delta_peft_vs_merged": 0.234375,
+      "merge_and_unload": true,
+      "rank": 16
+    }
+  ],
+  "device": "cuda:0",
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS"
+}

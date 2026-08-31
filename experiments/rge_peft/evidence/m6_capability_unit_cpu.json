@@ -1,0 +1,23 @@
+{
+  "check_count": 14,
+  "checks": [
+    "final_tag_extraction",
+    "think_suffix_extraction",
+    "final_prefix_extraction",
+    "frozen_normalization",
+    "accepted_answer_exact_match",
+    "verbosity_not_falsely_accepted",
+    "validation_path_accepted",
+    "forbidden_test.jsonl_rejected",
+    "forbidden_challenge.jsonl_rejected",
+    "forbidden_rag_SEALED.jsonl_rejected",
+    "exact_mcnemar_reference_cases",
+    "paired_case_accounting",
+    "family_delta_accounting",
+    "recursive_fingerprint_detects_change"
+  ],
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS",
+  "test_and_challenge_accessed": false
+}

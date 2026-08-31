@@ -1,0 +1,27 @@
+{
+  "adapter_optimizer_rng_retained": true,
+  "allowed_inert_source_drift": [
+    "cma.py: added"
+  ],
+  "averaging_performed": false,
+  "checkpoint_steps": [
+    2,
+    4,
+    6,
+    8,
+    10,
+    12
+  ],
+  "constant_lr": 1e-05,
+  "plan_position_reset": true,
+  "projection_counters_reset": true,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "source_checkpoint": "artifacts/rge_peft/m4_c_u_uniform_r16_subset10/checkpoints/step_000000101.pt",
+  "source_checkpoint_sha256": "a79ec30ffef94e87babee843689a863783254e03d263c6ac87b4eaf1e87d4c4a",
+  "status": "FROZEN_BEFORE_TAIL_RUN",
+  "steps": 12,
+  "tail_config": "configs\\rge_peft\\m5_c_utm_uniform_tail.yaml",
+  "tail_config_sha256": "8f02f6a3d3855bc9414d2b93bdbe04575eba327c7235d6e387fc82c4a72477f0",
+  "tail_plan_hash": "d2e45a384d555f95960f251c374343751a98e1bc168508ec587bc0325d289c11"
+}

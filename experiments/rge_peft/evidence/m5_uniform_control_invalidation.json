@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "milestone": "M5",
+  "status": "INVALIDATED_MATCHING",
+  "invalid_control_run": "artifacts/rge_peft/m5_c_utm_uniform_tail_r16",
+  "invalid_control_tail": {
+    "plan_hash": "d2e45a384d555f95960f251c374343751a98e1bc168508ec587bc0325d289c11",
+    "steps": 12,
+    "rows_seen": 1535,
+    "supervised_tokens": 12489,
+    "active_gpu_hours": 0.04401668883333615
+  },
+  "candidate_tail": {
+    "run": "artifacts/rge_peft/m4_c_ct_constant_tail_r16",
+    "plan_hash": "c1298f9ed849b14dc6fb99700484830a735d48a289f97ea1970750c7ef8d468e",
+    "steps": 12,
+    "rows_seen": 1536,
+    "supervised_tokens": 12713,
+    "active_gpu_hours": 0.042687940750001874
+  },
+  "supervised_token_delta_control_minus_candidate": -224,
+  "rows_delta_control_minus_candidate": -1,
+  "violated_contract": "SSOT amendment v1.5 requires total supervised tokens and tail protocol to match so that only main-segment order differs",
+  "invalidated_evidence": [
+    "experiments/rge_peft/evidence/m5_uniform_cma_construction.json",
+    "experiments/rge_peft/evidence/m5_uniform_cma_loader_gpu.json",
+    "experiments/rge_peft/evidence/m5_matched_cma_interaction.json"
+  ],
+  "scientific_use": "none; results may be retained only as an audit trail",
+  "corrective_action": "initialize from the frozen uniform main endpoint but reuse the candidate's exact 12-batch tail plan before reconstructing CMA",
+  "capability_validation_diagnostic_rows_observed": 16,
+  "capability_validation_diagnostic_scope": "control-only runner smoke; not eligible scientific evidence; no candidate output observed",
+  "full_capability_bank_evaluated": false,
+  "test_and_challenge_accessed": false,
+  "sealed_data_accessed": false
+}
