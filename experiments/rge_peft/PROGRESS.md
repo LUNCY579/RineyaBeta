@@ -195,8 +195,10 @@ RETIRED
 - **Required evidence:** gauge-invariant averaging; QR/SVD recompression; retained energy; PEFT export/reload; endpoint decision.
 - **Inputs:** frozen constant-tail checkpoints `{2,4,6,8,10,12}`, equal weights, source rank 16/scale 2.
 - **Math verification:** `verify_cma_math.py` PASS, 7 checks covering exact dense average, gauge invariance, QR/core-SVD, rank/scale, energy/error, factor-averaging negative control, and rectangular aspects.
+- **Real construction:** PASS from tail steps `{2,4,6,8,10,12}`. Diagnostic exact rank 96 and primary rank 16 adapters contain 196 target modules. Rank 16 retains `0.999999999678495` global delta energy; global relative reconstruction error `1.793e-5`; worst module `2.874e-5`.
+- **Loader verification:** both adapters load through normal PEFT, produce finite logits, and merge/unload successfully on GPU. Exact config is r96/alpha96; matched config r16/alpha32.
 - **Sealed data accessed:** no.
-- **Next bounded action:** commit CMA implementation, construct diagnostic rank-96 exact and primary rank-16 adapters, then verify normal PEFT load/merge.
+- **Next bounded action:** commit real CMA construction evidence, then evaluate tail-final, CMA-exact, and CMA-r endpoints on frozen unsealed retention gates.
 
 ### M6 — confirmation
 

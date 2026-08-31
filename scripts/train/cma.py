@@ -37,8 +37,11 @@ def qr_core_svd(bc: torch.Tensor, ac: torch.Tensor):
     """SVD of a low-rank product through thin QR and a small core."""
     if bc.ndim != 2 or ac.ndim != 2 or bc.shape[1] != ac.shape[0]:
         raise ValueError("Bc/Ac are incompatible")
-    qb, rb = torch.linalg.qr(bc.float(), mode="reduced")
-    qa, ra = torch.linalg.qr(ac.float().mT, mode="reduced")
+    # The continuation checkpoints are extremely close. FP32 can round all
+    # rank-17+ energy away and falsely report perfect retention, so diagnostics
+    # and the small-core factorization use FP64 before exporting FP32 factors.
+    qb, rb = torch.linalg.qr(bc.double(), mode="reduced")
+    qa, ra = torch.linalg.qr(ac.double().mT, mode="reduced")
     core = rb @ ra.mT
     u, singular, vh = torch.linalg.svd(core, full_matrices=False)
     return qb, qa, u, singular, vh
@@ -75,4 +78,4 @@ def rank_compress(
             if total_energy else 0.0,
         "singular_values": singular.tolist(),
     }
-    return b.contiguous(), a.contiguous(), diagnostics
+    return b.float().contiguous(), a.float().contiguous(), diagnostics

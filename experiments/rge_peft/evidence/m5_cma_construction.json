@@ -1,0 +1,63 @@
+{
+  "exact_adapter": "artifacts/adapters/rge_m5_cma_exact_r96",
+  "exact_adapter_model_sha256": "9ddafad42556d405678a69e8cd7411a52204fa99ea939086b4b8655b9c0139ea",
+  "exact_rank": 96,
+  "factor_averaging_used": false,
+  "global_relative_reconstruction_error": 1.7930562458870565e-05,
+  "global_retained_energy_fraction": 0.999999999678495,
+  "implementation": "rge-delta-cma-v1",
+  "maximum_module_relative_reconstruction_error": 2.8735907956383257e-05,
+  "minimum_module_retained_energy_fraction": 0.9999999991742476,
+  "module_count": 196,
+  "rank_adapter_model_sha256": "6e0f735108af6b8a4992e90539dbbe63b1f65c070f8c5339824c88e39bb2ddff",
+  "rank_matched_adapter": "artifacts/adapters/rge_m5_cma_rank16",
+  "rank_matched_rank": 16,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "source_checkpoints": [
+    {
+      "path": "artifacts/rge_peft/m4_c_ct_constant_tail_r16/checkpoints/step_000000002.pt",
+      "sha256": "ba458a88c756ca729481dd471ab67d811484dd0d78d6f8a18232bed1f6cb2a06"
+    },
+    {
+      "path": "artifacts/rge_peft/m4_c_ct_constant_tail_r16/checkpoints/step_000000004.pt",
+      "sha256": "d277d4fcb0a623881d7f5ff1d84a585470450f59ec16e3f873e1fd0a69c2cb4b"
+    },
+    {
+      "path": "artifacts/rge_peft/m4_c_ct_constant_tail_r16/checkpoints/step_000000006.pt",
+      "sha256": "5461f1819537dbf73af0449af15cb9f87caa946baabe86a12e60c407e3978838"
+    },
+    {
+      "path": "artifacts/rge_peft/m4_c_ct_constant_tail_r16/checkpoints/step_000000008.pt",
+      "sha256": "4738ef190d914afce3b053f575dec9c2892c36be01af826021ed36a54bfda0fa"
+    },
+    {
+      "path": "artifacts/rge_peft/m4_c_ct_constant_tail_r16/checkpoints/step_000000010.pt",
+      "sha256": "e0f8a49989c6a2010d1f1895594200017bfec78aecfa83da842dc5ce1048fa32"
+    },
+    {
+      "path": "artifacts/rge_peft/m4_c_ct_constant_tail_r16/checkpoints/step_000000012.pt",
+      "sha256": "0f68babb30d4eed77a07c0b077ff403feedf5d2045b4f75e9cd1b196d41adda8"
+    }
+  ],
+  "source_rank": 16,
+  "source_run": "artifacts/rge_peft/m4_c_ct_constant_tail_r16",
+  "source_scale": 2.0,
+  "source_steps": [
+    2,
+    4,
+    6,
+    8,
+    10,
+    12
+  ],
+  "status": "PASS",
+  "weights": [
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666
+  ]
+}
