@@ -1,0 +1,12 @@
+{
+  "command": "scripts/eval/run_gates.py --dataset rag_test_SEALED --limit 1",
+  "output_tail": [
+    "refusing to evaluate the sealed test set; it is reserved for a frozen rung. Use rag_dev for gating."
+  ],
+  "refusal_observed": true,
+  "result_files_created": [],
+  "returncode": 1,
+  "schema_version": 1,
+  "sealed_records_loaded": false,
+  "status": "PASS"
+}

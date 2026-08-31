@@ -78,6 +78,7 @@ def save(
     config: dict,
     metrics: dict,
     keep_last: int = 3,
+    extra_state: dict | None = None,
 ) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     name = f"step_{position.global_step:09d}.pt"
@@ -95,8 +96,12 @@ def save(
         "metrics": metrics,
         "fingerprint": fingerprint(),
         "code_fingerprint": code_fingerprint(),
-        "format_version": 1,
+        # Legacy healing checkpoints remain format 1.  RGE uses the optional
+        # extension for optimizer/geometry contract state and is format 2.
+        "format_version": 2 if extra_state is not None else 1,
     }
+    if extra_state is not None:
+        payload["extra_state"] = extra_state
     buffer = io.BytesIO()
     torch.save(payload, buffer)
     _atomic_write_bytes(out_dir / name, buffer.getvalue())
