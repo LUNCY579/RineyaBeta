@@ -1,0 +1,115 @@
+{
+  "cadence": 10,
+  "config": "configs/rge_peft/m1_principal_smoke.yaml",
+  "modes": {
+    "geometry_every_n_full": {
+      "active_gpu_hours": 0.002497925888888454,
+      "geometry_records": 196,
+      "gpu_after": {
+        "memory_used_mib": 1096.0,
+        "power_w": 11.14,
+        "temperature_c": 72.0
+      },
+      "gpu_before": {
+        "memory_used_mib": 1093.0,
+        "power_w": 7.8,
+        "temperature_c": 73.0
+      },
+      "mean_step_time_s": 0.8992533199998434,
+      "median_step_time_s": 0.8472183000003497,
+      "overhead_fraction_vs_reference": 0.2033946027201856,
+      "peak_reserved_mib": 2700.0,
+      "steps": 10,
+      "total_step_time_s": 8.992533199998434
+    },
+    "geometry_every_step_full": {
+      "active_gpu_hours": 0.004736716472221916,
+      "geometry_records": 1960,
+      "gpu_after": {
+        "memory_used_mib": 1084.0,
+        "power_w": 7.56,
+        "temperature_c": 73.0
+      },
+      "gpu_before": {
+        "memory_used_mib": 1014.0,
+        "power_w": 10.81,
+        "temperature_c": 71.0
+      },
+      "mean_step_time_s": 1.7052179299998897,
+      "median_step_time_s": 1.766597049999291,
+      "overhead_fraction_vs_reference": 1.2819488210773708,
+      "peak_reserved_mib": 2700.0,
+      "steps": 10,
+      "total_step_time_s": 17.052179299998897
+    },
+    "geometry_every_step_low_rank_norms": {
+      "active_gpu_hours": 0.0056150972222222765,
+      "geometry_records": 1960,
+      "gpu_after": {
+        "memory_used_mib": 1093.0,
+        "power_w": 7.8,
+        "temperature_c": 73.0
+      },
+      "gpu_before": {
+        "memory_used_mib": 1086.0,
+        "power_w": 7.56,
+        "temperature_c": 73.0
+      },
+      "mean_step_time_s": 2.0214350000000194,
+      "median_step_time_s": 1.999163349999435,
+      "overhead_fraction_vs_reference": 1.7051153603192981,
+      "peak_reserved_mib": 2700.0,
+      "steps": 10,
+      "total_step_time_s": 20.214350000000195
+    },
+    "reference_geometry_disabled_end": {
+      "active_gpu_hours": 0.0022091911944451363,
+      "geometry_records": 0,
+      "gpu_after": {
+        "memory_used_mib": 1083.0,
+        "power_w": 11.24,
+        "temperature_c": 72.0
+      },
+      "gpu_before": {
+        "memory_used_mib": 1096.0,
+        "power_w": 11.14,
+        "temperature_c": 72.0
+      },
+      "mean_step_time_s": 0.7953088300002491,
+      "median_step_time_s": 0.8042187000000922,
+      "overhead_fraction_vs_reference": 0.06429448991989495,
+      "peak_reserved_mib": 2700.0,
+      "steps": 10,
+      "total_step_time_s": 7.9530883000024915
+    },
+    "reference_geometry_disabled_start": {
+      "active_gpu_hours": 0.0019422748055553207,
+      "geometry_records": 0,
+      "gpu_after": {
+        "memory_used_mib": 1014.0,
+        "power_w": 10.81,
+        "temperature_c": 71.0
+      },
+      "gpu_before": {
+        "memory_used_mib": 1040.0,
+        "power_w": 10.44,
+        "temperature_c": 70.0
+      },
+      "mean_step_time_s": 0.6992189299999154,
+      "median_step_time_s": 0.7072916500001156,
+      "overhead_fraction_vs_reference": -0.06429448991989495,
+      "peak_reserved_mib": 2700.0,
+      "steps": 10,
+      "total_step_time_s": 6.992189299999154
+    }
+  },
+  "per_step_hard_threshold": 0.2,
+  "preferred_overhead_target": 0.1,
+  "reference_mean_step_time_s": 0.7472638800000823,
+  "reference_repeat_drift_fraction": 0.13742462607576322,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "selected_policy": "cadence must be reduced or dense interactions disabled",
+  "status": "INCONCLUSIVE_THERMAL_DRIFT",
+  "steps": 10
+}

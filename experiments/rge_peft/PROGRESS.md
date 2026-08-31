@@ -94,10 +94,11 @@ RETIRED
 - **RGE GPU exact resume:** `verify_rge_resume.py --config configs/rge_peft/m1_principal_smoke.yaml --steps 2 --break-at 1` — PASS; 392 adapter and optimizer entries, RNG, position, generic optimizer tree, geometry snapshots, loss/LR sequence, and 392 geometry records equal.
 - **Legacy regression:** `verify_determinism.py --steps 2`, `verify_resume.py --steps 3 --break-at 1`, and `verify_interrupt.py --steps 4 --signal-after 1` — PASS; 112 LoRA and 336 Adam tensors bit-identical in each applicable comparison.
 - **Sealed boundary:** `verify_rge_sealed_boundary.py` — PASS; evaluator refused before record/model loading and created no result file.
-- **Evidence:** `experiments/rge_peft/evidence/m1_parity_smoke_adamw.json`, `m1_parity_m1_principal_smoke.json`, `m1_parity_pilot_adamw.json`, `m1_resume_smoke_adamw.json`, `m1_resume_m1_principal_smoke.json`, `m1_sealed_boundary.json`.
-- **Compute so far:** RGE training-step manifests/logs record approximately 0.0197 active GPU-hours; legacy reference active time was not separately instrumented. CPU RGE subprocess manifests recorded at least 75.88 seconds aggregate process wall time (legacy verifier wall time not aggregated here).
+- **Instrumentation overhead:** first five-arm run was `INCONCLUSIVE_THERMAL_DRIFT` (disabled references differed +13.7% while an external pytest job started). An identical repeat also showed cross-process drift (-37.9%), so cross-arm timing remains explicitly inconclusive. The paired cadence arm itself measured nine uninstrumented steps and one due step in the same process/trajectory: 0.8681 s nonmeasurement mean, 1.4578 s measurement step, **6.79% amortized cadence-10 overhead**, passing the preferred ≤10% target. Full every-step collection is screened out (>20% in both cross-arm attempts). Peak reserved remained 2,700 MiB in every mode. Selected M1 policy: full metrics every 10 steps.
+- **Evidence:** `experiments/rge_peft/evidence/m1_parity_smoke_adamw.json`, `m1_parity_m1_principal_smoke.json`, `m1_parity_pilot_adamw.json`, `m1_resume_smoke_adamw.json`, `m1_resume_m1_principal_smoke.json`, `m1_sealed_boundary.json`, `m1_overhead.json`, `m1_overhead_repeat.json`.
+- **Compute so far:** RGE training-step manifests/logs record approximately 0.0576 active GPU-hours; legacy reference active time was not separately instrumented. CPU RGE subprocess manifests recorded at least 75.88 seconds aggregate process wall time (legacy verifier wall time not aggregated here).
 - **Sealed data accessed:** no.
-- **Open gate items:** measured geometry overhead and selected cadence; rerun artifact-schema verification on the final checkpoint format; final reproducibility/claims audit.
+- **Open gate items:** committed substrate-freeze evidence and final reproducibility/claims audit. Final-format artifact-schema verification has passed on both actual-B0 and GPU-resumed checkpoints.
 - **SSOT amendment required:** no.
 
 ### M2 — Muon pilot
