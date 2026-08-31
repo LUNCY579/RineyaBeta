@@ -1,0 +1,172 @@
+{
+  "arms": [
+    {
+      "name": "host_baseline",
+      "role": "frozen host",
+      "total": 256,
+      "trainable": 0
+    },
+    {
+      "donor": "latent_kv_attention",
+      "frozen_donor": true,
+      "name": "foreign_block_graft",
+      "role": "candidate",
+      "total": 1297,
+      "trainable": 513
+    },
+    {
+      "intermediate_size": 11,
+      "name": "parameter_matched_swiglu",
+      "role": "ordinary-capacity control",
+      "total": 801,
+      "trainable": 545
+    }
+  ],
+  "claim_boundary": "Infrastructure and synthetic-mechanism evidence only. This manifest does not establish a Rineya capability, quality, efficiency, or cross-family knowledge-transfer improvement. Sealed evaluation remained closed.",
+  "claim_level": "infrastructure_only",
+  "config": {
+    "canonical_sha256": "6422d8976aaaeb30a14003d65648e4547bebdf842a901f4f8bde9617753be7ab",
+    "path": "experiments/cross_architecture_graft/configs/smoke.json",
+    "schema_version": 1,
+    "snapshot": {
+      "claim_level": "infrastructure_only",
+      "data_policy": {
+        "allow_sealed": false,
+        "require_content_hashes": true
+      },
+      "experiment_id": "cag-v1-synthetic-smoke",
+      "graft": {
+        "bridge": {
+          "bias": false,
+          "identity_init": true,
+          "kind": "linear"
+        },
+        "donor": {
+          "d_model": 16,
+          "dropout": 0.0,
+          "head_dim": 4,
+          "kind": "latent_kv_attention",
+          "latent_rank": 4,
+          "num_heads": 4,
+          "num_kv_heads": 2,
+          "q_rank": 4
+        },
+        "exact_eval_bypass": true,
+        "foreign_dim": 16,
+        "freeze_donor": true,
+        "freeze_host": true,
+        "gate": {
+          "bound": 1.0,
+          "kind": "scalar"
+        }
+      },
+      "host": {
+        "device": "cpu",
+        "dtype": "float32",
+        "hidden_size": 16,
+        "kind": "toy",
+        "layer_indices": [
+          0
+        ]
+      },
+      "mode": "smoke",
+      "notes": "Synthetic plumbing proof only; the candidate receives the exact frozen teacher block.",
+      "schema_version": 1,
+      "seed": 20260831,
+      "training": {
+        "batch_size": 64,
+        "grad_clip": 1.0,
+        "lr": 0.03,
+        "seq_len": 8,
+        "steps": 80,
+        "weight_decay": 0.0
+      }
+    }
+  },
+  "data_assets": [],
+  "experiment_id": "cag-v1-synthetic-smoke",
+  "generated_at_utc": "2026-08-31T19:21:24.168256+00:00",
+  "git": {
+    "branch": "research/cross-architecture-graft-v1",
+    "commit": "07aca94be8702906e860eb08db5529ba2d054bb1",
+    "dirty": false
+  },
+  "invariants": {
+    "all_metrics_finite": true,
+    "candidate_training_reduced_dev_mse_by_4x": true,
+    "frozen_donor_parameters_unchanged": true,
+    "host_parameters_unchanged": true,
+    "matched_control_parameter_gap_le_10pct": true,
+    "sealed_evaluation_opened": false,
+    "zero_gate_bit_exact": true,
+    "zero_gate_max_abs_error": 0.0
+  },
+  "manifest_payload_sha256": "40b1c573c7075e33766161503bbc7e692d4a2fb5f81c819c3127ca38a76ae3ba",
+  "manifest_schema_version": 1,
+  "model_assets": [],
+  "phase": "synthetic_end_to_end_smoke",
+  "results": {
+    "baseline_dev_mse": 0.0014365427196025848,
+    "candidate_final_dev_mse": 8.167316991603002e-06,
+    "candidate_gate": {
+      "contribution_rms": 0.037178944796323776,
+      "delta_rms": 0.1969520002603531,
+      "gate_max_abs": 0.18877160549163818,
+      "gate_mean_abs": 0.18877160549163818
+    },
+    "candidate_initial_dev_mse": 0.0014365427196025848,
+    "candidate_train_loss_first": 0.0011225906200706959,
+    "candidate_train_loss_last": 1.4611360938943108e-06,
+    "component_plan": {
+      "branch_total": {
+        "parameters": 1041,
+        "trainable_parameters": 513
+      },
+      "donor": {
+        "class": "LatentKVAttentionBranch",
+        "parameters": 528,
+        "trainable_parameters": 0
+      },
+      "foreign_hidden_size": 16,
+      "gate": {
+        "class": "ResidualGate",
+        "parameters": 1,
+        "trainable_parameters": 1
+      },
+      "host_hidden_size": 16,
+      "initial_gate_exactly_zero": true,
+      "input_bridge": {
+        "class": "LinearBridge",
+        "parameters": 256,
+        "trainable_parameters": 256
+      },
+      "output_bridge": {
+        "class": "LinearBridge",
+        "parameters": 256,
+        "trainable_parameters": 256
+      }
+    },
+    "control_final_dev_mse": 0.0015001684660091996,
+    "control_initial_dev_mse": 0.0014365427196025848,
+    "control_train_loss_first": 0.0011225906200706959,
+    "control_train_loss_last": 0.00048532511573284864,
+    "interpretation": "Synthetic wiring proof only: the candidate is given the exact frozen teacher block. Its result cannot support a model-quality or donor-knowledge claim.",
+    "matched_control": {
+      "intermediate_size": 11,
+      "relative_parameter_gap": 0.06237816764132553
+    },
+    "synthetic_teacher_scale": 0.35
+  },
+  "runtime": {
+    "cuda_available": false,
+    "cuda_version": null,
+    "deterministic_algorithms": true,
+    "device_count": 0,
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "torch": "2.10.0+cpu"
+  },
+  "sealed_evaluation_opened": false,
+  "seed": 20260831,
+  "status": "INFRASTRUCTURE_PASS_ONLY"
+}
