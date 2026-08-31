@@ -1753,7 +1753,7 @@ measured step times it would also exceed the default M2 compute envelope.
 Resolution: freeze `T_pilot = 104,371` requested supervised tokens, exactly 10%
 of the current B0 confirmatory epoch rounded to the nearest token. Both arms stop
 at the first identical deterministic plan boundary at or beyond the request, so
-effective token counts must still match exactly. Commit reference: pending.
+effective token counts must still match exactly. Commit reference: `f99fdd3`.
 
 This amendment changes no hypothesis, optimizer setting, LoRA capacity, data
 membership/order, evaluation policy, promotion threshold, or sealed boundary.

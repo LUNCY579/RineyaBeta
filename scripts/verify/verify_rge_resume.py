@@ -35,6 +35,14 @@ def main() -> None:
 
     run_entry(RGE, config, straight, args.steps, "none", geometry="on")
     run_entry(RGE, config, resumed, args.break_at, "none", geometry="on")
+    # Simulate an asynchronously killed process that flushed a newer log row but
+    # did not reach the next atomic checkpoint. Exact resume must discard it.
+    log_path = resumed / "train_log.jsonl"
+    stale = json.loads(log_path.read_text(encoding="utf-8").splitlines()[-1])
+    stale["step"] = args.break_at + 1
+    stale["loss"] = 12345.0
+    with log_path.open("a", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(stale) + "\n")
     run_entry(RGE, config, resumed, args.steps, "auto", geometry="on")
     left, right = load_latest(straight), load_latest(resumed)
     problems = []
@@ -57,6 +65,7 @@ def main() -> None:
         "geometry_record_count": len(geometry_rows(resumed)),
         "generic_optimizer_state_compared": True,
         "geometry_resume_state_compared": True,
+        "stale_train_log_tail_injected_and_removed": True,
         "bit_exact": not problems, "problems": problems[:100],
         "sealed_data_accessed": False,
     }

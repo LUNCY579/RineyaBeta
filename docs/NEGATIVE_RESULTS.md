@@ -408,3 +408,21 @@ rather than overwritten.
 ```bash
 python scripts/design/verify_claims.py
 ```
+
+---
+
+## 7. RGE resume logs without checkpoint-tail reconciliation
+
+**Idea.** Because model/optimizer checkpoints are atomic, append-only training
+logs can be left untouched across an asynchronous interruption.
+
+**Killed by the M2 pair audit.** Muon was forcibly paused after logging step 31
+but its last durable checkpoint was step 30. Exact resume replayed step 31 and
+produced the correct tensors, but the log contained two step-31 rows. The pair
+matcher therefore rejected the learning-curve token axis even though final
+positions and effective token counts matched.
+
+**Fix.** On resume, truncate records newer than the checkpoint and keep the last
+record for every completed global step. The historical pilot log was repaired by
+removing one duplicate row; before/after hashes are committed, and no model or
+optimizer tensor was touched. An injected stale-tail regression now passes.

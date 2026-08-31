@@ -1,0 +1,30 @@
+{
+  "active_gpu_hours_from_reconciled_log": 0.7255734431944377,
+  "position": {
+    "epoch": 0,
+    "global_step": 101,
+    "rows_seen": 12928,
+    "step_in_epoch": 101,
+    "supervised_tokens_seen": 104571
+  },
+  "repair": {
+    "checkpoint": "step_000000101.pt",
+    "geometry_sha256_after": "d54cc342911e0b657a208df834758a76bf00c751d7d0bcf9a3013e39d058bbce",
+    "geometry_sha256_before": "d54cc342911e0b657a208df834758a76bf00c751d7d0bcf9a3013e39d058bbce",
+    "kind": "checkpoint_consistent_evidence_tail_reconciliation",
+    "model_or_optimizer_tensors_touched": false,
+    "schema_version": 1,
+    "through_step": 101,
+    "train_log": {
+      "input_rows": 101,
+      "output_rows": 101,
+      "removed_rows": 0
+    },
+    "train_log_sha256_after": "507a6a39c5ec4f5e26cb0be653176f20f269ed9fed60922de160f1502b342037",
+    "train_log_sha256_before": "507a6a39c5ec4f5e26cb0be653176f20f269ed9fed60922de160f1502b342037"
+  },
+  "run_dir": "artifacts/rge_peft/m2_o_a_adamw_r16_t104371",
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS"
+}

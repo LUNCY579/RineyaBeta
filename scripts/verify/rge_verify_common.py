@@ -22,6 +22,14 @@ ENV = {
 }
 
 
+def safe_print(value: str) -> None:
+    """Print child diagnostics even when Windows selected a legacy code page."""
+    try:
+        print(value)
+    except UnicodeEncodeError:
+        print(value.encode("ascii", errors="backslashreplace").decode("ascii"))
+
+
 def run_entry(entry: Path, config: Path, out: Path, steps: int,
               resume: str, *, geometry: str | None = None) -> None:
     command = [sys.executable, str(entry), "--config", str(config), "--out", str(out),
@@ -34,10 +42,10 @@ def run_entry(entry: Path, config: Path, out: Path, steps: int,
     label = entry.name + (f" geometry={geometry}" if geometry else "")
     print(f"\n$ {label} --max-steps {steps} --resume {resume} --out {out.name}")
     for line in [line for line in proc.stdout.splitlines() if line.strip()][-10:]:
-        print("    " + line)
+        safe_print("    " + line)
     if proc.returncode != 0:
-        print(proc.stdout[-6000:])
-        print(proc.stderr[-6000:])
+        safe_print(proc.stdout[-6000:])
+        safe_print(proc.stderr[-6000:])
         raise SystemExit(f"{label} exited {proc.returncode}")
 
 

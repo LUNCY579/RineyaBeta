@@ -36,6 +36,32 @@ Timing caveat: two cross-process overhead attempts showed materially drifting
 disabled references (+13.7% and -37.9%). Those comparisons are not used for the
 cadence decision; the same-process measured/unmeasured cadence contrast is used.
 
+## M2 — exploratory optimizer-pilot status
+
+Established so far:
+
+- Muon LR `4e-4` was selected without evaluation by a paired effective-step
+  bracket: median AdamW-relative ratios `0.472`, `0.944`, and `1.889` at raw LR
+  `2e-4`, `4e-4`, and `8e-4`.
+- At 104,571 matched supervised tokens, Muon reduced token-weighted training loss
+  by `0.15530` and final-step loss by `0.36331` versus AdamW. Muon had lower loss
+  on 75 of 101 paired plan steps, tied one, and was higher on 25.
+- Muon optimizer-state tensor bytes were about half AdamW's. Peak reserved memory
+  was 434 MiB higher in the repaired pair summaries.
+
+Not established:
+
+- Frozen retention or capability improvement. `chat_dev`/`rag_dev` endpoints
+  have not yet been evaluated.
+- Any speed or GPU-hour advantage. External user inference workloads repeatedly
+  contended with both arms, invalidating timing comparisons.
+
+Infrastructure negative: an asynchronously killed process could leave a
+`train_log.jsonl` row newer than its checkpoint. Exact resume replayed the step
+correctly but the stale row caused the post-run token-axis audit to fail. Resume
+now reconciles logs to checkpoint position and keeps the last record per step;
+an injected-tail regression passes. No model or optimizer tensor required repair.
+
 ## Sealed boundary
 
 The sealed RAG test set has not been accessed by RGE-PEFT. It remains prohibited

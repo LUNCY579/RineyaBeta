@@ -168,6 +168,44 @@ def _first_batches_hash(plans, count: int = 3) -> str:
     return hashlib.sha256(json.dumps(payload, separators=(",", ":")).encode()).hexdigest()
 
 
+def reconcile_train_log(path: Path, *, through_step: int) -> dict:
+    """Keep the last checkpoint-consistent record for every completed step."""
+    if not path.exists():
+        return {"input_rows": 0, "output_rows": 0, "removed_rows": 0}
+    rows_by_step = {}
+    input_rows = 0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        input_rows += 1
+        row = json.loads(line)
+        step = int(row["step"])
+        if step <= through_step:
+            # An asynchronously killed process may have logged a step newer than
+            # its last checkpoint. A later exact resume replays that step; keep
+            # the later record and discard the stale duplicate.
+            rows_by_step[step] = row
+    expected = list(range(1, through_step + 1))
+    if sorted(rows_by_step) != expected:
+        raise SystemExit(
+            "train log cannot be reconciled to checkpoint position: "
+            f"expected steps 1..{through_step}, found {sorted(rows_by_step)[:8]}"
+        )
+    lines = [json.dumps(rows_by_step[step], allow_nan=False) for step in expected]
+    path.write_text("\n".join(lines) + ("\n" if lines else ""),
+                    encoding="utf-8", newline="\n")
+    return {"input_rows": input_rows, "output_rows": len(lines),
+            "removed_rows": input_rows - len(lines)}
+
+
+def logged_training_seconds(path: Path) -> float:
+    if not path.exists():
+        return 0.0
+    return sum(float(json.loads(line)["step_time_s"])
+               for line in path.read_text(encoding="utf-8").splitlines()
+               if line.strip())
+
+
 def _manifest(cfg: dict, legacy: dict, model, tokenizer, data, plans,
               plan_hash: str, contract: dict, geometry: DeltaGeometryTracker,
               device: torch.device) -> dict:
@@ -294,8 +332,15 @@ def main() -> None:
             cadence_steps=int(cfg["geometry"]["cadence_steps"]),
             include_radius_angle=bool(cfg["geometry"]["include_radius_angle"]),
             run_id=str(cfg["run"]["id"]))
+        previous_manifest = {}
+        if args.resume != "none" and manifest_path.exists():
+            try:
+                previous_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                previous_manifest = {}
         manifest = _manifest(cfg, legacy, model, tokenizer, data, plans, plan_hash,
                              opt_contract, geometry, device)
+        manifest["resume_events"] = list(previous_manifest.get("resume_events", []))
         _atomic_json(manifest_path, manifest)
         (run_dir / "resolved_config.yaml").write_text(
             yaml.safe_dump({k: v for k, v in cfg.items() if not k.startswith("_")},
@@ -371,8 +416,12 @@ def main() -> None:
                 print(f"resumed {path.name} at step {position.global_step}")
 
         geometry_path = run_dir / str(cfg["geometry"]["artifact"])
+        log_path = run_dir / "train_log.jsonl"
         if resumed_from:
             reconcile_geometry_log(geometry_path, through_step=position.global_step)
+            reconciliation = reconcile_train_log(log_path,
+                                                 through_step=position.global_step)
+            manifest["resume_events"][-1]["train_log_reconciliation"] = reconciliation
         elif geometry_path.exists():
             geometry_path.unlink()
         _atomic_json(manifest_path, manifest)
@@ -389,7 +438,6 @@ def main() -> None:
                 except (OSError, ValueError):
                     pass
 
-        log_path = run_dir / "train_log.jsonl"
         save_every = int(cfg["run"]["save_every_steps"])
         log_every = int(cfg["run"]["log_every_steps"])
         clip = float(cfg["train"]["grad_clip"])
@@ -515,8 +563,9 @@ def main() -> None:
         lock.unlink(missing_ok=True)
         if manifest is not None:
             manifest["wall_time_s"] = round(time.perf_counter() - overall_started, 6)
-            manifest["active_gpu_hours"] = (training_seconds / 3600.0
-                                             if use_cuda else 0.0)
+            manifest["active_gpu_hours"] = (
+                logged_training_seconds(run_dir / "train_log.jsonl") / 3600.0
+                if use_cuda else 0.0)
             snapshot = mem.snapshot() if use_cuda else {}
             probe_report = locals().get("report")
             probe_allocated = (probe_report.peak_alloc_mib if probe_report and

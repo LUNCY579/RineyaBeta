@@ -1,0 +1,30 @@
+{
+  "active_gpu_hours_from_reconciled_log": 0.5270594153611142,
+  "position": {
+    "epoch": 0,
+    "global_step": 101,
+    "rows_seen": 12928,
+    "step_in_epoch": 101,
+    "supervised_tokens_seen": 104571
+  },
+  "repair": {
+    "checkpoint": "step_000000101.pt",
+    "geometry_sha256_after": "a0cef26f525747d8e0e2d489359c73addefa6ec4365a7ea6db67e2346f6e6c25",
+    "geometry_sha256_before": "a0cef26f525747d8e0e2d489359c73addefa6ec4365a7ea6db67e2346f6e6c25",
+    "kind": "checkpoint_consistent_evidence_tail_reconciliation",
+    "model_or_optimizer_tensors_touched": false,
+    "schema_version": 1,
+    "through_step": 101,
+    "train_log": {
+      "input_rows": 102,
+      "output_rows": 101,
+      "removed_rows": 1
+    },
+    "train_log_sha256_after": "f27158f659bb27ddfe81b8e60b3d857a37fce6161717520da611d1642bd1589f",
+    "train_log_sha256_before": "90d77a97fd3157e73aad865765b3702486cc9019e9659088001b2cc8d953a04b"
+  },
+  "run_dir": "artifacts/rge_peft/m2_o_m_muon_r16_t104371",
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS"
+}

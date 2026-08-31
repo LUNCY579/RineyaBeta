@@ -49,7 +49,7 @@ RETIRED
 | Work package | Planning envelope | Actual GPU-hours | Status |
 |---|---:|---:|---|
 | M1 parity/smoke | 0–3 | 0.071 measured RGE training-step hours | GATE_PASSED |
-| M2 optimizer pilot | 2–6 | 0.182 measured training-step hours | IN_PROGRESS |
+| M2 optimizer pilot | 2–6 | 1.435 measured training-step hours | IN_PROGRESS |
 | M3 DeltaBall | 4–12 | 0 | NOT_STARTED |
 | M4 curriculum/tail | 4–12 | 0 | NOT_STARTED |
 | M5 CMA validation | 1–6 | 0 | NOT_STARTED |
@@ -126,7 +126,12 @@ RETIRED
 - **Calibration compute:** expanded bracket used 0.0819 measured optimizer-step GPU-hours; cumulative M2 measured optimizer-step time is approximately 0.182 GPU-hours.
 - **Sealed data accessed:** no.
 - **Pilot-budget correction:** the staged 1,000,000-token value was inconsistent with the SSOT's 10% rule. Full B0 is 1,043,713 supervised tokens, so amendment v1.2 freezes the M2 request at 104,371 before any pair outcome. Smoke/calibration loss was already visible, but no pair endpoint or retention result existed and the correction is formula-driven.
-- **Next bounded action:** execute the registered 104,371-requested-supervised-token exploratory O-A/O-M pair sequentially, then evaluate only frozen `chat_dev` and `rag_dev` retention if both arms pass comparability.
+- **Registered pair training:** COMPLETE after exact resumes at AdamW step 60 and Muon step 30. Both arms ended at step 101 and exactly 104,571 effective supervised tokens. AdamW weighted/final loss: `1.95586` / `0.94659`; Muon: `1.80056` / `0.58329`; deltas `-0.15530` / `-0.36331`. Muon had lower loss on 75/101 paired points, tied 1, and higher on 25.
+- **External contention:** user-owned long-context inference jobs repeatedly overlapped both arms. Training tensors/loss remain valid, but all time/throughput/GPU-hour efficiency comparisons from this cohort are `INVALID_EXTERNAL_GPU_CONTENTION`.
+- **Resume-artifact negative:** the first pair audit failed because an uncheckpointed Muon step-31 log row survived a forced pause at checkpoint 30 and was logged again on replay. Checkpoint/model/optimizer tensors and final positions matched. The log was reconciled to the checkpoint (one row removed), active time recomputed, and comparability then passed. Future resume now performs this reconciliation automatically; injected-tail regression passes.
+- **Memory/state:** Muon optimizer-state tensor bytes are 0.49999x AdamW; Muon peak reserved is +434 MiB in repaired summaries. Cumulative measured M2 optimizer-step time is 1.435 GPU-hours, but efficiency interpretation is prohibited by contention.
+- **Scientific interpretation:** exploratory positive evidence for training-objective improvement per supervised token only. Retention/capability improvement is not established.
+- **Next bounded action:** export both frozen pilot endpoints and evaluate `chat_dev` plus `rag_dev` retention under the existing unsealed protocol.
 
 ### M3 — DeltaBall factorial
 
