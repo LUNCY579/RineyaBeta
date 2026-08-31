@@ -1,0 +1,63 @@
+{
+  "exact_adapter": "artifacts\\adapters\\rge_m5_uniform_matched_cma_exact_r96",
+  "exact_adapter_model_sha256": "e9f0dc48ab9bc2a30e8352c21d96713a7da97e607a4ea5f45c985c95251eee5c",
+  "exact_rank": 96,
+  "factor_averaging_used": false,
+  "global_relative_reconstruction_error": 1.8148454940661816e-05,
+  "global_retained_energy_fraction": 0.9999999996706336,
+  "implementation": "rge-delta-cma-v1",
+  "maximum_module_relative_reconstruction_error": 3.114473308769602e-05,
+  "minimum_module_retained_energy_fraction": 0.9999999990300056,
+  "module_count": 196,
+  "rank_adapter_model_sha256": "feb336f220eb39aada22e91d052aa7578a88d8adeea60b06cefd1b5955e5fc1d",
+  "rank_matched_adapter": "artifacts\\adapters\\rge_m5_uniform_matched_cma_rank16",
+  "rank_matched_rank": 16,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "source_checkpoints": [
+    {
+      "path": "artifacts/rge_peft/m5_c_utm_uniform_main_matched_tail_r16/checkpoints/step_000000002.pt",
+      "sha256": "986891ce3188775ce34476269b411c777c22bb6ceebe0776e4e8ccc299928a8c"
+    },
+    {
+      "path": "artifacts/rge_peft/m5_c_utm_uniform_main_matched_tail_r16/checkpoints/step_000000004.pt",
+      "sha256": "c8290fe450d5394836b6da3016a245be7af22e537fbff1dba5f06ed64de1a21e"
+    },
+    {
+      "path": "artifacts/rge_peft/m5_c_utm_uniform_main_matched_tail_r16/checkpoints/step_000000006.pt",
+      "sha256": "ec8ab6346fcec8c8667f4d1faa3ec5683716175334257918709333d03a8c5ad7"
+    },
+    {
+      "path": "artifacts/rge_peft/m5_c_utm_uniform_main_matched_tail_r16/checkpoints/step_000000008.pt",
+      "sha256": "e017d1862e5b6c291d432340a03921e0deee3f13f27c583359875408037a7052"
+    },
+    {
+      "path": "artifacts/rge_peft/m5_c_utm_uniform_main_matched_tail_r16/checkpoints/step_000000010.pt",
+      "sha256": "6840aeb4292e7b9c9ce41916b8a8cd1a0768bd20b9cf7d1f5905491509a00b55"
+    },
+    {
+      "path": "artifacts/rge_peft/m5_c_utm_uniform_main_matched_tail_r16/checkpoints/step_000000012.pt",
+      "sha256": "3fe5c3197973d62a48ca88becb4994ecc2c2475d6238fbf8918f8187515f7f64"
+    }
+  ],
+  "source_rank": 16,
+  "source_run": "artifacts\\rge_peft\\m5_c_utm_uniform_main_matched_tail_r16",
+  "source_scale": 2.0,
+  "source_steps": [
+    2,
+    4,
+    6,
+    8,
+    10,
+    12
+  ],
+  "status": "PASS",
+  "weights": [
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666,
+    0.16666666666666666
+  ]
+}

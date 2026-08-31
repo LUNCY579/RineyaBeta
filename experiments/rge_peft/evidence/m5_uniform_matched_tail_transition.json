@@ -1,0 +1,40 @@
+{
+  "adapter_optimizer_rng_retained": true,
+  "allowed_inert_source_drift": [
+    "cma.py: added"
+  ],
+  "averaging_performed": false,
+  "checkpoint_steps": [
+    2,
+    4,
+    6,
+    8,
+    10,
+    12
+  ],
+  "constant_lr": 1e-05,
+  "matched_tail_reference": {
+    "mix_sha256": "ab7545b0d4bbf73f9ab63c3e2732c509f76a81a93733c74a3730eef56a2e1af3",
+    "plan_hash": "c1298f9ed849b14dc6fb99700484830a735d48a289f97ea1970750c7ef8d468e",
+    "rows_seen": 1536,
+    "run": "artifacts\\rge_peft\\m4_c_ct_constant_tail_r16",
+    "supervised_tokens": 12713
+  },
+  "plan_position_reset": true,
+  "projection_counters_reset": true,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "source_checkpoint": "artifacts/rge_peft/m4_c_u_uniform_r16_subset10/checkpoints/step_000000101.pt",
+  "source_checkpoint_sha256": "a79ec30ffef94e87babee843689a863783254e03d263c6ac87b4eaf1e87d4c4a",
+  "source_main_segment_curriculum": {
+    "manifest": "experiments/rge_peft/evidence/m4_subset_manifest.json",
+    "membership_sha256": "8365fecdf98e5a0fbb9ac635500a4a8fa16aabca97ccb2042fd5032533748e28",
+    "mode": "reference",
+    "order_sha256": "0d7151ed282ac453e698adce7f58ae12661f172b2fa780875eecf21e0e5b9575"
+  },
+  "status": "FROZEN_BEFORE_TAIL_RUN",
+  "steps": 12,
+  "tail_config": "configs\\rge_peft\\m5_c_utm_uniform_matched_tail.yaml",
+  "tail_config_sha256": "7a5ec51c3ab6f05413e7fa12a476b1f8a42f470c16a9fa7ed775a868a40e620c",
+  "tail_plan_hash": "c1298f9ed849b14dc6fb99700484830a735d48a289f97ea1970750c7ef8d468e"
+}
