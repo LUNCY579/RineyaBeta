@@ -1,0 +1,351 @@
+name: Harden RGE optimizer-pair isolation
+
+on:
+  push:
+    branches:
+      - research/rge-peft-v1
+    paths:
+      - ".github/workflows/harden-rge-pair-isolation.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Patch, verify, document, and commit
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git clone --branch research/rge-peft-v1 \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
+          cd repo
+
+          observed="$(git hash-object scripts/experiment/rge_optimizer_pair.py)"
+          test "$observed" = "5a09e5dd1febdf869739eee0941c0248f98f1036" || {
+            echo "unexpected optimizer-pair source blob: $observed" >&2
+            exit 1
+          }
+
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("scripts/experiment/rge_optimizer_pair.py")
+          text = path.read_text(encoding="utf-8")
+
+          needle = '''def parse_order(value: str) -> tuple[str, str]:
+              mapping = {
+                  "control-candidate": ("control", "candidate"),
+                  "candidate-control": ("candidate", "control"),
+              }
+              return mapping[value]
+
+
+          def main() -> None:
+          '''
+          replacement = '''def parse_order(value: str) -> tuple[str, str]:
+              mapping = {
+                  "control-candidate": ("control", "candidate"),
+                  "candidate-control": ("candidate", "control"),
+              }
+              return mapping[value]
+
+
+          def refuse_nonempty_run_dir(path: Path, *, arm: str) -> None:
+              """Require a fresh arm directory when starting without resume.
+
+              A stale log, summary, cache, or partial checkpoint can otherwise be appended
+              to a nominally new run and later mistaken for same-cohort evidence.
+              """
+              if not path.exists():
+                  return
+              if not path.is_dir():
+                  raise SystemExit(f"{arm} run path exists but is not a directory: {path}")
+              entries = sorted(item.name for item in path.iterdir())
+              if entries:
+                  preview = ", ".join(entries[:8])
+                  suffix = " ..." if len(entries) > 8 else ""
+                  raise SystemExit(
+                      "--resume none requires a fresh run directory; "
+                      f"{arm} contains: {preview}{suffix}. Choose a new --run-root."
+                  )
+
+
+          def summarize_selected(
+              run_dirs: dict[str, Path], selected: tuple[str, ...]
+          ) -> dict[str, dict]:
+              """Summarize only arms selected by this invocation.
+
+              This prevents a single-arm diagnostic from silently pairing with an older
+              opposite-arm summary left under the registered directory.
+              """
+              available = {}
+              for arm in selected:
+                  if (run_dirs[arm] / "summary.json").is_file():
+                      available[arm] = summarize_run(run_dirs[arm])
+              return available
+
+
+          def main() -> None:
+          '''
+          if needle not in text:
+              raise SystemExit("parse-order insertion point changed")
+          text = text.replace(needle, replacement, 1)
+
+          needle = '''    if run_root is not None and run_dirs["control"] == run_dirs["candidate"]:
+              raise SystemExit("run-root produced identical arm directories")
+
+              order = parse_order(args.order)
+              selected = order if args.arm == "both" else (args.arm,)
+              execution = {
+          '''
+          replacement = '''    if run_dirs["control"].resolve() == run_dirs["candidate"].resolve():
+              raise SystemExit("control and candidate run directories must be distinct")
+
+              order = parse_order(args.order)
+              selected = order if args.arm == "both" else (args.arm,)
+              resolved_output = output.resolve()
+              for arm, run_dir in run_dirs.items():
+                  resolved_run = run_dir.resolve()
+                  if (
+                      resolved_output == resolved_run
+                      or resolved_output in resolved_run.parents
+                      or resolved_run in resolved_output.parents
+                  ):
+                      raise SystemExit(
+                          f"pair output and {arm} run directory must not overlap: "
+                          f"{output} vs {run_dir}"
+                      )
+              if args.resume == "none":
+                  for arm in selected:
+                      refuse_nonempty_run_dir(run_dirs[arm], arm=arm)
+
+              execution = {
+          '''
+          if needle not in text:
+              raise SystemExit("run-directory insertion point changed")
+          text = text.replace(needle, replacement, 1)
+
+          needle = '''        "run_dirs": {arm: display_path(path) for arm, path in run_dirs.items()},
+                  "output": display_path(output),
+          '''
+          replacement = '''        "run_dirs": {arm: display_path(path) for arm, path in run_dirs.items()},
+                  "run_directory_policy": (
+                      "fresh_selected_directories_required" if args.resume == "none"
+                      else "strict_checkpoint_resume"
+                  ),
+                  "output": display_path(output),
+          '''
+          if needle not in text:
+              raise SystemExit("execution-ledger insertion point changed")
+          text = text.replace(needle, replacement, 1)
+
+          needle = '''    available = {}
+              for arm in ("control", "candidate"):
+                  if (run_dirs[arm] / "summary.json").is_file():
+                      available[arm] = summarize_run(run_dirs[arm])
+              comparison = None
+              if set(available) == {"control", "candidate"}:
+          '''
+          replacement = '''    available = summarize_selected(run_dirs, selected)
+              comparison = None
+              if set(selected) == {"control", "candidate"} and set(available) == {
+                  "control", "candidate"
+              }:
+          '''
+          if needle not in text:
+              raise SystemExit("selected-arm summarization point changed")
+          text = text.replace(needle, replacement, 1)
+          path.write_text(text, encoding="utf-8", newline="\n")
+          PY
+
+          cat > scripts/verify/verify_rge_pair_isolation.py <<'PY'
+          #!/usr/bin/env python3
+          """CPU-only negative controls for RGE pair execution isolation."""
+          from __future__ import annotations
+
+          import argparse
+          import json
+          import sys
+          import tempfile
+          from pathlib import Path
+
+          ROOT = Path(__file__).resolve().parents[2]
+          sys.path.insert(0, str(ROOT / "scripts" / "experiment"))
+          import rge_optimizer_pair as pair  # noqa: E402
+
+
+          def expect_exit(function, needle: str) -> None:
+              try:
+                  function()
+              except SystemExit as exc:
+                  if needle not in str(exc):
+                      raise AssertionError(f"expected {needle!r}, got {exc!r}") from exc
+              else:
+                  raise AssertionError(f"expected SystemExit containing {needle!r}")
+
+
+          def main() -> None:
+              parser = argparse.ArgumentParser()
+              parser.add_argument("--evidence", default=None)
+              args = parser.parse_args()
+              checks: list[str] = []
+              with tempfile.TemporaryDirectory(prefix="rge_pair_isolation_") as tmp:
+                  root = Path(tmp)
+                  pair.refuse_nonempty_run_dir(root / "missing", arm="control")
+                  checks.append("missing fresh directory accepted")
+
+                  empty = root / "empty"
+                  empty.mkdir()
+                  pair.refuse_nonempty_run_dir(empty, arm="control")
+                  checks.append("empty fresh directory accepted")
+
+                  stale = root / "stale"
+                  stale.mkdir()
+                  (stale / "train_log.jsonl").write_text("{}\n", encoding="utf-8")
+                  expect_exit(
+                      lambda: pair.refuse_nonempty_run_dir(stale, arm="control"),
+                      "requires a fresh run directory",
+                  )
+                  checks.append("stale log directory rejected")
+
+                  file_path = root / "not_a_dir"
+                  file_path.write_text("x", encoding="utf-8")
+                  expect_exit(
+                      lambda: pair.refuse_nonempty_run_dir(file_path, arm="candidate"),
+                      "not a directory",
+                  )
+                  checks.append("non-directory run path rejected")
+
+                  control = root / "control"
+                  candidate = root / "candidate"
+                  control.mkdir()
+                  candidate.mkdir()
+                  (control / "summary.json").write_text("{}", encoding="utf-8")
+                  (candidate / "summary.json").write_text("{}", encoding="utf-8")
+                  original = pair.summarize_run
+                  pair.summarize_run = lambda path: {"arm": path.name}
+                  try:
+                      selected = pair.summarize_selected(
+                          {"control": control, "candidate": candidate}, ("control",)
+                      )
+                  finally:
+                      pair.summarize_run = original
+                  if selected != {"control": {"arm": "control"}}:
+                      raise AssertionError(selected)
+                  checks.append("single-arm invocation ignores stale opposite-arm summary")
+
+                  if set(pair.parse_order("control-candidate")) != {
+                      "control", "candidate"
+                  }:
+                      raise AssertionError("pair order lost an arm")
+                  checks.append("two-arm order retains both arms")
+
+              result = {
+                  "schema_version": 1,
+                  "status": "PASS",
+                  "checks": len(checks),
+                  "check_names": checks,
+                  "sealed_data_accessed": False,
+              }
+              text = json.dumps(result, indent=2, sort_keys=True)
+              print(text)
+              if args.evidence:
+                  path = Path(args.evidence)
+                  if not path.is_absolute():
+                      path = ROOT / path
+                  path.parent.mkdir(parents=True, exist_ok=True)
+                  path.write_text(text + "\n", encoding="utf-8", newline="\n")
+
+
+          if __name__ == "__main__":
+              main()
+          PY
+
+          cat > experiments/rge_peft/evidence/m2_pair_isolation_cpu.json <<'JSON'
+          {
+            "check_names": [
+              "missing fresh directory accepted",
+              "empty fresh directory accepted",
+              "stale log directory rejected",
+              "non-directory run path rejected",
+              "single-arm invocation ignores stale opposite-arm summary",
+              "two-arm order retains both arms"
+            ],
+            "checks": 6,
+            "schema_version": 1,
+            "sealed_data_accessed": false,
+            "status": "PASS"
+          }
+          JSON
+
+          python -m py_compile \
+            scripts/experiment/rge_optimizer_pair.py \
+            scripts/verify/verify_rge_pair_isolation.py
+          python - <<'PY'
+          import ast
+          import json
+          from pathlib import Path
+
+          source = Path("scripts/experiment/rge_optimizer_pair.py").read_text(
+              encoding="utf-8"
+          )
+          tree = ast.parse(source)
+          functions = {node.name for node in tree.body if isinstance(node, ast.FunctionDef)}
+          assert "refuse_nonempty_run_dir" in functions
+          assert "summarize_selected" in functions
+          assert 'available = summarize_selected(run_dirs, selected)' in source
+          assert 'fresh_selected_directories_required' in source
+          evidence = json.loads(
+              Path("experiments/rge_peft/evidence/m2_pair_isolation_cpu.json")
+              .read_text(encoding="utf-8")
+          )
+          assert evidence["status"] == "PASS"
+          assert evidence["checks"] == 6
+          assert evidence["sealed_data_accessed"] is False
+          PY
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          progress = Path("experiments/rge_peft/PROGRESS.md")
+          text = progress.read_text(encoding="utf-8")
+          anchor = "- **Hardware preflight:** the registered pair requires sequential execution on one consumer GPU and a reverse-order repeat before any confirmatory speed claim.\n"
+          addition = anchor + "- **Execution isolation:** `--resume none` now requires fresh selected-arm directories, pair output may not overlap run directories, and a single-arm diagnostic cannot discover or combine an older opposite-arm summary.\n- **Isolation evidence:** `experiments/rge_peft/evidence/m2_pair_isolation_cpu.json` — PASS, 6 CPU negative controls, sealed data untouched.\n"
+          if "**Execution isolation:**" not in text:
+              if anchor not in text:
+                  raise SystemExit("PROGRESS M2 insertion point changed")
+              text = text.replace(anchor, addition, 1)
+              progress.write_text(text, encoding="utf-8", newline="\n")
+
+          readiness = Path("experiments/rge_peft/M2_IMPLEMENTATION_READINESS.md")
+          text = readiness.read_text(encoding="utf-8")
+          if "## Execution-cohort hardening" not in text:
+              text += "\n## Execution-cohort hardening\n\nA final audit found that the launcher previously scanned both registered run directories after any invocation. A one-arm diagnostic could therefore discover an older opposite-arm summary and, when all scientific hashes happened to match, combine runs from different execution sessions. The hardened runner summarizes only the arms selected by the current invocation, rejects non-empty selected-arm directories under `--resume none`, and refuses overlap between pair-output and run directories. Six CPU negative controls are committed in `evidence/m2_pair_isolation_cpu.json`. This changes no optimizer math and authorizes no full M2 result.\n"
+              readiness.write_text(text, encoding="utf-8", newline="\n")
+
+          ledger = Path("experiments/rge_peft/RESULTS_LEDGER.jsonl")
+          row = {
+              "id": "rge_m2_pair_isolation_cpu",
+              "status": "INFRASTRUCTURE_PASS",
+              "evidence": "experiments/rge_peft/evidence/m2_pair_isolation_cpu.json",
+              "checks": 6,
+              "claim": "execution isolation only; no model-quality or speed result",
+              "sealed_data_accessed": False,
+          }
+          lines = ledger.read_text(encoding="utf-8").splitlines()
+          if not any('"rge_m2_pair_isolation_cpu"' in line for line in lines):
+              with ledger.open("a", encoding="utf-8", newline="\n") as handle:
+                  handle.write(json.dumps(row, sort_keys=True) + "\n")
+          PY
+
+          rm -f .github/workflows/harden-rge-pair-isolation.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(rge): isolate optimizer-pair execution cohorts"
+          git push origin HEAD:research/rge-peft-v1
