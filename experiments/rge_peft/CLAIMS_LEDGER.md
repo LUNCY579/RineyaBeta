@@ -16,3 +16,4 @@ Allowed statuses are `PLANNED`, `IMPLEMENTED_UNVERIFIED`, `VERIFIED_MECHANISM`,
 | Curriculum ordering improves the endpoint | EXPLORATORY_NEGATIVE | C-U/C-C with identical membership and exact tokens | weighted loss −0.00137, but final loss +0.145; chat −0.00368, RAG +0.00081; CIs cross zero | observed: no consistent endpoint gain |
 | Constant tail improves the endpoint | EXPLORATORY_NEGATIVE | C-C versus C-CT frozen retention | chat −0.000884, RAG exactly tied on 752/752 cases | observed: no standalone endpoint gain; tail retained only for CMA |
 | Rank-matched Delta-CMA improves the endpoint | PLANNED | C-CT/C-CTM plus compression diagnostics | — | gain only in higher-rank exact average |
+| Delta-CMA construction is gauge-correct and rank-controlled | VERIFIED_MECHANISM | dense, gauge, QR/SVD, scaling, and raw-factor negative controls | `m5_cma_unit_cpu.json` (7 checks) | dense mismatch, loader failure, or rank/scale drift |

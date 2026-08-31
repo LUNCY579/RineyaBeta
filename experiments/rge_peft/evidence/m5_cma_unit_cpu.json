@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "checks": 7,
+  "check_names": [
+    "exact concatenation equals dense weighted delta average",
+    "exact average is gauge invariant",
+    "QR/core-SVD rank-r result matches dense truncated SVD",
+    "rank-matched factors have requested PEFT shapes",
+    "retained energy and reconstruction error reported",
+    "raw independent factor averaging is not used",
+    "rectangular target aspects recompress correctly"
+  ],
+  "sealed_data_accessed": false
+}

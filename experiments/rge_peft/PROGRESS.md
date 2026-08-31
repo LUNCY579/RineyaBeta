@@ -6,7 +6,7 @@
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
 **Current milestone:** M5 — Delta-CMA
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 NOT_STARTED
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 IN_PROGRESS
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -34,7 +34,7 @@ RETIRED
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | GATE_PASSED | active eps1x retained on small positive named-retention frontier |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | CLOSED | curriculum mixed/unsupported; tail neutral; six CMA inputs valid |
-| M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | NOT_STARTED | CMA math/export proof and endpoint decision |
+| M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | IN_PROGRESS | synthetic math passes; real six-checkpoint construction pending |
 | M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | NOT_STARTED | frozen control/candidate, seed evidence, retention/efficiency decision |
 | M7 | One-time sealed promotion gate | Oct 26–Oct 28 | 1% | NOT_STARTED | exactly one authorized sealed result after candidate freeze |
 | M8 | Phase 7: rank/family transfer | Oct 29–Nov 15 | 1% | NOT_STARTED | conditional transfer-scope decision |
@@ -189,9 +189,14 @@ RETIRED
 
 ### M5 — Delta-CMA
 
-- **Status:** NOT_STARTED
+- **Opened:** 2026-08-31 (America/Chicago)
+- **Status:** IN_PROGRESS
 - **Planned window:** 2026-10-05 to 2026-10-11
 - **Required evidence:** gauge-invariant averaging; QR/SVD recompression; retained energy; PEFT export/reload; endpoint decision.
+- **Inputs:** frozen constant-tail checkpoints `{2,4,6,8,10,12}`, equal weights, source rank 16/scale 2.
+- **Math verification:** `verify_cma_math.py` PASS, 7 checks covering exact dense average, gauge invariance, QR/core-SVD, rank/scale, energy/error, factor-averaging negative control, and rectangular aspects.
+- **Sealed data accessed:** no.
+- **Next bounded action:** commit CMA implementation, construct diagnostic rank-96 exact and primary rank-16 adapters, then verify normal PEFT load/merge.
 
 ### M6 — confirmation
 
@@ -227,7 +232,7 @@ RETIRED
 | 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | gate record `a59a340`; `experiments/rge_peft/evidence/m1_gate_audit.json` |
 | 2026-08-31 | M2 | Reject Muon for the general Rineya recipe and advance DeltaBall only under AdamW | training loss improved, but chat non-inferiority failed and RAG gained four critical defects | gate record `8f69c9d`; `experiments/rge_peft/evidence/m2_gate_audit.json` |
 | 2026-08-31 | M3 | Retain AdamW + active eps1x DeltaBall for M4 | small positive/non-inferior chat and RAG retention with no critical regression; targeted capability untested | gate record `b689530`; `experiments/rge_peft/evidence/m3_gate_audit.json` |
-| 2026-08-31 | M4 | Close curriculum/tail isolation without a standalone benefit; authorize CMA construction | curriculum mixed, tail neutral, exact six-checkpoint trajectory available | `experiments/rge_peft/evidence/m4_gate_audit.json`; gate-record commit pending |
+| 2026-08-31 | M4 | Close curriculum/tail isolation without a standalone benefit; authorize CMA construction | curriculum mixed, tail neutral, exact six-checkpoint trajectory available | gate record `888d3e6`; `experiments/rge_peft/evidence/m4_gate_audit.json` |
 
 ## 6. Blocker log
 
