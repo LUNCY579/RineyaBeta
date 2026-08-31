@@ -8,12 +8,14 @@ about the frozen dataset hash.  Test, challenge, and sealed paths are refused.
 from __future__ import annotations
 
 import argparse
+import atexit
 import collections
 import hashlib
 import importlib.metadata
 import json
 import platform
 import re
+import os
 import sys
 import time
 from pathlib import Path
@@ -24,6 +26,43 @@ import torch
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "train"))
 import memory as mem  # noqa: E402
+
+
+def take_run_lock(directory: Path):
+    """Hold a non-blocking process lock for one evaluation output directory."""
+    path = directory / ".run.lock"
+    handle = path.open("a+b")
+    if path.stat().st_size == 0:
+        handle.write(b"\0")
+        handle.flush()
+    handle.seek(0)
+    try:
+        if os.name == "nt":
+            import msvcrt
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as error:
+        handle.close()
+        raise SystemExit(f"another capability process owns {directory}") from error
+
+    def release() -> None:
+        if handle.closed:
+            return
+        try:
+            handle.seek(0)
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        finally:
+            handle.close()
+
+    atexit.register(release)
+    return handle
 
 
 def sha256_file(path: Path) -> str:
@@ -176,6 +215,7 @@ def main() -> None:
     adapter_path = (ROOT / args.adapter).resolve()
     out_dir = (ROOT / args.out).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
+    run_lock = take_run_lock(out_dir)
     results_path = out_dir / "results.jsonl"
     progress_path = out_dir / "progress.jsonl"
     evaluation_manifest_path = out_dir / "evaluation_manifest.json"
@@ -338,6 +378,7 @@ def main() -> None:
     evaluation_manifest_path.write_text(
         json.dumps(run_manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=2, sort_keys=True))
+    run_lock.close()
 
 
 if __name__ == "__main__":

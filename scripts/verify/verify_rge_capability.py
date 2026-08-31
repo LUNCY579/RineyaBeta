@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / "scripts" / "verify"))
 from compare_rge_capability import compare, mcnemar_exact  # noqa: E402
 from run_rge_capability import (  # noqa: E402
     extract_final, normalize_answer, reject_nonvalidation_path, score_prediction,
-    sha256_file, tree_fingerprint,
+    sha256_file, take_run_lock, tree_fingerprint,
 )
 
 
@@ -81,6 +81,19 @@ def main() -> None:
         (root / "a.txt").write_text("b", encoding="utf-8")
         assert tree_fingerprint(root) != first
     checks.append("recursive_fingerprint_detects_change")
+
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        first = take_run_lock(root)
+        try:
+            try:
+                take_run_lock(root)
+            except SystemExit:
+                checks.append("concurrent_output_writer_rejected")
+            else:
+                raise AssertionError("concurrent writer acquired the same run lock")
+        finally:
+            first.close()
 
     result = {
         "schema_version": 1,

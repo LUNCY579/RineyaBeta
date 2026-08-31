@@ -1,5 +1,5 @@
 {
-  "check_count": 14,
+  "check_count": 15,
   "checks": [
     "final_tag_extraction",
     "think_suffix_extraction",
@@ -14,7 +14,8 @@
     "exact_mcnemar_reference_cases",
     "paired_case_accounting",
     "family_delta_accounting",
-    "recursive_fingerprint_detects_change"
+    "recursive_fingerprint_detects_change",
+    "concurrent_output_writer_rejected"
   ],
   "schema_version": 1,
   "sealed_data_accessed": false,
