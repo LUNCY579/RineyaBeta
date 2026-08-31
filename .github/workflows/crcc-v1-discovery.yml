@@ -1,0 +1,361 @@
+name: CRCC v1 unsealed discovery
+
+on:
+  push:
+    branches:
+      - research/catastrophic-removal-core-v1
+    paths:
+      - .github/workflows/crcc-v1-discovery.yml
+      - configs/critical_core_scan_v1.yaml
+      - scripts/critical_core/assemble_scan_evidence.py
+      - scripts/verify/verify_crcc_discovery_evidence.py
+      - docs/CRCC_V1_PRE_RUN_EXECUTION_AMENDMENT.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crcc-v1-discovery-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CRCC_PREREG_HEAD: 242613d1b4b5e0a5a4a7154c60337115ca394bd7
+  CRCC_BRANCH: research/catastrophic-removal-core-v1
+  MODEL_REPO: Qwen/Qwen3-0.6B
+  MODEL_REVISION: c916fa4defd319b7d4e4da17604ca7338f4d99f5
+  MODEL_DIR: Qwen3-0.6B
+  PYTHON_VERSION: "3.11"
+  TORCH_VERSION: 2.8.0
+  TRANSFORMERS_VERSION: 4.57.1
+  ACCELERATE_VERSION: 1.10.1
+  PYYAML_VERSION: 6.0.2
+  HF_HUB_DISABLE_TELEMETRY: "1"
+  TOKENIZERS_PARALLELISM: "false"
+
+jobs:
+  preflight:
+    name: Contract preflight (no model inference)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the triggering commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Verify ancestry and branch boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "${CRCC_BRANCH}"
+          git merge-base --is-ancestor "${CRCC_PREREG_HEAD}" "${GITHUB_SHA}"
+          test "$(git rev-parse "${CRCC_PREREG_HEAD}^{commit}")" = "${CRCC_PREREG_HEAD}"
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install model-light verification dependency
+        run: python -m pip install --disable-pip-version-check "PyYAML==${PYYAML_VERSION}"
+
+      - name: Compile and verify the evidence assembler
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compileall -q scripts/critical_core scripts/verify
+          python scripts/verify/verify_crcc_discovery_evidence.py
+
+      - name: Enforce unsealed discovery inputs and frozen model source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          cfg = yaml.safe_load(Path("configs/critical_core_scan_v1.yaml").read_text(encoding="utf-8"))
+          assert cfg["model"]["source_repo"] == "Qwen/Qwen3-0.6B"
+          assert cfg["model"]["revision"] == "c916fa4defd319b7d4e4da17604ca7338f4d99f5"
+          assert int(cfg["model"]["num_hidden_layers"]) == 28
+          assert cfg["scan"]["layers"] == "all"
+          assert int(cfg["criticality"]["minimum_supporting_sources"]) == 2
+          assert cfg["criticality"].get("manual_hypothesis_layers", []) == []
+          for source in cfg["data"]["sources"]:
+              path = str(source["path"])
+              assert "SEALED" not in path.upper(), path
+              assert Path(path).is_file(), path
+          print("CRCC preflight boundary: PASS")
+          PY
+
+  baseline:
+    name: Intact baseline + layer 00
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Check out the triggering commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: .github/workflows/crcc-v1-discovery.yml
+
+      - name: Restore the pinned checkpoint cache
+        id: model-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ env.MODEL_DIR }}
+          key: crcc-qwen3-0.6b-${{ env.MODEL_REVISION }}-linux-x64-v1
+
+      - name: Install pinned inference dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check \
+            "torch==${TORCH_VERSION}" --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --disable-pip-version-check \
+            "transformers==${TRANSFORMERS_VERSION}" \
+            "accelerate==${ACCELERATE_VERSION}" \
+            "PyYAML==${PYYAML_VERSION}"
+
+      - name: Materialize the exact official checkpoint revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f "${MODEL_DIR}/config.json" ]; then
+            python - <<'PY'
+          from huggingface_hub import snapshot_download
+          snapshot_download(
+              repo_id="Qwen/Qwen3-0.6B",
+              revision="c916fa4defd319b7d4e4da17604ca7338f4d99f5",
+              local_dir="Qwen3-0.6B",
+          )
+          PY
+          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          marker = {
+              "repo_id": "Qwen/Qwen3-0.6B",
+              "revision": "c916fa4defd319b7d4e4da17604ca7338f4d99f5",
+          }
+          model_dir = Path("Qwen3-0.6B")
+          model_config = json.loads((model_dir / "config.json").read_text(encoding="utf-8"))
+          assert int(model_config["num_hidden_layers"]) == 28
+          (model_dir / "MODEL_SOURCE.json").write_text(
+              json.dumps(marker, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          assert (model_dir / "model.safetensors").is_file()
+          PY
+
+      - name: Record runtime and execute intact + layer 00
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="runs/critical_core/crcc-v1/distributed/base"
+          mkdir -p "${base}"
+          python - <<'PY' > "${base}/runtime_platform.json"
+          import json, os, platform, torch, transformers
+          print(json.dumps({
+              "python": platform.python_version(),
+              "platform": platform.platform(),
+              "processor": platform.processor(),
+              "cpu_count": os.cpu_count(),
+              "torch": torch.__version__,
+              "transformers": transformers.__version__,
+              "cuda_available": torch.cuda.is_available(),
+          }, indent=2, sort_keys=True))
+          PY
+          python -m pip freeze | LC_ALL=C sort > "${base}/runtime_pip_freeze.txt"
+          python scripts/critical_core/scan_layer_ablation.py \
+            --config configs/critical_core_scan_v1.yaml \
+            --out "${base}" \
+            --layers 0 \
+            --hash-weights
+
+      - name: Upload intact baseline and layer 00
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crcc-v1-base
+          path: runs/critical_core/crcc-v1/distributed/base
+          if-no-files-found: error
+          retention-days: 90
+
+  layer-shards:
+    name: Layer shard ${{ matrix.id }}
+    needs: baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 7
+      matrix:
+        include:
+          - id: 01-04
+            layers: "1 2 3 4"
+          - id: 05-08
+            layers: "5 6 7 8"
+          - id: 09-12
+            layers: "9 10 11 12"
+          - id: 13-16
+            layers: "13 14 15 16"
+          - id: 17-20
+            layers: "17 18 19 20"
+          - id: 21-24
+            layers: "21 22 23 24"
+          - id: 25-27
+            layers: "25 26 27"
+    steps:
+      - name: Check out the triggering commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: .github/workflows/crcc-v1-discovery.yml
+
+      - name: Restore the exact checkpoint
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ env.MODEL_DIR }}
+          key: crcc-qwen3-0.6b-${{ env.MODEL_REVISION }}-linux-x64-v1
+          fail-on-cache-miss: true
+
+      - name: Install pinned inference dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check \
+            "torch==${TORCH_VERSION}" --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --disable-pip-version-check \
+            "transformers==${TRANSFORMERS_VERSION}" \
+            "accelerate==${ACCELERATE_VERSION}" \
+            "PyYAML==${PYYAML_VERSION}"
+
+      - name: Download the canonical intact baseline
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: crcc-v1-base
+          path: runs/critical_core/crcc-v1/distributed/incoming-base
+
+      - name: Execute assigned one-layer bypasses
+        shell: bash
+        env:
+          SHARD_ID: ${{ matrix.id }}
+          SHARD_LAYERS: ${{ matrix.layers }}
+        run: |
+          set -euo pipefail
+          out="runs/critical_core/crcc-v1/distributed/shard-${SHARD_ID}"
+          mkdir -p "${out}"
+          cp runs/critical_core/crcc-v1/distributed/incoming-base/run_manifest.json "${out}/run_manifest.json"
+          cp runs/critical_core/crcc-v1/distributed/incoming-base/baseline.json "${out}/baseline.json"
+          read -r -a layers <<< "${SHARD_LAYERS}"
+          python scripts/critical_core/scan_layer_ablation.py \
+            --config configs/critical_core_scan_v1.yaml \
+            --out "${out}" \
+            --layers "${layers[@]}" \
+            --hash-weights
+          test "$(find "${out}/layers" -maxdepth 1 -name 'layer_*.json' | wc -l)" -eq "${#layers[@]}"
+
+      - name: Upload layer shard
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crcc-v1-shard-${{ matrix.id }}
+          path: runs/critical_core/crcc-v1/distributed/shard-${{ matrix.id }}/layers
+          if-no-files-found: error
+          retention-days: 90
+
+  assemble-and-freeze:
+    name: Assemble unsealed evidence and freeze G0 membership
+    needs: layer-shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the exact execution commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install model-light assembly dependency
+        run: python -m pip install --disable-pip-version-check "PyYAML==${PYYAML_VERSION}"
+
+      - name: Download baseline artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: crcc-v1-base
+          path: runs/critical_core/crcc-v1/distributed/incoming/base
+
+      - name: Download and merge all layer shards
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: crcc-v1-shard-*
+          path: runs/critical_core/crcc-v1/distributed/incoming/shards
+          merge-multiple: true
+
+      - name: Build canonical raw layout and audited summaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw="runs/critical_core/crcc-v1/scan"
+          evidence="experiments/catastrophic_removal_core/results/discovery_v1"
+          mkdir -p "${raw}/layers"
+          cp runs/critical_core/crcc-v1/distributed/incoming/base/run_manifest.json "${raw}/run_manifest.json"
+          cp runs/critical_core/crcc-v1/distributed/incoming/base/baseline.json "${raw}/baseline.json"
+          cp runs/critical_core/crcc-v1/distributed/incoming/base/runtime_platform.json "${raw}/runtime_platform.json"
+          cp runs/critical_core/crcc-v1/distributed/incoming/base/runtime_pip_freeze.txt "${raw}/runtime_pip_freeze.txt"
+          cp runs/critical_core/crcc-v1/distributed/incoming/base/layers/layer_00.json "${raw}/layers/layer_00.json"
+          cp runs/critical_core/crcc-v1/distributed/incoming/shards/layer_*.json "${raw}/layers/"
+          test "$(find "${raw}/layers" -maxdepth 1 -name 'layer_*.json' | wc -l)" -eq 28
+
+          python scripts/critical_core/assemble_scan_evidence.py \
+            --config configs/critical_core_scan_v1.yaml \
+            --run-manifest "${raw}/run_manifest.json" \
+            --baseline "${raw}/baseline.json" \
+            --layers-dir "${raw}/layers" \
+            --out-dir "${evidence}" \
+            --source-head "${CRCC_PREREG_HEAD}" \
+            --execution-commit "${GITHUB_SHA}" \
+            --workflow-run-id "${GITHUB_RUN_ID}" \
+            --raw-artifact-name "crcc-v1-discovery-raw-${GITHUB_RUN_ID}"
+
+          cp "${evidence}/scan_summary.json" "${raw}/scan_summary.json"
+          cp "${evidence}/evidence_manifest.json" "${raw}/evidence_manifest.json"
+          python scripts/verify/verify_crcc_discovery_evidence.py
+          python -m compileall -q scripts/critical_core scripts/verify
+          cat "${evidence}/CRCC_V1_DISCOVERY_EVIDENCE.md" >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload complete raw unsealed evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crcc-v1-discovery-raw-${{ github.run_id }}
+          path: runs/critical_core/crcc-v1/scan
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Commit the small canonical evidence package
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git fetch origin "${CRCC_BRANCH}"
+          test "$(git rev-parse FETCH_HEAD)" = "${GITHUB_SHA}" || {
+            echo "Branch advanced during the run; refusing to overwrite newer work." >&2
+            exit 1
+          }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add experiments/catastrophic_removal_core/results/discovery_v1
+          git commit -m "Record CRCC v1 unsealed discovery evidence [skip ci]"
+          git push origin "HEAD:${CRCC_BRANCH}"
