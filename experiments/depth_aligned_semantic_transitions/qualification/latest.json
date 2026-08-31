@@ -1,0 +1,68 @@
+{
+  "claim_boundary": "Engineering evidence only. A qualification pass does not establish any Rineya capability claim, and it does not validate the GitHub Actions workflow file itself - only the commands that workflow would invoke.",
+  "environment": {
+    "accelerate": "1.14.0",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
+    "git_branch": "research/depth-aligned-semantic-transitions-v1",
+    "git_commit": "f5ae82f84df3f287aa54a5a850f4bed712b3576a",
+    "git_dirty": false,
+    "gpu_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "numpy": "2.4.6",
+    "peft": "0.20.0",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "pytest": "9.1.1",
+    "python": "3.11.15",
+    "ruff": "unknown",
+    "torch": "2.13.0+cu130",
+    "transformers": "5.15.0"
+  },
+  "mode": "full",
+  "schema_version": "dast-local-qualification-v1",
+  "steps": [
+    {
+      "cuda_visible": true,
+      "output_tail": "",
+      "passed": true,
+      "seconds": 0.19,
+      "step": "compileall"
+    },
+    {
+      "cuda_visible": true,
+      "output_tail": "",
+      "passed": true,
+      "seconds": 0.69,
+      "step": "ruff"
+    },
+    {
+      "cuda_visible": true,
+      "output_tail": "",
+      "passed": true,
+      "seconds": 20.92,
+      "step": "pytest_device_visible"
+    },
+    {
+      "cuda_visible": false,
+      "output_tail": "",
+      "passed": true,
+      "seconds": 7.98,
+      "step": "pytest_cpu_only"
+    },
+    {
+      "cuda_visible": true,
+      "output_tail": "",
+      "passed": true,
+      "seconds": 2.52,
+      "step": "validate_fixture"
+    },
+    {
+      "cuda_visible": true,
+      "output_tail": "",
+      "passed": true,
+      "seconds": 7.44,
+      "step": "smoke"
+    }
+  ],
+  "verdict": "PASS"
+}

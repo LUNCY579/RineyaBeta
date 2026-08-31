@@ -1,5 +1,72 @@
 # DAST progress
 
+## 2026-08-31 — G1 pilot RE-RUN, four arms, valid scorer: EXPLORATORY_DEV
+
+**Status: BUILT — UNRUN on a qualifying (frozen, multi-seed) arm run. TEST CLOSED.
+First real DEV evidence exists. It neither supports nor closes the hypothesis.**
+
+Full report: `docs/FINDINGS_G1_PILOT.md`. Four arms, seed 17, 1000 train / 200 DEV,
+corrected geometry, fixed scorer, 63 optimizer steps each, ~12-14 min per arm.
+
+| arm | accuracy | order margin | top-1 | monotonic | LM ppl | `L_state` |
+|---|---:|---:|---:|---:|---:|---:|
+| `cot_baseline` | **0.7800** | 0.0132 | 0.2700 | 0.6550 | 1.0547 | - |
+| `state_ordered` | **0.7800** | **0.5751** | **0.7100** | **0.9750** | 1.0536 | **0.5441** |
+| `state_shuffled` | 0.7600 | -0.0908 | 0.1863 | 0.4100 | 1.0551 | 0.9745 |
+| `state_reverse` | 0.7650 | -0.1571 | 0.1450 | 0.0000 | 1.0557 | **0.5403** |
+
+`ordered - baseline` is **+0.0000**, discordant **5:5**, McNemar **p = 1.0000**.
+
+**Read the power table first.** Measured discordance is 6.0%, so n=200 gives 10-15
+discordant pairs and a real 2:1 effect would have been missed with **~82%**
+probability. No null above is evidence of absence.
+
+**The one result robust to that:** `L_state` compares each arm on its OWN targets.
+`state_reverse` = 0.5403 versus `state_ordered` = 0.5441, so a fully reversed
+state-to-depth assignment fits marginally BETTER. `SSOT §5` assigns reverse the job
+of testing directional compatibility of reasoning and depth; on this evidence there
+is none. The margin and monotonic columns cannot be used for that comparison because
+they are computed against the canonical order and so penalise reverse by
+construction.
+
+**The ordered-vs-shuffled gap is shuffled being harmed, not ordered being helped.**
+The baseline anchors it: ordered lands exactly on baseline while shuffled (-0.020)
+and reverse (-0.015) sit below. And shuffled's failure to fit is near-tautological -
+the permutation is drawn per problem from SHA-256 of seed and problem id, so no
+consistent function exists for the shared projector to learn. That gap must not be
+reported as evidence about reasoning.
+
+**Most plausible alternative explanation:** 63 optimizer steps is very little. The
+trained projector's margin (0.575) is still below the 0.977 a fitted linear probe
+reaches on the UNTRAINED backbone under the same geometry.
+
+### Preregistration TBDs now resolvable from measurement
+
+- practical minimum effect: **1.56 pp** at 3 seeds x 800 DEV (80% power, alpha 0.05,
+  6.0% discordance). Proposed freeze: **2.0 pp**.
+- DEV size: 800 per seed with **three** seeds; one seed at 800 gives only 56.7%
+  power and cannot be confirmatory.
+
+### Next permitted action
+
+Escalate the training budget before the seed count, because it is the cheapest test
+of the most plausible confound: 4000 train records (250 steps) for `cot_baseline`,
+`state_ordered` and `state_reverse`, one seed, 800 DEV. ~3 h, about a fifth of the
+full matrix. Drop `state_shuffled`, which measures an impossibility. Do **not** run
+the 18-run matrix to confirm a null, and do **not** declare the hypothesis closed.
+
+### Local qualification at `f5ae82f`
+
+```text
+compileall  PASS (0.2s)   pytest_device_visible  PASS (20.9s)   validate_fixture PASS (2.5s)
+ruff        PASS (0.7s)   pytest_cpu_only        PASS ( 8.0s)   smoke            PASS (7.4s)
+VERDICT: PASS
+```
+
+Artifact: `qualification/latest.json`.
+
+---
+
 ## 2026-08-31 — G1 pilot: capability metric WITHDRAWN, instrument failure found and fixed
 
 **Status: BUILT — UNRUN on a qualifying arm run. TEST CLOSED.
