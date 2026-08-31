@@ -180,7 +180,8 @@ RETIRED
 - **Curriculum decision:** retain component-local order for the constant-tail experiment only, labeled weak/mixed exploratory evidence rather than a confirmed ordering gain.
 - **M4 compute:** approximately 1.03 measured training/evaluation GPU-hours so far.
 - **Constant-tail freeze:** 12 steps at LR `1e-5`; checkpoints `{2,4,6,8,10,12}`; retain adapter/AdamW/RNG/geometry state and selected curriculum membership/order; eps1x DeltaBall begins fully warmed; reset only tail plan position and projection counters. No averaging in M4.
-- **Next bounded action:** commit the tail transition, run it, and compare the final step-12 endpoint against C-C before any M5 averaging.
+- **Constant-tail run:** PASS. 12 steps / 12,713 supervised tokens at LR `1e-5`; six checkpoints saved exactly at `{2,4,6,8,10,12}`; tail weighted/final loss `1.32867/1.26110`; 0 DeltaBall hits; 0.0427 active GPU-hours; no averaging performed.
+- **Next bounded action:** export tail step 12 and compare frozen retention against the pre-tail C-C endpoint before any M5 averaging.
 
 ### M5 — Delta-CMA
 

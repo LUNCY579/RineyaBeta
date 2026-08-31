@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "source_run": "artifacts/rge_peft/m4_c_c_curriculum_r16_subset10",
+  "tail_run": "artifacts/rge_peft/m4_c_ct_constant_tail_r16",
+  "steps": 12,
+  "supervised_tokens": 12713,
+  "constant_lr": 0.00001,
+  "initial_tail_loss": 1.3201122902141968,
+  "final_tail_loss": 1.261101550496785,
+  "token_weighted_tail_loss": 1.328673655093818,
+  "active_gpu_hours": 0.042687940750001874,
+  "peak_reserved_mib": 3248.0,
+  "deltaball_matrix_hit_rate": 0.0,
+  "checkpoint_steps": [2, 4, 6, 8, 10, 12],
+  "checkpoint_count": 6,
+  "averaging_performed": false,
+  "sealed_data_accessed": false
+}

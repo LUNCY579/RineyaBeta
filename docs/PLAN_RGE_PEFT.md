@@ -1747,7 +1747,7 @@ begins fully warmed. No averaging is performed in M4.
 
 This specifies a previously planned ingredient rather than changing a hypothesis
 or evaluation gate. No tail/CMA outcome had been observed. Commit reference:
-pending.
+`57f4d26`.
 
 ## v1.3 — 2026-08-31
 
