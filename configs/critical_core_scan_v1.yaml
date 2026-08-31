@@ -8,6 +8,9 @@ device: auto
 model:
   # The hypothesis is about the official full-depth Qwen3-0.6B coordinate system.
   path: Qwen3-0.6B
+  source_repo: Qwen/Qwen3-0.6B
+  revision: c916fa4defd319b7d4e4da17604ca7338f4d99f5
+  num_hidden_layers: 28
   dtype: bfloat16
   attn_implementation: eager
 
