@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M2 — Muon transfer pilot
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 IN_PROGRESS
+**Current milestone:** M3 — DeltaBall factorial (AdamW path)
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 NOT_STARTED
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -31,7 +31,7 @@ RETIRED
 |---|---|---|---:|---|---|
 | M0 | Approved SSOT and dashboard committed to the remote research branch | Aug 30 | 3% | GATE_PASSED | canonical commit `fe34db9`; exact blobs and cleanup verified |
 | M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | GATE_PASSED | all ten exit items pass in `evidence/m1_gate_audit.json` |
-| M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | IN_PROGRESS | 40 Muon and 20 pair-protocol CPU checks pass; GPU smoke/calibration pending |
+| M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | NOT_STARTED | G-* evidence and frozen geometry recipe or retirement |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | NOT_STARTED | C-* evidence and ingredient decision |
 | M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | NOT_STARTED | CMA math/export proof and endpoint decision |
@@ -49,7 +49,7 @@ RETIRED
 | Work package | Planning envelope | Actual GPU-hours | Status |
 |---|---:|---:|---|
 | M1 parity/smoke | 0–3 | 0.071 measured RGE training-step hours | GATE_PASSED |
-| M2 optimizer pilot | 2–6 | 1.435 measured training-step hours | IN_PROGRESS |
+| M2 optimizer pilot | 2–6 | 1.681 measured training/eval hours | GATE_FAILED |
 | M3 DeltaBall | 4–12 | 0 | NOT_STARTED |
 | M4 curriculum/tail | 4–12 | 0 | NOT_STARTED |
 | M5 CMA validation | 1–6 | 0 | NOT_STARTED |
@@ -106,7 +106,8 @@ RETIRED
 ### M2 — Muon pilot
 
 - **Opened:** 2026-08-30 (America/Chicago)
-- **Status:** IN_PROGRESS
+- **Closed:** 2026-08-31 02:20:03 -05:00 (America/Chicago)
+- **Status:** GATE_FAILED
 - **Planned window:** 2026-09-07 to 2026-09-13
 - **Required evidence:** Muon math/parameter routing; bounded LR calibration; O-A/O-M fixed-token runs; proceed/reject decision.
 - **Implementation:** minimal Apache-2.0 FP32 matrix-only Muon; explicit no-fallback routing; matched sequential pair launcher; fixed-token/post-run comparability gates.
@@ -131,7 +132,10 @@ RETIRED
 - **Resume-artifact negative:** the first pair audit failed because an uncheckpointed Muon step-31 log row survived a forced pause at checkpoint 30 and was logged again on replay. Checkpoint/model/optimizer tensors and final positions matched. The log was reconciled to the checkpoint (one row removed), active time recomputed, and comparability then passed. Future resume now performs this reconciliation automatically; injected-tail regression passes.
 - **Memory/state:** Muon optimizer-state tensor bytes are 0.49999x AdamW; Muon peak reserved is +434 MiB in repaired summaries. Cumulative measured M2 optimizer-step time is 1.435 GPU-hours, but efficiency interpretation is prohibited by contention.
 - **Scientific interpretation:** exploratory positive evidence for training-objective improvement per supervised token only. Retention/capability improvement is not established.
-- **Next bounded action:** export both frozen pilot endpoints and evaluate `chat_dev` plus `rag_dev` retention under the existing unsealed protocol.
+- **Frozen retention:** Muon `chat_dev` delta `-0.01524` with paired 95% CI `[-0.02857, -0.00195]`, failing the `-0.01` guardrail (74/312/124 win/tie/loss). `rag_dev` delta `-0.00542` with CI `[-0.01120, -0.00045]` passes the mean margin but adds four critical decoding-corruption cases, lowers intelligibility, and doubles contract violations.
+- **M2 decision:** `GATE_FAILED`; Muon is `REJECTED` for the general Rineya v1 recipe. Do not tune Muon on retention. Lower training loss is retained only as optimizer-dynamics evidence.
+- **M2 compute:** approximately 1.681 measured GPU-hours including 0.247 hours of frozen retention evaluation; model-load/probe time is not fully instrumented.
+- **Next bounded action:** begin M3 DeltaBall under AdamW only, as H3 is logically separable from the rejected Muon transfer.
 
 ### M3 — DeltaBall factorial
 
@@ -183,6 +187,7 @@ RETIRED
 | 2026-08-30 | M0 | Close M0 and advance the operational focus to M1 without starting implementation | exact Git blobs, successful hash gate, clean two-file diff | Actions `33344630813`; `fe34db9` |
 | 2026-08-30 | M1 | Open implementation after re-verifying remote/current SHAs and frozen SSOT | Tier-0 math, CPU parity/resume, legacy regression, sealed refusal all pass; GPU gates still open | pending implementation commit; evidence under `experiments/rge_peft/evidence/` |
 | 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | gate record `a59a340`; `experiments/rge_peft/evidence/m1_gate_audit.json` |
+| 2026-08-31 | M2 | Reject Muon for the general Rineya recipe and advance DeltaBall only under AdamW | training loss improved, but chat non-inferiority failed and RAG gained four critical defects | `experiments/rge_peft/evidence/m2_gate_audit.json`; gate-record commit pending |
 
 ## 6. Blocker log
 

@@ -62,6 +62,23 @@ correctly but the stale row caused the post-run token-axis audit to fail. Resume
 now reconciles logs to checkpoint position and keeps the last record per step;
 an injected-tail regression passes. No model or optimizer tensor required repair.
 
+### M2 decision
+
+Muon is rejected for the general Rineya v1 recipe.
+
+- `chat_dev`: mean quality `0.8580` versus AdamW `0.8732`, delta `-0.01524`,
+  paired 95% bootstrap CI `[-0.02857, -0.00195]`. This fails the `-0.01`
+  non-inferiority guardrail.
+- `rag_dev`: mean quality delta `-0.00542`, but four critical
+  `compound_decoding_corruption` cases appeared (control zero), intelligibility
+  fell to `0.9947`, and contract violations rose from `0.00133` to `0.00266`.
+- Timing/GPU-hour comparison is invalid because unrelated user inference jobs
+  repeatedly contended with both training arms.
+
+Thus the lower training loss is optimizer-dynamics evidence, not a useful-model
+or efficiency win. M3 may still test DeltaBall under AdamW because H3 is
+preregistered as logically separable from H1.
+
 ## Sealed boundary
 
 The sealed RAG test set has not been accessed by RGE-PEFT. It remains prohibited

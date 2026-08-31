@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "milestone": "M2",
+  "status": "GATE_FAILED",
+  "endpoint_source_commit": "f99fdd38276035b30fb40b6b622febf50fbf175e",
+  "artifact_repair_commit": "c9b9d3e",
+  "sealed_data_accessed": false,
+  "mechanism": {
+    "status": "PASS",
+    "muon_math_checks": 40,
+    "pair_protocol_checks": 20,
+    "pair_isolation_checks": 6,
+    "gpu_resume_bit_exact": true,
+    "effective_step_selected_lr": 0.0004,
+    "effective_step_selected_ratio": 0.9442003824539175
+  },
+  "matched_training": {
+    "effective_supervised_tokens_per_arm": 104571,
+    "steps_per_arm": 101,
+    "token_weighted_loss_delta_candidate_minus_control": -0.155303525576723,
+    "final_loss_delta_candidate_minus_control": -0.3633052356253327,
+    "candidate_lower_equal_higher_loss_points": [75, 1, 25],
+    "timing_status": "INVALID_EXTERNAL_GPU_CONTENTION"
+  },
+  "retention": {
+    "chat_dev": {
+      "mean_delta": -0.015236274509803924,
+      "paired_bootstrap_95_ci": [-0.028570405228758172, -0.0019470000000000054],
+      "candidate_win_tie_loss": [74, 312, 124],
+      "mean_noninferiority_pass": false
+    },
+    "rag_dev": {
+      "mean_delta": -0.005419658687943262,
+      "paired_bootstrap_95_ci": [-0.01119636524822695, -0.0004491356382978723],
+      "candidate_win_tie_loss": [1, 745, 6],
+      "mean_noninferiority_pass": true,
+      "critical_defect_cases_control": 0,
+      "critical_defect_cases_candidate": 4,
+      "critical_regression_present": true,
+      "contract_violation_rate_control": 0.0013297872340425532,
+      "contract_violation_rate_candidate": 0.0026595744680851063
+    }
+  },
+  "decision": "REJECT_MUON_FOR_GENERAL_RINEYA_V1",
+  "interpretation": "Muon improves the matched training objective but fails frozen retention; no capability or efficiency win is established.",
+  "m2_gpu_hours": {
+    "reconciled_training_steps": 1.252632858555552,
+    "calibration_and_smoke_training_steps_approx": 0.182,
+    "frozen_retention_evaluation": 0.24675,
+    "total_measured_approx": 1.6814
+  },
+  "next_bounded_action": "Begin M3 DeltaBall mechanism work under AdamW only; Muon is excluded from the surviving recipe."
+}

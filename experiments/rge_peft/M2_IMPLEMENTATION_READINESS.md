@@ -57,3 +57,11 @@ between pair-output and run directories. This prevents a one-arm diagnostic from
 silently combining with an older opposite-arm summary. Six CPU negative controls
 are committed in `evidence/m2_pair_isolation_cpu.json`. This changes no optimizer
 math and authorizes no full M2 result.
+
+## Final M2 outcome
+
+Mechanism and execution readiness passed, but the scientific gate failed.
+Muon improved the matched training-loss curve and then failed frozen retention:
+`chat_dev` breached non-inferiority and `rag_dev` gained four critical defects.
+Muon is rejected from the surviving v1 recipe. DeltaBall may proceed under
+AdamW only.

@@ -1,6 +1,6 @@
 # RGE-PEFT M2 Optimizer Pilot Protocol
 
-**Status:** IMPLEMENTED / REGISTERED EXPLORATORY PAIR AUTHORIZED
+**Status:** CLOSED / M2 GATE_FAILED / MUON REJECTED FOR GENERAL RINEYA
 **Program:** Rineya Geometry-Efficient PEFT v1.1
 **Branch:** `research/rge-peft-v1`
 **Experiment ID:** `rge_v1__m2__optimizer_pair__r16__t104371__seed20260819`

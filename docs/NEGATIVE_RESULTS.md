@@ -426,3 +426,24 @@ positions and effective token counts matched.
 record for every completed global step. The historical pilot log was repaired by
 removing one duplicate row; before/after hashes are committed, and no model or
 optimizer tensor was touched. An injected stale-tail regression now passes.
+
+---
+
+## 8. Muon-LoRA at matched effective-step scale
+
+**Idea.** Apply a pinned FP32 Muon update to every rank-16 LoRA factor, with raw
+LR selected only by AdamW-relative effective-delta geometry.
+
+**Training objective improved.** At 104,571 matched supervised tokens, Muon
+reduced token-weighted loss by 0.1553 and final-step loss by 0.3633; it had lower
+loss on 75/101 paired plan steps.
+
+**Killed for the general model by frozen retention.** `chat_dev` fell 0.01524
+(paired 95% CI entirely below zero), beyond the 0.01 non-inferiority margin.
+`rag_dev` fell 0.00542 on mean and introduced four critical decoding-corruption
+cases where AdamW had zero; contract violations also doubled. Muon is rejected
+for the general Rineya v1 recipe. No retention-driven LR rescue is permitted.
+
+**Interpretation.** Better optimization of the supervised objective did not
+translate into a better retained endpoint. Timing from the pair is unusable due
+to external GPU contention and is not part of the rejection.
