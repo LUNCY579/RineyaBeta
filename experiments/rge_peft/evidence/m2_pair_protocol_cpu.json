@@ -25,7 +25,7 @@
   "execution_gate": {
     "authorization_commit": "a59a3408c6d6a2e1386c6de622d8cc0597ad7969",
     "authorization_evidence": "experiments/rge_peft/evidence/m1_gate_audit.json",
-    "reason": "M1 GATE_PASSED with all ten exit items satisfied; bounded M2 smoke is authorized.",
+    "reason": "M1 GATE_PASSED; registered exploratory pair additionally requires frozen effective-step calibration.",
     "required_milestone": "M1",
     "status": "AUTHORIZED"
   },

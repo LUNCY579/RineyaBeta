@@ -275,12 +275,20 @@ def main() -> None:
         raise AssertionError("blocked execution gate did not fail closed")
     checks.append("blocked execution gate fails closed before model loading")
 
-    # The authorized manifest still blocks a full pair while LR/effective-step
-    # calibration is provisional. Bounded positive-step smoke is the only path.
-    process = subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "experiment" / "rge_optimizer_pair.py"),
-         "--pair", str(PAIR), "--arm", "control"],
-        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    # Provisional calibration must block a full pair before model loading. Test a
+    # temporary downgrade; the checked-in pair is now frozen/authorized.
+    with tempfile.TemporaryDirectory(prefix="rge_pair_calibration_") as tmp:
+        provisional_pair = copy.deepcopy(pair)
+        provisional_pair["optimizer_calibration"]["status"] = \
+            "provisional_screening_configuration"
+        provisional_path = Path(tmp) / "provisional_pair.yaml"
+        write_yaml(provisional_path, provisional_pair)
+        process = subprocess.run(
+            [sys.executable,
+             str(ROOT / "scripts" / "experiment" / "rge_optimizer_pair.py"),
+             "--pair", str(provisional_path), "--arm", "control"],
+            cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
+            errors="replace")
     if process.returncode == 0 or "optimizer calibration is not frozen" not in (
             process.stdout + process.stderr):
         raise AssertionError("provisional calibration did not block full training")

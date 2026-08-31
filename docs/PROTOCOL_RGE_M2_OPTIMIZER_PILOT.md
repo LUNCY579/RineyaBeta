@@ -1,9 +1,9 @@
 # RGE-PEFT M2 Optimizer Pilot Protocol
 
-**Status:** IMPLEMENTED / BOUNDED SMOKE AUTHORIZED / FULL PAIR BLOCKED PENDING LR CALIBRATION
+**Status:** IMPLEMENTED / REGISTERED EXPLORATORY PAIR AUTHORIZED
 **Program:** Rineya Geometry-Efficient PEFT v1.1
 **Branch:** `research/rge-peft-v1`
-**Experiment ID:** `rge_v1__m2__optimizer_pair__r16__t1m__seed20260819`
+**Experiment ID:** `rge_v1__m2__optimizer_pair__r16__t104371__seed20260819`
 **Governing SSOT:** `docs/PLAN_RGE_PEFT.md`
 **Pair manifest:** `manifests/rge_peft/m2_optimizer_pair.yaml`
 
@@ -51,9 +51,9 @@ forbidden until M7.
 | Data | B0 mix | identical bytes/order/plan |
 | Precision | BF16 base, FP32 adapters | identical |
 | Schedule | cosine, 40-step warmup | identical |
-| Budget | 1,000,000 supervised tokens | identical effective token count |
+| Budget | 104,371 requested supervised tokens | identical effective token count |
 | Optimizer | `torch.optim.AdamW` | `rge.optim.Muon` |
-| Nominal LR | `1e-4` | `1e-4` |
+| Nominal LR | `1e-4` | `4e-4` |
 | Momentum | AdamW betas 0.9/0.999 | EMA 0.95 + Nesterov |
 | Update geometry | elementwise Adam normalization | 5-step quintic Newton–Schulz |
 | Muon scaling | n/a | spectral × 0.2 |
@@ -61,10 +61,9 @@ forbidden until M7.
 | Delta projection | none | none |
 | Curriculum/CMA | reference / off | identical |
 
-The same nominal LR plus Muon's `0.2` extra multiplier is a **provisional
-screening calibration**, chosen to approximately align update RMS with AdamW.
-It is not a confirmatory optimal-LR claim. Any bounded LR calibration performed
-before Phase 6 must be recorded as exploratory and must not use the sealed set.
+Muon LR `4e-4` plus the fixed `0.2` multiplier is the frozen exploratory
+effective-step calibration. It is not a confirmatory optimal-LR claim and did
+not use loss, capability, retention, or sealed evaluation for selection.
 
 ## 4. Muon implementation contract
 
@@ -104,11 +103,10 @@ surface. Before any model is loaded it verifies:
 - sealed access policy `forbidden_until_m7`; and
 - a `mechanism_and_retention_only` claim while the capability bank is unfrozen.
 
-M1 is `GATE_PASSED`, so bounded integration smoke is authorized. The full
-1M-token pair remains fail-closed until the SSOT's effective-step LR bracket is
-completed and `optimizer_calibration.status` is changed from
-`provisional_screening_configuration` to `frozen_exploratory`. This operational
-gate may not silently change arm contents, data, capacity, or claims.
+M1 is `GATE_PASSED`. The effective-step bracket is also complete and
+`optimizer_calibration.status` is `frozen_exploratory`, so the registered
+104,371-token exploratory pair is authorized. This operational gate may not
+silently change arm contents, data, capacity, or claims.
 
 ## 6. Run protocol
 
@@ -121,7 +119,7 @@ python scripts/experiment/rge_optimizer_pair.py \
 ```
 
 Expected output: `pair_preflight.json` with `status: PASS`, followed by no
-training. This command is safe while the execution gate is blocked.
+training. This command never launches an arm.
 
 ### 6.2 Bounded integration smoke after M1 authorization
 
@@ -137,16 +135,16 @@ python scripts/experiment/rge_optimizer_pair.py \
 
 This proves GPU construction, stepping, checkpointing, manifest generation,
 and post-run comparability. The disposable run root prevents a smoke run from
-contaminating the canonical 1M-token directories. It is marked
+contaminating the canonical pilot directories. It is marked
 `bounded_smoke: true` and is never confirmatory evidence.
 
 ### 6.3 Effective-step calibration gate
 
-Before the registered pair, run the AdamW reference and a small log-spaced Muon
-bracket, then identify approximately 0.5x, 1x, and 2x robust
-`base_relative_effective_step` regimes. Freeze exactly one stable exploratory
-candidate and record the selection without sealed evaluation. A provisional
-nominal-LR match cannot authorize the full pair.
+Before the registered pair, the protocol requires an AdamW reference and small
+log-spaced Muon bracket to identify approximately 0.5x, 1x, and 2x robust
+`base_relative_effective_step` regimes. Exactly one stable exploratory candidate
+is frozen without sealed evaluation. A provisional nominal-LR match cannot
+authorize the full pair.
 
 The first bracket is preregistered as raw Muon LR `{5e-5, 1e-4, 2e-4}` with the
 spectral `0.2` multiplier fixed, four B0 optimizer steps, per-step norm-only
@@ -177,6 +175,11 @@ evaluation to select the LR.
   --evidence experiments\rge_peft\evidence\m2_muon_lr_calibration_expanded.json `
   --cache-from artifacts\heal_runs\b0\cache
 ```
+
+The expansion passed: `2e-4`, `4e-4`, and `8e-4` produced median paired ratios
+`0.472`, `0.944`, and `1.889`. All three target regimes passed the factor-1.5
+coverage gate. The preregistered rule froze `4e-4` as the stable candidate
+closest to 1x, authorizing the registered exploratory pair.
 
 ### 6.4 Registered exploratory pair
 

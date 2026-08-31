@@ -1,6 +1,6 @@
 # M2 Optimizer-Pilot Implementation Readiness
 
-**Status:** IMPLEMENTATION_READY / BOUNDED SMOKE AUTHORIZED / FULL PAIR BLOCKED BY LR CALIBRATION
+**Status:** IMPLEMENTATION_READY / REGISTERED EXPLORATORY PAIR AUTHORIZED
 **Date:** 2026-08-30 (America/Chicago)
 **Sealed data accessed:** no
 
@@ -45,8 +45,9 @@ execution, and provisional-calibration fail-closed behavior.
 - No general-intelligence, broad-generalization, or confirmatory consumer-speedup
   claim is authorized.
 - M1 is `GATE_PASSED`; bounded GPU integration smoke is authorized.
-- The full 1M-token pair remains blocked until effective-step LR calibration is
-  frozen as required by the SSOT.
+- Effective-step calibration is frozen at Muon LR `4e-4` (median AdamW-relative
+  ratio `0.944`); the registered 104,371-requested-token exploratory pair is
+  authorized under SSOT amendment v1.2.
 
 ## Execution-cohort hardening
 

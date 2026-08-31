@@ -1736,6 +1736,28 @@ These are **snapshot anchors**, not eternal assumptions. Implementation Phase 0 
 
 # 23. Amendment log
 
+## v1.2 — 2026-08-31
+
+M2 pilot-budget correction, recorded before any O-A/O-M pilot endpoint or
+retention result and before launching the registered pair. Training loss and
+effective-step geometry from bounded integration/calibration runs had been
+observed; the correction is formula-driven and does not use those outcomes to
+select the budget.
+
+Exact issue: the staged M2 pair requested 1,000,000 supervised tokens. The
+current B0 plan contains 1,043,713 supervised tokens, so that request is about
+96% of a full epoch and violates Phase 2's preregistered
+`T_pilot = min(10% of confirmatory budget, bounded inexpensive cap)` rule. At
+measured step times it would also exceed the default M2 compute envelope.
+
+Resolution: freeze `T_pilot = 104,371` requested supervised tokens, exactly 10%
+of the current B0 confirmatory epoch rounded to the nearest token. Both arms stop
+at the first identical deterministic plan boundary at or beyond the request, so
+effective token counts must still match exactly. Commit reference: pending.
+
+This amendment changes no hypothesis, optimizer setting, LoRA capacity, data
+membership/order, evaluation policy, promotion threshold, or sealed boundary.
+
 ## v1.1 — 2026-08-30
 
 Project-owner approval and execution-calendar amendment. This amendment was made before implementation and before observing any RGE-PEFT experimental result. It changes no scientific hypothesis, arm, threshold, sealed-evaluation rule, or evidence standard.
@@ -1954,4 +1976,3 @@ Experimental outcomes observed: none
 Sealed evaluation accessed: no
 Next gate: commit the approved SSOT and initialized dashboard to research/rge-peft-v1
 ```
-

@@ -1,11 +1,11 @@
 schema_version: rge-optimizer-pair-v1
-experiment_id: rge_v1__m2__optimizer_pair__r16__t1m__seed20260819
+experiment_id: rge_v1__m2__optimizer_pair__r16__t104371__seed20260819
 designation: exploratory
 
 execution_gate:
   required_milestone: M1
   status: AUTHORIZED
-  reason: M1 GATE_PASSED with all ten exit items satisfied; bounded M2 smoke is authorized.
+  reason: M1 GATE_PASSED; registered exploratory pair additionally requires frozen effective-step calibration.
   authorization_evidence: experiments/rge_peft/evidence/m1_gate_audit.json
   authorization_commit: a59a3408c6d6a2e1386c6de622d8cc0597ad7969
 
@@ -26,18 +26,28 @@ arms:
 
 fixed_budget:
   unit: supervised_tokens
-  requested_supervised_tokens: 1000000
+  requested_supervised_tokens: 104371
+  derivation: exactly 10 percent (rounded) of the 1,043,713-supervised-token B0 confirmatory epoch
   step_boundary_policy: both arms may stop at the first identical plan boundary at or beyond the request
   equality_requirement: effective supervised tokens must match exactly across completed arms
 
 optimizer_calibration:
-  status: provisional_screening_configuration
+  status: frozen_exploratory
   control_lr: 1.0e-4
-  candidate_lr: 1.0e-4
+  candidate_lr: 4.0e-4
   candidate_extra_scale_factor: 0.2
-  rationale: same nominal LR with the upstream-recommended AdamW-RMS matching scale; no confirmatory LR claim
-  selection_rule: a later frozen LR may be selected only from bounded exploratory evidence before Phase 6
-  full_pair_gate: BLOCKED until status is frozen_exploratory after the registered effective-step bracket
+  initial_bracket_lrs: [5.0e-5, 1.0e-4, 2.0e-4]
+  initial_bracket_result: stable but insufficient; median ratios [0.118011, 0.236080, 0.472177]
+  expanded_bracket_lrs: [2.0e-4, 4.0e-4, 8.0e-4]
+  identified_regimes:
+    0.5x: {lr: 2.0e-4, median_ratio: 0.47217699361360643}
+    1x: {lr: 4.0e-4, median_ratio: 0.9442003824539175}
+    2x: {lr: 8.0e-4, median_ratio: 1.8894834437299926}
+  selected_lr: 4.0e-4
+  selection_rule: stable candidate closest to ratio 1.0 in absolute log2 distance
+  selection_used_loss_or_evaluation: false
+  evidence: experiments/rge_peft/evidence/m2_muon_lr_calibration_expanded.json
+  full_pair_gate: AUTHORIZED for the registered exploratory pair; not confirmatory
 
 dataset_roles:
   learning:
@@ -93,4 +103,4 @@ claim_boundary:
     - final frozen retention evaluation
     - later capability/OOD bank frozen before Phase 6
 
-output_dir: artifacts/rge_peft/pairs/m2_optimizer_pair_r16_t1m
+output_dir: artifacts/rge_peft/pairs/m2_optimizer_pair_r16_t104371
