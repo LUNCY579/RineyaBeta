@@ -3,7 +3,7 @@ import torch
 from dast.config import ARM_SPECS
 from dast.data import build_examples, load_records
 from dast.smoke import fixture_path
-from dast.tokenization import CausalBatchCollator, IGNORE_INDEX, tokenize_example
+from dast.tokenization import IGNORE_INDEX, CausalBatchCollator, tokenize_example
 from dast.toy import HashTokenizer
 
 

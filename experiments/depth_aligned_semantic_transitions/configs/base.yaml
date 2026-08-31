@@ -17,13 +17,32 @@ model:
   device_map: null
   attn_implementation: null
   max_length: 512
-  checkpoint_fractions: [0.25, 0.50, 0.75, 1.0]
+  # 0.964 * 28 -> 27, deliberately NOT 28. hidden_states[28] is post-final-norm
+  # while 7/14/21 are raw residual states, so a schedule ending at 1.0 feeds two
+  # representation classes into the single shared projector. Measured pooled
+  # cosine, 600 DEV problems: 7v28 = -0.018 raw and -0.111 even after norming
+  # 7/14/21, versus +0.409 for the 7/14/21/27 schedule below, which is the only
+  # variant with no near-orthogonal outlier and a uniform scale.
+  checkpoint_fractions: [0.25, 0.50, 0.75, 0.964]
+  checkpoint_readout: final_norm
   pooling: mean
   feedback_enabled: false
   feedback_scale: 0.05
 
 data:
-  path: ../../../Rineya_state_experiment_bundle/rineya_sequence_independence_dataset_v1/data/manifests/problem_manifest.jsonl
+  # data/manifests/problem_manifest.jsonl is a METADATA manifest: it carries
+  # problem_id, split, step_count and hashes, but none of problem, answer,
+  # full_response, reasoning_steps or compact_state_trace. Pointing data.path at
+  # it fails on every record. The reasoning text lives one directory over, one
+  # file per split, so the per-split overrides are used instead.
+  #
+  # These files are excluded by .gitignore, so a fresh checkout must supply the
+  # corpus at this location (same convention as the base checkpoint directory).
+  # The sealed split lives in test.jsonl, which no DEV config ever names - the
+  # seal is physical here, not only enforced by assert_split_allowed.
+  path: ""
+  train_path: ../../../Rineya_state_experiment_bundle/rineya_sequence_independence_dataset_v1/data/full_context/train.jsonl
+  eval_path: ../../../Rineya_state_experiment_bundle/rineya_sequence_independence_dataset_v1/data/full_context/dev.jsonl
   train_split: train
   eval_split: dev
   max_train_records: 4000
@@ -37,6 +56,12 @@ semantic:
   projector_hidden_dim: 256
   target_projection_seed: 1701
   target_max_tokens: 64
+  # As shipped, targets carried 56.6% of their variance in the PROBLEM factor and
+  # only 9.3% in the STAGE factor, so a depth permutation rearranged only the
+  # small component: state_ordered sat at 0.860 cosine from state_shuffled and
+  # the frozen-probe order margin was 0.129. Centering each problem on its own
+  # canonical-state mean moves that contrast to -0.019 and the margin to 0.977.
+  target_centering: within_problem
   state_weight: 1.0
   contrastive_weight: 0.10
   contrastive_temperature: 0.07
@@ -63,9 +88,13 @@ lora:
 
 training:
   epochs: 1
-  batch_size: 1
+  # multi_positive_contrastive_loss returns exactly 0.0 when batch < 2, so at the
+  # previous batch_size 1 the documented anti-collapse term contributed nothing.
+  # Accumulation is halved so the effective batch and the optimizer-step budget
+  # are unchanged, keeping every arm matched.
+  batch_size: 2
   eval_batch_size: 2
-  gradient_accumulation_steps: 16
+  gradient_accumulation_steps: 8
   learning_rate: 0.0002
   auxiliary_learning_rate: 0.0002
   weight_decay: 0.01
@@ -81,7 +110,10 @@ training:
   deterministic_algorithms: false
 
 evaluation:
-  max_new_tokens: 128
+  # At 128, 51% of DEV generations hit the cap without emitting EOS and strict
+  # accuracy was 0.115; at 384 the hit-cap rate is 0.010 and strict accuracy is
+  # 0.229, for 2x the decode cost (1.41 -> 2.78 s/problem at batch 4).
+  max_new_tokens: 384
   do_generation: true
   generation_batch_size: 4
   temperature: 0.0

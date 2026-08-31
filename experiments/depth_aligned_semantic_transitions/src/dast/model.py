@@ -80,6 +80,31 @@ def locate_decoder_layers(model: nn.Module) -> nn.ModuleList | list[nn.Module]:
     raise ValueError("could not locate decoder layers for feedback hooks")
 
 
+def locate_final_norm(model: nn.Module) -> nn.Module | None:
+    """Locate the model's final normalisation layer, without remote code.
+
+    Needed because ``hidden_states[-1]`` is already post-final-norm on HF decoder
+    models while every earlier entry is a raw residual state. Reading both through
+    one projector puts two representation classes into an interface the SSOT calls
+    shared; applying this module to the un-normed checkpoints removes that split.
+    """
+
+    root = _unwrap_model(model)
+    inner = getattr(root, "model", None)
+    candidates = (
+        getattr(inner, "norm", None),
+        getattr(root, "norm", None),
+        getattr(root, "final_norm", None),
+        getattr(getattr(root, "transformer", None), "ln_f", None),
+        getattr(getattr(root, "gpt_neox", None), "final_layer_norm", None),
+        getattr(getattr(inner, "decoder", None), "final_layer_norm", None),
+    )
+    for candidate in candidates:
+        if isinstance(candidate, nn.Module):
+            return candidate
+    return None
+
+
 def _replace_hidden(output: Any, hidden: torch.Tensor) -> Any:
     if torch.is_tensor(output):
         return hidden
@@ -119,6 +144,7 @@ class DASTModel(nn.Module):
         operator_bank: LowRankOperatorBank | None = None,
         feedback_enabled: bool = False,
         feedback_scale: float = 0.05,
+        checkpoint_readout: str = "raw",
     ) -> None:
         super().__init__()
         self.base_model = base_model
@@ -126,6 +152,16 @@ class DASTModel(nn.Module):
         self.hidden_size = infer_hidden_size(base_model)
         self.checkpoint_layers = resolve_checkpoint_layers(self.num_hidden_layers, checkpoint_fractions)
         self.pooling = pooling
+        if checkpoint_readout not in ("raw", "final_norm"):
+            raise ValueError(f"unsupported checkpoint readout: {checkpoint_readout}")
+        self.checkpoint_readout = checkpoint_readout
+        self._final_norm = None
+        if checkpoint_readout == "final_norm":
+            self._final_norm = locate_final_norm(base_model)
+            if self._final_norm is None:
+                raise ValueError(
+                    "checkpoint_readout='final_norm' requires a locatable final norm layer"
+                )
         self.state_projector = SharedStateProjector(self.hidden_size, state_dim, projector_hidden_dim)
         self.operator_bank = operator_bank
         self.feedback_enabled = feedback_enabled
@@ -140,9 +176,17 @@ class DASTModel(nn.Module):
 
         if feedback_enabled:
             self.feedback_decoder = nn.Linear(state_dim, self.hidden_size, bias=False)
+            # Zero-init keeps the pretrained residual stream untouched at step 0.
+            # Consequence to be explicit about: `delta = decoder(state) * gate` is
+            # then identically zero, so EVERY intervention is a bitwise no-op until
+            # the decoder has trained. An untrained feedback run therefore cannot
+            # produce a causal result. dW is non-zero (d(Wx)/dW = x), so it can
+            # learn; it just has not yet.
             nn.init.zeros_(self.feedback_decoder.weight)
-            # tanh(-3) starts near zero but not exactly zero; the causal path can
-            # learn without destabilising the pretrained residual stream.
+            # NOTE: tanh(-3) = -0.995, i.e. near SATURATION, not near zero. The
+            # near-zero initial delta comes from the decoder above, not from this
+            # gate, and saturation attenuates the gate's own gradient by ~100x
+            # (1 - tanh^2(-3) ~ 0.0099).
             self.feedback_gates = nn.Parameter(torch.full((len(self.checkpoint_layers),), -3.0))
             self._install_feedback_hooks()
 
@@ -159,7 +203,13 @@ class DASTModel(nn.Module):
                 if self._active_prompt_mask is None:
                     return output
                 hidden = _extract_hidden(output)
-                pooled = pool_prompt_hidden(hidden, self._active_prompt_mask, self.pooling)
+                # A forward hook sees the PRE-norm layer output, while the auxiliary
+                # path reads hidden_states[...] which is post-final-norm at the last
+                # index. Applying the same readout here keeps the two paths sampling
+                # the same tensor, so a projector trained under the auxiliary config
+                # is not silently fed a different vector during the causal probe.
+                readout = self._final_norm(hidden) if self._final_norm is not None else hidden
+                pooled = pool_prompt_hidden(readout, self._active_prompt_mask, self.pooling)
                 projector_device = next(self.state_projector.parameters()).device
                 raw_state = self.state_projector(pooled.to(projector_device))
                 effective_state = self._apply_intervention(stage, raw_state)
@@ -260,7 +310,12 @@ class DASTModel(nn.Module):
                 )
             projected = []
             for layer_number in self.checkpoint_layers:
-                pooled = pool_prompt_hidden(hidden_states[layer_number], prompt_mask, self.pooling)
+                state = hidden_states[layer_number]
+                # hidden_states[num_hidden_layers] is ALREADY post-final-norm on HF
+                # decoder models, so it is skipped here to avoid double-norming.
+                if self._final_norm is not None and layer_number < self.num_hidden_layers:
+                    state = self._final_norm(state)
+                pooled = pool_prompt_hidden(state, prompt_mask, self.pooling)
                 projector_device = next(self.state_projector.parameters()).device
                 projected.append(self.state_projector(pooled.to(projector_device)))
             states = torch.stack(projected, dim=1)

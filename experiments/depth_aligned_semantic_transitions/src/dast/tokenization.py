@@ -32,6 +32,15 @@ class TokenizedExample:
 
 
 def _as_int_list(value: Any) -> list[int]:
+    # transformers >= 5 returns a BatchEncoding mapping from
+    # apply_chat_template(tokenize=True); 4.x returned a bare list of ids.
+    # Iterating the mapping would yield its keys, so unwrap first.
+    if hasattr(value, "keys"):
+        if "input_ids" not in value:
+            raise TokenizationContractError(
+                f"tokenizer returned a mapping without input_ids: {sorted(value.keys())!r}"
+            )
+        value = value["input_ids"]
     if hasattr(value, "tolist"):
         value = value.tolist()
     if value and isinstance(value[0], list):

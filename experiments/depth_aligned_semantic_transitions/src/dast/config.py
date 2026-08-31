@@ -54,6 +54,12 @@ class ExperimentConfig:
     preregistration_frozen: bool = False
     preregistration_sha256: str = ""
     allow_sealed_test: bool = False
+    # Which tier of the EVIDENCE_STANDARD vocabulary this run is allowed to claim.
+    # Defaults to the weakest: a run is ENGINEERING unless someone deliberately
+    # says otherwise. Previously the manifest status was derived only from
+    # eval_split, so a 16-problem seam rehearsal was recorded as DEV_COMPLETE,
+    # indistinguishable from a qualifying arm run.
+    evidence_status: Literal["engineering", "exploratory_dev", "confirmatory_dev"] = "engineering"
 
 
 @dataclass
@@ -68,6 +74,13 @@ class ModelConfig:
     attn_implementation: str | None = None
     max_length: int = 512
     checkpoint_fractions: tuple[float, ...] = (0.25, 0.50, 0.75, 1.0)
+    # "raw" reads hidden_states[d_k] as committed. On a real HF model the LAST
+    # entry is post-final-norm while the others are raw residual states, so the
+    # single shared projector receives two representation classes. "final_norm"
+    # applies the model's own final norm to every checkpoint that is not already
+    # normed, putting all depths in one basis. Defaults to "raw" to preserve the
+    # committed behaviour; the shipped configs select "final_norm".
+    checkpoint_readout: Literal["raw", "final_norm"] = "raw"
     pooling: Literal["mean", "last_prompt"] = "mean"
     feedback_enabled: bool = False
     feedback_scale: float = 0.05
@@ -76,6 +89,12 @@ class ModelConfig:
 @dataclass
 class DataConfig:
     path: str = ""
+    # The reference corpus ships one content file per split under data/full_context/,
+    # while `path` assumes a single file carrying every split. These optional
+    # per-split overrides let a run read the real corpus without concatenating it,
+    # and they keep the sealed split in a file no DEV config ever names.
+    train_path: str = ""
+    eval_path: str = ""
     train_split: str = "train"
     eval_split: str = "dev"
     max_train_records: int | None = 4000
@@ -93,6 +112,10 @@ class SemanticConfig:
     projector_hidden_dim: int = 256
     target_projection_seed: int = 1701
     target_max_tokens: int = 64
+    # "within_problem" subtracts each problem's canonical-state mean before
+    # renormalising. Defaults to "none" so the committed V1 behaviour is
+    # unchanged; the shipped configs select the corrected geometry explicitly.
+    target_centering: Literal["none", "within_problem"] = "none"
     state_weight: float = 1.0
     contrastive_weight: float = 0.10
     contrastive_temperature: float = 0.07
@@ -187,6 +210,25 @@ class DASTConfig:
             return path
         return (Path(self.source_path).parent / path).resolve()
 
+    def data_path_for_split(self, split: str) -> Path:
+        """Resolve the corpus file that supplies ``split``.
+
+        Falls back to ``data.path`` so a single-file corpus (and the offline
+        fixture) keeps working unchanged.
+        """
+
+        name = split.lower()
+        if name == self.data.train_split.lower() and self.data.train_path:
+            return self.resolved_path(self.data.train_path)
+        if name == self.data.eval_split.lower() and self.data.eval_path:
+            return self.resolved_path(self.data.eval_path)
+        if not self.data.path:
+            raise ValueError(
+                f"no corpus path configured for split {split!r}: set data.path, "
+                "or data.train_path/data.eval_path"
+            )
+        return self.resolved_path(self.data.path)
+
     def as_dict(self) -> dict[str, Any]:
         result = dataclasses.asdict(self)
         result.pop("source_path", None)
@@ -210,8 +252,25 @@ class DASTConfig:
             errors.append("checkpoint_fractions must lie in (0, 1]")
         if tuple(sorted(set(fractions))) != fractions:
             errors.append("checkpoint_fractions must be strictly increasing and unique")
-        if fractions and abs(fractions[-1] - 1.0) > 1e-9:
-            errors.append("the final checkpoint fraction must be 1.0")
+        # The final checkpoint must sit near the top of the stack, but it may not
+        # have to BE the top. On a real HF model hidden_states[L] is
+        # post-final-norm while every earlier entry is a raw residual state, so a
+        # schedule pinned to exactly 1.0 forces two representation classes into
+        # the single shared projector. Allowing the last 10% of depth lets a run
+        # read layer L-1 instead and keep one basis. The floor still prevents a
+        # schedule that quietly stops reasoning supervision half way up.
+        if fractions and not (0.9 <= fractions[-1] <= 1.0):
+            errors.append(
+                "the final checkpoint fraction must lie in [0.9, 1.0]; "
+                f"got {fractions[-1]}"
+            )
+        if fractions and abs(fractions[-1] - 1.0) <= 1e-9 and self.model.checkpoint_readout == "final_norm":
+            errors.append(
+                "checkpoint_readout='final_norm' with a final fraction of exactly 1.0 leaves "
+                "the last checkpoint post-final-norm while the others are re-normed raw "
+                "residuals, which is the heterogeneous interface this option exists to fix; "
+                "move the last fraction just below 1.0 (e.g. (L-1)/L) or use readout='raw'"
+            )
         if self.model.max_length < 32:
             errors.append("model.max_length must be at least 32")
         if self.model.feedback_enabled and self.training.gradient_checkpointing:

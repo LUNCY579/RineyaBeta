@@ -62,20 +62,23 @@ def resolve_device(model: torch.nn.Module) -> torch.device:
 def build_dataloaders(
     config: DASTConfig,
     tokenizer: Any,
-) -> tuple[DataLoader[Any], DataLoader[Any], str]:
-    data_path = config.resolved_path(config.data.path)
+) -> tuple[DataLoader[Any], DataLoader[Any], list[Path]]:
     assert_split_allowed(config, config.data.train_split)
     assert_split_allowed(config, config.data.eval_split)
+    train_path = config.data_path_for_split(config.data.train_split)
+    eval_path = config.data_path_for_split(config.data.eval_split)
     train_records = load_records(
-        data_path,
+        train_path,
         split=config.data.train_split,
         limit=config.data.max_train_records,
     )
     eval_records = load_records(
-        data_path,
+        eval_path,
         split=config.data.eval_split,
         limit=config.data.max_eval_records,
     )
+    # Every corpus file a run touched, so the manifest can hash each one.
+    data_paths = [train_path] if train_path == eval_path else [train_path, eval_path]
     if not train_records:
         raise ValueError(f"no records found for train split {config.data.train_split!r}")
     if not eval_records:
@@ -115,7 +118,7 @@ def build_dataloaders(
         num_workers=config.data.num_workers,
         collate_fn=collator,
     )
-    return train_loader, eval_loader, str(data_path)
+    return train_loader, eval_loader, data_paths
 
 
 def _move_batch(batch: dict[str, Any], device: torch.device) -> dict[str, Any]:
@@ -188,15 +191,64 @@ def _make_scheduler(optimizer: torch.optim.Optimizer, *, total_steps: int, warmu
     return torch.optim.lr_scheduler.LambdaLR(optimizer, schedule)
 
 
+def _run_status(config: DASTConfig, *, finished: bool) -> str:
+    """Compose the machine-readable run status.
+
+    Derived from the declared evidence tier AND the split, so an engineering
+    rehearsal can never be mistaken for a qualifying DEV result, and a run that
+    touches the sealed split says so regardless of tier. Split comparison is
+    case-insensitive; a config saying ``eval_split: "TEST"`` previously produced a
+    manifest labelled DEV.
+    """
+
+    sealed = config.data.eval_split.strip().lower() == "test"
+    tier = {
+        "engineering": "ENGINEERING",
+        "exploratory_dev": "EXPLORATORY_DEV",
+        "confirmatory_dev": "CONFIRMATORY_DEV",
+    }[config.experiment.evidence_status]
+    scope = "SEALED_TEST" if sealed else "DEV"
+    phase = "COMPLETE" if finished else "RUNNING"
+    return f"{tier}__{scope}__{phase}"
+
+
 def _encode_targets(
     encoder: FrozenTextTargetEncoder,
     texts: Sequence[Sequence[str]],
     *,
     device: torch.device,
+    centering: str = "none",
+    reference_texts: Sequence[Sequence[str]] | None = None,
 ) -> torch.Tensor | None:
+    """Encode a [batch, stage] text grid into semantic targets.
+
+    ``centering='within_problem'`` subtracts each problem's own mean over its
+    CANONICAL states and renormalises. Phase-0 measurement motivating this: as
+    shipped, the targets carry 56.6% of their variance in the problem factor and
+    only 9.3% in the stage factor, so a depth permutation rearranges only the
+    small component and `state_ordered` sits at 0.86 cosine from
+    `state_shuffled`. Centering moves that to -0.02 and flips the factor ratio
+    from 0.16 to 6.3, aligning the target side with the hidden side.
+
+    The mean is always taken over the canonical grid, never the arm's own
+    training grid. That keeps the subtracted constant identical across arms, so
+    the controls stay matched: a permutation leaves the mean unchanged, and
+    `state_final_repeated` still receives a constant non-zero target at every
+    depth rather than degenerating to zero.
+    """
+
     if not texts or not texts[0]:
         return None
-    return encoder.encode_grid(texts, device=device)
+    grid = encoder.encode_grid(texts, device=device)
+    if centering == "none":
+        return grid
+    if centering != "within_problem":
+        raise ValueError(f"unsupported target centering mode: {centering}")
+    reference = (
+        grid if reference_texts is None
+        else encoder.encode_grid(reference_texts, device=device)
+    )
+    return torch.nn.functional.normalize(grid - reference.mean(dim=1, keepdim=True), dim=-1)
 
 
 @torch.no_grad()
@@ -223,11 +275,15 @@ def evaluate_teacher_forced(
             target_encoder,
             batch["training_target_texts"],
             device=device,
+            centering=config.semantic.target_centering,
+            reference_texts=batch["canonical_target_texts"],
         )
         canonical_targets = _encode_targets(
             target_encoder,
             batch["canonical_target_texts"],
             device=device,
+            centering=config.semantic.target_centering,
+            reference_texts=batch["canonical_target_texts"],
         )
         output = model(
             input_ids=batch["input_ids"],
@@ -281,7 +337,7 @@ def train(
         config.experiment.seed,
         deterministic_algorithms=config.training.deterministic_algorithms,
     )
-    train_loader, eval_loader, data_path = build_dataloaders(config, tokenizer)
+    train_loader, eval_loader, data_paths = build_dataloaders(config, tokenizer)
     device = resolve_device(model)
     if config.model.device_map is None:
         if torch.cuda.is_available():
@@ -327,10 +383,10 @@ def train(
     output_dir.mkdir(parents=True, exist_ok=True)
     manifest = build_run_manifest(
         config,
-        data_path=data_path,
+        data_path=data_paths,
         checkpoint_layers=model.checkpoint_layers,
         model_info=model_info or {},
-        status="RUNNING_DEV" if config.data.eval_split != "test" else "RUNNING_SEALED_TEST",
+        status=_run_status(config, finished=False),
     )
     manifest["runtime_precision"] = runtime_precision
     manifest["trainable_parameter_count"] = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -352,6 +408,8 @@ def train(
                 target_encoder,
                 batch["training_target_texts"],
                 device=device,
+                centering=config.semantic.target_centering,
+                reference_texts=batch["canonical_target_texts"],
             )
             with _autocast_context(device, runtime_precision):
                 output = model(
@@ -434,7 +492,7 @@ def train(
     )
     if config.evaluation.do_generation:
         eval_records = load_records(
-            data_path,
+            config.data_path_for_split(config.data.eval_split),
             split=config.data.eval_split,
             limit=config.data.max_eval_records,
         )
@@ -457,7 +515,7 @@ def train(
     torch.save(model.auxiliary_state_dict(), output_dir / "dast_auxiliary.pt")
     if hasattr(model.base_model, "save_pretrained"):
         model.base_model.save_pretrained(output_dir / "adapter")
-    manifest["status"] = "DEV_COMPLETE" if config.data.eval_split != "test" else "SEALED_TEST_COMPLETE"
+    manifest["status"] = _run_status(config, finished=True)
     manifest["final_metrics_file"] = summary_name
     atomic_write_json(output_dir / "run_manifest.json", manifest)
     return TrainingResult(output_dir=output_dir, global_steps=global_step, optimizer_steps=optimizer_step, final_metrics=final_metrics)

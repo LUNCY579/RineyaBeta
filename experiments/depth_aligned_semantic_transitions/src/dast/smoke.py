@@ -120,18 +120,48 @@ def _make_model(config: DASTConfig, *, feedback: bool = False) -> tuple[DASTMode
         operator_bank=operator,
         feedback_enabled=feedback,
         feedback_scale=0.2 if feedback else config.model.feedback_scale,
+        checkpoint_readout=config.model.checkpoint_readout,
     )
     return model, tokenizer
 
 
 def _feedback_qualification(config: DASTConfig) -> dict[str, Any]:
+    """Qualify the activation-patching PATH, and report the shipped-init no-op.
+
+    The feedback decoder is zero-initialised by contract (model.py), so at
+    initialisation ``delta = decoder(state) * gate`` is identically zero and every
+    intervention is a bitwise no-op. This function previously overwrote the decoder
+    and the gates and reported only the perturbed number, which made a green smoke
+    read as "the configured causal mechanism works". Both numbers are now reported:
+    the shipped-init delta (expected exactly 0.0) and the perturbed delta that
+    shows the hook, pooling, intervention and residual-injection path execute.
+    """
+
     feedback_config = build_smoke_config(Path(config.experiment.output_dir) / "feedback", arm="state_ordered")
     feedback_config.model.feedback_enabled = True
     model, tokenizer = _make_model(feedback_config, feedback=True)
     assert model.feedback_decoder is not None and model.feedback_gates is not None
+    shipped_init_delta = _feedback_delta(model, tokenizer, feedback_config)
     torch.nn.init.normal_(model.feedback_decoder.weight, std=0.02)
     with torch.no_grad():
         model.feedback_gates.fill_(2.0)
+    perturbed_delta = _feedback_delta(model, tokenizer, feedback_config)
+    return {
+        "feedback_logits_changed": perturbed_delta > 0.0,
+        "feedback_max_logit_delta": perturbed_delta,
+        "feedback_stage_count": model.num_stages,
+        "shipped_init_max_logit_delta": shipped_init_delta,
+        "shipped_init_is_no_op": shipped_init_delta == 0.0,
+        "claim_boundary": (
+            "The perturbed delta qualifies the activation-patching PATH only. The "
+            "zero-initialised decoder makes interventions a bitwise no-op until the "
+            "decoder has trained, so an untrained feedback run cannot produce a "
+            "causal result and must not be reported as one."
+        ),
+    }
+
+
+def _feedback_delta(model: DASTModel, tokenizer: Any, feedback_config: DASTConfig) -> float:
     records = load_records(fixture_path(), split="dev", limit=2)
     examples = build_examples(records, arm=feedback_config.arm_spec, num_stages=4, seed=17)
     batch = CausalBatchCollator(
@@ -154,12 +184,7 @@ def _feedback_qualification(config: DASTConfig) -> dict[str, Any]:
             prompt_mask=batch["prompt_mask"],
             interventions={1: negate_state},
         )
-    delta = float((ordinary.logits - intervened.logits).abs().max())
-    return {
-        "feedback_logits_changed": delta > 0.0,
-        "feedback_max_logit_delta": delta,
-        "feedback_stage_count": ordinary.states.shape[1],
-    }
+    return float((ordinary.logits - intervened.logits).abs().max())
 
 
 def run_smoke(output_dir: str | Path | None = None) -> dict[str, Any]:
@@ -186,8 +211,11 @@ def run_smoke(output_dir: str | Path | None = None) -> dict[str, Any]:
             config,
             model_info={"kind": "offline_toy", "quality_claim_allowed": False},
         )
+        # train() moves the model to the accelerator, so the pre-training snapshot
+        # and the live parameter can sit on different devices. Compare on one device
+        # or this check raises instead of answering, on every CUDA host.
         projector_changed = any(
-            not torch.equal(before[name], parameter.detach())
+            not torch.equal(before[name], parameter.detach().to(before[name].device))
             for name, parameter in model.state_projector.named_parameters()
         )
         report = {

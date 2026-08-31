@@ -9,7 +9,7 @@ import platform
 import random
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 import numpy as np
 import torch
@@ -67,14 +67,29 @@ def environment_manifest() -> dict[str, Any]:
 def build_run_manifest(
     config: DASTConfig,
     *,
-    data_path: str | Path,
+    data_path: str | Path | Sequence[str | Path],
     checkpoint_layers: tuple[int, ...],
     model_info: dict[str, Any],
     status: str = "BUILT_UNRUN",
 ) -> dict[str, Any]:
     split = config.data.eval_split.lower()
+    # Train and eval can come from different corpus files, so every file a run
+    # touched is hashed individually. A single concatenated path string would both
+    # break hashing and leave the provenance unverifiable.
+    if isinstance(data_path, (str, Path)):
+        paths = [Path(data_path)]
+    else:
+        paths = [Path(item) for item in data_path]
+    unique: list[Path] = []
+    for candidate in paths:
+        if candidate not in unique:
+            unique.append(candidate)
+    files = [
+        {"path": str(item.resolve()), "sha256": sha256_file(item)}
+        for item in unique
+    ]
     return {
-        "schema_version": "dast-run-manifest-v1",
+        "schema_version": "dast-run-manifest-v2",
         "status": status,
         "experiment": config.experiment.name,
         "arm": config.experiment.arm,
@@ -82,8 +97,11 @@ def build_run_manifest(
         "config_sha256": config.canonical_sha256(),
         "config": config.as_dict(),
         "data": {
-            "path": str(Path(data_path).resolve()),
-            "sha256": sha256_file(data_path),
+            "files": files,
+            # Retained for readers of the v1 schema; only meaningful when a single
+            # file supplies both splits.
+            "path": files[0]["path"] if len(files) == 1 else None,
+            "sha256": files[0]["sha256"] if len(files) == 1 else None,
             "train_split": config.data.train_split,
             "eval_split": config.data.eval_split,
             "sealed_test_opened": split == "test",

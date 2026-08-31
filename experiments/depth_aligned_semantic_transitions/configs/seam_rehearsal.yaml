@@ -1,0 +1,31 @@
+# RUNBOOK section 5 resource rehearsal - ENGINEERING ONLY.
+#
+# Purpose: prove that the real Hugging Face / LoRA seam executes end to end on an
+# audited local checkpoint, and measure VRAM and wall time before any comparative
+# run. This config is deliberately too small to support ANY scientific claim:
+# 16 train and 8 eval problems, generation disabled. Its output is an engineering
+# artifact, never a DEV result, and it must never be aggregated with arm runs.
+#
+# Do not raise the record counts here. Copy the file instead, so the rehearsal
+# stays a rehearsal.
+extends: base.yaml
+
+experiment:
+  name: dast-seam-rehearsal-engineering-only
+  arm: state_ordered
+  output_dir: ../runs/seam_rehearsal
+  # Explicit, and the default anyway: this run may claim nothing above
+  # ENGINEERING in the EVIDENCE_STANDARD vocabulary.
+  evidence_status: engineering
+
+data:
+  max_train_records: 16
+  max_eval_records: 8
+
+training:
+  epochs: 1
+  log_every_steps: 1
+
+evaluation:
+  # Generation is the expensive part and is not what this rehearsal qualifies.
+  do_generation: false

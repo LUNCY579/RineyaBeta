@@ -7,13 +7,13 @@ import json
 from typing import Any
 
 from dast.compare import compare_prediction_files
-from dast.config import load_config
+from dast.config import assert_split_allowed, load_config
 from dast.data import build_examples, load_records, validate_dataset
 from dast.hf import build_hf_components
 from dast.model import DASTModel
 from dast.operators import LowRankOperatorBank
 from dast.smoke import run_smoke
-from dast.training import train
+from dast.training import set_global_seed, train
 
 
 def _print_json(value: Any) -> None:
@@ -28,9 +28,15 @@ def command_validate_data(args: argparse.Namespace) -> int:
 
 def command_inspect_alignment(args: argparse.Namespace) -> int:
     config = load_config(args.config)
+    split = args.split or config.data.train_split
+    # The printed canonical/training targets ARE compact state text, and the last
+    # one contains the final answer. Inspecting alignment on the sealed split
+    # would therefore leak TEST answers to stdout, so it takes the same guard as
+    # training and evaluation.
+    assert_split_allowed(config, split)
     records = load_records(
-        config.resolved_path(config.data.path),
-        split=args.split or config.data.train_split,
+        config.data_path_for_split(split),
+        split=split,
         limit=args.limit,
     )
     examples = build_examples(
@@ -59,6 +65,14 @@ def command_inspect_alignment(args: argparse.Namespace) -> int:
 
 def command_train(args: argparse.Namespace) -> int:
     config = load_config(args.config)
+    # Seed BEFORE anything draws from the global RNG. The LoRA adapter and the
+    # shared projector are both initialised during construction below, so seeding
+    # only inside train() left every arm's starting weights unreproducible and
+    # made the matched-seed contract unenforceable.
+    set_global_seed(
+        config.experiment.seed,
+        deterministic_algorithms=config.training.deterministic_algorithms,
+    )
     base_model, tokenizer, model_info = build_hf_components(config, for_training=True)
     operator = None
     if config.operators.enabled:
@@ -78,10 +92,18 @@ def command_train(args: argparse.Namespace) -> int:
         operator_bank=operator,
         feedback_enabled=config.model.feedback_enabled,
         feedback_scale=config.model.feedback_scale,
+        checkpoint_readout=config.model.checkpoint_readout,
     )
     model_info["dast_checkpoint_layers"] = list(model.checkpoint_layers)
     model_info["dast_state_dim"] = config.semantic.state_dim
     model_info["dast_operator_enabled"] = config.operators.enabled
+    # Both readout and target geometry change what the objective means, so a run
+    # is not interpretable without them recorded alongside the resolved layers.
+    model_info["dast_checkpoint_readout"] = model.checkpoint_readout
+    model_info["dast_target_centering"] = config.semantic.target_centering
+    model_info["dast_contrastive_active"] = bool(
+        config.semantic.contrastive_weight > 0.0 and config.training.batch_size >= 2
+    )
     result = train(model, tokenizer, config, model_info=model_info)
     _print_json(
         {

@@ -166,7 +166,16 @@ class ToyCausalLM(nn.Module):
             hidden = layer(hidden, attention_mask=attention_mask)
             if all_hidden is not None:
                 all_hidden.append(hidden)
-        logits = self.lm_head(self.final_norm(hidden))
+        normed = self.final_norm(hidden)
+        if all_hidden is not None:
+            # Match Hugging Face decoder semantics exactly: the LAST hidden_states
+            # entry is the post-final-norm state that feeds the LM head, while every
+            # earlier entry is a raw residual state. The toy previously exposed a
+            # homogeneous stack, which made the offline tests and CI structurally
+            # blind to the representation-class split that only appears on a real
+            # checkpoint.
+            all_hidden[-1] = normed
+        logits = self.lm_head(normed)
         loss = None
         if labels is not None:
             shift_logits = logits[:, :-1].contiguous().float()
