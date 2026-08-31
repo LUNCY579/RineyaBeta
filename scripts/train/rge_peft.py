@@ -175,6 +175,7 @@ def _manifest(cfg: dict, legacy: dict, model, tokenizer, data, plans,
     eval_manifest = json.loads((ROOT / "manifests/eval_assets.json").read_text(
         encoding="utf-8"))
     status = _git(["status", "--porcelain"])
+    tracked_status = _git(["status", "--porcelain", "--untracked-files=no"])
     try:
         import peft
         import transformers
@@ -188,7 +189,10 @@ def _manifest(cfg: dict, legacy: dict, model, tokenizer, data, plans,
         "designation": str(cfg["run"]["designation"]),
         "git": {"branch": _git(["branch", "--show-current"]),
                 "commit": _git(["rev-parse", "HEAD"]),
-                "dirty": bool(status), "status_porcelain": status.splitlines()},
+                "origin_main": _git(["rev-parse", "origin/main"]),
+                "origin_research": _git(["rev-parse", "origin/research/rge-peft-v1"]),
+                "dirty": bool(status), "tracked_dirty": bool(tracked_status),
+                "status_porcelain": status.splitlines()},
         "model": {"path": _relative(model_dir), **_combined_files(model_dir)},
         "tokenizer": {
             "path": _relative(model_dir / "tokenizer.json"),
