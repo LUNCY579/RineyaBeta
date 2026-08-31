@@ -201,7 +201,12 @@ def _run_status(config: DASTConfig, *, finished: bool) -> str:
     manifest labelled DEV.
     """
 
-    sealed = config.data.eval_split.strip().lower() == "test"
+    # BOTH splits, not just eval: a run that TRAINS on the sealed split would
+    # otherwise report ..__DEV__.. and read as an ordinary DEV result.
+    sealed = "test" in {
+        config.data.train_split.strip().lower(),
+        config.data.eval_split.strip().lower(),
+    }
     tier = {
         "engineering": "ENGINEERING",
         "exploratory_dev": "EXPLORATORY_DEV",
@@ -244,10 +249,16 @@ def _encode_targets(
         return grid
     if centering != "within_problem":
         raise ValueError(f"unsupported target centering mode: {centering}")
-    reference = (
-        grid if reference_texts is None
-        else encoder.encode_grid(reference_texts, device=device)
-    )
+    if reference_texts is None:
+        # Centering on the arm's OWN grid is the mode this function forbids: it
+        # would give each arm a different subtracted mean, and state_final_repeated
+        # would collapse to a zero target. Refuse rather than silently break the
+        # matched-control contract.
+        raise ValueError(
+            "target centering requires reference_texts (the canonical grid); "
+            "centering on the arm's own targets would unmatch the controls"
+        )
+    reference = encoder.encode_grid(reference_texts, device=device)
     return torch.nn.functional.normalize(grid - reference.mean(dim=1, keepdim=True), dim=-1)
 
 

@@ -245,6 +245,30 @@ class DASTConfig:
         if self.experiment.seed < 0:
             errors.append("experiment.seed must be non-negative")
 
+        # Literal annotations are not enforced at runtime and load_config only
+        # rejects unknown KEYS, so a typo in one of these reached a bare KeyError
+        # or a silent wrong branch after the model and corpus were already loaded.
+        if self.experiment.evidence_status not in ("engineering", "exploratory_dev", "confirmatory_dev"):
+            errors.append(
+                "experiment.evidence_status must be engineering, exploratory_dev or "
+                f"confirmatory_dev; got {self.experiment.evidence_status!r}"
+            )
+        if self.model.checkpoint_readout not in ("raw", "final_norm"):
+            errors.append(
+                f"model.checkpoint_readout must be raw or final_norm; got {self.model.checkpoint_readout!r}"
+            )
+        if self.semantic.target_centering not in ("none", "within_problem"):
+            errors.append(
+                "semantic.target_centering must be none or within_problem; "
+                f"got {self.semantic.target_centering!r}"
+            )
+        # A confirmatory claim requires the frozen protocol it is confirming.
+        if self.experiment.evidence_status == "confirmatory_dev" and not self.experiment.preregistration_frozen:
+            errors.append(
+                "experiment.evidence_status='confirmatory_dev' requires "
+                "preregistration_frozen: true"
+            )
+
         fractions = self.model.checkpoint_fractions
         if len(fractions) < 2:
             errors.append("at least two checkpoint_fractions are required")

@@ -131,10 +131,16 @@ def test_toy_last_hidden_state_is_post_final_norm_like_hf():
     out = model(input_ids=ids, output_hidden_states=True)
     assert len(out.hidden_states) == model.config.num_hidden_layers + 1
     last = out.hidden_states[-1]
-    assert torch.allclose(last, model.final_norm(out.hidden_states[-1]) * 0 + last)
-    # The last entry must be the normed state, not the raw residual.
-    assert not torch.allclose(last, out.hidden_states[-2], atol=1e-4)
+    penultimate = out.hidden_states[-2]
+    # The same three facts that were verified directly on Qwen3-0.6B, where
+    # lm_head(hidden_states[28]) reproduced logits to 0.0 absolute error while
+    # lm_head(norm(hidden_states[28])) differed by 18.7:
+    #   1. the last entry is exactly what the LM head consumes, i.e. post-norm;
     assert torch.allclose(model.lm_head(last), out.logits, atol=1e-5)
+    #   2. the earlier entries are NOT, i.e. they are raw residual states;
+    assert not torch.allclose(model.lm_head(penultimate), out.logits, atol=1e-3)
+    #   3. so the last entry must never be normed a second time.
+    assert not torch.allclose(model.final_norm(last), last, atol=1e-3)
 
 
 def test_locate_final_norm_finds_the_toy_norm():
@@ -144,7 +150,9 @@ def test_locate_final_norm_finds_the_toy_norm():
 
 # --------------------------------------------------------- symmetric norm readout
 def _toy_model(readout: str, fractions=(0.25, 0.5, 0.75, 1.0)) -> DASTModel:
-    base = ToyCausalLM(vocab_size=64, hidden_size=16, num_hidden_layers=4)
+    # 8 layers, so 0.9 resolves to layer 7 and a sub-top checkpoint is expressible.
+    # On a 4-layer model int(round(4 * 0.9)) == 4, i.e. still the top layer.
+    base = ToyCausalLM(vocab_size=64, hidden_size=16, num_hidden_layers=8)
     return DASTModel(
         base,
         checkpoint_fractions=fractions,
@@ -159,9 +167,9 @@ def test_final_norm_readout_changes_the_states_and_is_recorded():
     ids = torch.tensor([[1, 2, 3, 4, 5]])
     mask = torch.ones_like(ids)
     set_global_seed(17)
-    raw = _toy_model("raw")
+    raw = _toy_model("raw", fractions=(0.25, 0.5, 0.75, 0.9))
     set_global_seed(17)
-    normed = _toy_model("final_norm")
+    normed = _toy_model("final_norm", fractions=(0.25, 0.5, 0.75, 0.9))
     assert raw.checkpoint_readout == "raw"
     assert normed.checkpoint_readout == "final_norm"
     with torch.no_grad():
@@ -171,19 +179,46 @@ def test_final_norm_readout_changes_the_states_and_is_recorded():
     assert not torch.allclose(a, b)
 
 
-def test_final_norm_readout_does_not_double_norm_the_final_index():
-    """hidden_states[L] is already post-norm, so it must be passed through as-is."""
+def test_final_norm_readout_rejects_a_top_layer_checkpoint_at_model_level():
+    """The config guard sees only the FRACTION, and int(round(L*f)) maps the whole
+    interval [1 - 0.5/L, 1.0) onto layer L. So 0.99 on an 8-layer model resolves to
+    the top layer while passing config validation. The assertion must be on the
+    resolved depth."""
+
+    for fractions in ((0.25, 0.5, 0.75, 1.0), (0.25, 0.5, 0.75, 0.99)):
+        with pytest.raises(ValueError, match="resolved its last checkpoint to layer"):
+            _toy_model("final_norm", fractions=fractions)
+    # Just below the rounding boundary is accepted and stays off the top layer.
+    model = _toy_model("final_norm", fractions=(0.25, 0.5, 0.75, 0.9))
+    assert model.checkpoint_layers == (2, 4, 6, 7)
+    assert model.checkpoint_layers[-1] < model.num_hidden_layers
+
+
+def test_final_norm_readout_actually_applies_the_norm_at_every_checkpoint():
+    """Pins that the readout is real, not a no-op, on a backbone whose final_norm
+    is measurably non-identity."""
 
     ids = torch.tensor([[1, 2, 3, 4, 5]])
     mask = torch.ones_like(ids)
-    model = _toy_model("final_norm", fractions=(0.25, 0.5, 0.75, 1.0))
-    assert model.checkpoint_layers[-1] == model.num_hidden_layers
+    model = _toy_model("final_norm", fractions=(0.25, 0.5, 0.75, 0.9))
+    # The norm must be NON-UNIFORM per dimension. The projector begins with its own
+    # LayerNorm, which absorbs any uniform affine transform (x -> a*x_hat + b), so a
+    # final_norm with a constant gain is invisible to it and this test would pass
+    # vacuously. Real RMSNorm gains are per-dimension, which is exactly why the
+    # readout measurably de-correlated the checkpoints on Qwen3-0.6B.
     with torch.no_grad():
-        out = model.base_model(input_ids=ids, attention_mask=mask, output_hidden_states=True)
-        pooled_expected = out.hidden_states[model.num_hidden_layers].mean(dim=1)
-        expected = model.state_projector(pooled_expected)
+        width = model.base_model.final_norm.weight.shape[0]
+        model.base_model.final_norm.weight.copy_(torch.linspace(0.2, 4.0, width))
+        model.base_model.final_norm.bias.copy_(torch.linspace(-1.0, 1.0, width))
+    with torch.no_grad():
+        raw_out = model.base_model(input_ids=ids, attention_mask=mask, output_hidden_states=True)
         states = model(input_ids=ids, attention_mask=mask, labels=None, prompt_mask=mask).states
-    assert torch.allclose(states[:, -1], expected, atol=1e-5)
+        for stage, layer in enumerate(model.checkpoint_layers):
+            normed = model.base_model.final_norm(raw_out.hidden_states[layer])
+            expected = model.state_projector(normed.mean(dim=1))
+            unnormed = model.state_projector(raw_out.hidden_states[layer].mean(dim=1))
+            assert torch.allclose(states[:, stage], expected, atol=1e-5)
+            assert not torch.allclose(states[:, stage], unnormed, atol=1e-4)
 
 
 def test_unknown_readout_is_rejected():

@@ -1,5 +1,89 @@
 # DAST progress
 
+## 2026-08-31 — post-review corrections to the V1.1 commit
+
+An adversarial review of `30119fe` over four lenses (correctness,
+scientific-validity, reproducibility, test-quality) raised 29 findings, each
+verified or refuted by an independent agent. It caught **a real regression
+introduced by that commit**, plus several repairs whose tests did not actually pin
+them. Recorded here rather than amended into `30119fe`, because "a review caught
+this" is part of the provenance.
+
+### The regression
+
+Adding `time` and `statistic` to the scorer's numeric-tolerance set routed them
+through `_numeric_value`, which uses `re.search` and therefore compared only the
+**first** number in each answer. Verified by execution:
+
+```text
+answers_equal("16:20", "16:55", "time")                            -> True   WRONG
+answers_equal("mean 3.5, range 12", "mean 3.5, range 99", ...)     -> True   WRONG
+```
+
+All 160 DEV `time` answers are `HH:MM`, so the minute field was always discarded;
+24 of 80 `statistic` answers are `mean X, range Y`, so the range was always
+discarded. In the shipped 800-problem eval window that is ~61 problems (7.6%).
+Both were **False** before `30119fe` under exact string equality, so the commit
+made the primary endpoint worse for those types: it inflates absolute accuracy and
+converts genuinely discordant pairs into ties, which is exactly the paired power
+the endpoint exists to provide.
+
+Fixed by comparing **all** numbers elementwise when the gold carries more than
+one, while keeping first-number comparison for single-number golds so the intended
+unit tolerance (`129 N` vs `129`, `$14.50` vs `14.50`) is preserved. The reviewer's
+`rate` claim did **not** hold and was not acted on: all 80 DEV `rate` answers are
+single-number-plus-unit.
+
+### A no-op hiding inside the readout repair
+
+Chasing "these tests are vacuous" produced a more important finding. The shared
+projector begins with its own `LayerNorm`, which absorbs any **uniform** affine
+transform exactly. So `checkpoint_readout: final_norm` does nothing at all when the
+final norm's gain is uniform — and the toy backbone's `final_norm` was at default
+init (weight 1, bias 0), on top of `ToyBlock` already ending in a `LayerNorm`.
+
+Consequence: the offline smoke and every unit test would have passed with the
+readout entirely broken. The toy now carries a deterministic **per-dimension**
+gain, which is what a trained model has and the only reason the readout measurably
+de-correlated the checkpoints on Qwen3-0.6B (7v21: 0.954 → 0.689).
+
+### Other confirmed defects, now fixed
+
+| Defect | Fix |
+|---|---|
+| The `final_norm` guard tested the configured **fraction**, but `int(round(L·f))` maps all of `[1 − 0.5/L, 1.0)` onto layer `L`. `0.99` on an 8-layer model, or the shipped `0.964` on any model with `L ≤ 13`, resolved to the top layer while passing validation | assert on the **resolved depth** in `DASTModel.__init__`, where `checkpoint_layers` and `num_hidden_layers` are both known |
+| `_run_status` took its scope from `eval_split` alone, so a run that **trained** on the sealed split reported `..__DEV__..` | consider both splits |
+| `_encode_targets` defaulted `reference_texts=None`, silently centering on the arm's own grid — the mode its own docstring forbids, which would unmatch the controls and collapse `state_final_repeated` to a zero target | refuse without an explicit canonical reference |
+| The three new `Literal` config fields were unvalidated, so a typo survived config load and surfaced as a bare `KeyError` after the model and corpus were in memory | validated by value; `confirmatory_dev` additionally requires `preregistration_frozen` |
+| No arm config set `evidence_status`, so all six DEV arm runs would have emitted the same manifest status as the 16-problem rehearsal | `base.yaml` sets `exploratory_dev`; the rehearsal overrides to `engineering` |
+| The smoke config pinned the **pre-repair** geometry, so the only end-to-end offline test never exercised either protocol correction | smoke now runs `final_norm` + `within_problem` at fractions ending 0.9 |
+
+### Repairs that had no test, and now do
+
+Left-padded generation, seed-before-construction, the feedback hook readout, the
+shipped-init intervention no-op, and the smoke device fix were all revertible with
+the suite still green. `tests/test_v11_review_fixes.py` pins each. Two assertions
+in the first pass were tautological (`allclose(last, last)`) and are replaced with
+the three facts actually verified on Qwen3-0.6B: `lm_head(hidden_states[-1])`
+reproduces `logits`, `lm_head(hidden_states[-2])` does not, and the last entry must
+never be normed twice.
+
+Suite is now **94 tests**, passing with a GPU visible, with `CUDA_VISIBLE_DEVICES=-1`,
+and under CI-like invocation (`PYTHONPATH=src` only). Smoke PASS, and the real
+seam rehearsal still exits 0 with `checkpoints [7, 14, 21, 27]`,
+`readout final_norm`, `centering within_problem`.
+
+### Not acted on
+
+One reviewer claim is **declined**: that per-split corpus files make
+`validate_dataset`'s cross-split duplicate detection unable to fire. True as
+stated, but the corpus itself asserts `cross_split_problem_overlap: false` in
+`dataset_stats.json` and ships `source_pair_sha256` per record. The right response
+is a cross-file contamination check as a separate tool, not a change to this
+commit. Recorded in `docs/PHASE0_DEFECT_AUDIT.md`.
+
+---
+
 ## 2026-08-31 — V1.1 readiness correction
 
 **Status: BUILT — UNRUN on a qualifying arm run. TEST CLOSED.

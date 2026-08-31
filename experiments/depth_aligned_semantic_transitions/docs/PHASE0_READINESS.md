@@ -522,6 +522,24 @@ Two independent corrections, and their effect sizes are very unequal:
    index. Marginal gain over centering alone is small (0.977 → 0.995), but it is
    what makes "one shared interface" true rather than nominal.
 
+   **Acknowledged cost, not hidden.** Moving the last checkpoint to layer 27 means
+   the model's final layer is no longer read by any depth checkpoint. `SSOT §4`
+   and `ALGORITHM.md §1` both write the schedule as \(d_K = L\), so this is a
+   deviation, and it is a real trade: layer 28's output is what feeds the LM head,
+   so stage 4 now supervises one layer earlier and leaves the last layer free for
+   output formatting. Two reasons to accept it, and one guard:
+   - the alternative preserves \(d_K=L\) at the cost of stage 4 reading a
+     near-orthogonal vector (7v28 = −0.111) through a projector shared with three
+     checkpoints that do not, which defeats the stated purpose of sharing;
+   - nothing downstream assumes \(d_K = L\): `resolve_checkpoint_layers` only
+     requires strict increase within range, and `model.py` bounds-checks the
+     hidden-state tuple against `checkpoint_layers[-1]`.
+   - the old behaviour remains exactly reachable as an ablation
+     (`checkpoint_readout: raw` with the final fraction at 1.0), and config
+     validation refuses the incoherent middle case (`final_norm` **and** 1.0).
+   Whichever is chosen must be frozen as part of the Stage-C decision and recorded
+   in the preregistration, not left to a default.
+
 #### What this means for the ΔH / semantic-motion proposal
 
 The motion reading was diagnostically right — it is what exposed the factor

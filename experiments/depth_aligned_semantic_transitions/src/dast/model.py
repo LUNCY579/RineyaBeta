@@ -162,6 +162,20 @@ class DASTModel(nn.Module):
                 raise ValueError(
                     "checkpoint_readout='final_norm' requires a locatable final norm layer"
                 )
+            # The config-level guard can only see the FRACTION, and
+            # int(round(L * f)) maps the whole interval [1 - 0.5/L, 1.0) onto layer
+            # L. So 0.983 on a 28-layer model, or the shipped 0.964 on any model
+            # with L <= 13, resolves to the top layer while passing config
+            # validation. Assert on the resolved depth, where the truth is known.
+            if self.checkpoint_layers[-1] >= self.num_hidden_layers:
+                raise ValueError(
+                    "checkpoint_readout='final_norm' resolved its last checkpoint to layer "
+                    f"{self.checkpoint_layers[-1]} of {self.num_hidden_layers}, i.e. the top of "
+                    "the stack, whose hidden state is already post-final-norm and measured as a "
+                    "near-orthogonal outlier against the other checkpoints. Lower the last "
+                    f"checkpoint fraction below {1.0 - 0.5 / self.num_hidden_layers:.4f} for this "
+                    "model, or use checkpoint_readout='raw'."
+                )
         self.state_projector = SharedStateProjector(self.hidden_size, state_dim, projector_hidden_dim)
         self.operator_bank = operator_bank
         self.feedback_enabled = feedback_enabled

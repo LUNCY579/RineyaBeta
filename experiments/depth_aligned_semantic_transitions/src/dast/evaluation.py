@@ -87,13 +87,49 @@ _BOOLEAN_TRUE = frozenset({"true", "yes", "t", "1"})
 _BOOLEAN_FALSE = frozenset({"false", "no", "f", "0"})
 
 
+_NUMBER_PATTERN = re.compile(r"[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?(?:\s*/\s*\d+)?")
+
+
+def _all_numbers(value: str) -> list[float]:
+    numbers: list[float] = []
+    for match in _NUMBER_PATTERN.finditer(value.replace(",", "")):
+        token = match.group(0).replace(" ", "")
+        try:
+            numbers.append(float(Fraction(token)) if "/" in token else float(token))
+        except (ValueError, ZeroDivisionError):
+            continue
+    return numbers
+
+
+def _close(a: float, b: float) -> bool:
+    return math.isclose(a, b, rel_tol=1e-5, abs_tol=max(1e-6, abs(a) * 1e-5))
+
+
 def _numbers_close(expected: str, predicted: str) -> bool | None:
-    expected_number = _numeric_value(expected)
-    predicted_number = _numeric_value(predicted)
-    if expected_number is None or predicted_number is None:
+    """Compare the numeric content of two answers.
+
+    A single-number gold is compared against the prediction's first number, which
+    is what gives `129 N` vs `129` and `$14.50` vs `14.50` their intended unit
+    tolerance.
+
+    A gold carrying SEVERAL numbers must match elementwise. Comparing only the
+    first number silently credited wrong answers for every composite gold in this
+    corpus: all 160 DEV `time` answers are `HH:MM`, so `16:20` vs `16:55` compared
+    only the hour and scored correct, and the `mean X, range Y` form of `statistic`
+    discarded the range. That inflates absolute accuracy and, worse, converts
+    genuinely discordant pairs into ties, which is exactly the paired power the
+    primary endpoint depends on.
+    """
+
+    expected_numbers = _all_numbers(expected)
+    predicted_numbers = _all_numbers(predicted)
+    if not expected_numbers or not predicted_numbers:
         return None
-    tolerance = max(1e-6, abs(expected_number) * 1e-5)
-    return math.isclose(expected_number, predicted_number, rel_tol=1e-5, abs_tol=tolerance)
+    if len(expected_numbers) == 1:
+        return _close(expected_numbers[0], predicted_numbers[0])
+    if len(predicted_numbers) != len(expected_numbers):
+        return False
+    return all(_close(a, b) for a, b in zip(expected_numbers, predicted_numbers))
 
 
 def _collection_items(value: str) -> list[str]:

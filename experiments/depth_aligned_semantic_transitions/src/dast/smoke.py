@@ -47,7 +47,13 @@ def build_smoke_config(output_dir: Path, *, arm: str = "operator_ordered") -> DA
             name_or_path="toy",
             precision="fp32",
             max_length=160,
-            checkpoint_fractions=(0.25, 0.5, 0.75, 1.0),
+            # 0.9 * 8 -> 7, deliberately below the top layer: with readout
+            # 'final_norm' the last checkpoint must not be the already-normed
+            # final hidden state. Mirrors the shipped 28-layer schedule so the
+            # offline smoke actually exercises the corrected geometry instead of
+            # the pre-repair one.
+            checkpoint_fractions=(0.25, 0.5, 0.75, 0.9),
+            checkpoint_readout="final_norm",
             pooling="mean",
         ),
         data=DataConfig(
@@ -63,6 +69,7 @@ def build_smoke_config(output_dir: Path, *, arm: str = "operator_ordered") -> DA
             projector_hidden_dim=48,
             target_projection_seed=1701,
             target_max_tokens=32,
+            target_centering="within_problem",
             state_weight=0.0 if baseline else 0.5,
             contrastive_weight=0.0 if baseline else 0.05,
         ),

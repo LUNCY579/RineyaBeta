@@ -3,6 +3,11 @@ experiment:
   arm: state_ordered
   seed: 17
   output_dir: ../runs/state_ordered_seed17
+  # Arm runs are EXPLORATORY_DEV until the preregistration is frozen; promoting to
+  # confirmatory_dev is refused by config validation while preregistration_frozen
+  # is false. Without this, every arm run emitted the same manifest status as the
+  # 16-problem seam rehearsal.
+  evidence_status: exploratory_dev
   preregistration_frozen: false
   preregistration_sha256: ""
   allow_sealed_test: false

@@ -142,6 +142,18 @@ class ToyCausalLM(nn.Module):
         self.embed_tokens = nn.Embedding(vocab_size, hidden_size)
         self.layers = nn.ModuleList(ToyBlock(hidden_size) for _ in range(num_hidden_layers))
         self.final_norm = nn.LayerNorm(hidden_size)
+        # A trained model's final norm has a PER-DIMENSION gain, and that is the
+        # only reason checkpoint_readout='final_norm' does anything: the shared
+        # projector begins with its own LayerNorm, which absorbs any uniform
+        # affine transform (x -> a*x_hat + b) exactly. At default init
+        # (weight=1, bias=0) the readout is therefore a bitwise no-op, and since
+        # ToyBlock already ends in a LayerNorm the final norm was idempotent too.
+        # A deterministic non-uniform gain makes the offline backbone
+        # representative, so the smoke and the unit tests actually exercise the
+        # readout instead of passing vacuously.
+        with torch.no_grad():
+            self.final_norm.weight.copy_(torch.linspace(0.5, 2.0, hidden_size))
+            self.final_norm.bias.copy_(torch.linspace(-0.25, 0.25, hidden_size))
         self.lm_head = nn.Linear(hidden_size, vocab_size, bias=False)
         self.lm_head.weight = self.embed_tokens.weight
 
