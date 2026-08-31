@@ -147,8 +147,9 @@ RETIRED
 - **Radius derivation:** AdamW step-100 geometry across 196 modules gives `d_ref = p95(relative_delta) = 0.01435526856`. Frozen candidates are `0.5x/1x/2x`: `0.00717763428`, `0.01435526856`, `0.02871053712`, with 40-step linear warm-in.
 - **Selection rule:** stable post-warm-in matrix-hit rate must be 1%–50%; among eligible arms choose lowest token-weighted loss, exact ties choose larger radius. Retention/evaluation does not select the screen radius.
 - **Mechanism verification:** `verify_deltaball_projection.py` — PASS, 9 checks: inside no-op, exact boundary, symmetric `sqrt(c)`, dense product scale, frozen base, linear schedule, gauge equivalence, exact counter restore, no RNG.
+- **GPU integration/resume:** PASS at rank 16/all targets. Straight versus resumed trajectories match across 392 adapter/optimizer entries, RNG, geometry state, projection counters, 588 geometry records, 588 projection records, and an injected stale train-log tail. Format-v2 artifact schema passes.
 - **Sealed data accessed:** no.
-- **Next bounded action:** commit implementation/preregistration, run GPU DeltaBall smoke plus exact resume, then execute the four-arm AdamW radius screen.
+- **Next bounded action:** execute the four-arm AdamW control plus 0.5x/1x/2x DeltaBall radius screen sequentially.
 
 ### M4 — curriculum/tail
 
