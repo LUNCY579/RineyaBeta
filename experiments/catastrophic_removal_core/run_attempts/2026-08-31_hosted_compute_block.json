@@ -1,0 +1,69 @@
+{
+  "schema_version": "crcc.execution-attempt.v1",
+  "program": "Catastrophic-Removal Critical Core v1 discovery",
+  "recorded_at": "2026-08-31T19:00:18Z",
+  "status": "DISCOVERY_UNRUN__HOSTED_COMPUTE_BLOCKED",
+  "scientific_evidence_package_produced": false,
+  "preregistration_head": "242613d1b4b5e0a5a4a7154c60337115ca394bd7",
+  "execution_harness_head": "1bc28bec88de110b4ce3196c408bcf10813af216",
+  "branch": "research/catastrophic-removal-core-v1",
+  "crcc_membership": null,
+  "membership_frozen": false,
+  "g0_evaluated": false,
+  "attempts": [
+    {
+      "service": "Hugging Face Jobs",
+      "operation": "model-free execution-path smoke test",
+      "outcome": "blocked_before_job_creation",
+      "http_status": 402,
+      "private_repository_data_submitted": false,
+      "model_inference_executed": false
+    },
+    {
+      "service": "GitHub Actions",
+      "workflow": ".github/workflows/crcc-v1-discovery.yml",
+      "workflow_run_id": 33428048659,
+      "run_attempts": 2,
+      "preflight_job_ids": [
+        99606367292,
+        99606641158
+      ],
+      "outcome": "hosted_runner_not_assigned",
+      "observed_runner_id": 0,
+      "steps_executed": 0,
+      "job_logs_available": false,
+      "baseline_job_executed": false,
+      "layer_shards_executed": false,
+      "assembly_job_executed": false,
+      "model_inference_executed": false,
+      "note": "GitHub exposed one platform annotation but not its text through the connected API. This record therefore does not assert a more specific billing or policy cause."
+    }
+  ],
+  "corroborating_repository_state": {
+    "unrelated_workflow_run_id": 33359160293,
+    "unrelated_job_id": 99387033101,
+    "observed_runner_id": 0,
+    "steps_executed": 0,
+    "interpretation": "The same no-runner/no-step pattern on an unrelated workflow supports an account- or repository-level hosted-runner allocation block rather than a CRCC script failure."
+  },
+  "opened_or_executed": {
+    "official_checkpoint_download": false,
+    "intact_baseline": false,
+    "one_layer_bypass_conditions": 0,
+    "development_gates": false,
+    "matched_recovery_arm_design": false,
+    "recovery_training": false,
+    "donor_merges": false,
+    "historical_long_context_64": false,
+    "sealed_evaluation": false
+  },
+  "claim_boundaries": {
+    "automatic_crcc_membership_may_be_claimed": false,
+    "crcc_membership_may_be_frozen": false,
+    "matched_recovery_arms_may_be_designed": false,
+    "halo_30_of_64_comparable_claim_permitted": false,
+    "historical_64_registration_still_required": true
+  },
+  "next_required_evidence_action": "Run the committed intact baseline plus all 28 one-layer bypass conditions on a trusted private runner or local machine, assemble the audited discovery_v1 package, and require G0 PASS before freezing membership or designing matched recovery arms.",
+  "non_evidence_notice": "This file records failed execution infrastructure only. It is not a model result, does not identify any critical layer, and must not be supplied to design_arms.py as a scan summary."
+}
