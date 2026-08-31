@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from scripts.critical_core.common import object_sha256, read_json, sha256_file  # noqa: E402
+from scripts.critical_core.metrics import summarize_cases  # noqa: E402
 
 
 class VerificationFailure(AssertionError):
@@ -36,33 +37,36 @@ def write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def flat_summary(*, nll: float, collapse: float, intelligibility: float, eos: float) -> dict:
-    return {
-        "case_count": 2,
-        "mean_reference_nll": nll,
-        "median_reference_nll": nll,
-        "nonfinite_reference_nll_rate": 0.0,
-        "mean_collapse_score": collapse,
-        "collapse_case_rate": collapse,
-        "intelligibility_rate": intelligibility,
-        "empty_rate": collapse,
-        "eos_rate": eos,
-        "max_length_without_eos_rate": 1.0 - eos,
-        "mean_generated_tokens": 8.0,
-        "mean_weird_unicode_rate": 0.0,
-        "mean_dominant_token_fraction": collapse,
-        "mean_repeated_bigram_fraction": collapse,
-    }
-
-
-def with_sources(summary: dict) -> dict:
-    value = dict(summary)
-    per_source = {key: value for key, value in summary.items() if key != "per_source"}
-    value["per_source"] = {
-        "rag_train": dict(per_source),
-        "short_preservation_train": dict(per_source),
-    }
-    return value
+def raw_cases(
+    *, nll: float, collapse: float, intelligible: bool, eos: bool
+) -> list[dict]:
+    rows = []
+    for case_id, source in (
+        ("rag_train:r:1", "rag_train"),
+        ("short_preservation_train:s:1", "short_preservation_train"),
+    ):
+        rows.append(
+            {
+                "id": case_id,
+                "source": source,
+                "category": "fixture",
+                "reference_nll": nll,
+                "generated_text": "fixture",
+                "generated_token_ids": [1, 2, 3],
+                "completion_metrics": {
+                    "collapse_score": collapse,
+                    "intelligible_by_mechanical_screen": intelligible,
+                    "empty": not intelligible,
+                    "ended_with_eos": eos,
+                    "hit_max_new_tokens": not eos,
+                    "token_count": 3,
+                    "weird_unicode_rate": 0.0,
+                    "dominant_token_fraction": collapse,
+                    "repeated_bigram_fraction": collapse,
+                },
+            }
+        )
+    return rows
 
 
 def build_fixture(tmp: Path) -> tuple[Path, Path, Path, Path]:
@@ -111,13 +115,11 @@ def build_fixture(tmp: Path) -> tuple[Path, Path, Path, Path]:
     config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
 
     case_ids = ["rag_train:r:1", "short_preservation_train:s:1"]
-    baseline_summary = with_sources(
-        flat_summary(nll=1.0, collapse=0.0, intelligibility=1.0, eos=1.0)
-    )
+    baseline_cases = raw_cases(nll=1.0, collapse=0.0, intelligible=True, eos=True)
     baseline = {
         "condition": "intact",
-        "cases": [{"id": value} for value in case_ids],
-        "summary": baseline_summary,
+        "cases": baseline_cases,
+        "summary": summarize_cases(baseline_cases),
         "elapsed_s": 1.234,
     }
     baseline_path = tmp / "baseline.json"
@@ -182,16 +184,8 @@ def build_fixture(tmp: Path) -> tuple[Path, Path, Path, Path]:
         },
         "criticality": config["criticality"],
         "code": {},
-        "device": "cpu",
-        "torch_version": "fixture-torch",
-        "transformers_version": "fixture-transformers",
-        "cuda_total_mib": None,
     }
-    manifest["run_identity_sha256"] = object_sha256(
-        {key: value for key, value in manifest.items() if key not in {
-            "device", "torch_version", "transformers_version", "cuda_total_mib"
-        }}
-    )
+    manifest["run_identity_sha256"] = object_sha256(manifest)
     manifest_path = tmp / "run_manifest.json"
     write_json(manifest_path, manifest)
 
@@ -199,21 +193,19 @@ def build_fixture(tmp: Path) -> tuple[Path, Path, Path, Path]:
     layers_dir.mkdir()
     for layer in range(28):
         catastrophic = layer in {0, 27}
-        summary = with_sources(
-            flat_summary(
-                nll=8.0 if catastrophic else 1.05,
-                collapse=1.0 if catastrophic else 0.0,
-                intelligibility=0.0 if catastrophic else 1.0,
-                eos=0.0 if catastrophic else 1.0,
-            )
+        cases = raw_cases(
+            nll=8.0 if catastrophic else 1.05,
+            collapse=1.0 if catastrophic else 0.0,
+            intelligible=not catastrophic,
+            eos=not catastrophic,
         )
         write_json(
             layers_dir / f"layer_{layer:02d}.json",
             {
                 "condition": "single_layer_bypass",
                 "layer": layer,
-                "cases": [{"id": value} for value in case_ids],
-                "summary": summary,
+                "cases": cases,
+                "summary": summarize_cases(cases),
                 "elapsed_s": float(layer) + 0.5,
             },
         )
