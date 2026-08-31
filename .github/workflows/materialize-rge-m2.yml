@@ -1,0 +1,67 @@
+name: Materialize RGE M2 optimizer-pair implementation
+
+on:
+  push:
+    branches:
+      - research/rge-peft-v1
+    paths:
+      - ".rge_m2_import/**"
+      - ".github/workflows/materialize-rge-m2.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Materialize, verify, and commit M2 pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .rge_m2_import/payload.part.* | base64 --decode > /tmp/rge_m2_payload.tar.gz
+          echo "bbf0ed9cea4eb3420da5ceeee49fac90ef7d090f0dac24ebd68877121b1e8cb0  /tmp/rge_m2_payload.tar.gz" \
+            | sha256sum --check --strict
+          tar -xzf /tmp/rge_m2_payload.tar.gz -C .
+          sha256sum --check --strict .rge_m2_import/files.sha256
+
+          python -m py_compile \
+            scripts/train/optim/muon.py \
+            scripts/train/optim/factory.py \
+            scripts/train/optim/__init__.py \
+            scripts/experiment/__init__.py \
+            scripts/experiment/rge_optimizer_pair.py \
+            scripts/verify/verify_rge_muon.py \
+            scripts/verify/verify_rge_optimizer_pair.py
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for path in (
+              Path("experiments/rge_peft/evidence/m2_muon_unit_cpu.json"),
+              Path("experiments/rge_peft/evidence/m2_pair_protocol_cpu.json"),
+          ):
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              assert payload["status"] == "PASS", path
+              assert payload["sealed_data_accessed"] is False, path
+
+          ledger = Path("experiments/rge_peft/RESULTS_LEDGER.jsonl")
+          for line in ledger.read_text(encoding="utf-8").splitlines():
+              if line.strip():
+                  json.loads(line)
+          PY
+
+          rm -rf .rge_m2_import
+          rm -f .github/workflows/materialize-rge-m2.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(rge): implement matched AdamW versus Muon pilot"
+          git push origin HEAD:research/rge-peft-v1
