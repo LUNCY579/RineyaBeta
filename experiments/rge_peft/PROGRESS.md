@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M5 — corrected Delta-CMA interaction control
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 IN_PROGRESS; M6 BLOCKED_MATCHING
+**Current milestone:** M6 — frozen targeted capability validation
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 GATE_PASSED; M6 IN_PROGRESS
 **Implementation started:** yes
 **Experimental outcomes observed:** yes; all claims remain bounded by the ledgers
 **Sealed evaluation accessed:** no
@@ -34,8 +34,8 @@ RETIRED
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | GATE_PASSED | active eps1x retained on small positive named-retention frontier |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | CLOSED | curriculum mixed/unsupported; tail neutral; six CMA inputs valid |
-| M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | IN_PROGRESS | first uniform control invalidated at −224 tail tokens; exact-tail-plan correction frozen |
-| M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | NOT_STARTED | frozen control/candidate, seed evidence, retention/efficiency decision |
+| M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | GATE_PASSED | corrected interaction control passes 36 match checks and retention non-inferiority |
+| M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | IN_PROGRESS | full frozen capability validation unlocked; escalation requires clear paired gain |
 | M7 | One-time sealed promotion gate | Oct 26–Oct 28 | 1% | NOT_STARTED | exactly one authorized sealed result after candidate freeze |
 | M8 | Phase 7: rank/family transfer | Oct 29–Nov 15 | 1% | NOT_STARTED | conditional transfer-scope decision |
 | M9 | Findings, reproducibility audit, and v1 closeout | Nov 16–Nov 22 | 2% | NOT_STARTED | promote, revise, retire, or authorize v2 |
@@ -52,7 +52,7 @@ RETIRED
 | M2 optimizer pilot | 2–6 | 1.681 measured training/eval hours | GATE_FAILED |
 | M3 DeltaBall | 4–12 | 1.483 measured training/eval hours | GATE_PASSED |
 | M4 curriculum/tail | 4–12 | 1.186 measured training/eval hours | CLOSED |
-| M5 CMA validation | 1–6 | 0.235 measured evaluation hours | GATE_PASSED |
+| M5 CMA validation | 1–6 | ~0.56 measured training/evaluation hours including invalidated control | GATE_PASSED |
 | M6 confirmation | 12–36 | 0 | NOT_STARTED |
 | **Core v1 target** | **23–69** | **0** | NOT_STARTED |
 | Conditional M8 transfer | 12–30 | 0 | NOT_STARTED |
@@ -207,13 +207,17 @@ RETIRED
 - **First interaction-control audit:** INVALID. The uniform tail used its own shuffled tail plan and consumed 12,489 supervised tokens/1,535 rows, versus 12,713/1,536 for the candidate. The resulting CMA/retention comparison is superseded and scientifically ineligible despite passing pointwise retention gates.
 - **Corrective preregistration:** initialize from the unchanged 105,402-token uniform main endpoint, then reuse the candidate's exact tail mix/plan hash, 12 batches, 12,713 tokens, checkpoint steps, LR, DeltaBall, and CMA weights. This restores the v1.5 contract so only the main-segment order differs.
 - **Capability implementation:** deterministic exact-match runner and paired audit pass 14 CPU checks. A 16-row control-only diagnostic verified GPU integration; it is not eligible evidence, no candidate output was observed, and the full bank remains unopened.
-- **Next bounded action:** construct the corrected control tail/CMA, prove post-run matching, repeat retention, and only then evaluate the full frozen capability bank.
+- **Corrected control:** COMPLETE. It uses the uniform main endpoint plus the exact candidate tail plan; 36 post-run checks prove equal membership, 118,115 total supervised tokens, tail data/plan/LR/DeltaBall, CMA inputs/weights, rank/alpha/targets, model, and optimizer. Only main-segment order differs.
+- **Corrected retention:** PASS at the provisional −0.01 point guardrail. Candidate vs control: chat `−0.008038` (95% CI `[-0.017520, +0.001351]`, 52/395/63 W/T/L); RAG `+0.001617` (CI `[-0.002415, +0.005652]`, 4/746/2), contract-violation rate `−0.002660`; no critical regressions.
+- **M5 corrected decision:** `GATE_PASSED`; unlock the full frozen capability validation. This is not a capability or success claim.
+- **Next bounded action:** evaluate the 4,080-case frozen validation bank on the corrected rank-16 control and frozen candidate, then apply the committed clear-improvement rule.
 
 ### M6 — confirmation
 
-- **Status:** NOT_STARTED
+- **Status:** IN_PROGRESS
 - **Planned window:** 2026-10-12 to 2026-10-25
 - **Required evidence:** frozen control/candidate; matched full-budget run(s); seed plan; capability, retention, and GPU-hour comparison.
+- **Entry gate:** corrected M5 structural match and retention audit PASS; full validation generation authorized. Test/challenge/sealed remain forbidden.
 
 ### M7 — sealed gate
 

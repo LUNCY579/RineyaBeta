@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "milestone": "M5",
+  "status": "GATE_PASSED",
+  "source_commit": "8ba3301",
+  "structural_match": {
+    "status": "PASS",
+    "check_count": 36,
+    "scientific_difference": "main-segment order only",
+    "main_supervised_tokens_per_arm": 105402,
+    "tail_supervised_tokens_per_arm": 12713,
+    "total_supervised_tokens_per_arm": 118115,
+    "tail_rows_per_arm": 1536,
+    "tail_plan_hash": "c1298f9ed849b14dc6fb99700484830a735d48a289f97ea1970750c7ef8d468e",
+    "rank": 16,
+    "lora_alpha": 32
+  },
+  "retention": {
+    "status": "PASS",
+    "chat_mean_delta": -0.00803764705882353,
+    "chat_paired_bootstrap_95_ci": [-0.017519627450980388, 0.0013509999999999954],
+    "chat_win_tie_loss": [52, 395, 63],
+    "rag_mean_delta": 0.001616799645390071,
+    "rag_paired_bootstrap_95_ci": [-0.002415226063829787, 0.005652149822695035],
+    "rag_win_tie_loss": [4, 746, 2],
+    "rag_contract_violation_rate_delta": -0.0026595744680851068,
+    "critical_regression_present": false,
+    "noninferiority_margin": -0.01
+  },
+  "decision": "UNLOCK_FROZEN_CAPABILITY_VALIDATION",
+  "claim_boundary": "matched limited-seed retention non-inferiority only; targeted capability, robust seed, efficiency, and sealed success remain unproven",
+  "full_capability_bank_evaluated": false,
+  "test_and_challenge_accessed": false,
+  "sealed_data_accessed": false
+}
