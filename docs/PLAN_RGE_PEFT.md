@@ -1756,7 +1756,7 @@ semantics matched even when packing produces different step counts.
 No M4 loss, retention, or capability outcome had been observed. The amendment
 changes no curriculum ranking, optimizer, LoRA capacity, DeltaBall radius,
 evaluation policy, promotion threshold, or sealed boundary. Commit reference:
-pending.
+`38d0c7a`.
 
 ## v1.2 — 2026-08-31
 

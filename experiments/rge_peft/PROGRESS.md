@@ -171,8 +171,12 @@ RETIRED
 - **Exact pilot subset:** 12,875 rows selected before outcomes by `sha256(seed|m4_subset|source_id) mod 10 == 0`; both arms consume the complete identical subset. Membership hash `8365fe...8e28`; uniform/curriculum order hashes `0d7151...9575` / `7e8814...350f`.
 - **Schedule fairness:** amendment v1.3 freezes LR and DeltaBall warm-in by supervised tokens (41,383 warmup tokens), preventing order-dependent packing/step counts from changing schedule-versus-token semantics.
 - **Verification:** `verify_rge_curriculum.py` PASS, 10 membership/hash/planner checks.
+- **C-U/C-C training:** PASS comparability. Both consumed exactly 12,875 rows and 105,402 supervised tokens in 101 steps, with identical initial-state hash and verified token-indexed LR schedule. Uniform weighted/final loss `2.012459/1.224880`; curriculum `2.011093/1.370037`.
+- **Order selection:** component-local selected by preregistered token-weighted loss delta `-0.001366`; its final-step loss is worse by `+0.145157`, so retention evaluation is required before keeping it.
+- **Interruption:** disk exhaustion stopped C-C after uncheckpointed step 46. Regenerable calibration/smoke/intermediate checkpoints were pruned (25.98 GiB freed), checkpoint 40 resumed exactly, and six stale log rows were reconciled automatically. No model tensor was repaired.
+- **M4 compute so far:** 0.798 measured optimizer-step GPU-hours for C-U/C-C training; timing is exploratory single-order only.
 - **Sealed data accessed:** no.
-- **Next bounded action:** commit M4 manifests/planner, then execute complete-subset C-U/C-C pair and select order by token-weighted loss before retention evaluation.
+- **Next bounded action:** export C-U and selected C-C endpoints and evaluate both frozen `chat_dev`/`rag_dev` retention gates.
 
 ### M5 — Delta-CMA
 

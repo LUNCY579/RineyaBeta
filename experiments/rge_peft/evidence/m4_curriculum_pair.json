@@ -1,0 +1,71 @@
+{
+  "arms": [
+    {
+      "active_gpu_hours": 0.38704530741666227,
+      "actual_supervised_tokens": 105402,
+      "curriculum": {
+        "manifest": "experiments/rge_peft/evidence/m4_subset_manifest.json",
+        "membership_sha256": "8365fecdf98e5a0fbb9ac635500a4a8fa16aabca97ccb2042fd5032533748e28",
+        "mode": "reference",
+        "order_sha256": "0d7151ed282ac453e698adce7f58ae12661f172b2fa780875eecf21e0e5b9575"
+      },
+      "final_loss": 1.2248795701282338,
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "membership_sha256": "8365fecdf98e5a0fbb9ac635500a4a8fa16aabca97ccb2042fd5032533748e28",
+      "mix_sha256": "b6d7f6e1fa17d3e7d79928efa6c498f1937548c24ff5388ca02ab7905aeb4ac3",
+      "model_sha256": "c248c28f9bb2aaca152d65a852394335c6c26063b83830546f686080d2cc9654",
+      "order_sha256": "0d7151ed282ac453e698adce7f58ae12661f172b2fa780875eecf21e0e5b9575",
+      "peak_reserved_mib": 5064.0,
+      "plan_hash": "d2e45a384d555f95960f251c374343751a98e1bc168508ec587bc0325d289c11",
+      "rows_seen": 12875,
+      "run_dir": "artifacts/rge_peft/m4_c_u_uniform_r16_subset10",
+      "run_id": "rge_v1__m4__c_u__r16__subset10__seed20260819",
+      "source_commit": "38d0c7a197392c758fd40748951fd6017452f8a0",
+      "source_fingerprint": "cca6a0d4f4ce645fd2c4539376f3d9941252f9ad478f5bd8fee665ead789c29a",
+      "steps": 101,
+      "token_schedule_verified": true,
+      "token_weighted_mean_loss": 2.012459209874026,
+      "tokenizer_sha256": "249fa5ad6183e98ab44786bbbf95b072250773c69d8573c0cb8f2d44212d6958"
+    },
+    {
+      "active_gpu_hours": 0.41085566880557156,
+      "actual_supervised_tokens": 105402,
+      "curriculum": {
+        "manifest": "experiments/rge_peft/evidence/m4_subset_manifest.json",
+        "membership_sha256": "8365fecdf98e5a0fbb9ac635500a4a8fa16aabca97ccb2042fd5032533748e28",
+        "mode": "component_local",
+        "order_sha256": "7e8814b999c648e5b316db4698ee05dd7b3f05eb12ab858bb9b1136c6460350f"
+      },
+      "final_loss": 1.37003696521866,
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "membership_sha256": "8365fecdf98e5a0fbb9ac635500a4a8fa16aabca97ccb2042fd5032533748e28",
+      "mix_sha256": "ab7545b0d4bbf73f9ab63c3e2732c509f76a81a93733c74a3730eef56a2e1af3",
+      "model_sha256": "c248c28f9bb2aaca152d65a852394335c6c26063b83830546f686080d2cc9654",
+      "order_sha256": "7e8814b999c648e5b316db4698ee05dd7b3f05eb12ab858bb9b1136c6460350f",
+      "peak_reserved_mib": 3534.0,
+      "plan_hash": "c1298f9ed849b14dc6fb99700484830a735d48a289f97ea1970750c7ef8d468e",
+      "rows_seen": 12875,
+      "run_dir": "artifacts/rge_peft/m4_c_c_curriculum_r16_subset10",
+      "run_id": "rge_v1__m4__c_c__r16__subset10__seed20260819",
+      "source_commit": "38d0c7a197392c758fd40748951fd6017452f8a0",
+      "source_fingerprint": "cca6a0d4f4ce645fd2c4539376f3d9941252f9ad478f5bd8fee665ead789c29a",
+      "steps": 101,
+      "token_schedule_verified": true,
+      "token_weighted_mean_loss": 2.0110934973281904,
+      "tokenizer_sha256": "249fa5ad6183e98ab44786bbbf95b072250773c69d8573c0cb8f2d44212d6958"
+    }
+  ],
+  "comparison": {
+    "curriculum_training_signal_positive": true,
+    "final_loss_delta_curriculum_minus_uniform": 0.14515739509042613,
+    "membership_and_effective_tokens_identical": true,
+    "token_schedule_verified": true,
+    "token_weighted_loss_delta_curriculum_minus_uniform": -0.0013657125458355068
+  },
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "selected_order": "component_local",
+  "selection_rule": "lower token-weighted training loss before retention evaluation",
+  "status": "PASS",
+  "timing_interpretation": "EXPLORATORY_SINGLE_ORDER_ONLY"
+}
