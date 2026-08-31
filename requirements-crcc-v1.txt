@@ -1,0 +1,8 @@
+# Reproducible local/private execution environment for CRCC v1 discovery.
+# Keep this separate from the broader research environment so discovery runtime
+# changes do not silently alter the preregistered scan.
+torch==2.8.0
+transformers==4.57.1
+accelerate==1.10.1
+PyYAML==6.0.2
+psutil==7.0.0
