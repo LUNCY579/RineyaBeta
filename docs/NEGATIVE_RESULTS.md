@@ -447,3 +447,18 @@ for the general Rineya v1 recipe. No retention-driven LR rescue is permitted.
 **Interpretation.** Better optimization of the supervised objective did not
 translate into a better retained endpoint. Timing from the pair is unusable due
 to external GPU contention and is not part of the rejection.
+
+---
+
+## 9. DeltaBall radius extremes
+
+**0.5x `d_ref`: overconstrained.** The radius activated on 37.14% of post-warm-in
+matrix checks and 83.61% of steps, but worsened token-weighted and final training
+loss. It is rejected.
+
+**2x `d_ref`: inactive.** It produced zero hits through a fully warmed step-40
+checkpoint. Because the radius also exceeded the source AdamW run's final maximum
+relative delta, it was stopped early and receives no DeltaBall causal credit.
+
+The 1x radius barely cleared the preregistered activity floor (1.054%) and is the
+only radius retained for the next exploratory tier.

@@ -1,0 +1,203 @@
+{
+  "datasets": {
+    "chat_dev": {
+      "best_category_deltas": [
+        [
+          "mood_consistency",
+          0.07
+        ],
+        [
+          "playful_banter",
+          0.029680000000000005
+        ],
+        [
+          "concise_clarification",
+          0.014280000000000004
+        ],
+        [
+          "role_identity_adherence",
+          0.014000000000000002
+        ],
+        [
+          "trust_and_secrets",
+          0.014000000000000002
+        ],
+        [
+          "follow_up",
+          0.006720000000000015
+        ],
+        [
+          "acknowledgment",
+          0.0
+        ],
+        [
+          "acknowledgment_in_character",
+          0.0
+        ]
+      ],
+      "candidate_mean_quality": 0.8746843790849672,
+      "candidate_win_tie_loss": [
+        19,
+        476,
+        15
+      ],
+      "cases": 510,
+      "contract_violation_rate_candidate": 0.0,
+      "contract_violation_rate_control": 0.0,
+      "contract_violation_rate_delta": 0.0,
+      "control_mean_quality": 0.873191045751634,
+      "critical_defect_rate_candidate": 0.0,
+      "critical_defect_rate_control": 0.0,
+      "critical_defect_rate_delta": 0.0,
+      "critical_regression_present": false,
+      "dataset": "chat_dev",
+      "intelligibility_pass_rate_candidate": 1.0,
+      "intelligibility_pass_rate_control": 1.0,
+      "mean_noninferiority_pass": true,
+      "mean_quality_delta": 0.001493333333333334,
+      "median_quality_delta": 0.0,
+      "minimum_case_delta": -0.28,
+      "p10_case_delta": 0.0,
+      "paired_bootstrap_95_ci": [
+        -0.004194509803921568,
+        0.0073626274509803885
+      ],
+      "worst_category_deltas": [
+        [
+          "uncertainty",
+          -0.051239999999999994
+        ],
+        [
+          "empathy",
+          -0.028000000000000004
+        ],
+        [
+          "apology_repair",
+          -0.0273
+        ],
+        [
+          "conflict_deescalation",
+          -0.02632
+        ],
+        [
+          "empathy_in_character",
+          -0.014000000000000002
+        ],
+        [
+          "acknowledgment",
+          0.0
+        ],
+        [
+          "acknowledgment_in_character",
+          0.0
+        ],
+        [
+          "celebration",
+          0.0
+        ]
+      ]
+    },
+    "rag_dev": {
+      "best_category_deltas": [
+        [
+          "procedure_with_distractor",
+          0.024249999999999997
+        ],
+        [
+          "ambiguous_evidence",
+          0.0
+        ],
+        [
+          "conflict",
+          0.0
+        ],
+        [
+          "missing_answer",
+          0.0
+        ],
+        [
+          "multi_fact_supported",
+          0.0
+        ],
+        [
+          "partial_support",
+          0.0
+        ],
+        [
+          "procedure_conflict",
+          0.0
+        ],
+        [
+          "procedure_missing_input",
+          0.0
+        ]
+      ],
+      "candidate_mean_quality": 0.8305703578336556,
+      "candidate_win_tie_loss": [
+        1,
+        751,
+        0
+      ],
+      "cases": 752,
+      "contract_violation_rate_candidate": 0.0,
+      "contract_violation_rate_control": 0.0013297872340425532,
+      "contract_violation_rate_delta": -0.0013297872340425532,
+      "control_mean_quality": 0.8297641743230173,
+      "critical_defect_rate_candidate": 0.0,
+      "critical_defect_rate_control": 0.0,
+      "critical_defect_rate_delta": 0.0,
+      "critical_regression_present": false,
+      "dataset": "rag_dev",
+      "intelligibility_pass_rate_candidate": 1.0,
+      "intelligibility_pass_rate_control": 1.0,
+      "mean_noninferiority_pass": true,
+      "mean_quality_delta": 0.0008061835106382978,
+      "median_quality_delta": 0.0,
+      "minimum_case_delta": 0.0,
+      "p10_case_delta": 0.0,
+      "paired_bootstrap_95_ci": [
+        0.0,
+        0.0024185505319148934
+      ],
+      "worst_category_deltas": [
+        [
+          "ambiguous_evidence",
+          0.0
+        ],
+        [
+          "conflict",
+          0.0
+        ],
+        [
+          "missing_answer",
+          0.0
+        ],
+        [
+          "multi_fact_supported",
+          0.0
+        ],
+        [
+          "partial_support",
+          0.0
+        ],
+        [
+          "procedure_conflict",
+          0.0
+        ],
+        [
+          "procedure_missing_input",
+          0.0
+        ],
+        [
+          "procedure_supported",
+          0.0
+        ]
+      ]
+    }
+  },
+  "decision": "retain DeltaBall-eps1x for the next evidence tier",
+  "noninferiority_margin": -0.01,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "status": "PASS"
+}

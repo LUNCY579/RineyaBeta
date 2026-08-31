@@ -96,6 +96,7 @@ def main() -> None:
     parser.add_argument("--candidate-chat", required=True)
     parser.add_argument("--control-rag", required=True)
     parser.add_argument("--candidate-rag", required=True)
+    parser.add_argument("--candidate-label", default="candidate")
     parser.add_argument("--evidence", required=True)
     args = parser.parse_args()
     datasets = {
@@ -114,8 +115,9 @@ def main() -> None:
         "status": "PASS" if passes else "REJECT_MUON_RETENTION",
         "noninferiority_margin": -0.01,
         "datasets": datasets,
-        "decision": ("retain Muon for later capability testing" if passes else
-                     "reject Muon from the general Rineya candidate; do not tune on retention"),
+        "decision": (f"retain {args.candidate_label} for the next evidence tier"
+                     if passes else
+                     f"reject {args.candidate_label}; do not tune on retention"),
         "sealed_data_accessed": False,
     }
     evidence = ROOT / args.evidence

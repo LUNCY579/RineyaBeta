@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M3 — DeltaBall factorial (AdamW path)
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 IN_PROGRESS
+**Current milestone:** M4 — curriculum and late-tail isolation
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 NOT_STARTED
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -32,7 +32,7 @@ RETIRED
 | M0 | Approved SSOT and dashboard committed to the remote research branch | Aug 30 | 3% | GATE_PASSED | canonical commit `fe34db9`; exact blobs and cleanup verified |
 | M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | GATE_PASSED | all ten exit items pass in `evidence/m1_gate_audit.json` |
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
-| M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | IN_PROGRESS | AdamW-only radius screen preregistered; mechanism tests pass |
+| M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | GATE_PASSED | active eps1x retained on small positive named-retention frontier |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | NOT_STARTED | C-* evidence and ingredient decision |
 | M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | NOT_STARTED | CMA math/export proof and endpoint decision |
 | M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | NOT_STARTED | frozen control/candidate, seed evidence, retention/efficiency decision |
@@ -50,7 +50,7 @@ RETIRED
 |---|---:|---:|---|
 | M1 parity/smoke | 0–3 | 0.071 measured RGE training-step hours | GATE_PASSED |
 | M2 optimizer pilot | 2–6 | 1.681 measured training/eval hours | GATE_FAILED |
-| M3 DeltaBall | 4–12 | 0 | NOT_STARTED |
+| M3 DeltaBall | 4–12 | 1.483 measured training/eval hours | GATE_PASSED |
 | M4 curriculum/tail | 4–12 | 0 | NOT_STARTED |
 | M5 CMA validation | 1–6 | 0 | NOT_STARTED |
 | M6 confirmation | 12–36 | 0 | NOT_STARTED |
@@ -140,7 +140,8 @@ RETIRED
 ### M3 — DeltaBall factorial
 
 - **Opened:** 2026-08-31 (America/Chicago)
-- **Status:** IN_PROGRESS
+- **Closed:** 2026-08-31 (America/Chicago)
+- **Status:** GATE_PASSED
 - **Planned window:** 2026-09-14 to 2026-09-27
 - **Required evidence:** projection verification; bounded radius screen; G-A/G-M/G-AD/G-MD results; boundary-hit diagnostics; recipe freeze or retirement.
 - **M2 dependency decision:** Muon is rejected. M3 proceeds only with G-A AdamW control and G-AD radius arms, as allowed by the SSOT's separability rule.
@@ -153,7 +154,10 @@ RETIRED
 - **Control reuse proof:** the M3 G-A checkpoint is bit-identical across all 392 adapter tensors to the already evaluated M2 AdamW control, with identical position and plan. Its frozen retention results may be reused without regeneration.
 - **M3 compute so far:** approximately 1.36 measured optimizer-step GPU-hours for the screen; timing is exploratory single-order only.
 - **Sealed data accessed:** no.
-- **Next bounded action:** export the frozen 1x DeltaBall endpoint and compare `chat_dev`/`rag_dev` retention against the bit-identical AdamW control.
+- **Frozen retention:** selected eps1x `chat_dev` delta `+0.001493` (CI `[-0.004195, +0.007363]`, 19/476/15 W/T/L); `rag_dev` `+0.000806` (CI `[0, +0.002419]`, 1/751/0), with no critical regression and control contract violations removed.
+- **M3 decision:** `GATE_PASSED` as exploratory mechanism/named-retention evidence. Freeze AdamW + DeltaBall epsilon `0.014355268562212586` for M4. No targeted capability, multi-seed, or speed claim is established.
+- **M3 compute:** approximately 1.483 measured GPU-hours including selected endpoint evaluation.
+- **Next bounded action:** build deterministic same-membership curriculum manifests and run M4 under the frozen AdamW + eps1x DeltaBall recipe.
 
 ### M4 — curriculum/tail
 
@@ -200,6 +204,7 @@ RETIRED
 | 2026-08-30 | M1 | Open implementation after re-verifying remote/current SHAs and frozen SSOT | Tier-0 math, CPU parity/resume, legacy regression, sealed refusal all pass; GPU gates still open | pending implementation commit; evidence under `experiments/rge_peft/evidence/` |
 | 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | gate record `a59a340`; `experiments/rge_peft/evidence/m1_gate_audit.json` |
 | 2026-08-31 | M2 | Reject Muon for the general Rineya recipe and advance DeltaBall only under AdamW | training loss improved, but chat non-inferiority failed and RAG gained four critical defects | gate record `8f69c9d`; `experiments/rge_peft/evidence/m2_gate_audit.json` |
+| 2026-08-31 | M3 | Retain AdamW + active eps1x DeltaBall for M4 | small positive/non-inferior chat and RAG retention with no critical regression; targeted capability untested | `experiments/rge_peft/evidence/m3_gate_audit.json`; gate-record commit pending |
 
 ## 6. Blocker log
 

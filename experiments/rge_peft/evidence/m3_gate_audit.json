@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "milestone": "M3",
+  "status": "GATE_PASSED",
+  "source_commit": "866fea4",
+  "sealed_data_accessed": false,
+  "mechanism": {
+    "unit_checks": 9,
+    "gpu_resume_bit_exact": true,
+    "selected_epsilon_max": 0.014355268562212586,
+    "selected_post_warmin_matrix_hit_rate": 0.01053864168618267,
+    "selected_post_warmin_step_hit_rate": 0.3442622950819672,
+    "selected_training_loss_delta_weighted": 0.0004245023000981627,
+    "selected_training_loss_delta_final": 0.0057524051572247
+  },
+  "radius_screen": {
+    "eps0.5x": "active at 37.14 percent matrix-hit rate but worse training loss; rejected as overconstrained",
+    "eps1x": "active at 1.054 percent and selected by preregistered best-eligible rule",
+    "eps2x": "zero hits through fully warmed checkpoint 40; stopped early and classified inactive"
+  },
+  "retention": {
+    "chat_dev": {
+      "mean_delta": 0.001493333333333334,
+      "paired_bootstrap_95_ci": [-0.004194509803921568, 0.0073626274509803885],
+      "candidate_win_tie_loss": [19, 476, 15],
+      "noninferiority_pass": true,
+      "critical_regression_present": false
+    },
+    "rag_dev": {
+      "mean_delta": 0.0008061835106382978,
+      "paired_bootstrap_95_ci": [0.0, 0.0024185505319148934],
+      "candidate_win_tie_loss": [1, 751, 0],
+      "noninferiority_pass": true,
+      "critical_regression_present": false,
+      "contract_violation_rate_control": 0.0013297872340425532,
+      "contract_violation_rate_candidate": 0.0
+    }
+  },
+  "decision": "RETAIN_ADAMW_PLUS_DELTABALL_EPS1X_FOR_M4",
+  "claim_boundary": "exploratory mechanism and named-retention evidence only; no targeted capability, speed, or general-intelligence claim",
+  "measured_gpu_hours_approx": 1.483,
+  "next_bounded_action": "Begin M4 same-membership curriculum/tail isolation using frozen AdamW plus DeltaBall epsilon 0.014355268562212586."
+}

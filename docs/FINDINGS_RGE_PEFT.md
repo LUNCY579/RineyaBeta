@@ -79,6 +79,24 @@ Thus the lower training loss is optimizer-dynamics evidence, not a useful-model
 or efficiency win. M3 may still test DeltaBall under AdamW because H3 is
 preregistered as logically separable from H1.
 
+## M3 — exploratory DeltaBall result
+
+The frozen surviving geometry recipe is AdamW plus DeltaBall epsilon
+`0.014355268562212586` with a 40-step linear warm-in.
+
+- The 0.5x radius was active on 37.14% of post-warm-in matrix checks and worsened
+  training loss, so it was rejected as overconstrained.
+- The 1x radius was active on 1.054% of checks and 34.43% of steps. Training loss
+  was essentially neutral/slightly worse, but it was the best eligible radius.
+- The 2x radius produced zero hits through fully warmed checkpoint 40 and was
+  stopped as inactive; it receives no causal credit.
+- Selected 1x retention was slightly positive: `chat_dev +0.00149` and
+  `rag_dev +0.000806`, with no critical regression and RAG contract violations
+  reduced to zero. Chat's CI crosses zero; this is exploratory, not confirmed.
+
+M3 passes only as mechanism/named-retention evidence and authorizes M4. No
+targeted capability, replicated, speed, or sealed claim is established.
+
 ## Sealed boundary
 
 The sealed RAG test set has not been accessed by RGE-PEFT. It remains prohibited
