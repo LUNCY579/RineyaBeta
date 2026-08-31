@@ -48,6 +48,17 @@ def _run(command: list[str], *, env: dict[str, str], cwd: Path) -> tuple[bool, s
         return False, "TIMEOUT after 3600s", time.monotonic() - started
 
 
+def _accelerator_available() -> bool:
+    """Is a GPU actually reachable, honouring any inherited CUDA_VISIBLE_DEVICES."""
+
+    try:
+        import torch
+
+        return bool(torch.cuda.is_available())
+    except ImportError:
+        return False
+
+
 def _git(*args: str) -> str | None:
     try:
         return subprocess.check_output(
@@ -92,6 +103,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     base_env = dict(os.environ)
+    # An inherited CUDA_VISIBLE_DEVICES would silently make the "device visible"
+    # pass run on CPU while still being labelled as though it had a GPU. That is
+    # exactly the kind of misleading qualification record this gate exists to
+    # prevent, so it is detected and reported rather than assumed.
+    accelerator = _accelerator_available()
+    base_env.pop("CUDA_VISIBLE_DEVICES", None)
     base_env["PYTHONPATH"] = str(ROOT / "src")
     base_env["PYTHONHASHSEED"] = "0"
     base_env["PYTHONIOENCODING"] = "utf-8"
@@ -102,7 +119,11 @@ def main(argv: list[str] | None = None) -> int:
     steps: list[tuple[str, list[str], dict[str, str]]] = [
         ("compileall", [python, "-m", "compileall", "-q", "src", "tests"], base_env),
         ("ruff", [python, "-m", "ruff", "check", "src", "tests"], base_env),
-        ("pytest_device_visible", [python, "-m", "pytest", "-q"], base_env),
+        (
+            "pytest_device_visible" if accelerator else "pytest_no_accelerator_present",
+            [python, "-m", "pytest", "-q"],
+            base_env,
+        ),
     ]
     if not args.fast:
         steps += [
@@ -136,16 +157,24 @@ def main(argv: list[str] | None = None) -> int:
                 "step": name,
                 "passed": ok,
                 "seconds": round(seconds, 2),
-                "cuda_visible": env.get("CUDA_VISIBLE_DEVICES") != "-1",
+                # Effective, not merely requested: a step "with the device visible"
+                # only truly had one if an accelerator exists on this host.
+                "accelerator_effective": accelerator and env.get("CUDA_VISIBLE_DEVICES") != "-1",
                 "output_tail": tail if not ok else "",
             }
         )
 
     environment = _environment()
+    covered_both = accelerator and not args.fast
     artifact = {
-        "schema_version": "dast-local-qualification-v1",
+        "schema_version": "dast-local-qualification-v2",
         "verdict": "PASS" if ok_all else "FAIL",
         "mode": "fast" if args.fast else "full",
+        # The whole value of this gate over a CPU-only hosted runner. When false, a
+        # defect that appears only with an accelerator present cannot have been
+        # caught, and the artifact must not be read as though it had been.
+        "both_device_configurations_covered": covered_both,
+        "accelerator_present": accelerator,
         "environment": environment,
         "steps": results,
         "claim_boundary": (
@@ -161,6 +190,12 @@ def main(argv: list[str] | None = None) -> int:
         encoding="utf-8",
     )
     print(f"\nVERDICT: {artifact['verdict']}   artifact: {destination}")
+    if not covered_both:
+        reason = "no accelerator on this host" if not accelerator else "--fast requested"
+        print(
+            f"PARTIAL: only one device configuration was exercised ({reason}). A defect "
+            "that appears only with an accelerator present cannot have been caught."
+        )
     if environment["git_dirty"]:
         print("WARNING: working tree is dirty, so this artifact describes no committed state.")
     return 0 if ok_all else 1

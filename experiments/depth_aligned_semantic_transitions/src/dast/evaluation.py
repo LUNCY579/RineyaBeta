@@ -57,6 +57,11 @@ def _clean_extracted(value: str, *, strip_enumeration: bool = False) -> str:
 class GenerationRecord:
     problem_id: str
     category: str
+    # The bootstrap cluster unit. SSOT section 10 promises "problem-cluster
+    # bootstrap intervals", and problems sharing a generator share a template, so
+    # they are not independent. Without this field on the prediction record,
+    # compare.py could only resample problems i.i.d., which is anti-conservative.
+    generator: str
     answer_type: str
     expected: str
     extracted: str | None
@@ -68,6 +73,7 @@ class GenerationRecord:
         return {
             "problem_id": self.problem_id,
             "category": self.category,
+            "generator": self.generator,
             "answer_type": self.answer_type,
             "expected": self.expected,
             "extracted": self.extracted,
@@ -283,6 +289,7 @@ def evaluate_generation(
                 GenerationRecord(
                     problem_id=record.problem_id,
                     category=record.category,
+                    generator=record.generator,
                     answer_type=record.answer_type,
                     expected=record.answer,
                     extracted=extracted,

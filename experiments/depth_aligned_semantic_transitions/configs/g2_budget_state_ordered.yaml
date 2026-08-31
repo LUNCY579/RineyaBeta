@@ -1,0 +1,30 @@
+# Training-budget escalation - EXPLORATORY_DEV, one seed.
+#
+# The G1 pilot (docs/FINDINGS_G1_PILOT.md) found ordered exactly equal to baseline
+# on capability, and reverse fitting its own reversed targets marginally BETTER than
+# ordered fits the canonical ones. Its most plausible alternative explanation is
+# simply that 63 optimizer steps is too little training to reorganise computation.
+#
+# This step tests that confound directly and cheaply: 4x the training records
+# (250 optimizer steps) and 4x the DEV set, one seed, ~50 min per arm.
+#
+# state_shuffled is deliberately ABSENT. Its permutation is drawn per problem from
+# SHA-256 of seed and problem id, so no consistent function from (depth, prompt) to
+# target exists and its failure to fit is near-tautological. It remains required in
+# the confirmatory matrix by SSOT section 5, but it would tell us nothing here.
+#
+# Still not confirmatory: one seed at 800 DEV gives only 56.7% power for a 2:1
+# discordant split at the measured 6.0% discordance rate.
+extends: state_ordered.yaml
+
+experiment:
+  name: dast-g2-budget-state_ordered
+  output_dir: ../runs/g2_budget_state_ordered
+  evidence_status: exploratory_dev
+
+data:
+  max_train_records: 4000
+  max_eval_records: 800
+
+evaluation:
+  do_generation: true

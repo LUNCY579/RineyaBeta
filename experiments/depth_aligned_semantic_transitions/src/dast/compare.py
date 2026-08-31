@@ -20,8 +20,11 @@ class PairedResult:
     candidate_correct: bool
 
 
-def _read_predictions(path: str | Path) -> dict[str, bool]:
+def _read_predictions(path: str | Path) -> tuple[dict[str, bool], dict[str, str]]:
+    """Return correctness by problem id, and the bootstrap cluster of each problem."""
+
     rows: dict[str, bool] = {}
+    clusters: dict[str, str] = {}
     with Path(path).open("r", encoding="utf-8") as handle:
         for line_number, line in enumerate(handle, start=1):
             if not line.strip():
@@ -31,7 +34,40 @@ def _read_predictions(path: str | Path) -> dict[str, bool]:
             if problem_id in rows:
                 raise ValueError(f"duplicate problem_id {problem_id!r} in {path}:{line_number}")
             rows[problem_id] = bool(value["correct"])
-    return rows
+            # Older prediction files predate the generator field; those fall back to
+            # the i.i.d. interval and say so in the report.
+            generator = value.get("generator")
+            if generator:
+                clusters[problem_id] = str(generator)
+    return rows, clusters
+
+
+def _cluster_bootstrap(
+    differences: "np.ndarray",
+    cluster_of: list[str],
+    *,
+    samples: int,
+    rng: "np.random.Generator",
+) -> tuple[float, float, int]:
+    """Resample CLUSTERS with replacement, not individual problems.
+
+    Problems generated from one template are correlated, so an i.i.d. bootstrap
+    understates the interval. SSOT section 10 asks for a problem-cluster interval;
+    this is it.
+    """
+
+    names = sorted(set(cluster_of))
+    index_of: dict[str, list[int]] = {name: [] for name in names}
+    for position, name in enumerate(cluster_of):
+        index_of[name].append(position)
+    members = [np.asarray(index_of[name], dtype=np.int64) for name in names]
+    draws = rng.integers(0, len(names), size=(samples, len(names)))
+    estimates = np.empty(samples, dtype=np.float64)
+    for row in range(samples):
+        picked = np.concatenate([members[j] for j in draws[row]])
+        estimates[row] = differences[picked].mean()
+    low, high = np.quantile(estimates, [0.025, 0.975]).tolist()
+    return float(low), float(high), len(names)
 
 
 def _exact_two_sided_binomial(k: int, n: int) -> float:
@@ -54,8 +90,8 @@ def compare_prediction_files(
     seed: int = 17,
     output_path: str | Path | None = None,
 ) -> dict[str, Any]:
-    baseline = _read_predictions(baseline_path)
-    candidate = _read_predictions(candidate_path)
+    baseline, baseline_clusters = _read_predictions(baseline_path)
+    candidate, _ = _read_predictions(candidate_path)
     common = sorted(set(baseline) & set(candidate))
     if set(baseline) != set(candidate):
         missing_baseline = sorted(set(candidate) - set(baseline))[:10]
@@ -75,6 +111,27 @@ def compare_prediction_files(
         low, high = np.quantile(boot, [0.025, 0.975]).tolist()
     else:
         low = high = 0.0
+    # The interval SSOT section 10 actually promises, when the cluster unit is present.
+    cluster_of = [baseline_clusters.get(key, "") for key in common]
+    clustered: dict[str, Any]
+    if len(pairs) and all(cluster_of):
+        c_low, c_high, n_clusters = _cluster_bootstrap(
+            differences, cluster_of, samples=bootstrap_samples, rng=rng
+        )
+        clustered = {
+            "available": True,
+            "unit": "generator",
+            "clusters": n_clusters,
+            "bootstrap_95_ci": [c_low, c_high],
+        }
+    else:
+        clustered = {
+            "available": False,
+            "reason": (
+                "prediction files carry no generator field, so only the "
+                "anti-conservative i.i.d. interval could be computed"
+            ),
+        }
     baseline_only = int(np.sum((base_values == 1) & (candidate_values == 0)))
     candidate_only = int(np.sum((base_values == 0) & (candidate_values == 1)))
     report = {
@@ -83,6 +140,7 @@ def compare_prediction_files(
         "candidate_accuracy": float(candidate_values.mean()) if len(pairs) else 0.0,
         "candidate_minus_baseline": float(differences.mean()) if len(pairs) else 0.0,
         "bootstrap_95_ci": [float(low), float(high)],
+        "bootstrap_95_ci_clustered": clustered,
         "discordant": {
             "baseline_only_correct": baseline_only,
             "candidate_only_correct": candidate_only,
@@ -92,7 +150,12 @@ def compare_prediction_files(
         ),
         "bootstrap_samples": bootstrap_samples,
         "seed": seed,
-        "claim_boundary": "A single paired comparison is not confirmatory; aggregate preregistered seeds and controls.",
+        "claim_boundary": (
+            "A single paired comparison is not confirmatory; aggregate preregistered "
+            "seeds and controls. Quote the CLUSTERED interval when it is available: "
+            "problems sharing a generator are correlated, so the i.i.d. interval is "
+            "anti-conservative."
+        ),
     }
     if output_path is not None:
         atomic_write_json(output_path, report)
