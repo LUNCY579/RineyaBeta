@@ -1,0 +1,53 @@
+# Catastrophic-Removal Critical Core (CRCC) discovery scan.
+# This uses training-corpus diagnostics only. It must never point at a SEALED path.
+
+experiment_id: crcc-v1
+seed: 20260831
+device: auto
+
+model:
+  # The hypothesis is about the official full-depth Qwen3-0.6B coordinate system.
+  path: Qwen3-0.6B
+  dtype: bfloat16
+  attn_implementation: eager
+
+data:
+  # Deterministic hash selection avoids choosing only the first rows of a corpus.
+  sources:
+    - label: rag_train
+      path: Aegis_RAG_v3_train_4410/rag_v3_train.sft.jsonl
+      take: 16
+    - label: short_preservation_train
+      path: Rineya_Short_Response_Behavior_Corpus_v1.0/data/sft/rineya_short_response_preservation_slice.jsonl
+      take: 16
+  minimum_cases: 32
+  max_total_tokens: 768
+
+generation:
+  max_new_tokens: 48
+  do_sample: false
+  enable_thinking: false
+
+scan:
+  output: runs/critical_core/crcc-v1/scan
+  layers: all
+  # Adds an orthogonal residual-rewrite measurement to the final table. It does
+  # not participate in the catastrophic classifier.
+  layer_profile: manifests/layer_profile.json
+
+criticality:
+  # Structural-critical membership must reproduce in both diagnostic domains.
+  minimum_supporting_sources: 2
+  # Historical recollections may be listed here, but remain visibly separate
+  # from automatically classified CRCC layers and are not selected by default.
+  manual_hypothesis_layers: []
+  thresholds:
+    composite_score: 0.60
+    hard_nll_ratio: 4.0
+    hard_min_collapse_rate: 0.25
+    hard_intelligibility_drop: 0.60
+    hard_nonfinite_nll_rate: 0.0
+
+memory:
+  # Same conservative ceiling used by the deterministic healing program.
+  cap_mib: 5120
