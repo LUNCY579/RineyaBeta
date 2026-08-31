@@ -3,7 +3,7 @@
   "milestone": "M1",
   "status": "GATE_PASSED",
   "training_source_commit": "840b04ed7b4993e369c46e3d633945acd283c2c6",
-  "gate_record_commit": "pending",
+  "gate_record_commit": "a59a3408c6d6a2e1386c6de622d8cc0597ad7969",
   "sealed_data_accessed": false,
   "items": [
     {"id": 1, "name": "frozen substrate and identities", "status": "PASS", "evidence": "experiments/rge_peft/evidence/m1_substrate_freeze.json"},

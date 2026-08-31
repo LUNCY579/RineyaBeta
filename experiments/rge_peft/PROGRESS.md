@@ -158,7 +158,7 @@ RETIRED
 | 2026-08-30 | M0 | Project owner approved the SSOT; v1.1 adds execution governance without changing the scientific design | approval recorded before implementation/results | canonical `fe34db9` |
 | 2026-08-30 | M0 | Close M0 and advance the operational focus to M1 without starting implementation | exact Git blobs, successful hash gate, clean two-file diff | Actions `33344630813`; `fe34db9` |
 | 2026-08-30 | M1 | Open implementation after re-verifying remote/current SHAs and frozen SSOT | Tier-0 math, CPU parity/resume, legacy regression, sealed refusal all pass; GPU gates still open | pending implementation commit; evidence under `experiments/rge_peft/evidence/` |
-| 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | `experiments/rge_peft/evidence/m1_gate_audit.json`; gate-record commit pending |
+| 2026-08-30 | M1 | Close M1 as GATE_PASSED and authorize M2 engineering | ten-item gate audit PASS; final training source `840b04e`; no sealed access | gate record `a59a340`; `experiments/rge_peft/evidence/m1_gate_audit.json` |
 
 ## 6. Blocker log
 
@@ -188,7 +188,7 @@ Append one entry each Sunday in America/Chicago:
 ### 2026-08-30 weekly closeout
 
 - Current milestone/status: M1 GATE_PASSED; M2 NOT_STARTED.
-- Commits added: `13ee3cd`, `a860afc`, `0033d91`, `8db1e95`, `fe632a6`, `840b04e`; gate-record commit pending.
+- Commits added: `13ee3cd`, `a860afc`, `0033d91`, `8db1e95`, `fe632a6`, `840b04e`, gate record `a59a340`, and merge `0bd2614` preserving concurrent M2 staging.
 - Runs completed or interrupted: Tier-0 geometry suite; CPU parity/resume; legacy determinism/resume/interrupt; principal GPU parity/resume; actual B0 parity; two overhead attempts; substrate dry-run. No interrupted RGE run.
 - Supervised tokens this week / cumulative: engineering smoke only; actual-B0 parity consumed one 1,121-supervised-token step per arm. No M2 pilot or confirmatory token budget consumed.
 - Active GPU-hours this week / cumulative: approximately 0.071 measured RGE optimizer-step hours; model-load/probe engineering time and legacy reference active time are not separately instrumented.
