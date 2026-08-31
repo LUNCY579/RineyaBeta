@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "experiment_id": "cag-v1-rineya-swiglu-control-layer14",
+  "mode": "plan",
+  "claim_level": "infrastructure_only",
+  "seed": 20260831,
+  "host": {
+    "kind": "qwen_rineya",
+    "hidden_size": 1024,
+    "layer_indices": [14],
+    "layer_path": "model.layers",
+    "device": "cuda",
+    "dtype": "bfloat16",
+    "attn_implementation": "eager",
+    "local_files_only": true
+  },
+  "graft": {
+    "foreign_dim": 1024,
+    "donor": {
+      "kind": "swiglu_mlp",
+      "d_model": 1024,
+      "intermediate_size": 235,
+      "dropout": 0.0
+    },
+    "bridge": {
+      "kind": "identity",
+      "bias": false,
+      "identity_init": true
+    },
+    "gate": {
+      "kind": "scalar",
+      "bound": 1.0
+    },
+    "freeze_host": true,
+    "freeze_donor": false,
+    "exact_eval_bypass": true
+  },
+  "training": {
+    "steps": 400,
+    "lr": 0.0001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "batch_size": 1,
+    "max_len": 512,
+    "grad_accum": 8
+  },
+  "data_policy": {
+    "allow_sealed": false,
+    "require_content_hashes": true
+  },
+  "notes": "Ordinary dense residual-capacity control. The width is chosen to closely match the primary candidate's trainable parameter budget; preflight records the exact residual gap."
+}

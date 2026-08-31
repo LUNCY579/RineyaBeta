@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "experiment_id": "cag-v1-synthetic-smoke",
+  "mode": "smoke",
+  "claim_level": "infrastructure_only",
+  "seed": 20260831,
+  "host": {
+    "kind": "toy",
+    "hidden_size": 16,
+    "layer_indices": [0],
+    "device": "cpu",
+    "dtype": "float32"
+  },
+  "graft": {
+    "foreign_dim": 16,
+    "donor": {
+      "kind": "latent_kv_attention",
+      "d_model": 16,
+      "num_heads": 4,
+      "num_kv_heads": 2,
+      "head_dim": 4,
+      "latent_rank": 4,
+      "q_rank": 4,
+      "dropout": 0.0
+    },
+    "bridge": {
+      "kind": "linear",
+      "bias": false,
+      "identity_init": true
+    },
+    "gate": {
+      "kind": "scalar",
+      "bound": 1.0
+    },
+    "freeze_host": true,
+    "freeze_donor": true,
+    "exact_eval_bypass": true
+  },
+  "training": {
+    "steps": 80,
+    "lr": 0.03,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "batch_size": 64,
+    "seq_len": 8
+  },
+  "data_policy": {
+    "allow_sealed": false,
+    "require_content_hashes": true
+  },
+  "notes": "Synthetic plumbing proof only; the candidate receives the exact frozen teacher block."
+}

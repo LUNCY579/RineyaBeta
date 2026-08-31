@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "experiment_id": "cag-v1-local-unsealed-example",
+  "mode": "real",
+  "claim_level": "infrastructure_only",
+  "seed": 20260831,
+  "host": {
+    "kind": "qwen_rineya",
+    "model_path": "artifacts/rineya-core-en32k-28L",
+    "hidden_size": 1024,
+    "layer_indices": [
+      14
+    ],
+    "layer_path": "model.layers",
+    "device": "cuda",
+    "dtype": "bfloat16",
+    "attn_implementation": "eager",
+    "local_files_only": true
+  },
+  "graft": {
+    "foreign_dim": 512,
+    "donor": {
+      "kind": "latent_kv_attention",
+      "d_model": 512,
+      "num_heads": 8,
+      "num_kv_heads": 4,
+      "head_dim": 64,
+      "latent_rank": 128,
+      "q_rank": 128,
+      "dropout": 0.0
+    },
+    "input_bridge": {
+      "kind": "low_rank",
+      "rank": 64,
+      "bias": false,
+      "identity_init": false
+    },
+    "output_bridge": {
+      "kind": "low_rank",
+      "rank": 64,
+      "bias": false,
+      "identity_init": false
+    },
+    "gate": {
+      "kind": "scalar",
+      "bound": 1.0
+    },
+    "freeze_host": true,
+    "freeze_donor": false,
+    "exact_eval_bypass": true
+  },
+  "training": {
+    "steps": 10,
+    "lr": 0.0001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "batch_size": 1,
+    "max_len": 128,
+    "grad_accum": 1
+  },
+  "data": {
+    "train_mix": "artifacts/cross_architecture_graft/data/unsealed_train.jsonl",
+    "dev_mix": "artifacts/cross_architecture_graft/data/unsealed_dev.jsonl",
+    "cache_dir": "artifacts/cross_architecture_graft/token_cache",
+    "max_train_rows": 32,
+    "max_dev_rows": 32,
+    "split_manifest": "artifacts/cross_architecture_graft/data/unsealed_split_manifest.json"
+  },
+  "evaluation": {
+    "dev_batch_size": 1,
+    "required_categories": [],
+    "equivalence_probe_rows": 8
+  },
+  "memory": {
+    "cap_mib": 7000
+  },
+  "data_policy": {
+    "allow_sealed": false,
+    "require_content_hashes": true
+  },
+  "output": {
+    "run_dir": "artifacts/cross_architecture_graft/runs/local_smoke",
+    "overwrite": false
+  },
+  "notes": "Local-only real-model runner template. It intentionally points to not-yet-created unsealed split files so a user cannot accidentally train on an evaluation pack."
+}

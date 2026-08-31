@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "experiment_id": "cag-v1-rineya-nope-gqa-control-layer14",
+  "mode": "plan",
+  "claim_level": "infrastructure_only",
+  "seed": 20260831,
+  "host": {
+    "kind": "qwen_rineya",
+    "hidden_size": 1024,
+    "layer_indices": [14],
+    "layer_path": "model.layers",
+    "device": "cuda",
+    "dtype": "bfloat16",
+    "attn_implementation": "eager",
+    "local_files_only": true
+  },
+  "graft": {
+    "foreign_dim": 424,
+    "donor": {
+      "kind": "nope_attention",
+      "d_model": 424,
+      "num_heads": 8,
+      "num_kv_heads": 4,
+      "head_dim": 53,
+      "dropout": 0.0
+    },
+    "input_bridge": {
+      "kind": "low_rank",
+      "rank": 64,
+      "bias": false,
+      "identity_init": false
+    },
+    "output_bridge": {
+      "kind": "low_rank",
+      "rank": 64,
+      "bias": false,
+      "identity_init": false
+    },
+    "gate": {
+      "kind": "scalar",
+      "bound": 1.0
+    },
+    "freeze_host": true,
+    "freeze_donor": false,
+    "exact_eval_bypass": true
+  },
+  "training": {
+    "steps": 400,
+    "lr": 0.0001,
+    "weight_decay": 0.0,
+    "grad_clip": 1.0,
+    "batch_size": 1,
+    "max_len": 512,
+    "grad_accum": 8
+  },
+  "data_policy": {
+    "allow_sealed": false,
+    "require_content_hashes": true
+  },
+  "notes": "Attention-family control for the primary latent-KV arm. A full causal NoPE/GQA sidecar is dimensioned to match the primary trainable parameter budget within one percent, separating latent compression from the generic benefit of adding attention capacity."
+}

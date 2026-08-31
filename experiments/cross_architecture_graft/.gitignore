@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+
+# Local smoke/campaign artifacts are evidence inputs, not source.
+results/*
+!results/README.md
+!results/synthetic_build_evidence.json
+
+*.pt
+*.safetensors
