@@ -518,8 +518,15 @@ def main() -> None:
             manifest["active_gpu_hours"] = (training_seconds / 3600.0
                                              if use_cuda else 0.0)
             snapshot = mem.snapshot() if use_cuda else {}
-            manifest["peak_allocated_mib"] = snapshot.get("allocated_mib")
-            manifest["peak_reserved_mib"] = snapshot.get("peak_reserved_mib")
+            probe_report = locals().get("report")
+            probe_allocated = (probe_report.peak_alloc_mib if probe_report and
+                               probe_report.ran else 0.0)
+            probe_reserved = (probe_report.peak_reserved_mib if probe_report and
+                              probe_report.ran else 0.0)
+            manifest["peak_allocated_mib"] = max(
+                float(snapshot.get("allocated_mib", 0.0)), probe_allocated)
+            manifest["peak_reserved_mib"] = max(
+                float(snapshot.get("peak_reserved_mib", 0.0)), probe_reserved)
             if manifest.get("exit_reason") == "running":
                 # Infer the controlled return path from the last saved metrics.
                 manifest["exit_reason"] = (locals().get("exit_reason") or
