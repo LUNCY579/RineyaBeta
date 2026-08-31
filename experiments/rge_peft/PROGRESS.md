@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M0 — SSOT preservation  
-**Current status:** IN_PROGRESS until the remote commit is verified  
+**Current milestone:** M1 — substrate/parity (not started)  
+**Current status:** M0 GATE_PASSED; M1 NOT_STARTED  
 **Implementation started:** no  
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -29,7 +29,7 @@ RETIRED
 
 | ID | Work | Planned window | Weight | Status | Evidence / next gate |
 |---|---|---|---:|---|---|
-| M0 | Approved SSOT and dashboard committed to the remote research branch | Aug 30 | 3% | IN_PROGRESS | verify remote branch, files, and introducing commit |
+| M0 | Approved SSOT and dashboard committed to the remote research branch | Aug 30 | 3% | GATE_PASSED | canonical commit `fe34db9`; exact blobs and cleanup verified |
 | M1 | Phase 0–1: substrate freeze, AdamW parity, geometry instrumentation | Aug 31–Sep 6 | 15% | NOT_STARTED | `GATE_PASSED` only after parity/resume/overhead evidence |
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | NOT_STARTED | O-A/O-M fixed-token evidence and optimizer decision |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | NOT_STARTED | G-* evidence and frozen geometry recipe or retirement |
@@ -64,7 +64,8 @@ RETIRED
 ### M0 — SSOT preservation
 
 - **Opened:** 2026-08-30
-- **Status:** IN_PROGRESS
+- **Status:** GATE_PASSED
+- **Closed:** 2026-08-30 (America/Chicago)
 - **Parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`
 - **Branch:** `research/rge-peft-v1`
 - **Required files:**
@@ -72,8 +73,10 @@ RETIRED
   - `experiments/rge_peft/PROGRESS.md`
 - **Implementation boundary:** documentation only; no optimizer or experiment implementation.
 - **Completion condition:** remote files are readable and the introducing commit SHA is recorded below.
-- **Introducing commit:** pending
-- **Remote verification:** pending
+- **Canonical commit:** `fe34db9d668e463781750a94b5b3e39d625cceb7`
+- **Transfer commits:** `887d35fa309bede6df099ad4a21cd44cd7f84d39`, `145e8169804d66dbd555d9dba9498d198db2e1d5`
+- **Remote verification:** GitHub Actions run `33344630813` succeeded; roadmap blob `3345c18e6bf57eac57b3b4fb45f4e130013feda1` and tracker blob `3935726b6c5cae70da271e1e766c350114d49f00` match the approved local Git object IDs; temporary import data and workflow are absent from the final tree.
+- **Branch diff at close:** exactly two added files, 1,957 roadmap lines and 161 tracker lines; branch was three commits ahead and zero behind `main`.
 
 ### M1 — substrate/parity
 
@@ -133,13 +136,14 @@ RETIRED
 
 | Date | Milestone | Decision | Evidence | Commit/run references |
 |---|---|---|---|---|
-| 2026-08-30 | M0 | Project owner approved the SSOT; v1.1 adds execution governance without changing the scientific design | approval recorded before implementation/results | introducing commit pending |
+| 2026-08-30 | M0 | Project owner approved the SSOT; v1.1 adds execution governance without changing the scientific design | approval recorded before implementation/results | canonical `fe34db9` |
+| 2026-08-30 | M0 | Close M0 and advance the operational focus to M1 without starting implementation | exact Git blobs, successful hash gate, clean two-file diff | Actions `33344630813`; `fe34db9` |
 
 ## 6. Blocker log
 
 | Opened | Closed | Milestone | Blocker | Effect | Resolution |
 |---|---|---|---|---|---|
-| — | — | — | none at initialization | — | — |
+| 2026-08-30 | 2026-08-30 | M0 | First transfer run detected a CRC mismatch in one staging chunk | canonical files were not committed | split the affected chunk into four content-addressed pieces; rerun passed all hashes |
 
 ## 7. Weekly closeout template
 
