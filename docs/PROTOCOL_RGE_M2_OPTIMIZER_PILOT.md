@@ -162,6 +162,22 @@ not select the LR.
   --cache-from artifacts\heal_runs\b0\cache
 ```
 
+The first bracket completed without instability but was insufficient: median
+Muon/AdamW ratios were `0.118`, `0.236`, and `0.472`, so only the 0.5x regime was
+covered. Before any additional run, one bounded log-spaced expansion is
+preregistered at `{2e-4, 4e-4, 8e-4}` with every other rule unchanged. This
+expansion follows the near-linear measured response and still cannot use loss or
+evaluation to select the LR.
+
+```powershell
+& .venv\Scripts\python.exe scripts\experiment\rge_muon_calibration.py `
+  --steps 4 `
+  --muon-lrs 2e-4 4e-4 8e-4 `
+  --out artifacts\rge_peft\calibration\m2_muon_lr_v2 `
+  --evidence experiments\rge_peft\evidence\m2_muon_lr_calibration_expanded.json `
+  --cache-from artifacts\heal_runs\b0\cache
+```
+
 ### 6.4 Registered exploratory pair
 
 ```bash

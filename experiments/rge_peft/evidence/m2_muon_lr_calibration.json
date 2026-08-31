@@ -1,0 +1,133 @@
+{
+  "calibration_output": "artifacts/rge_peft/calibration/m2_muon_lr_v1",
+  "calibration_script_sha256": "9857854ea439a2235ab0cd3a06a7ba0c098dbeec675c0b67776e17d181e74c79",
+  "candidate_config_sha256": "ffaba0dd99c41de89ddaebbdbd82b3729b35d1fe3931188489e13119a9c74583",
+  "candidate_extra_scale_factor": 0.2,
+  "candidate_lrs": [
+    5e-05,
+    0.0001,
+    0.0002
+  ],
+  "candidates": [
+    {
+      "active_gpu_hours": 0.02306430877777782,
+      "final_loss": 4.161414044411073,
+      "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "losses": [
+        4.222921425481655,
+        4.036235184363185,
+        4.158716832153528,
+        4.161414044411073
+      ],
+      "lr": 5e-05,
+      "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+      "name": "muon_lr_5p0em05",
+      "paired_values": 588,
+      "peak_reserved_mib": 2426.0,
+      "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+      "rho_ratio_median": 0.11801105016484745,
+      "rho_ratio_p10": 0.11125912065501492,
+      "rho_ratio_p90": 0.12915179067646895,
+      "source_commit": "3c9f8d1824d2e47ba90b1019e67e71db404d4c8b",
+      "source_fingerprint": "099f3afdbb7e03302f72134a0b69f169f9123ad915c7dff7ec8d5f6a028e8f93",
+      "stable": true,
+      "supervised_tokens_seen": 4211
+    },
+    {
+      "active_gpu_hours": 0.019147841277777945,
+      "final_loss": 4.157424110659673,
+      "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "losses": [
+        4.222921425481655,
+        4.0363602126204725,
+        4.15456828648942,
+        4.157424110659673
+      ],
+      "lr": 0.0001,
+      "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+      "name": "muon_lr_1p0em04",
+      "paired_values": 588,
+      "peak_reserved_mib": 2426.0,
+      "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+      "rho_ratio_median": 0.23608007620328225,
+      "rho_ratio_p10": 0.22254370508609314,
+      "rho_ratio_p90": 0.2584022813962987,
+      "source_commit": "3c9f8d1824d2e47ba90b1019e67e71db404d4c8b",
+      "source_fingerprint": "099f3afdbb7e03302f72134a0b69f169f9123ad915c7dff7ec8d5f6a028e8f93",
+      "stable": true,
+      "supervised_tokens_seen": 4211
+    },
+    {
+      "active_gpu_hours": 0.02059738516666635,
+      "final_loss": 4.153928256947346,
+      "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+      "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+      "losses": [
+        4.222921425481655,
+        4.040152430191479,
+        4.15568980238317,
+        4.153928256947346
+      ],
+      "lr": 0.0002,
+      "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+      "name": "muon_lr_2p0em04",
+      "paired_values": 588,
+      "peak_reserved_mib": 2426.0,
+      "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+      "rho_ratio_median": 0.47217699361360643,
+      "rho_ratio_p10": 0.4450543430932604,
+      "rho_ratio_p90": 0.5167019719435266,
+      "source_commit": "3c9f8d1824d2e47ba90b1019e67e71db404d4c8b",
+      "source_fingerprint": "099f3afdbb7e03302f72134a0b69f169f9123ad915c7dff7ec8d5f6a028e8f93",
+      "stable": true,
+      "supervised_tokens_seen": 4211
+    }
+  ],
+  "control": {
+    "active_gpu_hours": 0.018199752333333284,
+    "final_loss": 4.126861793136222,
+    "first_batches_sha256": "3afe0bd69eb39b2e6ae0af743fc40ad4e030923c730e87027e304521c8ee3867",
+    "initial_state_sha256": "23fdbce2e811beb382ce7596374164ea201d8d23c041a71fc6ea5bf2ca12cb1d",
+    "losses": [
+      4.222921425481655,
+      4.029316985595718,
+      4.140965084737377,
+      4.126861793136222
+    ],
+    "mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+    "peak_reserved_mib": 2464.0,
+    "plan_hash": "ded0bafa819341a77ea9baeb383ab9a20b7e8e9968c63fb1bf27f0fae6e465c3",
+    "source_commit": "3c9f8d1824d2e47ba90b1019e67e71db404d4c8b",
+    "source_fingerprint": "099f3afdbb7e03302f72134a0b69f169f9123ad915c7dff7ec8d5f6a028e8f93",
+    "supervised_tokens_seen": 4211
+  },
+  "control_config_sha256": "7744a3b8760bc3ac3b5da0a814ef97d6c0e01f171855486aa8a675875f65a126",
+  "control_lr": 0.0001,
+  "evaluation_used": false,
+  "exclude_through_step": 1,
+  "git_commit": "3c9f8d1824d2e47ba90b1019e67e71db404d4c8b",
+  "identified_regime_lrs": {
+    "0.5": 0.0002,
+    "1.0": 0.0002,
+    "2.0": 0.0002
+  },
+  "pair_manifest_sha256": "1376a09303e6a577cdea1f82878318b14b7ce2a0007d6817c2ef2838e8418075",
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "selected_lr": 0.0002,
+  "selected_ratio": 0.47217699361360643,
+  "selection_frozen_for_exploratory_pair": false,
+  "selection_metric": "median paired module-step rho_delta ratio to AdamW",
+  "selection_rule": "stable candidate closest to ratio 1.0 in absolute log2 distance",
+  "status": "BRACKET_INSUFFICIENT",
+  "steps": 4,
+  "target_ratio_factor_tolerance": 1.5,
+  "target_ratios": [
+    0.5,
+    1.0,
+    2.0
+  ],
+  "target_regime_coverage_passed": false
+}

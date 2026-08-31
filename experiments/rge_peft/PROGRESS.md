@@ -49,7 +49,7 @@ RETIRED
 | Work package | Planning envelope | Actual GPU-hours | Status |
 |---|---:|---:|---|
 | M1 parity/smoke | 0–3 | 0.071 measured RGE training-step hours | GATE_PASSED |
-| M2 optimizer pilot | 2–6 | 0.019 measured training-step hours | IN_PROGRESS |
+| M2 optimizer pilot | 2–6 | 0.100 measured training-step hours | IN_PROGRESS |
 | M3 DeltaBall | 4–12 | 0 | NOT_STARTED |
 | M4 curriculum/tail | 4–12 | 0 | NOT_STARTED |
 | M5 CMA validation | 1–6 | 0 | NOT_STARTED |
@@ -119,8 +119,11 @@ RETIRED
 - **GPU pair smoke:** two sequential B0 steps per arm — PASS. Both arms consumed exactly 2,164 supervised tokens with identical source/model/data/plan/initial-state hashes. Muon remained finite; bounded diagnostics were loss delta +0.00704, time ratio 1.0902, throughput ratio 0.9173, optimizer-state byte ratio 0.49999, and peak-reserved delta -38 MiB. These are integration diagnostics only, not optimizer selection evidence.
 - **Muon GPU resume:** `verify_rge_resume.py --config configs/rge_peft/m2_muon_smoke.yaml --steps 2 --break-at 1` — PASS; 392 adapter tensors, 392 optimizer states, RNG, geometry state, loss/LR sequence, and 392 geometry records bit-identical.
 - **Compute so far:** approximately 0.019 measured M2 optimizer-step GPU-hours; model-load/probe engineering time excluded by the run-manifest definition.
+- **Initial LR/effective-step bracket:** stable but `BRACKET_INSUFFICIENT`. Muon raw LR `5e-5`, `1e-4`, `2e-4` produced median paired `rho_delta` ratios `0.118`, `0.236`, `0.472` over 588 values each. Only the 0.5x regime passed factor-1.5 coverage; no LR was frozen and loss/evaluation did not participate.
+- **Calibration compute:** 0.081 measured optimizer-step GPU-hours; cumulative M2 measured optimizer-step time is approximately 0.100 GPU-hours.
+- **Bounded expansion:** preregistered before execution at `{2e-4, 4e-4, 8e-4}` with identical four-step B0 protocol and selection rule.
 - **Sealed data accessed:** no.
-- **Next bounded action:** pre-register and execute the short AdamW reference plus log-spaced Muon effective-step LR bracket; keep the full 1M-token pair blocked.
+- **Next bounded action:** execute the one preregistered expanded bracket; keep the full 1M-token pair blocked unless all 0.5x/1x/2x regimes pass coverage.
 
 ### M3 — DeltaBall factorial
 
