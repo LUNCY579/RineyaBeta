@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "milestone": "M5",
+  "status": "GATE_PASSED",
+  "source_commit": "6584692",
+  "sealed_data_accessed": false,
+  "construction": {
+    "source_steps": [2, 4, 6, 8, 10, 12],
+    "exact_rank": 96,
+    "primary_rank": 16,
+    "global_retained_energy_fraction": 0.999999999678495,
+    "global_relative_reconstruction_error": 0.000017930562458870565,
+    "worst_module_relative_reconstruction_error": 0.000028735907956383257,
+    "peft_load_merge_pass": true
+  },
+  "exact_vs_tail": {"chat_mean_delta": 0.0012817647058823542, "rag_mean_delta": 0.0, "chat_candidate_win_tie_loss": [21, 471, 18]},
+  "rank16_vs_tail": {"chat_mean_delta": 0.0008729411764705891, "rag_mean_delta": 0.0, "chat_candidate_win_tie_loss": [17, 477, 16], "noninferiority_pass": true, "critical_regression_present": false},
+  "rank16_vs_exact": {"chat_mean_delta": -0.00040882352941176453, "rag_mean_delta": 0.0, "interpretation": "tiny compression effect; no material rank bottleneck"},
+  "decision": "FREEZE_RANK16_CMA_AS_M6_CANDIDATE",
+  "claim_boundary": "exploratory named-retention endpoint gain only; no targeted capability, seed, speed, or sealed claim",
+  "measured_gpu_hours_approx": 0.235,
+  "next_bounded_action": "Freeze a targeted capability development bank before M6, then run matched control/candidate confirmation without reopening candidate selection."
+}

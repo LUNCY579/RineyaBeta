@@ -114,6 +114,18 @@ changed by `-0.000884` and `rag_dev` was identical on all 752 cases. It receives
 no standalone credit, but its six equally spaced checkpoints are valid M5 CMA
 inputs.
 
+## M5 — Delta-CMA exploratory result
+
+Equal-weight Delta-space averaging of tail steps `{2,4,6,8,10,12}` produced an
+exact rank-96 diagnostic and a primary rank-16 adapter. Rank-16 retained
+`0.99999999968` of global delta energy with `1.79e-5` relative reconstruction
+error; both adapters passed normal PEFT load/merge.
+
+CMA-exact changed chat by `+0.00128` and RAG by exactly zero versus tail-final.
+CMA-r16 changed chat by `+0.000873` and RAG by zero. Compression cost only
+`-0.000409` chat versus exact and no RAG case. Rank-16 CMA is frozen for M6, but
+the gain is tiny and exploratory; no useful capability improvement is established.
+
 ## Sealed boundary
 
 The sealed RAG test set has not been accessed by RGE-PEFT. It remains prohibited

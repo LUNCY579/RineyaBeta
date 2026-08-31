@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M5 — Delta-CMA
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 IN_PROGRESS
+**Current milestone:** M6 — confirmatory matched comparison
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 GATE_PASSED; M6 NOT_STARTED
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -34,7 +34,7 @@ RETIRED
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | GATE_PASSED | active eps1x retained on small positive named-retention frontier |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | CLOSED | curriculum mixed/unsupported; tail neutral; six CMA inputs valid |
-| M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | IN_PROGRESS | synthetic math passes; real six-checkpoint construction pending |
+| M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | GATE_PASSED | rank16 CMA frozen after tiny positive/non-inferior endpoint result |
 | M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | NOT_STARTED | frozen control/candidate, seed evidence, retention/efficiency decision |
 | M7 | One-time sealed promotion gate | Oct 26–Oct 28 | 1% | NOT_STARTED | exactly one authorized sealed result after candidate freeze |
 | M8 | Phase 7: rank/family transfer | Oct 29–Nov 15 | 1% | NOT_STARTED | conditional transfer-scope decision |
@@ -52,7 +52,7 @@ RETIRED
 | M2 optimizer pilot | 2–6 | 1.681 measured training/eval hours | GATE_FAILED |
 | M3 DeltaBall | 4–12 | 1.483 measured training/eval hours | GATE_PASSED |
 | M4 curriculum/tail | 4–12 | 1.186 measured training/eval hours | CLOSED |
-| M5 CMA validation | 1–6 | 0 | NOT_STARTED |
+| M5 CMA validation | 1–6 | 0.235 measured evaluation hours | GATE_PASSED |
 | M6 confirmation | 12–36 | 0 | NOT_STARTED |
 | **Core v1 target** | **23–69** | **0** | NOT_STARTED |
 | Conditional M8 transfer | 12–30 | 0 | NOT_STARTED |
@@ -190,7 +190,8 @@ RETIRED
 ### M5 — Delta-CMA
 
 - **Opened:** 2026-08-31 (America/Chicago)
-- **Status:** IN_PROGRESS
+- **Closed:** 2026-08-31 (America/Chicago)
+- **Status:** GATE_PASSED
 - **Planned window:** 2026-10-05 to 2026-10-11
 - **Required evidence:** gauge-invariant averaging; QR/SVD recompression; retained energy; PEFT export/reload; endpoint decision.
 - **Inputs:** frozen constant-tail checkpoints `{2,4,6,8,10,12}`, equal weights, source rank 16/scale 2.
@@ -198,7 +199,10 @@ RETIRED
 - **Real construction:** PASS from tail steps `{2,4,6,8,10,12}`. Diagnostic exact rank 96 and primary rank 16 adapters contain 196 target modules. Rank 16 retains `0.999999999678495` global delta energy; global relative reconstruction error `1.793e-5`; worst module `2.874e-5`.
 - **Loader verification:** both adapters load through normal PEFT, produce finite logits, and merge/unload successfully on GPU. Exact config is r96/alpha96; matched config r16/alpha32.
 - **Sealed data accessed:** no.
-- **Next bounded action:** commit real CMA construction evidence, then evaluate tail-final, CMA-exact, and CMA-r endpoints on frozen unsealed retention gates.
+- **Endpoint results:** CMA-exact versus tail: chat `+0.001282`, RAG exactly tied. CMA-r16 versus tail: chat `+0.000873`, RAG exactly tied, no critical regression. CMA-r16 versus exact: chat `-0.000409`, RAG tied; compression effect is tiny/non-material.
+- **M5 decision:** `GATE_PASSED`; freeze rank-16 CMA as M6 candidate. This is a tiny exploratory named-retention gain only—no targeted capability, speed, seed, or sealed claim.
+- **M5 compute:** approximately 0.235 evaluation GPU-hours; construction/math primarily CPU.
+- **Next bounded action:** freeze a targeted capability development bank before M6, then define matched CONTROL/CANDIDATE confirmation without reopening candidate selection.
 
 ### M6 — confirmation
 
