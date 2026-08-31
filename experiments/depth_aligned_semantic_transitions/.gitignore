@@ -7,3 +7,6 @@ runs/
 dist/
 build/
 *.egg-info/
+
+# Transient generated configs (e.g. per-run output-dir rewrites).
+configs/_*.yaml

@@ -62,6 +62,24 @@ The default real-model configs set `local_files_only: true` and
 `trust_remote_code: false`. Put `Qwen/Qwen3-0.6B` in the Hugging Face cache or
 change `model.name_or_path` to an audited local Rineya/R2 checkpoint.
 
+## Qualification
+
+The authoritative gate is **local**. GitHub Actions is retired to
+`workflow_dispatch` only, because every run on this branch failed before a runner
+was assigned — 0 steps executed, `runner_id: 0`, a billing annotation — and there is
+no budget to resolve it.
+
+```bash
+python scripts/qualify.py            # writes qualification/latest.json
+python scripts/qualify.py --fast     # compileall + ruff + pytest only
+```
+
+The gate runs the suite with the accelerator **both** visible and hidden. That is
+not redundancy: a CPU-only hosted runner structurally could not catch the CPU/CUDA
+defect that made an earlier "pytest PASS" record reproducible only on a machine
+without a GPU. The one thing local qualification does not establish is that the
+workflow file itself is correct.
+
 ## Sixty-second engineering check
 
 ```bash

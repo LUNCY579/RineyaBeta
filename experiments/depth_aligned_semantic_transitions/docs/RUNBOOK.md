@@ -31,6 +31,33 @@ merely to bypass a loading error.
 
 ## 2. Offline qualification
 
+The authoritative gate is **local**, not GitHub Actions:
+
+```bash
+python scripts/qualify.py          # full gate
+python scripts/qualify.py --fast   # skip smoke and the CPU-only pass
+```
+
+It writes a machine-readable record to `qualification/latest.json` carrying the
+commit, whether the tree was dirty, host and package versions, and a per-step
+result. Commit that artifact as the qualification evidence.
+
+**Why local is the gate, and why it is stronger here.** Every Actions run on this
+branch failed before a runner was assigned — 0 steps executed, `runner_id: 0` —
+with the annotation "recent account payments have failed or your spending limit
+needs to be increased". A red result that never ran a step carries no information
+about the code, and there is no budget to resolve it. Beyond that, a hosted runner
+is CPU-only, so it structurally **cannot** catch a defect that only appears when a
+GPU is present — which is exactly what made the 2026-08-30 "pytest PASS (37 tests)"
+record reproducible only on a machine without one. `qualify.py` therefore runs the
+suite in **both** device configurations. The workflow is preserved at
+`.github/workflows/dast-ci.yml` as `workflow_dispatch` only.
+
+The one thing local qualification does **not** establish: that the workflow file
+itself is correct. That stays unqualified.
+
+The narrower smoke-only path remains available:
+
 ```bash
 scripts/run_smoke.sh
 ```
@@ -213,3 +240,7 @@ Update `PROGRESS.md` with:
 
 Then update the repository-wide experiment audit in the same merge commit. Preserve
 negative and withdrawn evidence.
+
+Attach the `qualification/latest.json` produced on the committed tree. An artifact
+whose `environment.git_dirty` is true describes no committed state and is not
+evidence.

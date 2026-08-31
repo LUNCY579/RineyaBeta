@@ -1,18 +1,56 @@
-name: DAST qualification
+# DAST qualification — RETIRED AS AN AUTOMATIC GATE, 2026-08-31.
+#
+# This workflow is preserved but reduced to workflow_dispatch only. It no longer
+# fires on push or pull_request, and it is NOT the qualification gate.
+#
+# Why. Every run of this workflow failed before a runner was ever assigned:
+#
+#   run 33356304292 (2 attempts)  91f2e1c   5s   0 steps   runner_id 0
+#   run 33356616512               a343e1f   4s   0 steps   runner_id 0
+#   run 33431122752               96644f7   3s   0 steps   runner_id 0
+#   run 33441981518               98bc669   3s   0 steps   runner_id 0
+#
+# with the annotation:
+#
+#   "The job was not started because recent account payments have failed or your
+#    spending limit needs to be increased."
+#
+# So the red result carried no information about the code — it never checked out,
+# never installed, never ran a step. Leaving it on push meant every commit
+# displayed a failure that looked like a code defect and was not one. There is no
+# budget to resolve the billing, so this stops being the gate.
+#
+# The gate is now `scripts/qualify.py`, run locally. It is STRONGER than this
+# workflow in one specific way: it runs the suite both with the accelerator
+# visible and with it hidden. A CPU-only hosted runner structurally could not
+# catch the CPU/CUDA defect that made the 2026-08-30 "pytest PASS" record
+# reproducible only on a machine without a GPU.
+#
+# What this workflow still cannot be replaced for: proving the workflow file
+# itself is correct. That remains unqualified, and PROGRESS.md says so.
+#
+# To revive it: restore Billing & plans, then re-enable the push/pull_request
+# triggers below and re-run once to confirm a runner is actually assigned.
+
+name: DAST qualification (manual only — see header)
 
 on:
-  push:
-    branches:
-      - research/depth-aligned-semantic-transitions-v1
-    paths:
-      - "experiments/depth_aligned_semantic_transitions/**"
-      - "docs/PLAN_DEPTH_ALIGNED_SEMANTIC_TRANSITIONS.md"
-      - ".github/workflows/dast-ci.yml"
-  pull_request:
-    paths:
-      - "experiments/depth_aligned_semantic_transitions/**"
-      - "docs/PLAN_DEPTH_ALIGNED_SEMANTIC_TRANSITIONS.md"
-      - ".github/workflows/dast-ci.yml"
+  workflow_dispatch:
+  # Deliberately disabled; see the header. Do not re-enable without first
+  # confirming a hosted runner is assigned.
+  #
+  # push:
+  #   branches:
+  #     - research/depth-aligned-semantic-transitions-v1
+  #   paths:
+  #     - "experiments/depth_aligned_semantic_transitions/**"
+  #     - "docs/PLAN_DEPTH_ALIGNED_SEMANTIC_TRANSITIONS.md"
+  #     - ".github/workflows/dast-ci.yml"
+  # pull_request:
+  #   paths:
+  #     - "experiments/depth_aligned_semantic_transitions/**"
+  #     - "docs/PLAN_DEPTH_ALIGNED_SEMANTIC_TRANSITIONS.md"
+  #     - ".github/workflows/dast-ci.yml"
 
 permissions:
   contents: read
@@ -35,18 +73,15 @@ jobs:
         run: python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
       - name: Install DAST development dependencies
         run: python -m pip install -e ".[dev]"
-      - name: Static compilation
-        run: python -m compileall -q src tests
-      - name: Lint
-        run: python -m ruff check src tests
-      - name: Unit and integration tests
-        run: pytest -q
-      - name: Offline end-to-end smoke
-        run: python -m dast.cli smoke --output-dir runs/ci-smoke
-      - name: Upload engineering report
+      # Runs the same gate as a local qualification, in --fast mode: a hosted
+      # runner has no accelerator, so its CPU-only pass is the only one it can
+      # give and the smoke is already covered by the local artifact.
+      - name: Local qualification gate (fast)
+        run: python scripts/qualify.py --fast --output runs/ci-qualification.json
+      - name: Upload qualification artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dast-ci-smoke-report
-          path: experiments/depth_aligned_semantic_transitions/runs/ci-smoke/
+          name: dast-qualification-report
+          path: experiments/depth_aligned_semantic_transitions/runs/
           if-no-files-found: warn
