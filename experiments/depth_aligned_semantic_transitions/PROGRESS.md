@@ -1,5 +1,167 @@
 # DAST progress
 
+## 2026-08-31 — G1 pilot: capability metric WITHDRAWN, instrument failure found and fixed
+
+**Status: BUILT — UNRUN on a qualifying arm run. TEST CLOSED.
+The G1 pilot's capability metric is WITHDRAWN. Its mechanism metrics stand as
+EXPLORATORY_DEV. No arm comparison is claimed.**
+
+A three-arm G1 pilot (1000 train / 200 DEV, one seed, generation on) was started.
+`cot_baseline` and `state_ordered` completed; `state_shuffled` — the **decisive**
+control — was killed partway by an external process stop and produced no summary.
+
+### The pilot reported strict accuracy 0.0000 for both arms
+
+That is an instrument failure, not a model result. The raw responses were visibly
+correct:
+
+```text
+gold: 246 bolts
+raw : Reasoning:
+      1. Apply the restock: 246 + 85 = 331.
+      ...
+      5. Therefore, the answer is 246 bolts.
+extracted: "5. Therefore, the answer is 246 bolts."   -> scored WRONG
+```
+
+Cause: even a short SFT taught the model the corpus's own `full_response` format,
+which ends `"N. Therefore, the answer is X."`. The shipped extraction pattern
+required a **colon or equals** after "answer", so **200/200** responses fell through
+to the last-line fallback — and the list enumeration `5.` then became the
+prediction's first number, losing every numeric comparison.
+
+So **SFT made the model better at the task and drove the scorer to zero.** Every
+arm of a Phase-1 matrix would have tied at 0.000, producing a completely spurious
+`CLOSED — NEGATIVE`. This is the second time in this program that an endpoint has
+been caught measuring itself rather than the model.
+
+### Size of the failure, measured on the saved predictions
+
+| n=200 | as scored by the run | rescored, fixed extractor | gold present in response |
+|---|---:|---:|---:|
+| `cot_baseline` | **0.0000** | **0.7800** | 0.7750 |
+| `state_ordered` | **0.0000** | **0.7850** | 0.7850 |
+
+The fixed extractor sits at the achievable ceiling, so the remaining ~22% are
+genuine model errors (wrong arithmetic, incomplete sets) — the endpoint has real
+discriminative range once it is reading the answer at all.
+
+### Fixes
+
+- `extract_answer` accepts `answer is X` alongside `answer:` and `answer =`.
+- The last-line fallback strips a leading `N.` / `N)` enumeration — but only when
+  followed by whitespace, and only on that route. Two bugs were found in the first
+  attempt at this and are pinned by tests: without the trailing `\s+` the pattern
+  ate the integer part of decimals (`14.71` → `71`, `94.` → empty), and applying it
+  to a labelled capture destroyed legitimate values.
+- Markdown emphasis (`**94**`) is stripped; the underscore is **not**, because it is
+  legitimate answer content (`43UZOZ_end`).
+- `tests/test_extraction_real_responses.py` pins one verbatim final line per
+  answer_type taken from the real pilot output, so extraction cannot regress on
+  output a fine-tuned Qwen3-0.6B actually produced. Suite is now **110 tests**.
+
+**Discipline note.** Changing a scorer after seeing results is normally forbidden.
+This change was driven by the **absolute** value being 0.0000 with visibly correct
+responses — an unambiguous instrument fault — and not by any arm *difference*. It is
+applied identically to every arm. The corrected scorer must be frozen before the
+comparative matrix, and the pilot itself must be **re-run**, not rescored into a
+result.
+
+### What the mechanism metrics show, and what they do not
+
+| | `cot_baseline` | `state_ordered` |
+|---|---:|---:|
+| order margin | 0.013 | **0.575** |
+| checkpoint top-1 (chance 0.25) | 0.268 | **0.713** |
+| decoded progress monotonic | 0.635 | **0.975** |
+| teacher-forced LM perplexity | 1.0556 | 1.0545 |
+
+The shared projector clearly learns the depth-to-state alignment, and LM quality is
+preserved. But two cautions, both of which cut against reading this as support:
+
+1. **The baseline is not a control for this.** `cot_baseline` runs with
+   `state_weight: 0`, so its projector is untrained and its margin is simply chance.
+   A trained auxiliary head beating an untrained one is not evidence about depth.
+2. **The trained margin is BELOW the frozen floor.** A fitted shared *linear* probe
+   on the **untrained** backbone reaches margin 0.977 under the same corrected
+   geometry (§3.8 of the readiness report). The trained MLP projector reached 0.575
+   after 63 optimizer steps. So there is as yet **no evidence of learned
+   reorganisation** beyond what a probe already extracts from the frozen model.
+
+Capability difference between the two arms after rescoring is **+0.005**, i.e. one
+problem out of 200, on one seed, without the decisive control. That is **not a
+finding** in either direction, and `SSOT §5` already states that ordered-vs-baseline
+is insufficient because the arms differ in active losses.
+
+### Measured cost, for the Stage-E projection
+
+| | wall-clock |
+|---|---|
+| `cot_baseline`, 1000 train / 200 DEV + generation | 11 min 41 s |
+| `state_ordered`, same | 12 min 13 s |
+
+Scaling 4× on both train and DEV gives roughly 45–50 min per arm, so the 18-run
+matrix is **~14–15 h GPU**, consistent with the earlier 15–25 h estimate. Peak VRAM
+observed 4.1 GiB of 8.
+
+### Next permitted action
+
+Re-run the **full three-arm** pilot under the fixed scorer, including
+`state_shuffled`. Only its ordered-vs-shuffled contrast can say anything, and only
+then is the 15 h matrix worth committing.
+
+---
+
+## 2026-08-31 — remote CI blocker RESOLVED as an account billing issue
+
+The 2026-08-30 entry classified the Actions failures as
+`EXTERNAL BLOCKER — GITHUB-HOSTED RUNNER NOT ASSIGNED` and recorded that "the
+specific platform-side cause cannot be established from the available run
+metadata". It can now. The annotation on **every** run, including both attempts
+from that session, is:
+
+```text
+The job was not started because recent account payments have failed or your
+spending limit needs to be increased. Please check the 'Billing & plans'
+section in your settings
+```
+
+| run | head | duration | steps | runner_id | conclusion |
+|---|---|---:|---:|---:|---|
+| 33356304292 (2 attempts) | `91f2e1c` | 5s | 0 | 0 | failure |
+| 33356616512 | `a343e1f` | 4s | 0 | 0 | failure |
+| 33431122752 | `96644f7` | 3s | 0 | 0 | failure |
+
+So the earlier classification was correct in substance and is now specific:
+**GitHub Actions billing / spending limit, at the account level.** No repository
+change can affect it, and the ruff error fixed in `30119fe` was never what
+these runs were failing on — they never reached the Lint step, or any step.
+
+Commit status for `96644f7`: 0 status contexts; 1 check-run
+`offline-qualification: completed/failure`, 0 steps executed.
+
+**Action required outside this repository:** resolve Billing & plans, then re-run
+run 33431122752. Until then remote CI cannot qualify anything.
+
+### Local CI equivalent, used as the substitute qualification artifact
+
+The four steps of `.github/workflows/dast-ci.yml` run locally under CPU-only
+conditions matching `ubuntu-latest`, at `96644f7`:
+
+```text
+compileall   PASS
+ruff         PASS
+pytest       PASS   (94 tests)
+smoke        PASS
+OVERALL      PASS
+```
+
+This is engineering evidence only, and it is weaker than a hosted run in one
+specific way: it does not prove the workflow file itself is correct, only that the
+commands it invokes succeed. That remains unqualified until a runner is assigned.
+
+---
+
 ## 2026-08-31 — post-review corrections to the V1.1 commit
 
 An adversarial review of `30119fe` over four lenses (correctness,

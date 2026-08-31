@@ -20,8 +20,37 @@ from dast.tokenization import apply_chat_template_ids
 
 _FINAL_PATTERNS = (
     re.compile(r"\\boxed\{([^{}]+)\}", re.IGNORECASE),
-    re.compile(r"(?:final answer|answer)\s*[:=]\s*(.+)$", re.IGNORECASE | re.MULTILINE),
+    # "is" matters as much as ":" and "=". The corpus's own full_response ends
+    # "N. Therefore, the answer is X.", so after even a short SFT the model adopts
+    # that form -- and the colon-only pattern never matched it. Measured on the G1
+    # pilot: 200/200 responses fell through to the last-line fallback and strict
+    # accuracy read 0.0000 while true capability was ~0.78.
+    re.compile(
+        r"(?:final answer|answer)\s*(?:is|:|=)\s*(.+?)\s*$",
+        re.IGNORECASE | re.MULTILINE,
+    ),
 )
+
+# "5. Therefore, ..." otherwise contributes 5 as the prediction's first number,
+# which then loses every numeric comparison. The trailing \s+ is essential: without
+# it this also matches the integer part of a decimal, turning "14.71" into "71" and
+# "94." into "". Applied ONLY to the last-line fallback -- a labelled or boxed
+# capture is already just the answer, so stripping a leading number there destroys
+# legitimate values.
+_LEADING_ENUMERATION = re.compile(r"^\s*\d{1,3}\s*[.)]\s+")
+_TRAILING_PUNCTUATION = re.compile(r"[\s.]+$")
+# Models emit the answer in markdown emphasis (**94**), which survives
+# normalize_text and breaks every non-numeric comparison. Deliberately excludes
+# the underscore, which is legitimate answer content ("43UZOZ_end").
+_EMPHASIS = re.compile(r"[*`]+")
+
+
+def _clean_extracted(value: str, *, strip_enumeration: bool = False) -> str:
+    value = value.strip()
+    if strip_enumeration:
+        value = _LEADING_ENUMERATION.sub("", value)
+    value = _EMPHASIS.sub("", value)
+    return _TRAILING_PUNCTUATION.sub("", value).strip()
 
 
 @dataclass(frozen=True)
@@ -174,10 +203,11 @@ def extract_answer(response: str) -> tuple[str | None, str]:
     for index, pattern in enumerate(_FINAL_PATTERNS):
         matches = list(pattern.finditer(response))
         if matches:
-            return matches[-1].group(1).strip(), "boxed" if index == 0 else "labelled"
+            # The LAST match, because the answer is stated at the end.
+            return _clean_extracted(matches[-1].group(1)), "boxed" if index == 0 else "labelled"
     lines = [line.strip() for line in response.splitlines() if line.strip()]
     if lines:
-        return lines[-1], "last_nonempty_line"
+        return _clean_extracted(lines[-1], strip_enumeration=True), "last_nonempty_line"
     return None, "empty"
 
 

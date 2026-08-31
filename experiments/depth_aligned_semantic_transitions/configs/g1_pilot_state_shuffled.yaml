@@ -1,0 +1,22 @@
+# G1 learnability pilot - RUNBOOK section 11 gate 3, EXPLORATORY_DEV.
+#
+# Purpose: does ordered semantic depth supervision learn at all, does it move the
+# order margin ABOVE the measured frozen floor, and does it damage LM quality?
+# One seed, a bounded slice, generation enabled so capability is observed too.
+#
+# This is NOT the Phase-1 confirmatory matrix. It has one seed, a reduced slice,
+# and no preregistration freeze, so it cannot pass G2/G3. Its job is to decide
+# whether the full matrix is worth 11 hours of decode.
+extends: state_shuffled.yaml
+
+experiment:
+  name: dast-g1-pilot-state_shuffled
+  output_dir: ../runs/g1_pilot_state_shuffled
+  evidence_status: exploratory_dev
+
+data:
+  max_train_records: 1000
+  max_eval_records: 200
+
+evaluation:
+  do_generation: true
