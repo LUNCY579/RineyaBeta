@@ -97,6 +97,18 @@ The frozen surviving geometry recipe is AdamW plus DeltaBall epsilon
 M3 passes only as mechanism/named-retention evidence and authorizes M4. No
 targeted capability, replicated, speed, or sealed claim is established.
 
+## M4 — curriculum ordering status
+
+A 12,875-row component-stratified subset was consumed completely under both
+reference-shuffled and component-local order. Membership, 105,402 supervised
+tokens, initial tensors, and token-indexed LR/DeltaBall schedules matched.
+
+Component-local order reduced token-weighted training loss by only `0.00137` and
+worsened final-step loss by `0.145`. Retention was mixed: `chat_dev -0.00368`,
+`rag_dev +0.00081`, both non-inferior with confidence intervals crossing zero and
+no critical regression. Curriculum is retained only as weak exploratory input to
+the constant-tail test; an ordering benefit is not established.
+
 ## Sealed boundary
 
 The sealed RAG test set has not been accessed by RGE-PEFT. It remains prohibited

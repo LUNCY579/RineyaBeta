@@ -176,7 +176,10 @@ RETIRED
 - **Interruption:** disk exhaustion stopped C-C after uncheckpointed step 46. Regenerable calibration/smoke/intermediate checkpoints were pruned (25.98 GiB freed), checkpoint 40 resumed exactly, and six stale log rows were reconciled automatically. No model tensor was repaired.
 - **M4 compute so far:** 0.798 measured optimizer-step GPU-hours for C-U/C-C training; timing is exploratory single-order only.
 - **Sealed data accessed:** no.
-- **Next bounded action:** export C-U and selected C-C endpoints and evaluate both frozen `chat_dev`/`rag_dev` retention gates.
+- **Frozen retention:** curriculum versus uniform `chat_dev -0.003678` (CI `[-0.01375, +0.00624]`, 63/385/62 W/T/L); `rag_dev +0.000810` (CI `[-0.00242, +0.00484]`, 3/747/2), with no critical regression and slightly fewer contract violations. Both pass non-inferiority; neither CI establishes superiority.
+- **Curriculum decision:** retain component-local order for the constant-tail experiment only, labeled weak/mixed exploratory evidence rather than a confirmed ordering gain.
+- **M4 compute:** approximately 1.03 measured training/evaluation GPU-hours so far.
+- **Next bounded action:** create a 12-step constant-LR continuation from the frozen C-C endpoint, save six equally spaced checkpoints, and compare its final endpoint before any averaging.
 
 ### M5 — Delta-CMA
 
