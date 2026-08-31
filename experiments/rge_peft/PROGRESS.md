@@ -5,8 +5,8 @@
 **Target branch:** `research/rge-peft-v1`  
 **Starting parent:** `main @ 3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
 **Initialized:** 2026-08-30, America/Chicago  
-**Current milestone:** M6 — confirmatory matched comparison
-**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 GATE_PASSED; M6 NOT_STARTED
+**Current milestone:** M5 — Delta-CMA interaction control
+**Current status:** M0 GATE_PASSED; M1 GATE_PASSED; M2 GATE_FAILED; M3 GATE_PASSED; M4 CLOSED; M5 IN_PROGRESS; M6 BLOCKED_MATCHING
 **Implementation started:** yes
 **Experimental outcomes observed:** none  
 **Sealed evaluation accessed:** no
@@ -34,7 +34,7 @@ RETIRED
 | M2 | Phase 2: Muon optimizer pilot | Sep 7–Sep 13 | 12% | GATE_FAILED | Muon rejected: lower training loss but frozen retention failure |
 | M3 | Phase 3: DeltaBall factorial | Sep 14–Sep 27 | 18% | GATE_PASSED | active eps1x retained on small positive named-retention frontier |
 | M4 | Phase 4: curriculum and late-tail isolation | Sep 28–Oct 4 | 14% | CLOSED | curriculum mixed/unsupported; tail neutral; six CMA inputs valid |
-| M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | GATE_PASSED | rank16 CMA frozen after tiny positive/non-inferior endpoint result |
+| M5 | Phase 5: Delta-CMA and rank-matched compression | Oct 5–Oct 11 | 14% | IN_PROGRESS | rank16 candidate frozen; uniform UTM matched control pending |
 | M6 | Phase 6: matched confirmation | Oct 12–Oct 25 | 20% | NOT_STARTED | frozen control/candidate, seed evidence, retention/efficiency decision |
 | M7 | One-time sealed promotion gate | Oct 26–Oct 28 | 1% | NOT_STARTED | exactly one authorized sealed result after candidate freeze |
 | M8 | Phase 7: rank/family transfer | Oct 29–Nov 15 | 1% | NOT_STARTED | conditional transfer-scope decision |
@@ -201,8 +201,10 @@ RETIRED
 - **Sealed data accessed:** no.
 - **Endpoint results:** CMA-exact versus tail: chat `+0.001282`, RAG exactly tied. CMA-r16 versus tail: chat `+0.000873`, RAG exactly tied, no critical regression. CMA-r16 versus exact: chat `-0.000409`, RAG tied; compression effect is tiny/non-material.
 - **M5 decision:** `GATE_PASSED`; freeze rank-16 CMA as M6 candidate. This is a tiny exploratory named-retention gain only—no targeted capability, speed, seed, or sealed claim.
+- **Matching correction:** M6 audit found the uniform endpoint lacked the candidate's 12 tail steps/CMA. Amendment v1.5 reopens M5 for the optional C-UTM control before capability evaluation; prior CMA candidate selection remains frozen.
+- **Capability bank freeze:** 4,080 balanced validation puzzles across 15 families; SHA `f717d9...3b95`; zero exact B0 matches, zero ≥0.8 approximate matches, maximum candidate bigram Jaccard `0.0667`. Test/challenge remain untouched.
 - **M5 compute:** approximately 0.235 evaluation GPU-hours; construction/math primarily CPU.
-- **Next bounded action:** freeze a targeted capability development bank before M6, then define matched CONTROL/CANDIDATE confirmation without reopening candidate selection.
+- **Next bounded action:** run uniform 12-step tail and uniform rank-16 CMA, verify full matching against the frozen curriculum CMA candidate, then begin M6 capability evaluation.
 
 ### M6 — confirmation
 

@@ -1,0 +1,40 @@
+{
+  "asset": "Rineya-Puzzle-Reasoning-51k/data/validation.jsonl",
+  "difficulties": {
+    "easy": 2310,
+    "medium": 1770
+  },
+  "evaluation": "normalized exact match against accepted_answers",
+  "families": {
+    "arithmetic_constraints": 272,
+    "boolean_switches": 272,
+    "calendar_reasoning": 272,
+    "code_breaking": 272,
+    "epistemic_hats": 272,
+    "family_relations": 272,
+    "hanoi_planning": 272,
+    "knights_knaves": 272,
+    "linear_order": 272,
+    "logic_grid": 272,
+    "mislabeled_boxes": 272,
+    "object_tracking": 272,
+    "prisoner_alibis": 272,
+    "rule_deduction": 272,
+    "shortest_path": 272
+  },
+  "generation": {
+    "chat_template": "single user message; add_generation_prompt; enable_thinking=false",
+    "do_sample": false,
+    "extractor": "dataset evaluator final/think/plain extraction",
+    "max_new_tokens": 32
+  },
+  "license": "Apache-2.0",
+  "role": "targeted_capability_dev",
+  "rows": 4080,
+  "schema_version": 1,
+  "sealed_rag_accessed": false,
+  "selection_timing": "candidate frozen before bank evaluation",
+  "sha256": "f717d9f19a904a0278ba932afca76976a331dd4e184fd8a997af93843cd93b95",
+  "status": "FROZEN_BEFORE_M6_EVALUATION",
+  "test_and_challenge_access": "forbidden during M6 selection/confirmation"
+}

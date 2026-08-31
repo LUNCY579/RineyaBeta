@@ -1,0 +1,58 @@
+{
+  "asset": "Rineya-Puzzle-Reasoning-51k/data/validation.jsonl",
+  "contamination_audit": {
+    "approximate_metric": "token-bigram Jaccard on SimHash-LSH candidates",
+    "exact_match_ids": [],
+    "high_similarity_examples": [],
+    "high_similarity_matches": 0,
+    "maximum_candidate": {
+      "jaccard": 0.06666666666666667,
+      "training_source_id": "rineya_v3_sft__unit_conversion__reas_unit_conversion_s00__00154",
+      "validation_id": "rineya-pr51k-arith-val-00128"
+    },
+    "normalized_exact_matches": 0,
+    "simhash_bands": 4,
+    "threshold": 0.8,
+    "training_mix": "artifacts/heal_mixes/B0/heal_mix_b0.jsonl",
+    "training_mix_sha256": "53f87cdf401551d9f99a70f393c2696da09e5792cd8c3000345ab61d7b8c178b",
+    "training_rows": 128365
+  },
+  "difficulties": {
+    "easy": 2310,
+    "medium": 1770
+  },
+  "evaluation": "normalized exact match against accepted_answers",
+  "families": {
+    "arithmetic_constraints": 272,
+    "boolean_switches": 272,
+    "calendar_reasoning": 272,
+    "code_breaking": 272,
+    "epistemic_hats": 272,
+    "family_relations": 272,
+    "hanoi_planning": 272,
+    "knights_knaves": 272,
+    "linear_order": 272,
+    "logic_grid": 272,
+    "mislabeled_boxes": 272,
+    "object_tracking": 272,
+    "prisoner_alibis": 272,
+    "rule_deduction": 272,
+    "shortest_path": 272
+  },
+  "generation": {
+    "chat_template": "single user message; add_generation_prompt; enable_thinking=false",
+    "do_sample": false,
+    "extractor": "dataset evaluator final/think/plain extraction",
+    "max_new_tokens": 32
+  },
+  "license": "Apache-2.0",
+  "role": "targeted_capability_dev",
+  "rows": 4080,
+  "schema_version": 1,
+  "sealed_data_accessed": false,
+  "sealed_rag_accessed": false,
+  "selection_timing": "candidate frozen before bank evaluation",
+  "sha256": "f717d9f19a904a0278ba932afca76976a331dd4e184fd8a997af93843cd93b95",
+  "status": "FROZEN_BEFORE_M6_EVALUATION",
+  "test_and_challenge_access": "forbidden during M6 selection/confirmation"
+}

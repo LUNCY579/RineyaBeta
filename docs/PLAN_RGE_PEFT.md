@@ -1736,6 +1736,22 @@ These are **snapshot anchors**, not eternal assumptions. Implementation Phase 0 
 
 # 23. Amendment log
 
+## v1.5 — 2026-08-31
+
+M5/M6 matched-control correction, recorded before any targeted capability-bank
+evaluation or M6 confirmation. The selected curriculum candidate includes a
+12-step tail and six-checkpoint CMA, while the M4 uniform endpoint does not.
+Comparing them in M6 would confound order with extra tokens/tail/averaging.
+
+Resolution: run the preregistered optional C-UTM interaction control—uniform
+order with the identical 12-step constant tail and rank-16 Delta-CMA—and use it
+as M6 CONTROL. Use curriculum CMA-r16 as CANDIDATE. Membership, total supervised
+tokens, optimizer, DeltaBall, tail LR/steps, checkpoint weights, final rank, and
+evaluation protocol must match; only main-segment order differs.
+
+The capability validation bank was hash-frozen but had not been run on either
+endpoint. No test/challenge/sealed asset was accessed. Commit reference: pending.
+
 ## v1.4 — 2026-08-31
 
 M4 constant-tail transition details, frozen before tail training. Continue the

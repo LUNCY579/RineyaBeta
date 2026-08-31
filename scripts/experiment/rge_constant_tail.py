@@ -77,8 +77,10 @@ def main() -> None:
     source_path = latest_checkpoint(source_run)
     source = torch.load(source_path, map_location="cpu", weights_only=False)
     current_code = determinism.code_fingerprint()
-    if source["code_fingerprint"] != current_code:
-        raise SystemExit("training source changed since curriculum endpoint")
+    source_drift = determinism.compare_code_fingerprint(
+        source["code_fingerprint"], current_code)
+    if source_drift not in ([], ["cma.py: added"]):
+        raise SystemExit(f"training source changed since endpoint: {source_drift}")
     if source["config"]["curriculum"]["membership_sha256"] != config[
             "curriculum"]["membership_sha256"]:
         raise SystemExit("tail membership differs from source endpoint")
@@ -150,6 +152,7 @@ def main() -> None:
         "plan_position_reset": True,
         "projection_counters_reset": True,
         "averaging_performed": False,
+        "allowed_inert_source_drift": source_drift,
     }
     transition_path = tail_run / "transition_step_000000000.pt"
     atomic_torch_save(transition_path, transition)
