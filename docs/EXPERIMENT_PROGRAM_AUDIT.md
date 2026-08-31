@@ -6,9 +6,25 @@
 > branch names, result-directory presence, old pre-registrations, or stale planning
 > prose.
 >
-> **Snapshot:** `main@647c60ea9bf716ed05877ae2ccae8935aed71d9f`, 2026-08-30.
+> **Snapshot:** `main@647c60ea9bf716ed05877ae2ccae8935aed71d9f`, 2026-08-30, extended
+> with `research/depth-aligned-semantic-transitions-v1@1dce3cd`, 2026-08-31. Every
+> "at this snapshot" C1/C2/PCSM statement below remains anchored to the `main` tree
+> on which it was verified.
 > The GitHub remote was created on 2026-08-20, but the imported Git history begins
-> on 2026-08-19 (`5af0be4`). The current remote exposes **one live branch: `main`**.
+> on 2026-08-19 (`5af0be4`). The remote now exposes **five live branches**, verified
+> by `git ls-remote --heads origin` on 2026-08-31:
+>
+> ```text
+> main                                          3532c7bc
+> research/catastrophic-removal-core-v1         193f93d8
+> research/cross-architecture-graft-v1          79cb0897
+> research/depth-aligned-semantic-transitions-v1 1dce3cd
+> research/rge-peft-v1                          5005561
+> ```
+>
+> Only the DAST branch is audited below. The other four are recorded here so that
+> the earlier "one live branch" claim is not carried forward, not because their
+> contents have been reviewed.
 
 This audit records what was actually built, run, killed, withdrawn, superseded, or
 left unrun. It deliberately preserves negative results and invalidated interpretations.
@@ -111,6 +127,10 @@ adapter has been trained on the real checkpoint for that experiment.
 | **2026-08-28 -> 08-29** | Runtime/open-question closure | **ESTABLISHED — BOUNDED** | Directional pooling is essentially free relative to centered pooling; query-pass cost is measured; 13/13 distinct C1/C2 open questions are closed by 08-29. |
 | **2026-08-29** | C1 manuscript + PCSM merged to `main` | **MERGED** | Previously separate research lines are preserved on the canonical branch. |
 | **2026-08-30** | PCSM Phase C real-gradient causal screen | **BUILT — UNRUN** | Leakage-resistant one-step real-gradient experiment becomes executable on `main`; commit explicitly makes no Rineya quality claim. |
+| **2026-08-30** | Depth-aligned semantic transitions (DAST) enters the repo | **BUILT — UNRUN** | Depth-checkpoint semantic-state supervision, its six-arm matched control set and a sealed evaluation become executable on `research/depth-aligned-semantic-transitions-v1`. No arm has run in a qualifying frozen multi-seed configuration, and TEST has never been opened. |
+| **2026-08-31** | DAST instrument repair before any comparative run | **INFRASTRUCTURE** | The real-model path could not execute at all (transformers 5.x returns a mapping from `apply_chat_template`). Two further instrument failures were found and fixed, each of which would have produced a spurious result: the semantic targets encoded problem identity rather than stage, leaving `state_ordered` at 0.860 cosine from `state_shuffled`; and the answer scorer read **0.0000** on visibly correct post-SFT responses because short SFT taught the model the corpus's own `"N. Therefore, the answer is X."` format. |
+| **2026-08-31** | DAST hosted-runner gate retired; local qualification authoritative | **INFRASTRUCTURE** | Every GitHub Actions run failed before a runner was assigned — 0 steps executed, `runner_id` 0 — with a billing annotation. The workflow becomes `workflow_dispatch` only, and `scripts/qualify.py` becomes the gate: run locally, with the accelerator both visible and hidden, emitting `qualification/latest.json`. A CPU-only hosted runner structurally could not catch the GPU-only defect that made an earlier "pytest PASS" record reproducible on CPU only. |
+| **2026-08-31** | DAST G1 learnability pilot, four arms, one seed | **BUILT — UNRUN** | **EXPLORATORY_DEV only**, 1000 train / 200 DEV. `state_ordered` accuracy 0.7800 equals `cot_baseline` 0.7800 exactly (discordant 5:5, exact McNemar p = 1.0000), and `state_reverse` fits its own reversed targets marginally better than ordered fits the canonical ones (`L_state` 0.5403 vs 0.5441). Measured discordance is 6.0%, so n=200 carried only ~18% power at a true 2:1 split. Nothing is supported and nothing is closed. |
 
 ---
 

@@ -385,6 +385,30 @@ managed rather than merely noted.*
 - **Trial counts below ~6 mislead.** A 3-trial run produced "normalization hurts,
   0.87 → 0.60"; at 6 trials the arms were tied within one trial in 18 and the
   claim was withdrawn.
+- **A target space can encode subject identity instead of the variable under
+  test.** In the depth-aligned semantic transitions instrument, frozen mean-pooled
+  embedding targets put two *different stages of the same problem* at 0.821 cosine
+  while the *same stage of two different problems* sat near 0.72. The treatment and
+  its decisive control therefore shared **0.860** of their target signal, so the
+  entire separation the manipulation could inject was about 0.14. A variance
+  decomposition made it explicit: the hidden states were ~91% stage-determined and
+  ~6% problem-determined, while the targets were ~57% problem and ~9% stage — the
+  two sides of the objective encoded **orthogonal factors**. Within-problem
+  centering moves the arm contrast from 0.860 to **−0.019**. Measure the contrast
+  between arms *in the target geometry* before spending GPU on the arms.
+  (`experiments/depth_aligned_semantic_transitions/docs/PHASE0_READINESS.md` §3.3,
+  §3.8.)
+- **An answer extractor can read 0.0000 on responses that are correct.** The same
+  instrument reported strict generated-answer accuracy **0.0000** while the raw
+  replies were visibly right. Short SFT taught the model the corpus's own
+  `"N. Therefore, the answer is X."` format; the shipped pattern demanded a colon or
+  an equals sign after "answer", so **200/200** responses fell through to a
+  last-line fallback in which the enumeration `5.` became the prediction's first
+  number. Improving the model drove the scorer to zero. True capability was ~0.78.
+  Every arm of a matrix would have tied at 0.0000 and produced a spurious closed
+  negative — invisible in the aggregate, obvious in one raw response. Read raw
+  outputs before trusting an aggregate, especially after fine-tuning changes the
+  output format. (Commit `98bc669`.)
 
 
 ---

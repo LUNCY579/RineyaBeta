@@ -8,7 +8,10 @@ and flags which have been superseded.
 [`EXPERIMENT_PROGRAM_AUDIT.md`](EXPERIMENT_PROGRAM_AUDIT.md) is the canonical
 single source of truth for track chronology, lineage, and whether work is established,
 negative, withdrawn, synthetic-only, or built-but-unrun. Historical branch names are
-provenance labels; at the 2026-08-30 audit snapshot the remote exposes only `main`.
+provenance labels. At the 2026-08-30 audit snapshot the remote exposed only `main`;
+as of 2026-08-31 it exposes **five** live branches — `main`,
+`research/catastrophic-removal-core-v1`, `research/cross-architecture-graft-v1`,
+`research/depth-aligned-semantic-transitions-v1` and `research/rge-peft-v1`.
 Exact measurements remain authoritative in their committed result files and in the
 specialized findings documents checked by `scripts/design/verify_claims.py`.
 

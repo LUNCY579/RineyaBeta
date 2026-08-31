@@ -90,12 +90,28 @@ reference implementation.
 **Acceptance:** each operation has a `verify_*` proving the intended invariant.
 
 ### I3. Test suite + CI
-No tests, no CI. The `verify_*` scripts are integration tests taking minutes and
-needing a GPU. Add fast unit tests for the pure logic — `plan.py` determinism and
-budget arithmetic, `dataset.py` label boundaries and the off-by-one in
-`supervised_lengths`, `checkpoint.py` atomicity and every guard rail,
-`determinism.py` fingerprint comparison, the keep-set builder's merge closure.
-**Acceptance:** `pytest` green in under 60s on CPU; CI runs it per commit.
+No tests, no CI *for the core stack described here*. The `verify_*` scripts are
+integration tests taking minutes and needing a GPU. Add fast unit tests for the pure
+logic — `plan.py` determinism and budget arithmetic, `dataset.py` label boundaries
+and the off-by-one in `supervised_lengths`, `checkpoint.py` atomicity and every guard
+rail, `determinism.py` fingerprint comparison, the keep-set builder's merge closure.
+**Acceptance:** `pytest` green in under 60s on CPU.
+
+**Do not write "CI runs it per commit" into any acceptance criterion.** Hosted CI is
+not an available gate on this repository: every GitHub Actions run on
+`research/depth-aligned-semantic-transitions-v1` failed before a runner was assigned
+— 0 steps executed, `runner_id` 0 — with a billing annotation, and there is no
+budget to resolve it. The working pattern is a **local** gate that writes a
+machine-readable artifact; see
+`experiments/depth_aligned_semantic_transitions/scripts/qualify.py`, which runs the
+suite with the accelerator both visible and hidden and emits
+`qualification/latest.json`. That two-configuration property is not optional
+polish: a CPU-only hosted runner structurally cannot catch a defect that appears
+only when a GPU is present, and exactly such a defect made an earlier "pytest PASS"
+record reproducible on CPU only.
+
+The DAST package added 2026-08-30 already carries a suite on this pattern, so
+"no tests" is no longer true of the repository as a whole.
 
 ### I4. Shared utilities
 `sha256_file` ×3, `norm_hash` ×2, `classify` ×2, `count` ×2. Collapse into
