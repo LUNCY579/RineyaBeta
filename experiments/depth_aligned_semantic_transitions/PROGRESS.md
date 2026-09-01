@@ -1,5 +1,52 @@
 # DAST progress
 
+## 2026-09-01 — COMPLETE: four arms x three seeds. G3 passes. Forward ordering is the only arm that costs.
+
+**Status: EXPLORATORY_DEV, complete at the preregistered power level. TEST CLOSED.
+Not confirmatory: the preregistration is still unsigned.**
+
+All 12 runs finished. `docs/FINDINGS_G3_SEEDS.md` updated with the full dataset.
+
+| arm | s17 | s29 | s43 | mean |
+|---|---:|---:|---:|---:|
+| `state_final_repeated` | 0.8850 | 0.8912 | 0.9100 | **0.8954** |
+| `cot_baseline` | 0.8938 | 0.8950 | 0.8925 | **0.8937** |
+| `state_reverse` | 0.8900 | 0.8912 | 0.8950 | 0.8921 |
+| **`state_ordered`** | 0.8775 | 0.8862 | 0.8862 | **0.8833** |
+
+Pooled over 3 seeds, 2,400 paired problems:
+
+| contrast | diff | p |
+|---|---:|---:|
+| **ordered - final_repeated** | **-0.0121** | **0.0134** |
+| **ordered - baseline** | **-0.0104** | **0.0370** |
+| ordered - reverse | -0.0088 | 0.1102 |
+| reverse - final_repeated | -0.0033 | 0.5514 |
+| reverse - baseline | -0.0017 | 0.8000 |
+| final_repeated - baseline | +0.0017 | 0.7843 |
+
+**G3 passes, and it is the strongest contrast in the study.** Carrying a consistent
+auxiliary depth target is FREE: repeating the final state at every depth lands on
+baseline (+0.17 pp, p = 0.78). Only the canonical forward progression costs
+(-1.21 pp against final_repeated, p = 0.0134). The one weak link remains ordered vs
+reverse at p = 0.110.
+
+**Third over-reading of an under-seeded contrast, now recorded as a methodological
+result (§4a).** I called final_repeated "harmless" at 1 seed (-0.37 pp) and an
+"intermediate cost, a gradient not a binary" at 2 seeds (-0.63 pp). At 3 seeds it is
++0.17 pp. Seed 43 alone gives final_repeated - baseline at **p = 0.0288 POSITIVE**
+while seed 17 gives ordered - baseline at p = 0.0533 negative: single-seed contrasts
+here reach p < 0.05 in BOTH directions from noise. final_repeated is also the
+noisiest arm, 2.5 pp seed range against baseline's 0.25 pp.
+
+**Multiplicity recorded (§4b).** ~13 contrasts computed; Bonferroni at 0.0038 would
+admit neither headline. Both are nominally significant, neither robust to a strict
+family-wise correction over everything examined.
+
+Suite 117 tests, ruff clean.
+
+---
+
 ## 2026-09-01 — five corrections to the three-seed write-up, after external review
 
 **Status unchanged: BUILT — UNRUN on a qualifying run. TEST CLOSED. EXPLORATORY_DEV.**

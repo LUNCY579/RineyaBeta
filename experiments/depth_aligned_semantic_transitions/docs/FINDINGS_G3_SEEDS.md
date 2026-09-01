@@ -22,10 +22,14 @@ directory prefix is irrelevant.
 
 | arm | s17 | s29 | s43 | mean | n |
 |---|---:|---:|---:|---:|---:|
+| `state_final_repeated` | 0.8850 | 0.8912 | 0.9100 | **0.8954** | 3 |
 | **`cot_baseline`** | 0.8938 | 0.8950 | 0.8925 | **0.8937** | 3 |
 | `state_reverse` | 0.8900 | 0.8912 | 0.8950 | 0.8921 | 3 |
-| `state_ordered` | 0.8775 | 0.8862 | 0.8862 | **0.8833** | 3 |
-| `state_final_repeated` | — | 0.8912 | — | 0.8912 | **1** |
+| **`state_ordered`** | 0.8775 | 0.8862 | 0.8862 | **0.8833** | 3 |
+
+All four arms now have all three seeds. Note `state_final_repeated`'s seed range of
+**2.5 pp** (0.8850–0.9100) against `cot_baseline`'s 0.25 pp — it is by far the
+noisiest arm, which is why its two-seed reading was misleading (§4a).
 
 Mechanism metrics, seed-averaged:
 
@@ -39,15 +43,24 @@ Mechanism metrics, seed-averaged:
 Paired by problem id, clustered bootstrap by `generator` (30 clusters), exact
 McNemar on discordant pairs:
 
-| contrast | diff | clustered 95% CI | discordant | p |
+All pooled over three seeds, 2,400 paired problems:
+
+| contrast | pooled diff | discordant | p |
+|---|---:|---:|---:|
+| **ordered − final_repeated** | **−0.0121** | 50:79 | **0.0134** |
+| **ordered − baseline** | **−0.0104** | 54:79 | **0.0370** |
+| ordered − reverse | −0.0088 | 68:89 | 0.1102 |
+| reverse − final_repeated | −0.0033 | 65:73 | 0.5514 |
+| reverse − baseline | −0.0017 | 68:72 | 0.8000 |
+| final_repeated − baseline | +0.0017 | 62:58 | 0.7843 |
+
+Per-seed detail for the primary contrast:
+
+| ordered − baseline | diff | clustered 95% CI | discordant | p |
 |---|---:|---|---:|---:|
-| ordered − baseline, s17 | −0.0163 | [−0.0317, −0.0025] | 13:26 | 0.0533 |
-| ordered − baseline, s29 | −0.0088 | [−0.0209, +0.0036] | 19:26 | 0.3713 |
-| ordered − baseline, s43 | −0.0063 | [−0.0276, +0.0136] | 22:27 | 0.5682 |
-| **ordered − baseline, POOLED** | **−0.0104** | — | **54:79** | **0.0370** |
-| reverse − baseline, POOLED | −0.0017 | — | 68:72 | 0.8000 |
-| ordered − reverse, POOLED | −0.0088 | — | 68:89 | 0.1102 |
-| final_repeated − baseline, s29 | −0.0037 | [−0.0186, +0.0122] | 18:21 | 0.7493 |
+| s17 | −0.0163 | [−0.0317, −0.0025] | 13:26 | 0.0533 |
+| s29 | −0.0088 | [−0.0209, +0.0036] | 19:26 | 0.3713 |
+| s43 | −0.0063 | [−0.0276, +0.0136] | 22:27 | 0.5682 |
 
 ## 2. The result
 
@@ -65,11 +78,18 @@ SFT in all three seeds, pooled **−1.04 pp** across 2,400 paired problems at
 **p = 0.037**.
 
 ```text
-cot_baseline          0.8937  ─┐
-state_reverse         0.8921   ├─ neither differs detectably from baseline
-state_final_repeated  0.8912  ─┘   (reverse - baseline: p = 0.80)
-state_ordered         0.8833  ←    the only arm with a detectable deficit (p = 0.037)
+state_final_repeated  0.8954  ─┐
+cot_baseline          0.8937   ├─ mutually indistinguishable
+state_reverse         0.8921  ─┘   (both vs baseline: p = 0.78, p = 0.80)
+state_ordered         0.8833  ←    the only arm with a detectable deficit
 ```
+
+**G3 passes.** `state_ordered − state_final_repeated = −1.21 pp, p = 0.0134` over
+three seeds. Carrying a consistent auxiliary depth target is **free** — repeating
+the final state at every depth lands on baseline (+0.17 pp, p = 0.78). Only the
+canonical forward progression costs. That is the direct contrast `SSOT §8` G3 asks
+for, and it is now the *strongest* contrast in the study, stronger than
+ordered−baseline.
 
 **Wording correction.** An earlier draft of this document said the cost "is specific
 to the canonical forward assignment". That is stronger than the data supports, and
@@ -237,6 +257,37 @@ non-decreasing. Neither number is comparable across arms.
 5. **Narrow scope.** One 0.6B model, one procedurally-generated corpus, one LoRA
    configuration, one depth schedule. `SSOT §12` lists template overfitting as a
    live threat and no amount of seeds here addresses it.
+
+## 4a. Three times I over-read an under-seeded contrast
+
+Recorded because it is a methodological result about this endpoint, not merely an
+apology, and because the same trap will recur in any follow-up.
+
+| when | claim made | what the full data showed |
+|---|---|---|
+| 1 seed (`g2_budget`) | ordered−baseline "excludes zero", read as a finding | replicated to p = 0.037 pooled, but the s17 CI was the outlier of three |
+| 1 seed | `final_repeated` "harmless" at −0.37 pp | at 3 seeds it is **+0.17 pp** |
+| 2 seeds | `final_repeated` "intermediate cost", "a gradient not a binary" | seed 43 came in at **+1.75 pp** and the pooled figure is ~0 |
+
+The arithmetic forbidding all three was computed and written down *before* each
+claim: one seed at 800 DEV carries ~57% power at 6.0% discordance.
+
+The sharpest illustration is that **single-seed contrasts in this setup reach
+p < 0.05 in both directions from noise alone**: `state_ordered − cot_baseline` at
+seed 17 gives p = 0.0533 negative, while `state_final_repeated − cot_baseline` at
+seed 43 gives **p = 0.0288 positive**. Neither survives pooling. Any future
+single-seed result here should be treated as uninformative regardless of its p-value.
+
+## 4b. Multiplicity
+
+Roughly 13 paired contrasts have now been computed across this study. Bonferroni at
+α = 0.05/13 ≈ 0.0038 would admit **neither** ordered−final_repeated (0.0134) nor
+ordered−baseline (0.0370).
+
+That correction is conservative for a preregistered set — `PREREGISTRATION.md` §6
+names a small decisive family, not thirteen — but the honest position is that both
+headline contrasts are **nominally** significant and neither is robust to a strict
+family-wise correction over everything that was looked at.
 
 ## 5. Why two runs are missing
 
