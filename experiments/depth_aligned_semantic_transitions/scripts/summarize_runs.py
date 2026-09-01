@@ -68,15 +68,23 @@ def _load(directory: Path) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Summarise a DAST run batch")
-    parser.add_argument("--prefix", default="g3_")
+    # Comma-separated, because a single logical experiment can span prefixes: the
+    # seed-17 arms of this study live under g2_budget_ while seeds 29 and 43 live
+    # under g3_. Keying on the manifest means runs group by (arm, seed) regardless
+    # of which directory prefix they happen to carry.
+    parser.add_argument("--prefix", default="g2_budget_,g3_")
     parser.add_argument("--baseline-arm", default="cot_baseline")
     parser.add_argument("--json", dest="json_out")
     parser.add_argument("--bootstrap", type=int, default=5000)
     args = parser.parse_args(argv)
 
+    prefixes = [p.strip() for p in args.prefix.split(",") if p.strip()]
     found: dict[tuple[str, str], dict] = {}
     pending: list[str] = []
-    for directory in sorted(RUNS.glob(f"{args.prefix}*")):
+    candidates: list[Path] = []
+    for prefix in prefixes:
+        candidates.extend(sorted(RUNS.glob(f"{prefix}*")))
+    for directory in sorted(set(candidates)):
         if not directory.is_dir():
             continue
         if not _complete(directory):
@@ -90,7 +98,7 @@ def main(argv: list[str] | None = None) -> int:
         found[(arm, seed)] = {**_load(directory), "dir": directory}
 
     if not found:
-        print(f"no completed runs matching {args.prefix}*")
+        print(f"no completed runs matching {prefixes}")
         if pending:
             print("in progress / incomplete: " + ", ".join(pending))
         return 0
@@ -98,7 +106,7 @@ def main(argv: list[str] | None = None) -> int:
     arms = sorted({arm for arm, _ in found})
     seeds = sorted({seed for _, seed in found}, key=int)
 
-    print(f"=== {args.prefix}* : {len(found)} completed run(s), "
+    print(f"=== {'|'.join(prefixes)} : {len(found)} completed run(s), "
           f"{len(pending)} incomplete ===")
     if pending:
         print("    incomplete: " + ", ".join(pending))

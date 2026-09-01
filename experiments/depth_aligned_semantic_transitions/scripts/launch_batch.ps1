@@ -46,6 +46,17 @@ $err = Join-Path $runs "_batch_$stamp.err"
 $env:PYTHONPATH = Join-Path $pkg "src"
 $env:PYTHONHASHSEED = "0"
 $env:PYTHONIOENCODING = "utf-8"
+# This 8 GiB accelerator is SHARED with the desktop. Measured with no training
+# running at all, ~20 desktop processes (dwm, explorer, Edge, the Claude app,
+# NVIDIA Overlay, ShareX, Radeon software) held 5592 of 8188 MiB, leaving under
+# 2.6 GiB. Two runs of a 9-run batch died on that squeeze: one CUDA OOM and one
+# CUBLAS_STATUS_INTERNAL_ERROR in a bf16 GEMM, both inside backward.
+#
+# expandable_segments lets the caching allocator grow segments instead of
+# demanding one contiguous block, which is the difference between surviving a
+# fragmented 2.6 GiB and failing. It changes allocation strategy only -- no
+# effect on numerics, on the config hash, or on the protocol.
+$env:PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True"
 
 $argList = @("-u", "scripts\resume_runs.py", "--run", "--tags") + $Tags
 $proc = Start-Process -FilePath $Python -ArgumentList $argList -WorkingDirectory $pkg `
