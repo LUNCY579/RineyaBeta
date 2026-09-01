@@ -181,9 +181,18 @@ and its committed artifact says identity rank 1, reverse rank 4, spread 0.00816
 (3.66%). The direction replicates three times; those specific numbers should not be
 cited.
 
-## 8. Open mechanistic questions
+## 8. Open mechanistic questions — three of four now answered
 
-H1–H7 are stated in [`DAST_V2_HYPOTHESIS_TREE.md`](DAST_V2_HYPOTHESIS_TREE.md). V1 does **not** decide among them. The next authorized work is cheap diagnosis (B1/B2/C1), not a more complicated architecture and not the unsigned 9-run [`PREREGISTRATION_V2.md`](PREREGISTRATION_V2.md) matrix.
+H1–H7 are stated in [`DAST_V2_HYPOTHESIS_TREE.md`](DAST_V2_HYPOTHESIS_TREE.md). The cheap diagnosis it authorised has now largely run:
+
+| | result |
+|---|---|
+| **B2** (H2, gradient conflict) | **Not supported.** All three arms within 2σ of each other and within ~0.01 of orthogonal. V2 matrix stays parked. |
+| **C2** (H5, example heterogeneity) | **Reliable but negligible.** Split-half r ≈ 0.37–0.39 against a null of 0.08–0.10, but the whole permutation spread is 1.89% of `L_state`. Adaptive DAST stays forbidden. |
+| **C1c** (H6, target object) | **Defect diagnosed.** The objective is satisfiable from the layer-0 token embedding, and four bottom layers fit it better than V1's sites. |
+| **B1** (H1/H4, localization) | **Not run, and not answerable on this endpoint** — a one-seed pilot has MDE 2.27 pp against a full deficit of 1.00 pp (§3b). |
+
+**Consequence: the recommendation is to CLOSE the DAST training direction as formulated and keep the probe framework.** This is a close on the *target object*, not merely on the depth mapping. Any successor must change what is supervised and must first clear a **layer-0 recoverability control**.
 
 ## 9. Stop rules still in force
 

@@ -1,5 +1,54 @@
 # DAST progress
 
+## 2026-09-01 (final pass) — B2 RUN: H2 not supported. Recommendation: CLOSE.
+
+**Status: V1 CLOSED — NEGATIVE. Recommendation now extends to closing the DAST
+TRAINING DIRECTION as formulated, keeping the probe framework. TEST sealed. V2
+nine-run matrix stays PARKED and unsigned. 170 tests pass.**
+
+### 9. B2 ran — the GPU freed up and the signed condition was met
+Seed 29, three arms, 32 matched minibatches, separate `autograd.grad`, no optimizer
+step, production loss untouched.
+
+| arm | global cosine | LoRA-only cosine | frac modules < 0 |
+|---|---:|---:|---:|
+| ordered | −0.00167 ± 0.00156 | −0.00623 ± 0.00516 | 0.534 |
+| reverse | +0.00168 ± 0.00177 | +0.00475 ± 0.00511 | 0.479 |
+| final_repeated | −0.00063 ± 0.00121 | −0.00364 ± 0.00668 | 0.481 |
+
+Every contrast inside 2σ (largest |t| = 1.51). Direction is consistently as H2
+predicts — ordered most negative, most anti-aligned modules, on all three metrics —
+but the magnitude settles it: **|cosine| ≈ 0.006. The LM and state objectives are
+essentially orthogonal, not in conflict.**
+
+The frozen stop rule fired: cosines similar across arms → H2 is not the primary
+story → do not sign the V2 matrix. B3's trigger (conditional on B1/B2 showing
+interference) therefore also does not fire.
+
+A LoRA-only cosine is reported because `global_cosine` spans the `state_projector`,
+where `grad_lm` is identically zero, which shrinks |cosine| for every arm alike. Not
+excluded: a transient early-training conflict — B2 reads adapters at step 250, not a
+trajectory.
+
+### 10. Where the diagnosis tree has landed
+| branch | result | consequence |
+|---|---|---|
+| B2 (H2) | orthogonal, no arm difference | H2 dropped; V2 parked |
+| C2 (H5) | reliable (r≈0.37–0.39 vs null 0.08–0.10) but 1.89%-of-`L_state` small | Adaptive forbidden |
+| C1c (H6) | objective satisfiable at layer 0; bottom four layers beat the V1 sites | target-design defect diagnosed |
+| B1 (H1/H4) | not run; MDE 2.27 pp at one seed vs a 1.00 pp deficit | not answerable on this endpoint |
+
+> **Recommendation: CLOSE the DAST training direction as formulated. Keep the
+> probe/instrumentation framework, which is now the durable output.**
+
+This is a close on the **target object**, not merely on the depth mapping. `L_state`
+supervises something recoverable from the prompt's token-embedding centroid, so no
+rearrangement of *where* it is applied can rescue it. The only successor with a
+mechanism-level argument left is motion/ΔH (H6) — and it spends the SSOT §13
+revision budget and must clear a **layer-0 recoverability control** first, which is
+now a mandatory gate on any new target.
+
+
 ## 2026-09-01 (later still) — A no-op filter, corrected C1, and C2 answered
 
 **Status unchanged: CLOSED — NEGATIVE (EXPLORATORY DEV). TEST sealed. B2 still

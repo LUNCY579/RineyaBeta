@@ -25,7 +25,7 @@ demotes B1/B3 as capability tests and promotes Stage E from optional to
 |---|---|---|---|---|
 | 1 | C1 frozen landscape K=4 + C1c controls | 0 (CPU) | **RUN**, written up | no |
 | 2 | **Stage E** paired teacher-forced NLL from the 12 existing adapters | ~0.5 (forward-only, no retraining) | **PROMOTED — run when GPU idle** | no |
-| 3 | B2 gradient cosine on existing V1 adapters | ~0.3–1.0 | **DEFERRED — GPU busy** | no |
+| 3 | B2 gradient cosine on existing V1 adapters | ~0.3 (spent) | **RUN** — H2 not supported; V2 stays parked | no |
 | 4 | C2 per-problem π* (CPU) | 0 | **RUN** — reliable but 0.003-sized; Adaptive stays forbidden | no |
 | 5 | C1 optional K=5/6 `--require-distinct` | 0 if cache exists | optional | no |
 | 6 | B1 single-checkpoint one-seed pilots | ~4–5 (5× ~50 min) | **FROZEN** — and see the power gate below | no |
@@ -71,15 +71,29 @@ Optional K=5/6 only with an existing depth cache and `--require-distinct`. No GP
 
 ---
 
-## B2 — signed for a short diagnostic if GPU idle
+## B2 — RUN. H2 not supported.
 
-**Question:** Is ordered cosine(g_LM, g_state) more negative than reverse / final-repeated?
-**Method:** separate `autograd.grad` on `L_LM` and `L_state`; **no optimizer step**.
-**Arms:** existing V1 run dirs, seed 29 preferred (complete adapters).
-**Refuse** if `dast.cli train` or `resume_runs.py` is running.
-**Do not** change production loss.
+Seed 29, three arms, 32 matched minibatches each, separate `autograd.grad`, no
+optimizer step, production loss untouched.
+[`../artifacts/b2_verdict_s29.json`](../artifacts/b2_verdict_s29.json)
 
-Stop: if cosines are similar across arms, H2 is not the primary story; do not sign the V2 matrix.
+| arm | global cosine | LoRA-only cosine | frac modules < 0 |
+|---|---:|---:|---:|
+| ordered | −0.00167 ± 0.00156 | −0.00623 ± 0.00516 | 0.534 |
+| reverse | +0.00168 ± 0.00177 | +0.00475 ± 0.00511 | 0.479 |
+| final_repeated | −0.00063 ± 0.00121 | −0.00364 ± 0.00668 | 0.481 |
+
+Every contrast inside 2σ (largest |t| = 1.51). Direction is consistently as H2
+predicts; magnitude says it does not matter — |cosine| ≈ 0.006, i.e. essentially
+orthogonal.
+
+**The frozen stop rule fired: cosines are similar across arms, so H2 is not the
+primary story and the V2 matrix is not signed.**
+
+A LoRA-only cosine is reported because `global_cosine` includes the
+`state_projector`, where `grad_lm` is identically zero — that block shrinks
+|cosine| toward zero for every arm alike. Not excluded: a *transient* early-training
+conflict, since this reads adapters at step 250 rather than a trajectory.
 
 ---
 
@@ -105,10 +119,13 @@ Compare each to V1 `g2_budget_cot_baseline` seed 17 and to V1 ordered seed 17. I
 
 ---
 
-## B3 — grid frozen, not launched
+## B3 — grid frozen, trigger did NOT fire
 
 λ ∈ {0, 0.1, 0.25, 0.5, 1.0} × V1 `state_weight` (1.0), ordered arm, seed 17 only.
-Launch only if B1/B2 indicate interference. Do not add extra λ after seeing results.
+Launch only if B1/B2 indicate interference. **B2 shows none, so B3's trigger has not
+fired.** It also inherits the power gate: the "mechanism saturates while accuracy
+falls" pattern needs an accuracy endpoint that can see a sub-2 pp fall, and this one
+cannot. Do not add extra λ after seeing results.
 
 Informative pattern: mechanism saturates early while generated accuracy worsens as λ increases → H3 “readable ≠ useful”.
 

@@ -30,10 +30,17 @@ One checkpoint/state pairing, especially the deepest coherent checkpoint (layer
 `L_state` gradients under forward chronological supervision anti-align with
 `L_LM` more than reverse or flat-target supervision.
 
-- **Currently:** compatible with trained `L_state` ordered > reverse in every seed, while frozen geometry mildly prefers forward. Not demonstrated.
-- **Test:** B2 cosine(g_LM, g_state) on matched minibatches for ordered / reverse / final-repeated (and B1 arms if they run).
-- **If yes:** λ reduction (B3) or soft constraint; the parked [`PREREGISTRATION_V2.md`](PREREGISTRATION_V2.md) matrix becomes eligible **only then**.
-- **If no:** do not force the conflict story.
+- **MEASURED — NOT SUPPORTED.** B2, seed 29, three arms, 32 matched minibatches each:
+
+  | arm | global cosine | LoRA-only cosine | frac modules < 0 |
+  |---|---:|---:|---:|
+  | ordered | −0.00167 ± 0.00156 | −0.00623 ± 0.00516 | 0.534 |
+  | reverse | +0.00168 ± 0.00177 | +0.00475 ± 0.00511 | 0.479 |
+  | final_repeated | −0.00063 ± 0.00121 | −0.00364 ± 0.00668 | 0.481 |
+
+  Every contrast is inside 2σ (largest |t| = 1.51). The ordering is consistently in H2's predicted direction — ordered is most negative and most anti-aligned on all three metrics — but the magnitudes settle it: |cosine| ≈ 0.006. **The objectives are not fighting; they are essentially orthogonal**, which is what two unrelated objectives look like in a 10M-dimensional space.
+- **Consequence:** per the frozen stop rule, H2 is **not** the primary story and [`PREREGISTRATION_V2.md`](PREREGISTRATION_V2.md) stays **PARKED and unsigned**.
+- **Not excluded:** a *transient* early-training conflict. B2 reads adapters saved at step 250, not a trajectory. Reopening H2 requires a step-resolved measurement, not a re-run of this one.
 
 ### H3 — Overconstraint
 
@@ -85,9 +92,11 @@ B1: is the deficit concentrated at one checkpoint?
   deepest→s1 harmless AND deepest→s4 hurts → H4 target content.
   both deepest mappings hurt → deepest auxiliary itself.
 
-B2: is ordered cosine(g_LM, g_state) systematically more negative than reverse/flat?
-  YES → H2. λ sweep B3 frozen at {0, 0.1, 0.25, 0.5, 1.0}×λ0. Do not sign V2 until this fires.
-  NO → drop H2 as the primary story.
+B2 (DONE): is ordered cosine(g_LM, g_state) more negative than reverse/flat?
+  NO. All arms within 2 sigma of each other and within ~0.01 of orthogonal.
+  => H2 dropped as the primary story. V2 matrix stays PARKED.
+  => B3 (lambda sweep) loses its trigger: it was conditional on B1/B2 showing
+     interference, and B2 shows none.
 
 C1/C1c (done): landscape nearly flat; no chronological layer ridge; the whole
   signal is present at layer 0, before any decoder layer, and the bottom four
@@ -122,5 +131,30 @@ B1 unstructured <2 pp AND B2 similar across arms AND C2 null?
   whatever the truth is. Close on B2 + C2 + the C1c target-design defect, not on a
   null accuracy column. See DAST_NEXT_EXPERIMENTS.md, power gate.
 ```
+
+---
+
+## Where the tree has actually landed (2026-09-01)
+
+Three of the four cheap diagnostics have run, and they converge:
+
+| branch | result | consequence |
+|---|---|---|
+| **B2** | cosines orthogonal, no arm difference | H2 dropped; V2 matrix stays parked |
+| **C2** | reliability passes (r≈0.37–0.39 vs null 0.08–0.10), magnitude fails (spread 1.89% of `L_state`) | Adaptive DAST stays forbidden |
+| **C1c** | the objective is satisfiable from the layer-0 token embedding; four bottom layers beat the V1 sites | H6 raised to a diagnosed target-design defect |
+| **B1** | not run — and the endpoint power analysis shows its accuracy column *cannot* answer the localization question at any affordable seed count | H1/H4 remain formally open but are not reachable on this endpoint |
+
+**Recommendation: CLOSE the DAST training direction as formulated, and keep the
+probe/instrumentation framework.** The tree's close-out branch asked for B2 similar
+across arms and C2 null; B2 is similar across arms, and C2 is null *in magnitude*
+even though it is positive in reliability. C1c supplies the reason the whole
+formulation underdelivers: `L_state` supervises a quantity that needs no depth.
+
+This is a close on the **target object**, not merely on the depth mapping. Any
+successor must therefore change what is supervised, and must clear a **layer-0
+recoverability control** before anything else — including motion/ΔH (H6), which is
+the only remaining candidate with a mechanism-level argument behind it and which
+spends the SSOT §13 revision budget.
 
 **Do not implement more than one successor.** Bidirectional requires reverse **accuracy** advantage. Adaptive requires C2. Motion spends the revision budget. The parked V2 9-run matrix is H2-only and stays unsigned until B2 supports it.
