@@ -1,0 +1,222 @@
+{
+  "scorer_fix_commit": "f160f38",
+  "provenance": {
+    "cot_baseline@17": {
+      "directory": "g2_budget_cot_baseline",
+      "git_revision": "e3ca792b9952ba41b62e2dfbaf12acbf95aeb12d",
+      "after_scorer_fix": false
+    },
+    "state_final_repeated@17": {
+      "directory": "g3_s17_state_final_repeated",
+      "git_revision": "31cf2f273a8a01636b8fae03761f121a3a24e0ce",
+      "after_scorer_fix": true
+    },
+    "state_ordered@17": {
+      "directory": "g2_budget_state_ordered",
+      "git_revision": "1dce3cdb5eeb5d6d62a7c89654c42f2df788111e",
+      "after_scorer_fix": false
+    },
+    "state_reverse@17": {
+      "directory": "g2_budget_state_reverse",
+      "git_revision": "e3ca792b9952ba41b62e2dfbaf12acbf95aeb12d",
+      "after_scorer_fix": false
+    },
+    "cot_baseline@29": {
+      "directory": "g3_s29_cot_baseline",
+      "git_revision": "9735aedb79705bbda2e83b614d1ccc725b82af6e",
+      "after_scorer_fix": true
+    },
+    "state_final_repeated@29": {
+      "directory": "g3_s29_state_final_repeated",
+      "git_revision": "9735aedb79705bbda2e83b614d1ccc725b82af6e",
+      "after_scorer_fix": true
+    },
+    "state_ordered@29": {
+      "directory": "g3_s29_state_ordered",
+      "git_revision": "1412c79b420a48a435f26303eb47d1eab2c868cb",
+      "after_scorer_fix": true
+    },
+    "state_reverse@29": {
+      "directory": "g3_s29_state_reverse",
+      "git_revision": "1412c79b420a48a435f26303eb47d1eab2c868cb",
+      "after_scorer_fix": true
+    },
+    "cot_baseline@43": {
+      "directory": "g3_s43_cot_baseline",
+      "git_revision": "9735aedb79705bbda2e83b614d1ccc725b82af6e",
+      "after_scorer_fix": true
+    },
+    "state_final_repeated@43": {
+      "directory": "g3_s43_state_final_repeated",
+      "git_revision": "6a80f1d88198e888f059aa8bbca1654bed190335",
+      "after_scorer_fix": true
+    },
+    "state_ordered@43": {
+      "directory": "g3_s43_state_ordered",
+      "git_revision": "9735aedb79705bbda2e83b614d1ccc725b82af6e",
+      "after_scorer_fix": true
+    },
+    "state_reverse@43": {
+      "directory": "g3_s43_state_reverse",
+      "git_revision": "9735aedb79705bbda2e83b614d1ccc725b82af6e",
+      "after_scorer_fix": true
+    }
+  },
+  "flipped_verdicts": {
+    "state_ordered@17": [
+      {
+        "problem_id": "rineya_si_v1_recursive_state_updates_1300",
+        "rescored": true,
+        "answer_type": "state",
+        "expected": "A=ON, B=OFF, C=OFF, D=OFF",
+        "extracted": "D=OFF, B=OFF, C=OFF, A=ON",
+        "as_scored": false
+      }
+    ]
+  },
+  "accuracy": {
+    "cot_baseline": {
+      "per_seed_published": [
+        0.89375,
+        0.895,
+        0.8925
+      ],
+      "per_seed_rescored": [
+        0.89375,
+        0.895,
+        0.8925
+      ],
+      "mean_published": 0.8937499999999999,
+      "mean_rescored": 0.8937499999999999
+    },
+    "state_final_repeated": {
+      "per_seed_published": [
+        0.885,
+        0.89125,
+        0.91
+      ],
+      "per_seed_rescored": [
+        0.885,
+        0.89125,
+        0.91
+      ],
+      "mean_published": 0.8954166666666667,
+      "mean_rescored": 0.8954166666666667
+    },
+    "state_ordered": {
+      "per_seed_published": [
+        0.8775,
+        0.88625,
+        0.88625
+      ],
+      "per_seed_rescored": [
+        0.87875,
+        0.88625,
+        0.88625
+      ],
+      "mean_published": 0.8833333333333333,
+      "mean_rescored": 0.88375
+    },
+    "state_reverse": {
+      "per_seed_published": [
+        0.89,
+        0.89125,
+        0.895
+      ],
+      "per_seed_rescored": [
+        0.89,
+        0.89125,
+        0.895
+      ],
+      "mean_published": 0.8920833333333333,
+      "mean_rescored": 0.8920833333333333
+    }
+  },
+  "contrasts": {
+    "state_ordered - state_final_repeated": {
+      "as_scored": {
+        "delta": -0.012083333333333333,
+        "discordant_favouring_first": 50,
+        "discordant_favouring_second": 79,
+        "p": 0.013380437039568115
+      },
+      "rescored": {
+        "delta": -0.011666666666666667,
+        "discordant_favouring_first": 50,
+        "discordant_favouring_second": 78,
+        "p": 0.016670734269697562
+      }
+    },
+    "state_ordered - cot_baseline": {
+      "as_scored": {
+        "delta": -0.010416666666666666,
+        "discordant_favouring_first": 54,
+        "discordant_favouring_second": 79,
+        "p": 0.03702851006415334
+      },
+      "rescored": {
+        "delta": -0.01,
+        "discordant_favouring_first": 54,
+        "discordant_favouring_second": 78,
+        "p": 0.044885393128902384
+      }
+    },
+    "state_ordered - state_reverse": {
+      "as_scored": {
+        "delta": -0.00875,
+        "discordant_favouring_first": 68,
+        "discordant_favouring_second": 89,
+        "p": 0.11015726076112886
+      },
+      "rescored": {
+        "delta": -0.008333333333333333,
+        "discordant_favouring_first": 68,
+        "discordant_favouring_second": 88,
+        "p": 0.1279376757036481
+      }
+    },
+    "state_reverse - state_final_repeated": {
+      "as_scored": {
+        "delta": -0.0033333333333333335,
+        "discordant_favouring_first": 65,
+        "discordant_favouring_second": 73,
+        "p": 0.5514132796665223
+      },
+      "rescored": {
+        "delta": -0.0033333333333333335,
+        "discordant_favouring_first": 65,
+        "discordant_favouring_second": 73,
+        "p": 0.5514132796665223
+      }
+    },
+    "state_reverse - cot_baseline": {
+      "as_scored": {
+        "delta": -0.0016666666666666668,
+        "discordant_favouring_first": 68,
+        "discordant_favouring_second": 72,
+        "p": 0.79995641408785
+      },
+      "rescored": {
+        "delta": -0.0016666666666666668,
+        "discordant_favouring_first": 68,
+        "discordant_favouring_second": 72,
+        "p": 0.79995641408785
+      }
+    },
+    "state_final_repeated - cot_baseline": {
+      "as_scored": {
+        "delta": 0.0016666666666666668,
+        "discordant_favouring_first": 62,
+        "discordant_favouring_second": 58,
+        "p": 0.7843281773322222
+      },
+      "rescored": {
+        "delta": 0.0016666666666666668,
+        "discordant_favouring_first": 62,
+        "discordant_favouring_second": 58,
+        "p": 0.7843281773322222
+      }
+    }
+  },
+  "claim_boundary": "Re-scoring changes verdicts only, never generated text. DEV only; TEST sealed. The corrected numbers are the ones to cite: they apply one scorer to all 12 runs."
+}
