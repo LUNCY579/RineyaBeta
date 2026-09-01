@@ -36,7 +36,7 @@ from typing import Any, Sequence
 import torch
 
 from dast.alignment import resolve_checkpoint_layers
-from dast.config import ARM_SPECS, DASTConfig
+from dast.config import ARM_SPECS, DASTConfig, assert_split_allowed
 from dast.data import build_examples, load_records
 from dast.model import infer_num_hidden_layers, locate_final_norm
 from dast.pooling import pool_prompt_hidden
@@ -215,6 +215,12 @@ def build_depth_cache(
 ) -> DepthCache:
     """Run the frozen backbone once and pool prompt hidden states at ``layers``."""
 
+    # The seal check comes FIRST, before the model or any path is touched. This is
+    # a load site that does not go through training.py's gate, so a library caller
+    # could otherwise reach load_records with the seal unchecked.
+    split = split or config.data.eval_split
+    assert_split_allowed(config, split)
+
     if readout not in ("raw", "final_norm"):
         raise ValueError(f"unsupported readout: {readout}")
     num_hidden_layers = infer_num_hidden_layers(base_model)
@@ -226,7 +232,6 @@ def build_depth_cache(
     if readout == "final_norm" and final_norm is None:
         raise ValueError("readout='final_norm' requires a locatable final norm layer")
 
-    split = split or config.data.eval_split
     records = load_records(
         config.data_path_for_split(split),
         split=split,

@@ -454,7 +454,10 @@ def load_config(path: str | Path) -> DASTConfig:
 def assert_split_allowed(config: DASTConfig, split: str) -> None:
     """Keep the sealed TEST split closed unless a frozen protocol explicitly opens it."""
 
-    if split.lower() != "test":
+    # Normalise before comparing. Without .strip() a split of " test " -- which
+    # data_path_for_split and load_records both tolerate -- compares unequal to
+    # "test", returns here, and reaches the file open with the seal never checked.
+    if split.strip().lower() != "test":
         return
     if not config.experiment.allow_sealed_test:
         raise PermissionError("TEST is sealed: experiment.allow_sealed_test is false")
