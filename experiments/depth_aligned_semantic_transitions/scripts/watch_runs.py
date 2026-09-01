@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -98,16 +99,43 @@ def _accelerator_mib() -> int:
         return -1  # unknown; never counted as idle
 
 
+_EXIT_LINE = re.compile(r"^### \[\d+/\d+\]\s+(?P<tag>\S+)\s+EXIT=(?P<code>-?\d+)")
+
+
+def _batch_exits(log_path: str | None) -> list[tuple[str, int]]:
+    """Per-run exit codes recorded by resume_runs.py, oldest first."""
+
+    if not log_path:
+        return []
+    try:
+        text = Path(log_path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    out = []
+    for line in text.splitlines():
+        match = _EXIT_LINE.match(line.strip())
+        if match:
+            out.append((match["tag"], int(match["code"])))
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Live watchdog for DAST run batches")
     parser.add_argument("--tags", nargs="+", required=True, help="run directory names under runs/")
     parser.add_argument("--interval", type=float, default=60.0)
     parser.add_argument("--stale-polls", type=int, default=3, help="idle polls before STALE")
     parser.add_argument("--idle-mib", type=int, default=1500, help="below this the GPU is idle")
+    parser.add_argument(
+        "--batch-log",
+        help="resume_runs.py log to scan for nonzero EXIT lines. Without this, a run "
+             "that fails while the batch CONTINUES is invisible: the FAILED check "
+             "below only fires when no trainer is alive at all.",
+    )
     args = parser.parse_args(argv)
 
     seen_complete: set[str] = set()
     seen_failed: set[str] = set()
+    seen_exit: set[str] = set()
     idle_streak = 0
     stale_reported = False
     started = time.monotonic()
@@ -132,6 +160,19 @@ def main(argv: list[str] | None = None) -> int:
         if len(seen_complete) == total:
             emit(f"DONE all {total} runs complete")
             return 0
+
+        # A run can die while the batch moves on to the next one. That leaves a
+        # trainer alive, so the liveness check below stays quiet and the failure is
+        # never reported. The batch log is the authoritative record of per-run exit
+        # codes, so it is scanned every poll.
+        for tag, code in _batch_exits(args.batch_log):
+            key = f"{tag}:{code}"
+            if code != 0 and key not in seen_exit:
+                seen_exit.add(key)
+                emit(
+                    f"FAILED {tag} exited {code} while the batch continued -- "
+                    f"re-queue it with: python scripts/resume_runs.py --run --tags {tag}"
+                )
 
         alive = _trainer_alive()
         mib = _accelerator_mib()
