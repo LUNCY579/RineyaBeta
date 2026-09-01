@@ -1,5 +1,70 @@
 # DAST progress
 
+## 2026-09-01 — three-seed replication: mechanism learned, forward ordering COSTS accuracy
+
+**Status: BUILT — UNRUN on a qualifying (signed-preregistration) run. TEST CLOSED.
+EXPLORATORY_DEV at the preregistered power level. The primary contrast is complete
+across three seeds; it is not confirmatory because the preregistration is unsigned.**
+
+Full report: `docs/FINDINGS_G3_SEEDS.md`. Seeds 17/29/43, 4,000 train / 800 DEV,
+250 optimizer steps, ~50 min per run.
+
+| arm | s17 | s29 | s43 | mean | n |
+|---|---:|---:|---:|---:|---:|
+| **`cot_baseline`** | 0.8938 | 0.8950 | 0.8925 | **0.8937** | 3 |
+| `state_reverse` | 0.8900 | 0.8912 | 0.8950 | 0.8921 | 3 |
+| `state_ordered` | 0.8775 | 0.8862 | 0.8862 | **0.8833** | 3 |
+| `state_final_repeated` | - | 0.8912 | - | 0.8912 | **1** |
+
+| contrast | pooled diff | discordant | p |
+|---|---:|---:|---:|
+| **ordered - baseline** | **-0.0104** | 54:79 | **0.0370** |
+| reverse - baseline | -0.0017 | 68:72 | 0.8000 |
+| ordered - reverse | -0.0088 | 68:89 | 0.1102 |
+
+**The result.** The shared projector learns the depth-to-state alignment extremely
+well - order margin 0.935, checkpoint top-1 0.833 against 0.25 chance, monotonic
+progress 0.985, LM perplexity untouched. It also does not help: `state_ordered` is
+below plain CoT SFT in all three seeds, pooled -1.04 pp at p = 0.037 over 2,400
+paired problems. And the cost is specific to the canonical FORWARD assignment -
+reversing it costs -0.17 pp (p = 0.80, positive at seed 43) and flattening it to a
+repeated final state costs -0.37 pp (p = 0.75, one seed).
+
+**No directional advantage, and this is the cleanest result.** `L_state` scores each
+arm on its OWN targets: reverse 0.2520/0.2518/0.2563 against ordered
+0.2622/0.2644/0.2621. A fully reversed assignment is EASIER to fit, in every seed.
+The margin and monotonic columns cannot be used for that comparison because they are
+computed against canonical order and penalise reverse by construction.
+
+**Four constraints.** -1.04 pp is BELOW the 2.0 pp practical margin fixed in
+`PREREGISTRATION.md` before these runs, and that bar is not being moved now the
+effect landed under it. The preregistration is unsigned, so nothing is confirmatory.
+G3 has one seed of three. Scope is one 0.6B model on one procedurally-generated
+corpus.
+
+**Two runs missing, environmental.** Both `state_final_repeated` failures were
+accelerator-memory faults, not code: with no training running, ~20 desktop processes
+held 5,592 of 8,188 MiB, and desktop consumption drifted from ~2.5 GiB overnight to
+5.6 GiB by 07:00. One CUDA OOM (partly self-inflicted - GPU-touching tests were run
+during training, see 9735aed) and one CUBLAS_STATUS_INTERNAL_ERROR in a bf16 GEMM.
+Mitigations added, both protocol-neutral: expandable_segments in the launcher, and
+`--min-free-mib` in resume_runs.py so a run waits for headroom instead of wasting 50
+minutes dying into a squeeze. Batch sizes and sequence length were deliberately NOT
+reduced - that would have changed the config hash and made the re-queued runs a
+different protocol from their own seed-mates. Re-queued after the reboot with 7.6 GiB
+free.
+
+### Next permitted action
+
+Finish G3 at seeds 17 and 43, which decides the interpretation: whether the cost is
+specific to progressive forward supervision, or comes from carrying any consistent
+auxiliary depth target. Then the Stage-C freeze decision, which is the operator's.
+The recorded revision candidate remains semantic MOTION rather than absolute state
+(`PHASE0_READINESS.md` §3.8), and spending the SSOT §13 one-mechanism budget is a
+decision, not an implementation detail.
+
+---
+
 ## 2026-08-31 — budget escalation: mechanism learned, capability HARMED
 
 **Status: BUILT — UNRUN on a qualifying frozen multi-seed arm run. TEST CLOSED.
