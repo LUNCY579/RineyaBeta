@@ -1,0 +1,92 @@
+{
+  "num_problems": 2400,
+  "num_stages": 4,
+  "splits": 20,
+  "real_layers": [
+    7,
+    14,
+    21,
+    27
+  ],
+  "conditions": {
+    "real": {
+      "identity_L_state": 0.12397028728946177,
+      "identity_order_margin": 1.1216236377731938,
+      "identity_top1": 0.8653333365917206,
+      "identity_rank_median": 2,
+      "best_perm": [
+        1,
+        2,
+        3,
+        0
+      ],
+      "best_L_state": 0.12360819368490458,
+      "L_state_spread": 0.0072389952699458415,
+      "spread_fraction_of_L_state": 0.05839298616000868
+    },
+    "embedding_only": {
+      "identity_L_state": 0.8457578499978604,
+      "identity_order_margin": 4.163336342344337e-18,
+      "identity_top1": 0.25,
+      "identity_rank_median": 1,
+      "best_perm": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_L_state": 0.8457578499978604,
+      "L_state_spread": 4.4408920985006264e-17,
+      "spread_fraction_of_L_state": 5.2507843687313823e-17
+    },
+    "embedding_x4": {
+      "identity_L_state": 0.11127105617168535,
+      "identity_order_margin": 1.1371025590208643,
+      "identity_top1": 0.86152084171772,
+      "identity_rank_median": 2,
+      "best_perm": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_L_state": 0.11127105617168535,
+      "L_state_spread": 0.009378379534261034,
+      "spread_fraction_of_L_state": 0.0842840883957342
+    },
+    "shuffled_pairing": {
+      "identity_L_state": 0.6747383416175965,
+      "identity_order_margin": 0.4165131368173237,
+      "identity_top1": 0.581260421872139,
+      "identity_rank_median": 24,
+      "best_perm": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "best_L_state": 0.6683934254563154,
+      "L_state_spread": 0.00712285837280619,
+      "spread_fraction_of_L_state": 0.010556474908080772
+    }
+  },
+  "trained_state_ordered_reference": {
+    "L_state": 0.2629,
+    "order_margin": 0.935,
+    "top1": 0.8332
+  },
+  "cache_metadata": {
+    "split": "dev",
+    "num_problems": 2400,
+    "hidden_size": 1024,
+    "model": "Qwen/Qwen3-0.6B",
+    "max_length": 512,
+    "truncation": "preserve_target",
+    "system_prompt": "Solve the problem carefully. Give a concise reasoning trace and make the final answer explicit.",
+    "config_sha256": "8256507551ca66884724d9b188e95c86d1c35c76dd53fd284c4366e91b31f8d5",
+    "seed": 29,
+    "lora_loaded": false,
+    "git_revision": "c023758d64add1de458385441f2fc29215d99b25",
+    "built_by": "scripts/build_depth_cache.py"
+  }
+}
