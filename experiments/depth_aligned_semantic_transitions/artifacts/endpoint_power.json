@@ -1,0 +1,80 @@
+{
+  "discordance_rate": 0.05541666666666667,
+  "practical_margin": 0.02,
+  "alpha": 0.05,
+  "target_power": 0.8,
+  "minimum_detectable_effect": [
+    {
+      "seeds": 1,
+      "records": 800,
+      "mde": 0.022733432195898014
+    },
+    {
+      "seeds": 2,
+      "records": 1600,
+      "mde": 0.01713625135675191
+    },
+    {
+      "seeds": 3,
+      "records": 2400,
+      "mde": 0.013904998522847182
+    },
+    {
+      "seeds": 5,
+      "records": 4000,
+      "mde": 0.010804061184595787
+    },
+    {
+      "seeds": 8,
+      "records": 6400,
+      "mde": 0.008376706330553816
+    },
+    {
+      "seeds": 10,
+      "records": 8000,
+      "mde": 0.007448233488679993
+    },
+    {
+      "seeds": 15,
+      "records": 12000,
+      "mde": 0.006130009054060422
+    },
+    {
+      "seeds": 20,
+      "records": 16000,
+      "mde": 0.005306860797143951
+    }
+  ],
+  "required_records": [
+    {
+      "effect": 0.0117,
+      "records": 3312,
+      "label": "V1 ordered - final_repeated (consistently scored)"
+    },
+    {
+      "effect": 0.01,
+      "records": 4394,
+      "label": "V1 ordered - baseline (consistently scored)"
+    },
+    {
+      "effect": 0.0075,
+      "records": 7823,
+      "label": "three quarters of the ordered deficit"
+    },
+    {
+      "effect": 0.005,
+      "records": 17658,
+      "label": "half of the ordered deficit"
+    },
+    {
+      "effect": 0.0025,
+      "records": 70404,
+      "label": "one quarter -- a per-checkpoint share if B1 splits it four ways"
+    }
+  ],
+  "observed_ordered_baseline_deficit": 0.01,
+  "one_seed_mde": 0.022733432195898014,
+  "three_seed_mde": 0.013904998522847182,
+  "post_hoc_power_v1_ordered_baseline": 0.5373840028841846,
+  "conclusion": "The generated-accuracy endpoint cannot resolve sub-1.4 pp effects at three seeds. B1 at one seed has MDE 2.27 pp and therefore cannot produce a capability result. A higher-powered paired endpoint (Stage E) is a precondition for B1/B3 being informative about capability."
+}
