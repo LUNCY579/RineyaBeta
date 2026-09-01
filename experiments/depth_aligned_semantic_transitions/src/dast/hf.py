@@ -44,6 +44,51 @@ def _quantization_config(config: DASTConfig):
     return BitsAndBytesConfig(load_in_8bit=True)
 
 
+def load_frozen_base(config: DASTConfig) -> tuple[Any, Any]:
+    """Load the UNTOUCHED base model and tokenizer: no LoRA, no grads, eval mode.
+
+    The frozen diagnostics (`dast.depth_cache`, `dast.depth_probe`) need the model
+    as it was before any DAST training, because that is the reference point
+    `FINDINGS_G3_SEEDS.md` section 2a compares against. Going through
+    `build_hf_components` would attach a LoRA adapter whenever the run config
+    enables one, so this path deliberately bypasses it rather than relying on
+    zero-initialised `lora_B` being a mathematical no-op.
+    """
+
+    try:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+    except ImportError as exc:  # pragma: no cover - optional dependency
+        raise RuntimeError('real-model execution requires `pip install -e ".[train]"`') from exc
+
+    model_cfg = config.model
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_cfg.name_or_path,
+        revision=model_cfg.revision,
+        local_files_only=model_cfg.local_files_only,
+        trust_remote_code=model_cfg.trust_remote_code,
+        use_fast=True,
+    )
+    if tokenizer.pad_token_id is None:
+        if tokenizer.eos_token_id is None:
+            raise ValueError("tokenizer has neither a pad token nor an EOS token")
+        tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "right"
+
+    _, dtype = select_precision(model_cfg.precision)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_cfg.name_or_path,
+        revision=model_cfg.revision,
+        local_files_only=model_cfg.local_files_only,
+        trust_remote_code=model_cfg.trust_remote_code,
+        torch_dtype=dtype,
+    )
+    model.eval()
+    for parameter in model.parameters():
+        parameter.requires_grad_(False)
+    return model, tokenizer
+
+
 def build_hf_components(config: DASTConfig, *, for_training: bool = True) -> tuple[Any, Any, dict[str, Any]]:
     """Load a causal LM and attach a matched LoRA adapter when configured."""
 

@@ -14,3 +14,8 @@ configs/_*.yaml
 # Detached batch launcher logs (runs/ is already ignored, this is belt and braces).
 runs/_batch_*.log
 runs/_batch_*.err
+
+# Frozen-backbone hidden-state caches: 40-265 MB each and exactly regenerable by
+# scripts/build_depth_cache.py, whose git revision every cache records. The JSON
+# ANALYSES of these caches are committed; the tensors are not.
+artifacts/depth_cache_*.pt
