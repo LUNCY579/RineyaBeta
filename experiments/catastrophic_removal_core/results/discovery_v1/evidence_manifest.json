@@ -1,0 +1,111 @@
+{
+  "artifact_integrity": {
+    "baseline_sha256": "60f72663f36cfa57d74f08a5a943cd495420bd671286161de25e69bb4ac37622",
+    "layer_files": {
+      "layer_00.json": "f156fd99bb6ca130cb6bbcda557cfc1bf30011c2a704db7f3c452fb6cbf28c8c",
+      "layer_01.json": "3651f0c2a9a09a55653c22c5852c6d4a85ee4abf9835afefc9feac7c80999251",
+      "layer_02.json": "e82bab376c84ab43e619d2b048566928660577fb8fbddbac6312bc81277bdc8c",
+      "layer_03.json": "a0008190e62d7017a14a989051b7e4b5b4972d2329d3a1521f7b01993c9d494f",
+      "layer_04.json": "b1f01dfd31a3b96e41fe717580f124e15b5aa25051ba73cca46c279052c9bc6c",
+      "layer_05.json": "01ed920758faa169913c480c05de2b884f497fae4d3fb204d75395d7e6f8149d",
+      "layer_06.json": "f9f287d15b22c63e6c2cf2463bf510c0b207719a8f9bd206d869e8ad73b80db3",
+      "layer_07.json": "911e4c0bccf6a9aa46c3fb28ed278915894988318d74d6874795f294f54d23ff",
+      "layer_08.json": "723a0e1644416337d56ae1ba281d4fa9dd02f98f6aff14f575a448ffd086f68c",
+      "layer_09.json": "01bf78cc54e1f19785a4158bb3138ec107284abe14718a3cab44068f8a394278",
+      "layer_10.json": "746ac731385dc65fa9bdb30925306d7326f3ff6d05dc0ab3c60dfef3b36fa18a",
+      "layer_11.json": "3ad6eaa34dcb65a293a4ec0d9a53e66e9c2ee82bd4055c7bcaf707f7dfea2002",
+      "layer_12.json": "7039663fe4efb6b90bac60a0f28406292781a7815ae01e162c3518ce0094d7ee",
+      "layer_13.json": "73a6a80ef57a8fab701d08d492f6199ea3edea0e0c5ea944e442567ac48b4295",
+      "layer_14.json": "1c3bcc1a7310153781bb13aa3327b1d2c4ad82155f3c69846241b6eb7b96b55c",
+      "layer_15.json": "f45c66c2da8b5c89c28ab6bc3a25f0443a227e90b3006650b74146dbe39625c3",
+      "layer_16.json": "6e5f84f48f8e0ce06d8d568669590e28e433fdc7a02b686c317d59152bf23f73",
+      "layer_17.json": "309bb97da8a0076e1e5563fa9c1771c7518375039eb5e63d6aa17247bd818ce0",
+      "layer_18.json": "f68b0016fcdf954b89ae991a77954c61d38509af082770c6f9d760687f315244",
+      "layer_19.json": "890ef79e927630d30c80ad49735c791de6fb8c9651e66edcc8b58fad976897ba",
+      "layer_20.json": "67ab4d3a06ba2958c2de52a7c32d1b7f61cc4e733c3ba43f4adc04e713957dcd",
+      "layer_21.json": "c49de04780187042af5e7c18c5d08b8dcc5e4893f07de74b048b72d4caec2950",
+      "layer_22.json": "360c11f48122baace8cdcfe0a00301e985d9151aeec1bf45950534c0656d934a",
+      "layer_23.json": "9501d4c17a14b88d124cd1df6e3f02bf36e516d49f81159f54566b83345348b0",
+      "layer_24.json": "4522d617d5b98767c82adf04cbd6fc0743c8cc1cdf2199e990ef7ecce75c0f7c",
+      "layer_25.json": "a910223e2bdc57d7ffdac4682d12379b32c2f59d9ff36cf125ec875a1e5806f0",
+      "layer_26.json": "62a861b8e67df4f22f2d4862857127e350eecf1dc5489e80d6057afff7013280",
+      "layer_27.json": "43ef8cb77da86dce108ff9fa1f46ab6cad31ae7db3ba59d258b5b6201da587ad"
+    },
+    "run_manifest_sha256": "6b49d03c874222e2fb40bfefd29f0cf64b5f8f23bbdc72e6829883e27039ca43"
+  },
+  "assembled_at": "2026-09-01T03:42:08.870251+00:00",
+  "automatic_critical_layers": [],
+  "diagnostic_sources": [
+    {
+      "bytes": 13580469,
+      "label": "rag_train",
+      "path": "Aegis_RAG_v3_train_4410/rag_v3_train.sft.jsonl",
+      "selected_rows": 16,
+      "selection_seed": 20260831,
+      "sha256": "5db1059236c0f1549a88cdd9016cbafe988a7245ab6273245d878ff59299898f",
+      "total_nonempty_rows": 4410,
+      "usable_rows": 4410
+    },
+    {
+      "bytes": 2638824,
+      "label": "short_preservation_train",
+      "path": "Rineya_Short_Response_Behavior_Corpus_v1.0/data/sft/rineya_short_response_preservation_slice.jsonl",
+      "selected_rows": 16,
+      "selection_seed": 20260831,
+      "sha256": "1006c6e1d310b618baaa3e54406369530edca6242da83b5de90b9983e24132a4",
+      "total_nonempty_rows": 2000,
+      "usable_rows": 2000
+    }
+  ],
+  "evaluation_boundaries": {
+    "development_gates_executed": false,
+    "donor_merges_executed": false,
+    "halo_30_of_64_comparable_claim_permitted": false,
+    "historical_long_context_64_canonically_registered": false,
+    "historical_long_context_64_executed": false,
+    "matched_recovery_arms_designed": false,
+    "recovery_training_executed": false,
+    "sealed_evaluation_opened": false
+  },
+  "evidence_sha256": "883681f27abdb9fd3e646d137e9e5166a85d9fcbf0fccd34c758724831ec7b25",
+  "execution_commit": "193f93d8231d25087187a8624d37f86f28dba5bf",
+  "execution_runtime": {
+    "cuda_total_mib": 8187.5,
+    "requested_device": "auto",
+    "requested_dtype": "bfloat16",
+    "resolved_device": "cuda:0",
+    "resolved_dtype": "bfloat16",
+    "torch_version": "2.8.0+cu128",
+    "transformers_version": "4.57.1"
+  },
+  "experiment_id": "crcc-v1",
+  "g0": {
+    "checks": {
+      "all_28_single_layer_conditions_complete": true,
+      "automatic_core_depth_in_preregistered_range_1_to_14": false,
+      "automatic_members_have_required_cross_source_support": true,
+      "checkpoint_weight_files_hashed": true,
+      "diagnostic_case_count_meets_minimum": true,
+      "intact_baseline_reference_nll_finite": true,
+      "manual_hypotheses_not_promoted": true
+    },
+    "pass": false
+  },
+  "membership_depth": 0,
+  "membership_sha256": "002d55d1d3e825e40246945546376ffb0c857f022847bc499c989dcadfb4b7a1",
+  "model_source": {
+    "repo_id": "Qwen/Qwen3-0.6B",
+    "revision": "c916fa4defd319b7d4e4da17604ca7338f4d99f5"
+  },
+  "raw_artifact": {
+    "committed_to_git": false,
+    "contains_generated_case_outputs": true,
+    "name": "local-untracked-crcc-v1-local-14572-20260831T224208",
+    "workflow_run_id": "local-14572-20260831T224208"
+  },
+  "run_identity_sha256": "1b91c6d2d8cf68aed50f28e5f1aff838561538eacdcfd3871b3d77f9c7b69896",
+  "scan_summary_sha256": "f5ea9f1247eef5ebb4f6d710b0cdddfddcee16f73e4603b811b076f7042884e3",
+  "schema_version": "crcc.v1",
+  "source_head": "242613d1b4b5e0a5a4a7154c60337115ca394bd7",
+  "status": "DISCOVERY_COMPLETE__G0_STOP"
+}

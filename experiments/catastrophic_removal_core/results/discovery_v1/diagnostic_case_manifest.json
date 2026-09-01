@@ -1,0 +1,252 @@
+{
+  "diagnostic_cases": [
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_045_pinerelay_1045_01_launch_direct:2161",
+      "prompt_tokens": 197,
+      "source": "rag_train",
+      "target_tokens": 11
+    },
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_063_dawncrate_1063_02_capacity_direct:1238",
+      "prompt_tokens": 193,
+      "source": "rag_train",
+      "target_tokens": 5
+    },
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_075_pinegauge_1075_01_launch_direct:2222",
+      "prompt_tokens": 199,
+      "source": "rag_train",
+      "target_tokens": 12
+    },
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_076_quartznode_1076_02_capacity_direct:4053",
+      "prompt_tokens": 191,
+      "source": "rag_train",
+      "target_tokens": 6
+    },
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_092_cinderfilter_1092_04_protocol_direct:2073",
+      "prompt_tokens": 193,
+      "source": "rag_train",
+      "target_tokens": 7
+    },
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_122_cinderpanel_1122_04_protocol_direct:97",
+      "prompt_tokens": 193,
+      "source": "rag_train",
+      "target_tokens": 7
+    },
+    {
+      "category": "stale_evidence",
+      "id": "rag_train:v175_fact_127_harborkit_1127_08_runtime_stale_current:2358",
+      "prompt_tokens": 265,
+      "source": "rag_train",
+      "target_tokens": 5
+    },
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_132_marblefilter_1132_04_protocol_direct:3248",
+      "prompt_tokens": 193,
+      "source": "rag_train",
+      "target_tokens": 8
+    },
+    {
+      "category": "multi_fact_supported",
+      "id": "rag_train:v175_fact_182_cinderpanel_1182_06_capacity_corroborated:3776",
+      "prompt_tokens": 260,
+      "source": "rag_train",
+      "target_tokens": 6
+    },
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_190_kestrellink_1190_03_runtime_direct:871",
+      "prompt_tokens": 194,
+      "source": "rag_train",
+      "target_tokens": 4
+    },
+    {
+      "category": "supported",
+      "id": "rag_train:v175_fact_224_opaljunction_1224_04_protocol_direct:2248",
+      "prompt_tokens": 197,
+      "source": "rag_train",
+      "target_tokens": 7
+    },
+    {
+      "category": "procedure_supported",
+      "id": "rag_train:v175_proc_001_date_answer_2:421",
+      "prompt_tokens": 252,
+      "source": "rag_train",
+      "target_tokens": 12
+    },
+    {
+      "category": "procedure_missing_input",
+      "id": "rag_train:v175_proc_030_capacity_missing:674",
+      "prompt_tokens": 236,
+      "source": "rag_train",
+      "target_tokens": 11
+    },
+    {
+      "category": "procedure_supported",
+      "id": "rag_train:v175_proc_114_latency_answer_1:3709",
+      "prompt_tokens": 247,
+      "source": "rag_train",
+      "target_tokens": 5
+    },
+    {
+      "category": "procedure_supported",
+      "id": "rag_train:v175_proc_123_budget_answer_1:1900",
+      "prompt_tokens": 260,
+      "source": "rag_train",
+      "target_tokens": 4
+    },
+    {
+      "category": "procedure_supported",
+      "id": "rag_train:v175_proc_141_priority_answer_2:2729",
+      "prompt_tokens": 237,
+      "source": "rag_train",
+      "target_tokens": 4
+    },
+    {
+      "category": "conflict_deescalation",
+      "id": "short_preservation_train:rpv2_train_conflict_deescalation_02_nia:1070",
+      "prompt_tokens": 165,
+      "source": "short_preservation_train",
+      "target_tokens": 11
+    },
+    {
+      "category": "empathy_in_character",
+      "id": "short_preservation_train:rpv2_train_empathy_in_character_01_finn:199",
+      "prompt_tokens": 166,
+      "source": "short_preservation_train",
+      "target_tokens": 12
+    },
+    {
+      "category": "factual_compression_in_character",
+      "id": "short_preservation_train:rpv2_train_factual_compression_in_character_02_sol:914",
+      "prompt_tokens": 168,
+      "source": "short_preservation_train",
+      "target_tokens": 10
+    },
+    {
+      "category": "gentle_disagreement",
+      "id": "short_preservation_train:rpv2_train_gentle_disagreement_02_ren:789",
+      "prompt_tokens": 164,
+      "source": "short_preservation_train",
+      "target_tokens": 9
+    },
+    {
+      "category": "initiative_without_overreach",
+      "id": "short_preservation_train:rpv2_train_initiative_without_overreach_01_theo:106",
+      "prompt_tokens": 167,
+      "source": "short_preservation_train",
+      "target_tokens": 12
+    },
+    {
+      "category": "initiative_without_overreach",
+      "id": "short_preservation_train:rpv2_train_initiative_without_overreach_04_kai:783",
+      "prompt_tokens": 164,
+      "source": "short_preservation_train",
+      "target_tokens": 10
+    },
+    {
+      "category": "knowledge_boundary",
+      "id": "short_preservation_train:rpv2_train_knowledge_boundary_02_mara:628",
+      "prompt_tokens": 167,
+      "source": "short_preservation_train",
+      "target_tokens": 5
+    },
+    {
+      "category": "knowledge_boundary",
+      "id": "short_preservation_train:rpv2_train_knowledge_boundary_05_finn:1275",
+      "prompt_tokens": 166,
+      "source": "short_preservation_train",
+      "target_tokens": 11
+    },
+    {
+      "category": "relationship_continuity",
+      "id": "short_preservation_train:rpv2_train_relationship_continuity_04_noa:1700",
+      "prompt_tokens": 179,
+      "source": "short_preservation_train",
+      "target_tokens": 8
+    },
+    {
+      "category": "relationship_continuity",
+      "id": "short_preservation_train:rpv2_train_relationship_continuity_05_ash:81",
+      "prompt_tokens": 167,
+      "source": "short_preservation_train",
+      "target_tokens": 8
+    },
+    {
+      "category": "role_identity_adherence",
+      "id": "short_preservation_train:rpv2_train_role_identity_adherence_02_kai:1270",
+      "prompt_tokens": 170,
+      "source": "short_preservation_train",
+      "target_tokens": 12
+    },
+    {
+      "category": "safety_boundary_in_character",
+      "id": "short_preservation_train:rpv2_train_safety_boundary_in_character_04_aya:1162",
+      "prompt_tokens": 187,
+      "source": "short_preservation_train",
+      "target_tokens": 12
+    },
+    {
+      "category": "safety_boundary_in_character",
+      "id": "short_preservation_train:rpv2_train_safety_boundary_in_character_04_ori:112",
+      "prompt_tokens": 186,
+      "source": "short_preservation_train",
+      "target_tokens": 18
+    },
+    {
+      "category": "trust_and_secrets",
+      "id": "short_preservation_train:rpv2_train_trust_and_secrets_00_ori:1868",
+      "prompt_tokens": 171,
+      "source": "short_preservation_train",
+      "target_tokens": 10
+    },
+    {
+      "category": "context_consistency",
+      "id": "short_preservation_train:train_context_consistency_07_02:413",
+      "prompt_tokens": 101,
+      "source": "short_preservation_train",
+      "target_tokens": 6
+    },
+    {
+      "category": "follow_up",
+      "id": "short_preservation_train:train_follow_up_01_03:499",
+      "prompt_tokens": 78,
+      "source": "short_preservation_train",
+      "target_tokens": 7
+    }
+  ],
+  "run_identity_sha256": "1b91c6d2d8cf68aed50f28e5f1aff838561538eacdcfd3871b3d77f9c7b69896",
+  "schema_version": "crcc.v1",
+  "sources": [
+    {
+      "bytes": 13580469,
+      "label": "rag_train",
+      "path": "Aegis_RAG_v3_train_4410/rag_v3_train.sft.jsonl",
+      "selected_rows": 16,
+      "selection_seed": 20260831,
+      "sha256": "5db1059236c0f1549a88cdd9016cbafe988a7245ab6273245d878ff59299898f",
+      "total_nonempty_rows": 4410,
+      "usable_rows": 4410
+    },
+    {
+      "bytes": 2638824,
+      "label": "short_preservation_train",
+      "path": "Rineya_Short_Response_Behavior_Corpus_v1.0/data/sft/rineya_short_response_preservation_slice.jsonl",
+      "selected_rows": 16,
+      "selection_seed": 20260831,
+      "sha256": "1006c6e1d310b618baaa3e54406369530edca6242da83b5de90b9983e24132a4",
+      "total_nonempty_rows": 2000,
+      "usable_rows": 2000
+    }
+  ]
+}
