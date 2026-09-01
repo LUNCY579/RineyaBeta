@@ -116,7 +116,18 @@ _NUMERIC_TYPES = frozenset({
 })
 # Answers that are collections: order-insensitive for sets, order-SENSITIVE for
 # orderings, so they cannot share one comparison.
-_SET_TYPES = frozenset({"set"})
+#
+# `state` belongs with the sets. Its gold form is a bag of key=value bindings, e.g.
+# "A=ON, B=OFF, C=OFF, D=OFF", where order carries no meaning. Found by inspecting a
+# real discordant pair: a model answered "D=OFF, B=OFF, C=OFF, A=ON" — identical
+# content — and exact string equality scored it wrong. Measured effect on the
+# escalation run was 1 problem in 800 (0.0013 accuracy), so it does not explain any
+# arm difference, but it is a systematic type-level gap that would recur at larger n
+# and in `state`-heavy strata.
+#
+# `ordering` deliberately stays order-SENSITIVE: its gold form is a ranking, e.g.
+# "Eli, Kira, Hana, Mina", where a permutation is a different answer.
+_SET_TYPES = frozenset({"set", "state"})
 _SEQUENCE_TYPES = frozenset({"ordering"})
 _BOOLEAN_TRUE = frozenset({"true", "yes", "t", "1"})
 _BOOLEAN_FALSE = frozenset({"false", "no", "f", "0"})

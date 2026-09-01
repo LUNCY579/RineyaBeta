@@ -92,3 +92,26 @@ def test_fallback_still_returns_something_useful():
     assert route == "last_nonempty_line"
     assert value == "just a final line 42"
     assert extract_answer("")[1] == "empty"
+
+
+def test_state_answers_are_order_insensitive():
+    """Found in a real discordant pair on the escalation run: a model answered
+    "D=OFF, B=OFF, C=OFF, A=ON" for gold "A=ON, B=OFF, C=OFF, D=OFF" -- identical
+    content -- and exact string equality scored it wrong. `state` gold is a bag of
+    key=value bindings, so order carries no meaning."""
+
+    gold = "A=ON, B=OFF, C=OFF, D=OFF"
+    assert answers_equal(gold, "D=OFF, B=OFF, C=OFF, A=ON", "state") is True
+    assert answers_equal(gold, "A=ON, B=OFF, C=OFF, D=OFF", "state") is True
+    # A genuinely different binding must still fail.
+    assert answers_equal(gold, "A=OFF, B=OFF, C=OFF, D=OFF", "state") is False
+    assert answers_equal(gold, "A=ON, B=OFF, C=OFF", "state") is False
+
+
+def test_ordering_answers_stay_order_sensitive():
+    """`ordering` gold is a ranking, so a permutation is a different answer. It must
+    NOT be swept into the order-insensitive set alongside `state`."""
+
+    gold = "Eli, Kira, Hana, Mina"
+    assert answers_equal(gold, "Eli, Kira, Hana, Mina", "ordering") is True
+    assert answers_equal(gold, "Mina, Hana, Kira, Eli", "ordering") is False
