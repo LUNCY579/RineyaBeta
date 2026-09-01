@@ -1,9 +1,10 @@
 # Three-seed replication — findings
 
-**Status: EXPLORATORY_DEV at the preregistered power level. The primary contrast is
-complete across three seeds. This is NOT confirmatory: the preregistration in
-`PREREGISTRATION.md` is still DRAFT and unsigned, so §8's gates have not formally
-been run against a frozen protocol.**
+**Status: CLOSED — NEGATIVE (EXPLORATORY DEV). The tested V1 formulation does not
+support the hypothesis that aligning cumulative semantic reasoning states to
+increasing Transformer depth improves held-out reasoning. This is NOT confirmatory:
+the preregistration in `PREREGISTRATION.md` is still DRAFT and unsigned. TEST
+remains sealed. No additional V1 seeds.**
 
 **Branch:** `research/depth-aligned-semantic-transitions-v1` at `31cf2f2`
 **Run dates:** 2026-08-31 → 2026-09-01
@@ -84,12 +85,19 @@ state_reverse         0.8921  ─┘   (both vs baseline: p = 0.78, p = 0.80)
 state_ordered         0.8833  ←    the only arm with a detectable deficit
 ```
 
-**G3 passes.** `state_ordered − state_final_repeated = −1.21 pp, p = 0.0134` over
-three seeds. Carrying a consistent auxiliary depth target is **free** — repeating
-the final state at every depth lands on baseline (+0.17 pp, p = 0.78). Only the
-canonical forward progression costs. That is the direct contrast `SSOT §8` G3 asks
-for, and it is now the *strongest* contrast in the study, stronger than
-ordered−baseline.
+**G3 fails as a directional efficacy gate.** The preregistered criterion required
+ordered DAST to **beat** `state_final_repeated`. The observed contrast is in the
+opposite direction: `state_ordered − state_final_repeated = −1.21 pp, p = 0.0134`
+over three seeds. That is the strongest contrast in the study, and it is **adverse**
+rather than beneficial. The experiment therefore provides exploratory evidence that
+progressive forward-state supervision may behave differently from a flat auxiliary
+target, not that G3 passed.
+
+Carrying a consistent auxiliary depth target was empirically **free** on average —
+repeating the final state at every depth lands on baseline (+0.17 pp, p = 0.78).
+That is not a formal equivalence result, particularly because final-repeated
+displayed a 2.5 pp across-seed range. Only the canonical forward progression shows
+a detectable average cost.
 
 **Wording correction.** An earlier draft of this document said the cost "is specific
 to the canonical forward assignment". That is stronger than the data supports, and
@@ -249,11 +257,13 @@ non-decreasing. Neither number is comparable across arms.
    function from (depth, prompt) to target exists and its failure to fit measures an
    impossibility rather than a fact about reasoning. But "defensible to omit from an
    exploratory step" is not "satisfies the gate".)
-4. **G3 has one seed of three.** `state_final_repeated` completed only at seed 29;
-   seeds 17 and 43 failed on an environmental accelerator constraint (§5). A
-   single-seed null carries ~57% power, so "final-repeated is harmless" is
-   suggestive, not established. It is the control that decides whether the ordered
-   deficit is about reasoning order or about auxiliary depth losses in general.
+4. **G3 fails directionally, and final-repeated is not an equivalence result.**
+   All three `state_final_repeated` seeds completed after the OOM reruns in §5.
+   Ordered did not beat that control; the contrast is −1.21 pp. Final-repeated sits
+   at baseline on average (+0.17 pp, p = 0.78) but with a 2.5 pp seed range, so
+   "generic depth supervision is free" is an average description, not a formal
+   equivalence. The control still decides that the ordered deficit is not explained
+   by carrying *any* auxiliary depth loss.
 5. **Narrow scope.** One 0.6B model, one procedurally-generated corpus, one LoRA
    configuration, one depth schedule. `SSOT §12` lists template overfitting as a
    live threat and no amount of seeds here addresses it.
@@ -323,8 +333,8 @@ first). The trained `L_state` asymmetry is an optimisation phenomenon, not a
 representational one.
 
 **Not established.** That forward ordering is *uniquely* responsible relative to
-every auxiliary-state control. Ordered − reverse is p = 0.110, `state_final_repeated`
-has one seed of three, and `state_shuffled` is absent from this matrix entirely.
+every auxiliary-state control. Ordered − reverse is p = 0.110, and `state_shuffled`
+is absent from this matrix entirely, so G2 is not closed.
 
 **Now known to be non-evidence.** The mechanism metrics. A ridge probe on the
 untouched backbone matches or beats the trained projector (§2a), so margin 0.935
@@ -364,6 +374,10 @@ budget:
 The motion variant *is* a new mechanism and does spend the revision budget, so it is
 a recorded decision rather than an implementation detail.
 
+A separately preregistered **training** follow-up is justified only after cheap
+diagnosis (B1/B2/C1). The unsigned H2 matrix in `PREREGISTRATION_V2.md` is parked.
+See `DAST_V1_CLOSURE.md` and `DAST_NEXT_EXPERIMENTS.md`. No additional V1 seeds.
+
 ## 7. Reproducing this table
 
 ```bash
@@ -376,11 +390,17 @@ run rather than omitting it silently.
 
 ## 8. Claim boundary
 
-Three seeds. 800 DEV problems each. 250 optimizer steps. Unsigned preregistration.
-TEST sealed and never read. Nothing here is a Rineya capability claim.
+**CLOSED — NEGATIVE (EXPLORATORY DEV).** Three seeds. 800 DEV problems each. 250
+optimizer steps. Unsigned preregistration. TEST sealed and never read. Nothing here
+is a Rineya capability claim.
 
-The single contrast reaching p < 0.05 sits below the practical margin fixed in
-advance, is uncorrected for ~7 comparisons, and is the contrast `SSOT §5` designates
-insufficient. `state_shuffled` is absent and `state_final_repeated` has one seed of
-three, so this is the **primary directional result**, not closure of the G2/G3
-gates. The mechanism metrics are explicitly not evidence of learning (§2a).
+The tested formulation fails its directional efficacy gates. G3 required ordered to
+beat final-repeated; the observed contrast is −1.21 pp. G2 is not closed:
+`state_shuffled` is absent at 800 DEV × 3 seeds, and ordered − reverse is
+−0.88 pp, p = 0.110. Headline McNemar p-values (0.0134, 0.0370) are nominal; a
+strict Bonferroni over the ~13 examined contrasts (threshold ≈ 0.0038) admits
+neither. Both sit below the 2.0 pp practical margin fixed in advance. The
+mechanism metrics are explicitly not evidence of learning (§2a).
+
+No additional V1 seeds. Operators and causal feedback remain gated. Any follow-up
+must be a separately signed preregistration.

@@ -1,9 +1,144 @@
 # DAST progress
 
-## 2026-09-01 — COMPLETE: four arms x three seeds. G3 passes. Forward ordering is the only arm that costs.
+## 2026-09-01 — Diagnosis freeze: V1 closed; B1/B2 instrumented not launched; C1 CPU written; B2 deferred (GPU busy)
 
-**Status: EXPLORATORY_DEV, complete at the preregistered power level. TEST CLOSED.
-Not confirmatory: the preregistration is still unsigned.**
+**Status: CLOSED — NEGATIVE (EXPLORATORY DEV) for V1. Diagnosis protocols frozen.
+TEST sealed. No B1 GPU. No 9-run V2 matrix.**
+
+### A. What DAST V1 actually taught us
+Chronological ordered state-to-depth supervision did not improve held-out
+reasoning on Qwen3-0.6B + LoRA. Ordered mean accuracy 0.8833 vs baseline 0.8937
+(−1.04 pp). G3 fails directionally (−1.21 pp vs final-repeated). Depth is not
+shown to be reasoning time. High trained margins are non-evidence (frozen ridge
+matches or beats them). See `docs/DAST_V1_CLOSURE.md`.
+
+### B. Most likely mechanism of the ordered deficit
+**Undecided.** B1 not run. B2 not run (GPU occupied). C1 weakly favors H3/H5
+(near-flat permutation landscape; every stage best decoded at layer 1) over
+frozen reverse-geometry. That is not a training-mechanism identification.
+
+### C. H1–H7
+H1 unknown (need B1). H2 open (need B2). H3 weakly live (C1). H4 unknown (B1
+mismatch). H5 open (need C2). H6 untested (revision budget). H7 untested (do not
+scale yet). Tree: `docs/DAST_V2_HYPOTHESIS_TREE.md`.
+
+### D. Highest-information next experiment
+B1 one-seed single-checkpoint pilots **after** the B1 block is signed, **or** B2
+cosine on existing adapters when the GPU is free. Information per hour: B2
+first if idle (~minutes), then B1 (~4–5 h). Ranked list:
+`docs/DAST_NEXT_EXPERIMENTS.md`.
+
+### E. What result would make you stop
+B1 unstructured <2 pp with no site pattern, B2 cosine similar across ordered /
+reverse / final-repeated, and C2 null → close the **training** direction; keep
+probes.
+
+### F. What would justify Adaptive DAST
+C2: stable held-out π*(x) by problem family, plus matched-budget routing
+advantage. Flat pooled C1 is **not** sufficient.
+
+### G. What would justify Bidirectional/Reverse DAST
+Replicated reverse **generated-answer** advantage vs baseline, not lower
+`L_state`. V1 reverse is baseline-like. Currently OFF.
+
+### H. What would justify ΔH DAST
+Motion beats absolute states on generation **and** conflict, not probe cosmetics.
+Spends SSOT §13.
+
+### I. When Rineya replication is justified
+After a mechanism is localized on this stack (B1/B2), using normalized/functional
+checkpoints, not copied 7/14/21/27.
+
+### J. Exact repo/run status
+Working tree on `research/depth-aligned-semantic-transitions-v1`. Local audit:
+12/12 V1 runs complete, TEST sealed, adapters on disk (see closure table). C1
+JSON committed. B2 deferred: 7390/8188 MiB GPU used by a non-DAST job
+(`artifacts/b2_gradient_conflict_deferred.json`). B1 configs exist and are
+unsigned for execution.
+
+Suite pytest green; ruff clean on new/changed Python.
+
+---
+
+
+## 2026-09-01 — DAST V1 CLOSED — NEGATIVE (EXPLORATORY DEV)
+
+**Status: CLOSED — NEGATIVE (EXPLORATORY DEV). TEST remains sealed. No further V1
+seeds. The V1 preregistration in `docs/PREREGISTRATION.md` is still DRAFT and
+unsigned, so this is not confirmatory.**
+
+DAST V1 does not support the hypothesis that aligning cumulative semantic reasoning
+states to increasing Transformer depth improves held-out reasoning.
+
+Across three seeds, `state_ordered` achieved 0.8833 strict generated-answer
+accuracy, compared with 0.8937 for `cot_baseline`, 0.8921 for `state_reverse`, and
+0.8954 for `state_final_repeated`. The corresponding pooled differences were
+−1.04 pp versus baseline, −0.88 pp versus reverse, and −1.21 pp versus
+final-repeated.
+
+| arm | s17 | s29 | s43 | mean |
+|---|---:|---:|---:|---:|
+| `state_final_repeated` | 0.8850 | 0.8912 | 0.9100 | **0.8954** |
+| `cot_baseline` | 0.8938 | 0.8950 | 0.8925 | **0.8937** |
+| `state_reverse` | 0.8900 | 0.8912 | 0.8950 | 0.8921 |
+| **`state_ordered`** | 0.8775 | 0.8862 | 0.8862 | **0.8833** |
+
+Pooled over 3 seeds, 2,400 paired problems:
+
+| contrast | diff | p |
+|---|---:|---:|
+| **ordered − final_repeated** | **−0.0121** | **0.0134** |
+| **ordered − baseline** | **−0.0104** | **0.0370** |
+| ordered − reverse | −0.0088 | 0.1102 |
+| reverse − final_repeated | −0.0033 | 0.5514 |
+| reverse − baseline | −0.0017 | 0.8000 |
+| final_repeated − baseline | +0.0017 | 0.7843 |
+
+**G3 fails as a directional efficacy gate.** The preregistered G3 criterion required
+ordered DAST to beat the final-repeated control. It did not: the observed contrast
+was in the opposite direction (−1.21 pp, nominal McNemar p = 0.0134). That is
+exploratory evidence that progressive forward-state supervision may behave
+differently from a flat auxiliary target, with the observed difference **adverse**
+rather than beneficial. It is not a G3 pass.
+
+**G2 is not closed.** `state_shuffled` was never run at 800 DEV × 3 seeds. The
+direct ordered-versus-reverse comparison was −0.88 pp with p = 0.1102, so the data
+do not establish that canonical forward ordering is uniquely more harmful than
+reverse ordering, even though the ordered point estimate was lower in every seed.
+
+**Multiplicity.** Approximately 13 paired contrasts were examined during DAST V1.
+A strict Bonferroni family-wise threshold of approximately 0.0038 admits neither
+ordered−final_repeated (0.0134) nor ordered−baseline (0.0370).
+
+**`state_final_repeated` was empirically baseline-like** on average (+0.17 pp versus
+baseline, p = 0.7843), showing no detectable average capability cost in this
+experiment. This is not a formal equivalence result, particularly because
+final-repeated displayed substantial across-seed variability (2.5 pp range).
+
+**Mechanism metrics are non-evidence of a trained trajectory.** A fitted linear
+probe on the untouched backbone matched or exceeded the trained ordered projector
+on key trajectory measures (order margin 0.9947 vs 0.9350). Substantial
+depth-associated state information was already linearly decodable before DAST
+training.
+
+**Stop rules now in force for V1.** No additional seeds should be run merely to
+seek conventional significance. The sealed TEST split remains closed. Operators
+and causal feedback (G5/G6) remain gated. Definitive claim boundary:
+`docs/DAST_V1_CLOSURE.md`. Competing explanations: `docs/DAST_V2_HYPOTHESIS_TREE.md`.
+The unsigned 9-run `PREREGISTRATION_V2.md` matrix is **parked** until B2 supports
+H2. Next authorized work is cheap diagnosis in `docs/DAST_NEXT_EXPERIMENTS.md`,
+not a more complicated architecture.
+
+Canonical write-up: `docs/FINDINGS_G3_SEEDS.md`. Closure: `docs/DAST_V1_CLOSURE.md`.
+
+---
+
+## 2026-09-01 — COMPLETE: four arms x three seeds. (SUPERSEDED: the "G3 passes" reading is withdrawn; see closure above.)
+
+**Status at the time: EXPLORATORY_DEV, complete at the preregistered power level.
+TEST CLOSED. Not confirmatory: the preregistration is still unsigned.**
+**This section is retained as chronology. Its "G3 passes" claim is superseded by
+the CLOSED — NEGATIVE entry above.**
 
 All 12 runs finished. `docs/FINDINGS_G3_SEEDS.md` updated with the full dataset.
 

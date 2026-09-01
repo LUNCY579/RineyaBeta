@@ -3,8 +3,19 @@
 **Repository:** `LUNCY579/RineyaBeta`  
 **Working branch:** `research/depth-aligned-semantic-transitions-v1`  
 **Created:** 2026-08-30  
-**Program status:** **BUILT — UNRUN on a real checkpoint**  
+**Program status:** **CLOSED — NEGATIVE (EXPLORATORY DEV)**  
+**Sealed evaluation:** **CLOSED**  
+**Canonical findings:** [`experiments/depth_aligned_semantic_transitions/docs/DAST_V1_CLOSURE.md`](../experiments/depth_aligned_semantic_transitions/docs/DAST_V1_CLOSURE.md)  
 **Sealed evaluation:** **CLOSED**
+
+DAST V1 is closed. Aligning cumulative semantic reasoning states to increasing
+Transformer depth did not improve held-out reasoning. The preregistered G3
+criterion required ordered DAST to beat the final-repeated control; the observed
+contrast was −1.21 pp (adverse). Operators and causal feedback remain gated. The
+unsigned 9-run optimization-conflict matrix is **parked**. Next work is cheap
+diagnosis (H1–H7), not a more complicated architecture:
+[`DAST_V2_HYPOTHESIS_TREE.md`](../experiments/depth_aligned_semantic_transitions/docs/DAST_V2_HYPOTHESIS_TREE.md),
+[`DAST_NEXT_EXPERIMENTS.md`](../experiments/depth_aligned_semantic_transitions/docs/DAST_NEXT_EXPERIMENTS.md).
 
 This document is the branch-level single source of truth for investigating whether
 Transformer depth can be trained as a semantic reasoning trajectory rather than
@@ -482,7 +493,8 @@ result. It cannot simply search many schedules until one passes.
 - effects vanish under held-out generators/deeper traces.
 
 Retirement applies to the tested formulation, not automatically to every possible
-semantic-depth method.
+semantic-depth method. V1 met the first retirement criterion (ordered did not beat
+the decisive controls). See §15.
 
 ---
 
@@ -507,8 +519,18 @@ A later findings document is created only after real artifacts exist.
 
 ## 15. Current decision
 
-The idea is classified as **scientifically plausible and under-explored**, while
-the literal sentence-exclusive/freezing formulation is considered high-risk. The
-implemented V1 therefore begins with end-to-end differentiable, cumulative
-semantic-state supervision and decisive ordering controls. Independent block
-training remains a gated research endpoint rather than an assumption.
+**V1 is CLOSED — NEGATIVE (EXPLORATORY DEV).** The hypothesis that assigning
+cumulative compact reasoning states to increasing Transformer depth improves
+held-out reasoning is not supported on this stack. Ordered DAST finished below
+the CoT baseline in all three seeds (mean 0.8833 vs 0.8937) and below the
+final-repeated control (−1.21 pp), so G3 fails as a directional efficacy gate.
+G2 is not closed (`state_shuffled` was never run at 800 DEV × 3 seeds). TEST
+remains sealed. No additional V1 seeds.
+
+The idea remains scientifically interesting as a description of architecture —
+depth need not be reasoning time — but the tested *training* formulation is
+retired. Phase 2 operators and Phase 3 causal feedback stay gated on a positive
+capability result that V1 did not produce. The unsigned 9-run V2 matrix is parked.
+Authorized sequel work is cheap diagnosis of H1–H7
+([`DAST_NEXT_EXPERIMENTS.md`](../experiments/depth_aligned_semantic_transitions/docs/DAST_NEXT_EXPERIMENTS.md)),
+not a successor architecture chosen in advance.

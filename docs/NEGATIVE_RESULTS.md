@@ -410,6 +410,45 @@ managed rather than merely noted.*
   outputs before trusting an aggregate, especially after fine-tuning changes the
   output format. (Commit `98bc669`.)
 
+---
+
+## 7. Depth as chronological reasoning time (DAST V1)
+
+**Idea.** Supervise Transformer depth as a semantic reasoning trajectory: project
+prompt-only hidden states at increasing checkpoints onto cumulative compact
+states, while the full chain-of-thought language-model objective continues.
+
+**Killed as a capability intervention, on this stack.** Four arms × three seeds
+(17/29/43), 4,000 train / 800 DEV, Qwen3-0.6B + LoRA r=16. Strict
+generated-answer means:
+
+- `state_ordered` 0.8833
+- `cot_baseline` 0.8937 (−1.04 pp, nominal p = 0.0370)
+- `state_reverse` 0.8921 (−0.88 pp, p = 0.1102)
+- `state_final_repeated` 0.8954 (−1.21 pp, nominal p = 0.0134)
+
+The preregistered G3 gate required ordered to **beat** final-repeated. The
+contrast is in the opposite direction, so G3 fails as a directional efficacy
+gate. G2 is not closed: shuffled was never run at this scale. A strict Bonferroni
+over the ~13 examined contrasts (threshold ≈ 0.0038) admits neither headline
+p-value. A fitted linear probe on the frozen backbone matches or exceeds the
+trained projector (order margin 0.9947 vs 0.9350), so high decoding scores do not
+show that training created a depth-wise trajectory.
+
+**Why this is still useful.** Representations can *host* depth-aligned semantic
+supervision. Doing so does not help reasoning here, and forward chronological
+assignment is the only arm with a detectable average deficit. Depth is not
+reasoning time. This is **EXPLORATORY DEV** — the V1 preregistration was never
+signed — and TEST was never opened.
+
+**What is not licensed.** Additional V1 seeds to hunt conventional significance;
+opening TEST; advancing operators or causal feedback on the strength of these
+DEV numbers. A separately preregistered follow-up may test only the narrower
+claim that forward state supervision conflicts more with the LM objective than
+matched reverse or flat-target supervision.
+
+**Sources.** `experiments/depth_aligned_semantic_transitions/docs/FINDINGS_G3_SEEDS.md`;
+`experiments/depth_aligned_semantic_transitions/PROGRESS.md`.
 
 ---
 
@@ -428,6 +467,7 @@ rather than overwritten.
 | 5, 5a. store and precision | `experiments/kv_significance/results/{store_probe,mixed_precision}.json` | `.../src/{store_probe,mixed_precision}.py` |
 | calibration references | `experiments/kv_significance/results/{off,frac0.75,frac0.5,frac0.25}__rag_dev/summary.json` | `.../src/run_eval_sig.py` (driven by `run_sweep.sh`) |
 | 6. measurement failures | see §5 and §6 of [`FINDINGS_KV_PROGRAM.md`](FINDINGS_KV_PROGRAM.md) | `scripts/design/verify_claims.py` |
+| 7. DAST V1 | `experiments/depth_aligned_semantic_transitions/docs/FINDINGS_G3_SEEDS.md`; rebuild from local `runs/` via `scripts/summarize_runs.py` | `experiments/depth_aligned_semantic_transitions/src/dast/compare.py` |
 
 ```bash
 python scripts/design/verify_claims.py

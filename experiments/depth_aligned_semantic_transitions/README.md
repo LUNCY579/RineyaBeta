@@ -1,8 +1,10 @@
 # DAST: Depth-Aligned Semantic Transitions
 
-> **Status: BUILT — UNRUN on a real Rineya/Qwen checkpoint.** The committed toy
-> smoke and unit tests are engineering evidence only. They make no model-quality,
-> reasoning, memory-efficiency, or DiffusionBlocks-equivalence claim.
+> **Status: CLOSED — NEGATIVE (EXPLORATORY DEV).** DAST V1 does not support the
+> hypothesis that aligning cumulative semantic reasoning states to increasing
+> Transformer depth improves held-out reasoning. The sealed TEST split remains
+> closed. Operator and causal-feedback phases remain gated. See
+> `docs/FINDINGS_G3_SEEDS.md` and `PROGRESS.md`.
 
 DAST tests whether Transformer depth can be given an explicit semantic coordinate
 system for reasoning. A normal causal-LM objective remains intact, while one
@@ -106,7 +108,10 @@ targets, source indices, and the deterministic permutation for every example.
 
 ## First real DEV ladder
 
-Read `docs/PREREGISTRATION.md` and `docs/RUNBOOK.md` before training.
+V1 on this ladder is **closed negative**. Do not re-run these arms to hunt for
+significance. A V2 training matrix is allowed only after
+`docs/PREREGISTRATION_V2.md` is signed. Read `docs/PREREGISTRATION.md` and
+`docs/RUNBOOK.md` before any remaining engineering work.
 
 ```bash
 python -m dast.cli train --config configs/cot_baseline.yaml
@@ -118,8 +123,9 @@ python -m dast.cli train --config configs/literal_ordered.yaml
 ```
 
 Run the same frozen matrix for seeds 17, 29, and 43 by copying configs and changing
-only `experiment.seed`, `experiment.name`, and `experiment.output_dir`. Operator
-arms are phase-gated and must not begin merely because the software runs.
+only `experiment.seed`, `experiment.name`, and `experiment.output_dir`. Those
+commands are the historical V1 ladder, retained for provenance. Operator arms
+remain gated and must not begin merely because the software runs.
 
 ## Primary comparisons
 
@@ -152,9 +158,9 @@ arms are phase-gated and must not begin merely because the software runs.
 
 ```text
 configs/       frozen arm definitions and local model defaults
-docs/          algorithm, evidence standard, preregistration, and runbook
+docs/          algorithm, evidence standard, V1/V2 preregistration, findings, runbook
 fixtures/      tiny offline engineering dataset
-scripts/       Linux/macOS and Windows launchers
+scripts/       Linux/macOS and Windows launchers; run and training-dynamics summarizers
 src/dast/      data, alignment, targets, model, operators, losses, training, evaluation
 tests/         unit and end-to-end offline qualification
 PROGRESS.md    branch-local status and claim boundary
