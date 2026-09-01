@@ -54,26 +54,125 @@ McNemar on discordant pairs:
 > **Depth-aligned semantic states are highly learnable, and aligning them to
 > forward reasoning order is the only variant that costs reasoning accuracy.**
 
-The shared projector learns the depth-to-state alignment extremely well — order
-margin **0.935**, checkpoint top-1 **0.833** against a 0.25 chance level, monotonic
-decoded progress **0.985** — with the language model untouched (perplexity 1.0076
-against the baseline's 1.0069). There is no doubt the mechanism trains.
+The trained projector reaches order margin **0.935**, checkpoint top-1 **0.833**
+against a 0.25 chance level, and monotonic decoded progress **0.985**, with the
+language model untouched (perplexity 1.0076 against the baseline's 1.0069). §2a
+explains why those numbers do **not** demonstrate that training created the depth
+trajectory.
 
-It also does not help. `state_ordered` is **below** plain CoT SFT in all three
-seeds, pooled **−1.04 pp** across 2,400 paired problems at **p = 0.037**.
-
-And the cost is specific to the canonical **forward** assignment:
+What is unambiguous is that it does not help. `state_ordered` is **below** plain CoT
+SFT in all three seeds, pooled **−1.04 pp** across 2,400 paired problems at
+**p = 0.037**.
 
 ```text
 cot_baseline          0.8937  ─┐
-state_reverse         0.8921   ├─ mutually indistinguishable
+state_reverse         0.8921   ├─ neither differs detectably from baseline
 state_final_repeated  0.8912  ─┘   (reverse - baseline: p = 0.80)
-state_ordered         0.8833  ←    the only arm that pays (p = 0.037)
+state_ordered         0.8833  ←    the only arm with a detectable deficit (p = 0.037)
 ```
 
-Reversing the state-to-depth assignment costs **−0.17 pp** (p = 0.80), and at seed
-43 it is *positive*. Flattening it to a repeated final state costs −0.37 pp
-(p = 0.75, one seed). Only progressive forward ordering measurably hurts.
+**Wording correction.** An earlier draft of this document said the cost "is specific
+to the canonical forward assignment". That is stronger than the data supports, and
+the error is a classic one:
+
+> *significant* versus *not significant* is **not** the same as *significantly
+> different*.
+
+Ordered−baseline reaching p = 0.037 while reverse−baseline sits at p = 0.80 does not
+establish ordered ≠ reverse. The direct test is **ordered − reverse = −0.88 pp,
+p = 0.110** — consistently negative across all three seeds, but not crossing the
+conventional threshold.
+
+The defensible statement is therefore:
+
+> **Forward DAST shows a small statistically detectable deficit relative to the CoT
+> baseline. Reverse DAST does not. Forward is numerically worse than reverse in
+> every seed, but their direct pooled comparison is not significant (p = 0.110).**
+
+Two further reasons not to harden this: ~7 contrasts were computed without
+multiplicity correction (Bonferroni at α = 0.05/7 = 0.007 would not admit p = 0.037),
+and `SSOT §5` states that ordered-versus-baseline is *"informative but not
+sufficient because active parameter use and losses differ"* — the contrast that
+reached significance is the one the plan designates insufficient, while the
+designated decisive contrasts are not significant.
+
+## 2a. The mechanism metrics do NOT show that training built the trajectory
+
+This is the most important correction in this document, and it makes the negative
+result **sharper**, not weaker.
+
+`PHASE0_READINESS.md` §3.6 already warned that after target centering the untrained
+model reaches an order margin of 0.977–0.995, so a high margin becomes *necessary
+but non-discriminative*. That warning was not applied when writing up these runs.
+Applying it properly requires the frozen floor measured under **exactly** the final
+metric and the final geometry, which is now done.
+
+Two distinct reference points, both measured, both needed:
+
+| reference | order margin | top-1 | `L_state` |
+|---|---:|---:|---:|
+| untrained MLP projector (`cot_baseline`, `state_weight: 0`, run's own metric) | **+0.0141 / −0.0243 / +0.0068** | 0.275 / 0.223 / 0.253 | — |
+| **fitted linear probe on the FROZEN backbone**, same geometry, same metric, held out | **0.9947** | 0.8250 | **0.2229** |
+| trained shared projector (`state_ordered`, 250 steps) | 0.9350 | 0.8332 | 0.2629 |
+
+Read together:
+
+- Against an **untrained projector**, training clearly does something: margin ~0.00
+  to 0.935. That is the comparison an earlier draft implicitly made.
+- Against a **fitted ridge probe on the untouched backbone**, training does not win.
+  The frozen probe reaches margin **0.9947** versus the trained projector's 0.9350,
+  and `L_state` **0.2229** versus 0.2629. Only top-1 is a near tie (0.825 vs 0.833).
+
+So the depth-state trajectory was **already linearly decodable from the frozen
+model**, at least as well as SGD training the projector achieves. The honest
+statement:
+
+> **The high order margin is not evidence that DAST training created a semantic
+> depth trajectory. A least-squares readout on the untouched backbone matches or
+> exceeds it. Training the projector learned to read something that was already
+> present.**
+
+Caveat on comparability: these are different estimators — a closed-form ridge
+solution with a held-out split versus an SGD-trained MLP evaluated on DEV. They are
+not identical procedures. But both compute diagonal-minus-off-diagonal cosine on
+held-out data under the same readout and the same centred targets, so the comparison
+is fair in kind, and the direction is not marginal.
+
+## 2b. Does the untouched model prefer some orderings? All 24 permutations
+
+`L_state` for reverse (0.2534) is consistently below ordered (0.2629) across seeds
+(§3). One hypothesis was an intrinsic preference: perhaps depth natively hosts the
+trajectory backwards. That is directly testable **without training anything** —
+for K=4 there are 4! = 24 assignments of states to depths, and a shared linear
+readout can be fitted for each on the frozen backbone.
+
+Result over **20 random half/half splits** of 600 DEV problems:
+
+| assignment | best rank | median rank | worst rank | times ranked #1 |
+|---|---:|---:|---:|---:|
+| identity (canonical forward) | 1 | **3** | 15 | **5 / 20** |
+| reverse | 3 | **12** | 20 | **0 / 20** |
+
+**This inverts the intrinsic-preference hypothesis.** On the frozen model the
+canonical **forward** ordering fits *better* than reverse — median rank 3 against 12
+— and reverse is never the best permutation in any split.
+
+Two consequences:
+
+1. The trained `L_state` asymmetry (reverse easier) **cannot** be attributed to the
+   representation geometry preferring reverse, because the frozen geometry mildly
+   prefers forward. It must arise from training dynamics — plausibly interference
+   between forward depth supervision and the language-model objective, which is
+   also the arm that loses accuracy. That is a sharper and more specific claim than
+   "transformers reason backwards", which this experiment does **not** support.
+2. The preference is weak in absolute terms. The `L_state` spread across all 24
+   permutations averages **0.0096**, about **4.3%** of `L_state` itself, and identity
+   tops the ranking in only 5 of 20 splits. The frozen model is close to
+   *indifferent* about which state goes at which depth.
+
+Point 2 is itself informative for the original thesis: if depth genuinely
+implemented a chronological reasoning trajectory, the canonical ordering should be
+markedly easier to decode than a shuffle of it. It is not.
 
 ## 3. No directional advantage — the cleanest single result
 
@@ -87,9 +186,19 @@ result least dependent on the noisy generation endpoint:
 | `L_state`, reverse | **0.2520** | **0.2518** | **0.2563** |
 
 `L_state` is each arm's fit to **its own** targets, so it compares arms on equal
-footing. A fully **reversed** assignment is *easier* to fit than the canonical
-forward one, in every seed, stable to three decimals. Ordered − reverse on
-capability is −0.88 pp pooled (p = 0.11), negative in all three seeds.
+footing. Under *training*, a fully reversed assignment is easier to fit than the
+canonical forward one, in every seed, stable to three decimals. Ordered − reverse on
+capability is −0.88 pp pooled (p = 0.110), negative in all three seeds but not
+significant.
+
+This must **not** be read as "transformers reason backwards through depth". §2b
+tests that directly on the frozen model and finds the opposite: forward fits better
+than reverse there (median rank 3 of 24 versus 12). The trained asymmetry therefore
+reflects optimisation, not representational preference. Other explanations remain
+open and untested — later semantic states may simply be easier targets, early and
+late checkpoints may differ in capacity, cumulative-state construction is
+asymmetric by nature, and forward supervision may conflict more with the LM
+objective.
 
 The order margin and monotonic columns must **not** be used for this comparison:
 both are computed against the canonical order and therefore penalise reverse by
@@ -110,64 +219,99 @@ non-decreasing. Neither number is comparable across arms.
 2. **Not confirmatory.** The preregistration is unsigned, so this is
    EXPLORATORY_DEV. The §8 gates have not been formally executed against a frozen
    protocol.
-3. **G3 has one seed of three.** `state_final_repeated` completed only at seed 29;
+3. **`state_shuffled` is absent from this matrix entirely.** `SSOT §5` requires the
+   primary claim to rest on ordered versus **both** shuffled and reverse. Shuffled
+   exists only in the G1 pilot at seed 17 and 200 DEV problems, never at 800 DEV
+   across three seeds. So this document establishes the **primary directional
+   result** and does **not** constitute closure of the originally specified G2 gate.
+   (Its omission was deliberate and is defensible on its own terms — the permutation
+   is drawn per problem from SHA-256 of seed and problem id, so no consistent
+   function from (depth, prompt) to target exists and its failure to fit measures an
+   impossibility rather than a fact about reasoning. But "defensible to omit from an
+   exploratory step" is not "satisfies the gate".)
+4. **G3 has one seed of three.** `state_final_repeated` completed only at seed 29;
    seeds 17 and 43 failed on an environmental accelerator constraint (§5). A
    single-seed null carries ~57% power, so "final-repeated is harmless" is
    suggestive, not established. It is the control that decides whether the ordered
    deficit is about reasoning order or about auxiliary depth losses in general.
-4. **Narrow scope.** One 0.6B model, one procedurally-generated corpus, one LoRA
+5. **Narrow scope.** One 0.6B model, one procedurally-generated corpus, one LoRA
    configuration, one depth schedule. `SSOT §12` lists template overfitting as a
    live threat and no amount of seeds here addresses it.
 
 ## 5. Why two runs are missing
 
-Both `state_final_repeated` failures were environmental, not code faults, and the
-seven runs that completed did so under lower pressure.
+The two `state_final_repeated` failures were accelerator out-of-memory faults on a
+GPU shared with the desktop, not code faults; batch size, sequence length and every
+other config value were left untouched so re-queued runs stay protocol-identical to
+their seed-mates. An OOM therefore means *run incomplete*, never *scientific
+observation*: no partial run contributes a number to any table here.
 
-This 8,188 MiB accelerator is shared with the desktop. Measured with **no training
-running**, ~20 desktop processes (dwm, explorer, Edge, the Claude app, NVIDIA
-Overlay, ShareX, Radeon Software) held **5,592 MiB**, leaving under 2.6 GiB.
-Successful runs peaked near 7.8 GiB total. Desktop consumption drifted from roughly
-2.5 GiB overnight to 5.6 GiB by 07:00, and every run started after that failed:
+Full chronology, failure modes and the mitigations added
+(`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, and `--min-free-mib` so a run
+waits for headroom instead of dying into a squeeze) are in `PROGRESS.md` and commits
+`9735aed`, `9bfaecf`, `31cf2f2`. It is engineering provenance, not evidence.
 
-| run | failure | at |
-|---|---|---|
-| `g3_s17_state_final_repeated` | CUDA out of memory | step 1480/2000, then 750/2000 on retry |
-| `g3_s43_state_final_repeated` | `CUBLAS_STATUS_INTERNAL_ERROR`, bf16 GEMM | in backward |
+## 6. Verdict, graded by how well each claim is supported
 
-The first instance was self-inflicted: the test suite and a summariser validation
-were run while training was live, and both touch the accelerator. Recorded in
-`9735aed`.
+**Strongly supported.** The original thesis — that aligning cumulative reasoning
+states to increasing depth in *chronological* order improves or preserves reasoning
+— is **not supported**. Forward DAST is below the CoT baseline in all three seeds
+(0.8775 / 0.8862 / 0.8862 against 0.8938 / 0.8950 / 0.8925), while reverse sits at
+baseline. The observed ordering is `baseline ≈ reverse > forward`.
 
-Mitigations added, both protocol-neutral: `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
-in `scripts/launch_batch.ps1`, and `--min-free-mib` in `scripts/resume_runs.py`,
-which waits for headroom rather than starting a run into a squeeze that wastes 50
-minutes. Batch sizes and sequence length were deliberately **not** reduced: that
-would have changed the config hash and made the re-queued runs a different protocol
-from their own seed-mates.
+**Moderately supported.** Forcing forward chronological states onto depth produces a
+small interference effect: −1.04 pp pooled, p = 0.037. Two things keep this from
+being firm — it is **below the 2.0 pp practical margin** fixed in advance, and it is
+the contrast `SSOT §5` calls insufficient, while the designated decisive contrasts
+are not significant.
 
-## 6. What this means for the programme
+**Refuted, and worth recording.** The idea that depth intrinsically prefers a
+reversed trajectory. §2b tests all 24 permutations on the frozen model: forward
+fits *better* than reverse (median rank 3 of 24 versus 12; reverse never ranks
+first). The trained `L_state` asymmetry is an optimisation phenomenon, not a
+representational one.
 
-`SSOT §13` lists *"ordered improves mechanism metrics but not capability"* as a
-**revise** condition, and that is now measured at the preregistered power level
-rather than guessed. Two readings remain, and G3's missing seeds separate them:
+**Not established.** That forward ordering is *uniquely* responsible relative to
+every auxiliary-state control. Ordered − reverse is p = 0.110, `state_final_repeated`
+has one seed of three, and `state_shuffled` is absent from this matrix entirely.
 
-- **if final-repeated is confirmed harmless** — the cost is specific to progressive
-  forward supervision. That is a sharp, publishable negative result about the tested
-  formulation, and it would say the depth axis is indifferent to reasoning order
-  while being actively degraded by being told to follow it.
-- **if final-repeated also costs ~1 pp at three seeds** — the cost is from carrying
-  any consistent auxiliary depth target, the ordered/reverse asymmetry needs
-  re-explaining, and the finding becomes about auxiliary-loss interference rather
-  than about depth semantics.
+**Now known to be non-evidence.** The mechanism metrics. A ridge probe on the
+untouched backbone matches or beats the trained projector (§2a), so margin 0.935
+cannot support any claim that training built the trajectory.
 
-Either way the V1 formulation as specified does not improve reasoning, and the
-recorded revision candidate remains semantic **motion** rather than absolute state:
-`PHASE0_READINESS.md` §3.8 measured between-problem same-stage delta cosine at
-0.94–0.99 against within-problem cross-stage −0.32, an exact reversal of the
-absolute-state pattern. That direction is **not** implemented and spending the
-`SSOT §13` one-mechanism revision budget is a decision, not an implementation
-detail.
+### What DAST appears to have actually found
+
+The framing that survives all of the above is not "DAST failed" but:
+
+> **Representations can accommodate depth-aligned semantic supervision, and doing so
+> does not help reasoning — and forcing chronological progression onto depth mildly
+> interferes with useful computation.**
+
+That is a statement about architecture rather than about a training trick. A
+Transformer has the whole prompt at every layer; its computation need not resemble
+*read premise → read premise → derive → answer*. It may instead run something closer
+to global hypothesis formation, then constraint integration, then refinement, then
+output preparation. Mapping a human-authored chain-of-thought chronology onto that
+axis may distort a perfectly good internal computation. **Depth is not reasoning
+time.**
+
+### The experiment this points to
+
+Stop *assuming* the forward trajectory and start *measuring* the one the network
+already has. §2b is a first pass — 24 permutations, frozen model, no training — and
+its answer is that the network is nearly indifferent (spread ~4.3% of `L_state`).
+Extending that is cheap and does not spend the `SSOT §13` one-mechanism revision
+budget:
+
+- more checkpoints, so the permutation space is informative rather than flat;
+- targets that are not mean-pooled bags of embeddings, since `PHASE0_READINESS.md`
+  §3.3 showed that geometry is dominated by problem identity;
+- semantic **motion** rather than absolute state — between-problem same-stage delta
+  cosine was 0.94–0.99 against within-problem cross-stage −0.32
+  (`PHASE0_READINESS.md` §3.8), an exact reversal of the absolute-state pattern.
+
+The motion variant *is* a new mechanism and does spend the revision budget, so it is
+a recorded decision rather than an implementation detail.
 
 ## 7. Reproducing this table
 
@@ -182,6 +326,10 @@ run rather than omitting it silently.
 ## 8. Claim boundary
 
 Three seeds. 800 DEV problems each. 250 optimizer steps. Unsigned preregistration.
-TEST sealed and never read. Nothing here is a Rineya capability claim. The single
-contrast reaching p < 0.05 sits below the practical margin fixed in advance, and the
-control that would interpret it has one seed of three.
+TEST sealed and never read. Nothing here is a Rineya capability claim.
+
+The single contrast reaching p < 0.05 sits below the practical margin fixed in
+advance, is uncorrected for ~7 comparisons, and is the contrast `SSOT §5` designates
+insufficient. `state_shuffled` is absent and `state_final_repeated` has one seed of
+three, so this is the **primary directional result**, not closure of the G2/G3
+gates. The mechanism metrics are explicitly not evidence of learning (§2a).

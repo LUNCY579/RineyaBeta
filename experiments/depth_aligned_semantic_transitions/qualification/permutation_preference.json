@@ -1,0 +1,394 @@
+{
+  "records": 600,
+  "state_dim": 128,
+  "readout": "final_norm 7/14/21/27",
+  "Q1_frozen_floor_identity": {
+    "L_state": 0.22286772727966309,
+    "diagonal_cosine": 0.7771322727203369,
+    "order_margin": 0.994747206568718,
+    "top1": 0.824999988079071
+  },
+  "Q2_permutations_best_first": [
+    {
+      "perm": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "is_identity": true,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 1.0,
+      "L_state": 0.22286772727966309,
+      "diagonal_cosine": 0.7771322727203369,
+      "order_margin": 0.994747206568718,
+      "top1": 0.824999988079071
+    },
+    {
+      "perm": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.3333333333333333,
+      "L_state": 0.2229541540145874,
+      "diagonal_cosine": 0.7770458459854126,
+      "order_margin": 0.993859738111496,
+      "top1": 0.8274999856948853
+    },
+    {
+      "perm": [
+        1,
+        2,
+        3,
+        0
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.0,
+      "L_state": 0.22307813167572021,
+      "diagonal_cosine": 0.7769218683242798,
+      "order_margin": 0.9937786310911179,
+      "top1": 0.8341666460037231
+    },
+    {
+      "perm": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "is_identity": false,
+      "is_reverse": true,
+      "kendall_tau_vs_identity": -1.0,
+      "L_state": 0.2232005000114441,
+      "diagonal_cosine": 0.7767994999885559,
+      "order_margin": 0.9937716573476791,
+      "top1": 0.8308333158493042
+    },
+    {
+      "perm": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.6666666666666666,
+      "L_state": 0.22394704818725586,
+      "diagonal_cosine": 0.7760529518127441,
+      "order_margin": 0.9917463511228561,
+      "top1": 0.8224999904632568
+    },
+    {
+      "perm": [
+        0,
+        3,
+        2,
+        1
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.0,
+      "L_state": 0.22456520795822144,
+      "diagonal_cosine": 0.7754347920417786,
+      "order_margin": 0.9933687448501587,
+      "top1": 0.8299999833106995
+    },
+    {
+      "perm": [
+        2,
+        1,
+        0,
+        3
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.0,
+      "L_state": 0.22460275888442993,
+      "diagonal_cosine": 0.7753972411155701,
+      "order_margin": 0.992463007569313,
+      "top1": 0.8233333230018616
+    },
+    {
+      "perm": [
+        1,
+        0,
+        2,
+        3
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.6666666666666666,
+      "L_state": 0.2250610589981079,
+      "diagonal_cosine": 0.7749389410018921,
+      "order_margin": 0.9924975633621216,
+      "top1": 0.8308333158493042
+    },
+    {
+      "perm": [
+        1,
+        3,
+        2,
+        0
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": -0.3333333333333333,
+      "L_state": 0.22517234086990356,
+      "diagonal_cosine": 0.7748276591300964,
+      "order_margin": 0.9926042258739471,
+      "top1": 0.8299999833106995
+    },
+    {
+      "perm": [
+        0,
+        3,
+        1,
+        2
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.3333333333333333,
+      "L_state": 0.22716683149337769,
+      "diagonal_cosine": 0.7728331685066223,
+      "order_margin": 0.9888140857219696,
+      "top1": 0.8299999833106995
+    },
+    {
+      "perm": [
+        2,
+        0,
+        1,
+        3
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.3333333333333333,
+      "L_state": 0.22737592458724976,
+      "diagonal_cosine": 0.7726240754127502,
+      "order_margin": 0.9891267567873001,
+      "top1": 0.8224999904632568
+    },
+    {
+      "perm": [
+        2,
+        3,
+        1,
+        0
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": -0.6666666666666666,
+      "L_state": 0.22741544246673584,
+      "diagonal_cosine": 0.7725845575332642,
+      "order_margin": 0.9896765053272247,
+      "top1": 0.8241666555404663
+    },
+    {
+      "perm": [
+        2,
+        1,
+        3,
+        0
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": -0.3333333333333333,
+      "L_state": 0.22758281230926514,
+      "diagonal_cosine": 0.7724171876907349,
+      "order_margin": 0.989330843091011,
+      "top1": 0.8341666460037231
+    },
+    {
+      "perm": [
+        1,
+        0,
+        3,
+        2
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.3333333333333333,
+      "L_state": 0.2279956340789795,
+      "diagonal_cosine": 0.7720043659210205,
+      "order_margin": 0.9880147278308868,
+      "top1": 0.8316666483879089
+    },
+    {
+      "perm": [
+        3,
+        0,
+        1,
+        2
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.0,
+      "L_state": 0.2284705638885498,
+      "diagonal_cosine": 0.7715294361114502,
+      "order_margin": 0.9875612407922745,
+      "top1": 0.8258333206176758
+    },
+    {
+      "perm": [
+        2,
+        0,
+        3,
+        1
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.0,
+      "L_state": 0.22862011194229126,
+      "diagonal_cosine": 0.7713798880577087,
+      "order_margin": 0.9881708025932312,
+      "top1": 0.8333333134651184
+    },
+    {
+      "perm": [
+        0,
+        1,
+        3,
+        2
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.6666666666666666,
+      "L_state": 0.22934138774871826,
+      "diagonal_cosine": 0.7706586122512817,
+      "order_margin": 0.9850159585475922,
+      "top1": 0.8274999856948853
+    },
+    {
+      "perm": [
+        3,
+        0,
+        2,
+        1
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": -0.3333333333333333,
+      "L_state": 0.22954845428466797,
+      "diagonal_cosine": 0.770451545715332,
+      "order_margin": 0.9872883707284927,
+      "top1": 0.8308333158493042
+    },
+    {
+      "perm": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.0,
+      "L_state": 0.22981393337249756,
+      "diagonal_cosine": 0.7701860666275024,
+      "order_margin": 0.9853824526071548,
+      "top1": 0.8324999809265137
+    },
+    {
+      "perm": [
+        3,
+        1,
+        0,
+        2
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": -0.3333333333333333,
+      "L_state": 0.23022723197937012,
+      "diagonal_cosine": 0.7697727680206299,
+      "order_margin": 0.9842240214347839,
+      "top1": 0.8333333134651184
+    },
+    {
+      "perm": [
+        3,
+        2,
+        0,
+        1
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": -0.6666666666666666,
+      "L_state": 0.23040199279785156,
+      "diagonal_cosine": 0.7695980072021484,
+      "order_margin": 0.9839543849229813,
+      "top1": 0.8341666460037231
+    },
+    {
+      "perm": [
+        2,
+        3,
+        0,
+        1
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": -0.3333333333333333,
+      "L_state": 0.23071503639221191,
+      "diagonal_cosine": 0.7692849636077881,
+      "order_margin": 0.9849639385938644,
+      "top1": 0.8241666555404663
+    },
+    {
+      "perm": [
+        3,
+        1,
+        2,
+        0
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": -0.6666666666666666,
+      "L_state": 0.23099464178085327,
+      "diagonal_cosine": 0.7690053582191467,
+      "order_margin": 0.9847257286310196,
+      "top1": 0.8333333134651184
+    },
+    {
+      "perm": [
+        0,
+        2,
+        3,
+        1
+      ],
+      "is_identity": false,
+      "is_reverse": false,
+      "kendall_tau_vs_identity": 0.3333333333333333,
+      "L_state": 0.23102796077728271,
+      "diagonal_cosine": 0.7689720392227173,
+      "order_margin": 0.9825929403305054,
+      "top1": 0.82833331823349
+    }
+  ],
+  "summary": {
+    "identity_rank": 1,
+    "reverse_rank": 4,
+    "total_permutations": 24,
+    "identity_L_state": 0.22286772727966309,
+    "reverse_L_state": 0.2232005000114441,
+    "best_L_state": 0.22286772727966309,
+    "worst_L_state": 0.23102796077728271,
+    "best_perm": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "worst_perm": [
+      0,
+      2,
+      3,
+      1
+    ]
+  }
+}

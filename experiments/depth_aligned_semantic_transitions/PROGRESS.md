@@ -1,5 +1,73 @@
 # DAST progress
 
+## 2026-09-01 — five corrections to the three-seed write-up, after external review
+
+**Status unchanged: BUILT — UNRUN on a qualifying run. TEST CLOSED. EXPLORATORY_DEV.**
+
+External review of `docs/FINDINGS_G3_SEEDS.md` raised five corrections. All five were
+valid; all five are now applied. Two of them make the negative result **sharper**,
+and one **refutes** a reading I had encouraged.
+
+**1. "significant vs not significant" is not "significantly different".** The draft
+said the cost "is specific to the canonical forward assignment". Ordered-baseline at
+p = 0.037 alongside reverse-baseline at p = 0.80 does not establish ordered != reverse;
+the direct test is ordered - reverse = -0.88 pp at **p = 0.110**. Also recorded: ~7
+contrasts with no multiplicity correction (Bonferroni would need p < 0.007), and
+`SSOT §5` designates ordered-vs-baseline *insufficient* while the designated decisive
+contrasts are not significant.
+
+**2. The mechanism metrics are NOT evidence of learning.** This is the most important
+correction. `PHASE0_READINESS.md` §3.6 had already warned that after target centering
+the untrained model reaches margin 0.977-0.995, so a high margin is necessary but
+non-discriminative -- and I quoted margin 0.935 as "mechanism learned superbly"
+anyway. Measured now under exactly the final metric and geometry:
+
+| reference | margin | top-1 | `L_state` |
+|---|---:|---:|---:|
+| untrained MLP projector (`cot_baseline`) | ~0.00 | 0.25 | - |
+| **fitted ridge probe, FROZEN backbone** | **0.9947** | 0.8250 | **0.2229** |
+| trained projector (`state_ordered`) | 0.9350 | 0.8332 | 0.2629 |
+
+A least-squares readout on the untouched backbone **matches or beats** the trained
+projector. The trajectory was already linearly decodable; training learned to read
+something already present.
+
+**3. The reverse-preference reading is REFUTED.** Ran all 4! = 24 state-to-depth
+permutations on the frozen model over 20 random splits
+(`scripts/permutation_preference.py`):
+
+| assignment | best | median | worst | #1 finishes |
+|---|---:|---:|---:|---:|
+| identity (forward) | 1 | **3** | 15 | 5/20 |
+| reverse | 3 | **12** | 20 | **0/20** |
+
+The frozen geometry mildly prefers **forward**, and reverse is never best. So the
+trained `L_state` asymmetry is an optimisation effect, not a representational
+preference -- "transformers reason backwards" is not supported. Also: the spread
+across all 24 permutations is 0.0096, about **4.3%** of `L_state`, so the network is
+close to indifferent about which state sits at which depth. That indifference is
+itself evidence against the original thesis.
+
+**4. `state_shuffled` is absent, so G2 is not closed.** `SSOT §5` requires ordered
+versus shuffled AND reverse. Shuffled exists only in the G1 pilot at one seed and 200
+DEV. This document establishes the primary directional result, not gate closure.
+
+**5. The OOM chronology is engineering provenance, not evidence** — trimmed to two
+paragraphs pointing at PROGRESS and the commits.
+
+### Verdict, graded
+
+Strongly supported: the forward-order thesis is not supported (`baseline ~ reverse >
+forward`). Moderately supported: a small forward-ordering interference effect, below
+the prefixed 2 pp margin. Refuted: intrinsic reverse preference. Not established:
+that forward is uniquely responsible. Non-evidence: the mechanism metrics.
+
+The framing that survives: representations can accommodate depth-aligned semantic
+supervision, doing so does not help reasoning, and forcing chronological progression
+onto depth mildly interferes. **Depth is not reasoning time.**
+
+---
+
 ## 2026-09-01 — three-seed replication: mechanism learned, forward ordering COSTS accuracy
 
 **Status: BUILT — UNRUN on a qualifying (signed-preregistration) run. TEST CLOSED.
