@@ -1,5 +1,75 @@
 # DAST progress
 
+## 2026-09-01 (later still) — A no-op filter, corrected C1, and C2 answered
+
+**Status unchanged: CLOSED — NEGATIVE (EXPLORATORY DEV). TEST sealed. B2 still
+deferred (GPU held by an unrelated Chat-Bubble job).** 169 tests pass. No GPU job
+was run this pass.
+
+### 5. The distinctness filter was a no-op, and what it hid is about V1
+`DepthCache.trajectory_lengths` recorded `len(canonical_texts)`, which
+`align_trajectory` always sets to `num_stages`. So it was the constant 4 and
+`--require-distinct` dropped nothing. Caught because C2's `step_count`
+label-shuffled null came back *exactly* equal to its observed value.
+
+`raw_targets('compact_state')` drops the pre-reasoning state, leaving 2–9 usable
+states with a mode of 3. At the shipped K=4:
+
+- **1379/2400 (57.5%)** get four DISTINCT depth targets
+- **1021/2400 (42.5%)** get at least one DUPLICATED depth target
+
+For that 42.5%, "four distinct cumulative states" does not hold, `state_ordered` is
+partly a `state_final_repeated` arm, and any permutation swapping two depths holding
+the same target is a literal no-op. **K=8 was rejected for exactly this artifact; it
+was present at K=4 in the shipped protocol all along.**
+
+### 6. Corrected C1b makes the frozen model look MORE indifferent
+| | spread | identity median rank | reverse median rank |
+|---|---:|---:|---:|
+| as first committed (n=2400) | 5.84% | 2 | 10 |
+| filter working (n=1379) | **1.89%** | **7** | **18** |
+
+Two claims separate under the correction:
+- **"The model prefers to reason backwards" is refuted** — reverse is 18/24 and
+  never first, in all three passes.
+- **"Forward is preferred" is NOT supported** — identity is mid-pack at 7/24, and
+  the best assignment is odd/even interleave by 0.0003 `L_state` (0.2%).
+
+C1c holds under the filter: `embedding_x4` (layers 0/1/2/3) 0.13138 still beats the
+V1 sites 0.14280; `embedding_only` still sits at exactly chance top-1 0.2500; the
+trained projector's 0.2629 is still ~1.8× worse than a ridge on the frozen bottom.
+
+### 7. C2 — heterogeneity is real and far too small to act on
+Split-half reliability with a label-shuffled null, readout fitted on a disjoint FIT
+set, so `argmin` noise cannot masquerade as structure:
+
+| stratum | r(A,B) | label null | argmin agree | chance |
+|---|---:|---:|---:|---:|
+| generator | +0.3701 | +0.0814 | 0.1363 | 0.0417 |
+| answer_type | +0.3893 | +0.1024 | 0.1501 | 0.0417 |
+| step_count | +0.3650 | +0.2076 | 0.1250 | 0.0417 |
+
+Per-problem argmin agreement 0.1650 vs 0.0417 chance. Family preference replicates
+at ~4× its null — **real**. But the entire permutation spread is 1.89% of `L_state`,
+so the reliably-predicted quantity is a ~0.003 `L_state` difference with no shown
+link to capability.
+
+> **C2 passes reliability and fails magnitude. Adaptive DAST stays FORBIDDEN.**
+> C2 was its gate. Reopening requires evidence the preferred assignment moves
+> *generated capability*, not `L_state`.
+
+`category` is dropped from the report — 1:1 with `generator` here, so showing both
+reads as two confirmations of one measurement. `step_count`'s higher null reflects a
+difficulty confound.
+
+### 8. Two sealed-TEST bypasses closed
+`assert_split_allowed` compared `split.lower()` to "test" without stripping, so
+`" test "` returned early with the seal unchecked; and `build_depth_cache` reached
+`load_records` without the gate. Both fixed, the gate now runs as the first
+statement, and tests pin that `"testing"`/`"dev_test"` stay allowed. Neither was
+ever exercised: all 10,800 evaluated problem_ids are DEV.
+
+
 ## 2026-09-01 (later) — Three corrections to the V1 record, and the target-design defect
 
 **Status: unchanged — CLOSED — NEGATIVE (EXPLORATORY DEV). TEST sealed. No B1

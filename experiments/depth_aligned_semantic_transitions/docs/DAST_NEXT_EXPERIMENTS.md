@@ -26,7 +26,7 @@ demotes B1/B3 as capability tests and promotes Stage E from optional to
 | 1 | C1 frozen landscape K=4 + C1c controls | 0 (CPU) | **RUN**, written up | no |
 | 2 | **Stage E** paired teacher-forced NLL from the 12 existing adapters | ~0.5 (forward-only, no retraining) | **PROMOTED — run when GPU idle** | no |
 | 3 | B2 gradient cosine on existing V1 adapters | ~0.3–1.0 | **DEFERRED — GPU busy** | no |
-| 4 | C2 per-problem π* (CPU, cache exists) | 0 | next CPU study | no |
+| 4 | C2 per-problem π* (CPU) | 0 | **RUN** — reliable but 0.003-sized; Adaptive stays forbidden | no |
 | 5 | C1 optional K=5/6 `--require-distinct` | 0 if cache exists | optional | no |
 | 6 | B1 single-checkpoint one-seed pilots | ~4–5 (5× ~50 min) | **FROZEN** — and see the power gate below | no |
 | 7 | B3 λ sweep | ~4 (5 λ × one seed ordered) | freeze grid only | no |
@@ -114,9 +114,24 @@ Informative pattern: mechanism saturates early while generated accuracy worsens 
 
 ---
 
-## C2 — next CPU study after C1 write-up
+## C2 — RUN. Reliable heterogeneity, far too small to act on.
 
-Per-problem or per-family held-out permutation preference. Stratify by category, step count, answer_type, generator. Look for stable π*(x). **Adaptive DAST is forbidden until this fires.**
+Split-half reliability of family-level permutation preference, fitted on a disjoint
+FIT set, against a label-shuffled null:
+
+| stratum | r(A,B) | label null | argmin agree | chance |
+|---|---:|---:|---:|---:|
+| generator | +0.3701 | +0.0814 | 0.1363 | 0.0417 |
+| answer_type | +0.3893 | +0.1024 | 0.1501 | 0.0417 |
+| step_count | +0.3650 | +0.2076 | 0.1250 | 0.0417 |
+
+Family preference replicates at roughly 4× its null, so the heterogeneity is real.
+But the whole permutation spread is 1.89% of `L_state`, so the reliably-predicted
+quantity is a ~0.003 `L_state` difference with no demonstrated link to capability.
+
+**Adaptive DAST remains forbidden.** C2 was the gate, and it passes reliability
+while failing magnitude. Reopening it requires evidence that the preferred
+assignment changes *generated capability*, not `L_state`.
 
 ---
 

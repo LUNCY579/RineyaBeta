@@ -142,7 +142,13 @@ reason this result is reported as directional rather than firm.
 
 ## 7. Frozen-backbone permutation (C1, non-causal)
 
-The committed analysis [`../artifacts/c1b_permutation_k4_dev.json`](../artifacts/c1b_permutation_k4_dev.json) (20 splits, 24 permutations, `require_distinct`): identity median rank **2** (6/20 first); reverse median rank **10** (0/20 first); mean `L_state` spread **0.0072** (about 5.8% of identity `L_state`). An older write-up cited median rank 3 / spread ~4.3%; both descriptions agree the landscape is **nearly flat**. This is decodability, not computation. See [`FINDINGS_C1_FROZEN.md`](FINDINGS_C1_FROZEN.md).
+[`../artifacts/c1b_permutation_k4_dev.json`](../artifacts/c1b_permutation_k4_dev.json), 20 splits, 24 permutations, **n = 1379** after the distinctness filter: identity median rank **7 of 24** (4/20 first); reverse median rank **18** (0/20 first); mean `L_state` spread **0.00269**, about **1.89%** of identity `L_state`.
+
+The filter matters and was broken until now. `DepthCache.trajectory_lengths` recorded a constant, so `--require-distinct` dropped nothing; the first pass therefore included the **1,021 of 2,400 DEV problems (42.5%)** whose four depth targets are not all distinct, for which a permutation swapping two equal targets is a no-op. Removing them makes the frozen model look **more** indifferent (spread 5.84% → 1.89%) and moves identity from rank 2 to rank **7**.
+
+So: reverse-preference is **refuted** (reverse 18/24, never first, across all three passes), but forward-preference is **not supported** (identity mid-pack; the best assignment is odd/even interleave by 0.0003 `L_state`). Decodability, not computation.
+
+**42.5% duplication is a fact about V1, not only about this analysis.** For those problems the "four distinct cumulative states" premise does not hold and `state_ordered` is partly a `state_final_repeated` arm.
 
 K=8 exhaustive permutation is **not** licensed on this corpus: only ~4.6% of DEV traces have eight distinct compact states, so extra slots are repeated targets.
 

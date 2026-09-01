@@ -55,9 +55,9 @@ The deepest cumulative/final centred target interferes with output-producing rep
 
 Different problems prefer different state→depth assignments, so a universal π is inappropriate.
 
-- **Currently:** open. C1 is a **pooled** landscape. Flat average can hide stable π*(x).
-- **Test:** C2, held-out per-family permutation preference. Not yet run.
-- **If yes:** Adaptive DAST with matched-budget controls (uniform α, shuffled α, baseline, final-repeated).
+- **Currently:** **answered, and the answer is "real but far too small to act on."** C2 split-half reliability against a label-shuffled null: generator r = +0.3701 (null +0.0814), answer_type +0.3893 (null +0.1024), step_count +0.3650 (null +0.2076, partly a difficulty confound). Per-problem argmin agreement 0.1650 against 0.0417 chance. Family preference is genuinely reproducible — roughly 4× its null. **But the entire permutation spread is 1.89% of `L_state`**, so what replicates is a ~0.003 `L_state` difference, and modal preference replicates only 13–15% of the time.
+- **Test:** C2, done. [`FINDINGS_C1_FROZEN.md`](FINDINGS_C1_FROZEN.md) §C2.
+- **Verdict:** C2 passes the reliability test and **fails the magnitude test**. Adaptive DAST stays **forbidden**: a router would select among options differing by 0.2% of an objective C1c shows is satisfiable from the token embedding. Reliable ≠ consequential. Reopening requires evidence that the preferred assignment changes *capability*, not `L_state`.
 
 ### H6 — Absolute states are the wrong object
 
@@ -98,9 +98,11 @@ C1/C1c (done): landscape nearly flat; no chronological layer ridge; the whole
   NOTE: any successor keeping absolute embedding-derived targets inherits this
   defect. A layer-0 recoverability control is now mandatory for every new target.
 
-C2 (not done): stable π*(x) by category/length?
-  YES → SOFT/ADAPTIVE DAST.
-  NO → do not build a router to fit noise.
+C2 (DONE): stable pi*(x) by family?
+  Reliability YES (r ~ +0.37-0.39 vs null ~ +0.08-0.10), magnitude NO (spread is
+  1.89% of L_state; argmin replicates 13-15%).
+  => do NOT build a router. It would fit a real but 0.003-sized effect on an
+     objective that C1c shows needs no depth at all.
 
 Reverse capability (not L_state) > baseline, replicated?
   YES → consider Bidirectional/Convergent. V1 reverse is baseline-like, so this is currently OFF.
