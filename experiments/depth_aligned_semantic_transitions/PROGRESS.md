@@ -61,8 +61,11 @@ was run this pass.
 `--require-distinct` dropped nothing. Caught because C2's `step_count`
 label-shuffled null came back *exactly* equal to its observed value.
 
-`raw_targets('compact_state')` drops the pre-reasoning state, leaving 2–9 usable
-states with a mode of 3. At the shipped K=4:
+The duplication itself was **already known**: `PHASE0_READINESS.md` §3 recorded it
+before any training budget was spent ("dilutes the ordered-vs-shuffled contrast on
+42% of the corpus") and §658 recommended excluding the stratum. That recommendation
+was simply never executed. `raw_targets('compact_state')` drops the pre-reasoning
+state, leaving 2–9 usable states with a mode of 3. At the shipped K=4:
 
 - **1379/2400 (57.5%)** get four DISTINCT depth targets
 - **1021/2400 (42.5%)** get at least one DUPLICATED depth target

@@ -19,11 +19,17 @@ computation, not a capability result, and not a reason to reopen V1.
 
 ## C1b — exhaustive K=4 permutations (24 × 20 splits), n = 1379
 
-**`--require-distinct` now works.** It was a no-op until the
-`DepthCache.trajectory_lengths` fix, so the first pass ran on all 2,400 problems
-including the 1,021 (42.5%) whose depth targets are **not** all distinct. For those,
-permutations that swap two depths holding the same target are literal no-ops, which
-flattens the landscape by target construction. Corrected run drops them:
+**`--require-distinct` now works.** The duplication itself is not a new finding:
+[`PHASE0_READINESS.md`](PHASE0_READINESS.md) §3 (lines 298, 313) already recorded
+that `_progress_indices` pins both endpoints, so a trace with fewer than K=4 states
+gets repeated slots, and that this "dilutes the ordered-vs-shuffled contrast on 42%
+of the corpus" — and §658 already proposed excluding that stratum. What was wrong is
+that this study's filter did not actually apply it: `DepthCache.trajectory_lengths`
+recorded a constant, so `--require-distinct` dropped nothing and the first pass ran
+on all 2,400 problems including the 1,021 (42.5%) with non-distinct depth targets.
+For those, permutations swapping two depths that hold the same target are literal
+no-ops, which flattens the landscape by target construction. Corrected run drops
+them, executing PHASE0's own recommendation:
 
 | assignment | median rank | times #1 | mean `L_state` |
 |---|---:|---:|---:|

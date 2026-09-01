@@ -148,7 +148,7 @@ The filter matters and was broken until now. `DepthCache.trajectory_lengths` rec
 
 So: reverse-preference is **refuted** (reverse 18/24, never first, across all three passes), but forward-preference is **not supported** (identity mid-pack; the best assignment is odd/even interleave by 0.0003 `L_state`). Decodability, not computation.
 
-**42.5% duplication is a fact about V1, not only about this analysis.** For those problems the "four distinct cumulative states" premise does not hold and `state_ordered` is partly a `state_final_repeated` arm.
+**42.5% duplication is a fact about V1, not only about this analysis, and it was already known.** [`PHASE0_READINESS.md`](PHASE0_READINESS.md) §3 recorded it before any training budget was spent ("dilutes the ordered-vs-shuffled contrast on 42% of the corpus") and recommended excluding the stratum. That recommendation was never executed until now. For those problems the "four distinct cumulative states" premise does not hold and `state_ordered` is partly a `state_final_repeated` arm.
 
 K=8 exhaustive permutation is **not** licensed on this corpus: only ~4.6% of DEV traces have eight distinct compact states, so extra slots are repeated targets.
 
