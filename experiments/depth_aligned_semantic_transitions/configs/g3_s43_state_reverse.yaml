@@ -1,0 +1,21 @@
+# Seed replication of the budget escalation - EXPLORATORY_DEV.
+#
+# The seed-17 escalation (docs/FINDINGS_G2_BUDGET.md) found ordered - baseline
+# = -0.0163 with the clustered interval excluding zero but exact McNemar at
+# p = 0.0533: borderline, and one seed at 800 DEV carries only 56.7% power.
+# Three seeds x 800 DEV = 2,400 paired problems gives 97.8% power for a 2:1
+# discordant split and a 1.56 pp minimum detectable effect.
+extends: state_reverse.yaml
+
+experiment:
+  name: dast-g3-s43-state_reverse
+  seed: 43
+  output_dir: ../runs/g3_s43_state_reverse
+  evidence_status: exploratory_dev
+
+data:
+  max_train_records: 4000
+  max_eval_records: 800
+
+evaluation:
+  do_generation: true

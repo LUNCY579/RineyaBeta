@@ -1,0 +1,20 @@
+# G3 - progressive-state specificity. EXPLORATORY_DEV.
+#
+# THE control that decides what the escalation's deficit means. If repeating the
+# FINAL state at every depth also costs ~1.6 pp, then the harm comes from carrying
+# any auxiliary depth loss at all, not from aligning it to reasoning order - a
+# materially different conclusion that would make the ordered/reverse question moot.
+extends: state_final_repeated.yaml
+
+experiment:
+  name: dast-g3-s43-state_final_repeated
+  seed: 43
+  output_dir: ../runs/g3_s43_state_final_repeated
+  evidence_status: exploratory_dev
+
+data:
+  max_train_records: 4000
+  max_eval_records: 800
+
+evaluation:
+  do_generation: true
