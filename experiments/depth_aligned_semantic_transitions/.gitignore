@@ -10,3 +10,7 @@ build/
 
 # Transient generated configs (e.g. per-run output-dir rewrites).
 configs/_*.yaml
+
+# Detached batch launcher logs (runs/ is already ignored, this is belt and braces).
+runs/_batch_*.log
+runs/_batch_*.err
