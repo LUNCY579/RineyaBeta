@@ -39,7 +39,7 @@ One checkpoint/state pairing, especially the deepest coherent checkpoint (layer
 
 The model already represents semantic progress flexibly. A rigid one-state-per-depth map removes useful degrees of freedom.
 
-- **Currently:** weakly supported by C1. Frozen K=4 permutation landscape is nearly flat (identity median rank 2/24, reverse 10/24, spread ~6% of `L_state`). Layer×stage profile peaks at **layer 1 for every stage** (Spearman 0). Readable ≠ structured as a depth clock.
+- **Currently:** supported by C1/C1c, more strongly than "weakly". Frozen K=4 permutation landscape is nearly flat (identity median rank 2/24, reverse 10/24, spread ~6% of `L_state`). The layer×stage profile peaks at **layer 1 for every stage**, and C1c shows **layer 0 — the token-embedding centroid, before any decoder layer — matches it and beats every layer from 3 up**. Four *consecutive bottom* layers (0/1/2/3) fit the objective slightly **better** (`L_state` 0.111) than V1's spread-out sites (0.124), while the trained projector reaches only 0.263. The `embedding_only` control lands at exactly chance top-1 (0.2500), so this is not a metric that scores well on anything: the objective genuinely needs four distinguishable representations, it just does not need a *chronological depth axis*. Readable ≠ structured as a depth clock.
 - **Test:** B1 (all four together hurt, singles do not) plus B3 (mechanism saturates while accuracy falls as λ↑). C2 π*(x) heterogeneity.
 - **If yes:** Soft/Adaptive DAST — only after C2 shows stable example-wise routing, not because the landscape is flat.
 
@@ -63,7 +63,7 @@ Different problems prefer different state→depth assignments, so a universal π
 
 Semantic motion Δh_k ↔ Δs_k may capture computation better than absolute identities.
 
-- **Currently:** PHASE0 noted between-problem same-stage delta cosine 0.94–0.99 vs within-problem cross-stage −0.32 — motion geometry is different, not a capability result.
+- **Currently:** materially strengthened by C1c, though still not a capability result. PHASE0 noted between-problem same-stage delta cosine 0.94–0.99 vs within-problem cross-stage −0.32. C1c adds the sharper point: because `FrozenTextTargetEncoder` builds targets from the **frozen input embedding**, the absolute-state objective is essentially satisfiable from the prompt's token-embedding centroid, and the depth stack neither supplies nor improves it. That is a defect in the *target object*, not in the depth mapping — which is exactly H6's claim, arrived at independently of the motion geometry. A motion target would at minimum have to demonstrate it is **not** similarly recoverable at layer 0; that becomes a mandatory control, not an optional one.
 - **Test:** only after B/C, and only if motion wins on **capability and conflict**, not prettier probes. **Spends the SSOT §13 one-mechanism revision budget.**
 
 ### H7 — Scale / depth dependence
@@ -89,9 +89,14 @@ B2: is ordered cosine(g_LM, g_state) systematically more negative than reverse/f
   YES → H2. λ sweep B3 frozen at {0, 0.1, 0.25, 0.5, 1.0}×λ0. Do not sign V2 until this fires.
   NO → drop H2 as the primary story.
 
-C1 (done): landscape nearly flat; no chronological layer ridge.
-  Supports H3/H5 as live; does not implement Adaptive by itself.
-  Refutes “transformers reason backwards” as a frozen-geometry claim.
+C1/C1c (done): landscape nearly flat; no chronological layer ridge; the whole
+  signal is present at layer 0, before any decoder layer, and the bottom four
+  layers fit it better than V1's sites.
+  Supports H3/H5 as live and raises H6 from speculative to a target-design defect.
+  Does not implement Adaptive by itself.
+  Refutes "transformers reason backwards" as a frozen-geometry claim.
+  NOTE: any successor keeping absolute embedding-derived targets inherits this
+  defect. A layer-0 recoverability control is now mandatory for every new target.
 
 C2 (not done): stable π*(x) by category/length?
   YES → SOFT/ADAPTIVE DAST.
@@ -110,6 +115,10 @@ Mechanism localized AND we still need a domain check?
 
 B1 unstructured <2 pp AND B2 similar across arms AND C2 null?
   CLOSE the DAST training direction. Keep the probe/instrumentation framework.
+  CAUTION: "B1 unstructured <2 pp" is NOT evidence of absence. The one-seed MDE on
+  this endpoint is 2.27 pp, so that outcome is what an underpowered test returns
+  whatever the truth is. Close on B2 + C2 + the C1c target-design defect, not on a
+  null accuracy column. See DAST_NEXT_EXPERIMENTS.md, power gate.
 ```
 
 **Do not implement more than one successor.** Bidirectional requires reverse **accuracy** advantage. Adaptive requires C2. Motion spends the revision budget. The parked V2 9-run matrix is H2-only and stays unsigned until B2 supports it.

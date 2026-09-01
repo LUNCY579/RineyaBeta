@@ -14,17 +14,48 @@ are diagnostics inside the existing mechanism.
 
 ## Ranked list
 
+**Re-ranked after the endpoint power analysis** ([`../artifacts/endpoint_power.json`](../artifacts/endpoint_power.json)).
+The generated-accuracy endpoint has a three-seed MDE of **1.39 pp** and a one-seed
+MDE of **2.27 pp**. Any experiment whose question is *"does capability change by
+about a pp or less"* cannot be answered on it at an affordable seed count. That
+demotes B1/B3 as capability tests and promotes Stage E from optional to
+**precondition**.
+
 | Rank | ID | GPU-hours (est.) | Status this pass | Spends revision budget? |
 |---|---|---|---|---|
-| 1 | C1 frozen landscape K=4 (existing artifacts) | 0 (CPU) | **RUN** write-up | no |
-| 2 | C1 optional K=5/6 `--require-distinct` | 0 if cache exists; **do not rebuild cache** if a trainer may need the GPU | run only if `artifacts/depth_cache_*.pt` present | no |
-| 3 | B2 gradient cosine on existing V1 adapters | ~0.3–1.0 | **RUN only if GPU idle** | no |
-| 4 | B1 single-checkpoint one-seed pilots | ~4–5 (5× ~50 min) | **FROZEN, do not launch** | no |
-| 5 | C2 per-problem π* (CPU after cache) | 0–1 | listed, not this pass | no |
-| 6 | B3 λ sweep | ~4 (5 λ × one seed ordered) | freeze grid only | no |
-| 7 | Stage E teacher-forced surrogate | cheap once instrumented | design note only | no |
+| 1 | C1 frozen landscape K=4 + C1c controls | 0 (CPU) | **RUN**, written up | no |
+| 2 | **Stage E** paired teacher-forced NLL from the 12 existing adapters | ~0.5 (forward-only, no retraining) | **PROMOTED — run when GPU idle** | no |
+| 3 | B2 gradient cosine on existing V1 adapters | ~0.3–1.0 | **DEFERRED — GPU busy** | no |
+| 4 | C2 per-problem π* (CPU, cache exists) | 0 | next CPU study | no |
+| 5 | C1 optional K=5/6 `--require-distinct` | 0 if cache exists | optional | no |
+| 6 | B1 single-checkpoint one-seed pilots | ~4–5 (5× ~50 min) | **FROZEN** — and see the power gate below | no |
+| 7 | B3 λ sweep | ~4 (5 λ × one seed ordered) | freeze grid only | no |
 | 8 | Parked V2 9-run H2 matrix | ~9 | **PARKED** until B2 supports H2 | no |
 | 9 | Localized / Adaptive / Bidirectional / Motion / Rineya | large | choose **one** after B/C | motion only |
+
+### Power gate on B1 and B3 — read before signing either
+
+| seeds | 1 | 2 | 3 | 5 | 10 | 20 |
+|---|---:|---:|---:|---:|---:|---:|
+| MDE (pp) | **2.27** | 1.71 | **1.39** | 1.08 | 0.74 | 0.53 |
+
+A one-seed B1 pilot cannot detect even the **full** 1.00 pp ordered deficit. If that
+deficit is distributed across the four checkpoints, a per-site share of ~0.25 pp
+needs **~88 seeds of 800**. So:
+
+> **B1's generated-accuracy column cannot answer the localization question, at one
+> seed or at any seed count this project can afford. Do not read it as capability
+> evidence in either direction.**
+
+B1 remains worth running — but as a **mechanism** measurement (`L_state` per site,
+LM perplexity, and the B2 gradient cosine per arm), where the quantities are
+continuous and per-batch rather than a 5.5%-discordance binary. Its stop rule must
+be written on those, not on accuracy. The same applies to B3: the informative
+pattern there ("mechanism saturates while accuracy falls") requires an accuracy
+endpoint that can see a sub-2 pp fall, which this one cannot.
+
+This is the fourth time this endpoint's power has bitten the project;
+`FINDINGS_G3_SEEDS.md` §4a records the first three.
 
 K=8 exhaustive permutation is **rejected**: 4.6% of DEV traces have 8 distinct compact states ([`scripts/permutation_landscape.py`](../scripts/permutation_landscape.py)).
 
@@ -89,9 +120,28 @@ Per-problem or per-family held-out permutation preference. Stratify by category,
 
 ---
 
-## Stage E — design note only
+## Stage E — PROMOTED to rank 2, signed for a forward-only pass when the GPU is idle
 
-Teacher-forced paired NLL / answer-span NLL as a **companion** endpoint. Cluster by generator. Never promote a mechanism solely because the surrogate moves.
+**Why it moved.** It is the only route to an endpoint that can resolve the effects
+B1/B3 are about, and it is nearly free: all twelve V1 runs saved `adapter/` and
+`dast_auxiliary.pt`, so per-problem teacher-forced NLL needs **forward passes only,
+no retraining** — roughly 0.5 GPU-hours for the whole matrix against ~4–5 for a
+single B1 pilot that cannot answer its own question.
+
+**Method.** Per problem on the 800 DEV items: gold-token NLL over the assistant
+span, answer-region NLL, and mean gold-token probability. Pair by `problem_id`,
+cluster by `generator` (30 clusters), exactly as `compare.py` already does for
+accuracy. A continuous paired endpoint is not throttled by the 5.5% discordance
+rate that caps the binary one.
+
+**Validation gate, to be passed before the endpoint is used for anything.** The
+answer is already known on this matrix: `ordered` below `baseline ≈ reverse ≈
+final_repeated`. If the NLL endpoint does not reproduce that ordering on the same
+twelve runs, it is not a usable screen and must be discarded rather than explained.
+
+**Standing constraint.** Generated accuracy remains the capability endpoint. Stage E
+ranks candidates cheaply; it never promotes one on its own. Never promote a
+mechanism solely because the surrogate moves while generation does not.
 
 ---
 
@@ -115,4 +165,5 @@ Teacher-forced paired NLL / answer-span NLL as a **companion** endpoint. Cluster
 - No extra V1 seeds.
 - No V2 9-run matrix until B2 supports H2.
 - No B1 GPU this pass.
+- B1/B3 accuracy is not a capability endpoint at these seed counts (power gate above).
 - One GPU job at a time; `--min-free-mib`; never start B2 while a trainer is live.

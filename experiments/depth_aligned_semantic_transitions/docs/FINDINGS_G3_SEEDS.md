@@ -13,7 +13,25 @@ remains sealed. No additional V1 seeds.**
 Seeds **17, 29, 43**. 4,000 train / 800 DEV problems per run, 250 optimizer steps,
 Qwen3-0.6B + LoRA r=16, `checkpoint_readout: final_norm` at layers 7/14/21/27,
 `target_centering: within_problem`, greedy generation at `max_new_tokens: 384`,
-scorer frozen at `f160f38`. Roughly 50 min per run.
+scorer **not** frozen across runs — see the correction box below. Roughly 50 min per run.
+
+> **Scorer correction (supersedes the tables in §1).** This document originally
+> stated the scorer was frozen at `f160f38`. It was not: `compare.py` reads the
+> `correct` field baked into each predictions file at generation time, and all three
+> seed-17 arms were generated at `e3ca792` / `1dce3cd`, which predate `f160f38` (the
+> commit making `state` answers order-insensitive). Re-scoring all twelve prediction
+> files with one scorer flips exactly one problem and gives:
+> `state_ordered` mean **0.8838** (s17 **0.8788**);
+> ordered − final_repeated **−0.0117, p = 0.0167**;
+> ordered − baseline **−0.0100, p = 0.0449**;
+> ordered − reverse **−0.0083, p = 0.1279**; other contrasts unchanged.
+> Direction unchanged, strength lower. Cite the corrected values:
+> [`../scripts/rescore_consistency.py`](../scripts/rescore_consistency.py),
+> [`../artifacts/rescore_consistency.json`](../artifacts/rescore_consistency.json),
+> and [`DAST_V1_CLOSURE.md`](DAST_V1_CLOSURE.md) §3a.
+> Power context: the three-seed minimum detectable effect on this endpoint is
+> **1.39 pp**, so the 1.00 pp deficit sits *below* it and was found with ~54% power
+> ([`DAST_V1_CLOSURE.md`](DAST_V1_CLOSURE.md) §3b).
 
 Seed 17's three primary arms are the `g2_budget_*` runs; seeds 29 and 43 are
 `g3_s*`. Analysis groups by `(arm, seed)` from each `run_manifest.json`, so the
@@ -174,6 +192,15 @@ trajectory backwards. That is directly testable **without training anything** �
 for K=4 there are 4! = 24 assignments of states to depths, and a shared linear
 readout can be fitted for each on the frozen backbone.
 
+> **These §2b figures are WITHDRAWN.** `scripts/permutation_preference.py` contains
+> no RNG and no split loop — it performs one deterministic `half = N // 2` split — so
+> a median over 20 random splits was never computable from it, and its committed
+> artifact records identity rank **1**, reverse rank **4**, spread **0.00816
+> (3.66%)**. The superseding measurement is 24 permutations × 20 real random splits
+> on all 2,400 DEV problems: identity median rank **2** (6/20 first), reverse median
+> rank **10** (0/20 first), spread **0.00724 (5.8%)**. The *direction* replicates;
+> the numbers below do not. See [`FINDINGS_C1_FROZEN.md`](FINDINGS_C1_FROZEN.md).
+
 Result over **20 random half/half splits** of 600 DEV problems:
 
 | assignment | best rank | median rank | worst rank | times ranked #1 |
@@ -238,7 +265,7 @@ exactly 1.0000 are artifacts of its target set: four identical targets are much
 easier to fit, and "progress" over four identical states is trivially
 non-decreasing. Neither number is comparable across arms.
 
-## 4. Four constraints on reading this
+## 4. Five constraints on reading this
 
 1. **−1.04 pp is BELOW the 2.0 pp practical margin** proposed in
    `PREREGISTRATION.md` §6 *before* these runs. Statistically detectable at this n;

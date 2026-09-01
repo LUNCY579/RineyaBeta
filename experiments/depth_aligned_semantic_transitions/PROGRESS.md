@@ -1,5 +1,80 @@
 # DAST progress
 
+## 2026-09-01 (later) — Three corrections to the V1 record, and the target-design defect
+
+**Status: unchanged — CLOSED — NEGATIVE (EXPLORATORY DEV). TEST sealed. No B1
+GPU. B2 still deferred (unrelated Chat-Bubble p2 job holds the accelerator:
+2907 MiB free).** Three findings, all reproducible from committed scripts. Two
+weaken the published result; one is a new mechanistic result.
+
+### 1. The scorer was not frozen; the headline is weaker than published
+`FINDINGS_G3_SEEDS.md` said the scorer was "frozen at `f160f38`". It was not.
+`compare.py` reads the `correct` field baked in at generation time, and **all
+three seed-17 arms** were generated at `e3ca792` / `1dce3cd`, which predate
+`f160f38` (the order-insensitive `state` fix). Re-scoring all twelve prediction
+files with one scorer flips exactly one problem
+(`rineya_si_v1_recursive_state_updates_1300`, gold bag emitted in a different
+order):
+
+| contrast | as published | consistently scored |
+|---|---|---|
+| ordered − baseline | −0.0104, p=0.0370 | **−0.0100, p=0.0449** |
+| ordered − final_repeated | −0.0121, p=0.0134 | **−0.0117, p=0.0167** |
+| ordered − reverse | −0.0088, p=0.1102 | **−0.0083, p=0.1279** |
+
+`state_ordered` mean 0.8833 → **0.8838**. Direction unchanged; strength lower.
+`scripts/rescore_consistency.py`, `artifacts/rescore_consistency.json`.
+
+### 2. This endpoint cannot support B1 as a capability test
+Exact McNemar against the measured 5.54% discordance rate: one-seed MDE **2.27
+pp**, three-seed **1.39 pp**. The observed 1.00 pp deficit is *below its own
+three-seed MDE* and was found with ~54% post-hoc power. A one-seed B1 pilot
+cannot detect even the full deficit; a per-checkpoint quarter of it would need
+~88 seeds. **B1's accuracy column cannot answer the localization question** and
+must not be read as capability evidence either way — including as evidence of
+absence. B1 stays worth running for `L_state` and gradient evidence.
+Consequently **Stage E is promoted to rank 2**: per-problem teacher-forced NLL
+from the twelve existing adapters is forward-only, needs no retraining (~0.5
+GPU-h), and is the only route to an endpoint that can see these effects.
+`scripts/endpoint_power.py`, `artifacts/endpoint_power.json`, 9 new tests.
+
+### 3. C1c — the supervised signal precedes the depth stack entirely
+C1a found every centred stage best decoded at layer 1, which could not separate
+"shallow is best" from "the targets live in input-embedding space" —
+`FrozenTextTargetEncoder` builds them from the frozen input embedding. **Layer 0**
+settles it: the token-embedding centroid, before any decoder layer runs, is within
+0.003 of the best layer and beats every layer from 3 upward.
+
+| condition (shared readout, 2400 DEV, 20 splits) | `L_state` | margin | top-1 |
+|---|---:|---:|---:|
+| layers 7/14/21/27 (V1 sites) | 0.12397 | +1.1216 | 0.8653 |
+| layers 0/1/2/3 | **0.11127** | +1.1371 | 0.8615 |
+| layer 0 at all four depths | 0.84576 | +0.0000 | **0.2500** (chance) |
+| right depths, wrong problem | 0.67474 | +0.4165 | 0.5813 |
+| *trained* `state_ordered`, 250 steps | *0.26290* | *+0.9350* | *0.8332* |
+
+The chance-level `embedding_only` row is the control that keeps the rest honest: a
+shared readout fed identical input at every depth cannot separate stages, so 0.865
+elsewhere is real four-way discrimination — it just needs four *distinguishable*
+representations, not a chronological axis, and the bottom four layers do it
+slightly **better** than V1's. This is a defect in the **target object**, not the
+depth mapping, and it raises H6 from speculative to diagnosed. Any successor
+keeping absolute embedding-derived targets inherits it: **a layer-0 recoverability
+control is now mandatory for every new target.**
+`scripts/depth_information_controls.py`, `artifacts/c1c_*.json`.
+
+### 4. §2b's permutation figures are withdrawn
+`FINDINGS_G3_SEEDS.md` §2b cites "20 random half/half splits", identity median
+rank 3 vs reverse 12, spread 0.0096/4.3%. `scripts/permutation_preference.py`
+contains **no RNG and no split loop** (one deterministic `half = N // 2`), and its
+committed artifact says identity rank **1**, reverse **4**, spread **0.00816
+(3.66%)**. The direction replicates three times; those numbers should not be
+cited. Superseded by `artifacts/c1b_permutation_k4_dev.json`.
+
+### Suite
+150 tests pass (117 + 9 power + 24 depth-probe/other). No GPU job was run.
+
+
 ## 2026-09-01 — Diagnosis freeze: V1 closed; B1/B2 instrumented not launched; C1 CPU written; B2 deferred (GPU busy)
 
 **Status: CLOSED — NEGATIVE (EXPLORATORY DEV) for V1. Diagnosis protocols frozen.
@@ -7,8 +82,8 @@ TEST sealed. No B1 GPU. No 9-run V2 matrix.**
 
 ### A. What DAST V1 actually taught us
 Chronological ordered state-to-depth supervision did not improve held-out
-reasoning on Qwen3-0.6B + LoRA. Ordered mean accuracy 0.8833 vs baseline 0.8937
-(−1.04 pp). G3 fails directionally (−1.21 pp vs final-repeated). Depth is not
+reasoning on Qwen3-0.6B + LoRA. Ordered mean accuracy 0.8838 vs baseline 0.8937
+(−1.00 pp consistently scored; −1.04 as published). G3 fails directionally (−1.17 pp vs final-repeated). Depth is not
 shown to be reasoning time. High trained margins are non-evidence (frozen ridge
 matches or beats them). See `docs/DAST_V1_CLOSURE.md`.
 
