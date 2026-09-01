@@ -1,0 +1,146 @@
+{
+  "arms": {
+    "ordered": {
+      "run": "C:\\Users\\clclc\\RineyaExperiment-dast\\experiments\\depth_aligned_semantic_transitions\\runs\\g3_s29_state_ordered",
+      "seed": 29,
+      "arm": "state_ordered"
+    },
+    "reverse": {
+      "run": "C:\\Users\\clclc\\RineyaExperiment-dast\\experiments\\depth_aligned_semantic_transitions\\runs\\g3_s29_state_reverse",
+      "seed": 29,
+      "arm": "state_reverse"
+    },
+    "final_repeated": {
+      "run": "C:\\Users\\clclc\\RineyaExperiment-dast\\experiments\\depth_aligned_semantic_transitions\\runs\\g3_s29_state_final_repeated",
+      "seed": 29,
+      "arm": "state_final_repeated"
+    }
+  },
+  "reference_arm": "ordered",
+  "summaries": {
+    "ordered": {
+      "global_cosine": {
+        "n": 32,
+        "mean": -0.0016703578389751783,
+        "sd": 0.00883292067108998,
+        "sem": 0.0015614545260526386,
+        "n_negative": 18
+      },
+      "lora_only_cosine": {
+        "n": 32,
+        "mean": -0.006229819336231795,
+        "sd": 0.029177237489858412,
+        "sem": 0.00515785562134231,
+        "n_negative": 18
+      },
+      "fraction_modules_negative": {
+        "n": 32,
+        "mean": 0.5338955026455027,
+        "sd": 0.12919338471231512,
+        "sem": 0.022838379603630114,
+        "n_negative": 0
+      },
+      "grad_norm_ratio_median": 21.13077944944139
+    },
+    "reverse": {
+      "global_cosine": {
+        "n": 32,
+        "mean": 0.0016752312785683898,
+        "sd": 0.00998969448756155,
+        "sem": 0.0017659451785341613,
+        "n_negative": 17
+      },
+      "lora_only_cosine": {
+        "n": 32,
+        "mean": 0.004753071431662291,
+        "sd": 0.028925829047328436,
+        "sem": 0.005113412467702187,
+        "n_negative": 17
+      },
+      "fraction_modules_negative": {
+        "n": 32,
+        "mean": 0.4786706349206349,
+        "sd": 0.17025883355660099,
+        "sem": 0.030097793941196067,
+        "n_negative": 0
+      },
+      "grad_norm_ratio_median": 8.847894402155557
+    },
+    "final_repeated": {
+      "global_cosine": {
+        "n": 32,
+        "mean": -0.0006332903568591064,
+        "sd": 0.006864279190459941,
+        "sem": 0.0012134445908829822,
+        "n_negative": 16
+      },
+      "lora_only_cosine": {
+        "n": 32,
+        "mean": -0.003643120537430956,
+        "sd": 0.037802386831930254,
+        "sem": 0.006682581018473733,
+        "n_negative": 16
+      },
+      "fraction_modules_negative": {
+        "n": 32,
+        "mean": 0.4808201058201058,
+        "sd": 0.15507395204208235,
+        "sem": 0.02741346076858847,
+        "n_negative": 0
+      },
+      "grad_norm_ratio_median": 23.40484603769422
+    }
+  },
+  "contrasts": {
+    "global_cosine": {
+      "reverse": {
+        "difference": -0.003345589117543568,
+        "se": 0.0023572659184992943,
+        "t": -1.4192667408832136,
+        "significant_at_2_sigma": false
+      },
+      "final_repeated": {
+        "difference": -0.001037067482116072,
+        "se": 0.0019775206729825707,
+        "t": -0.5244281368507404,
+        "significant_at_2_sigma": false
+      }
+    },
+    "lora_only_cosine": {
+      "reverse": {
+        "difference": -0.010982890767894087,
+        "se": 0.007262951306147154,
+        "t": -1.5121801461891233,
+        "significant_at_2_sigma": false
+      },
+      "final_repeated": {
+        "difference": -0.002586698798800839,
+        "se": 0.0084415853771124,
+        "t": -0.30642334149864003,
+        "significant_at_2_sigma": false
+      }
+    },
+    "fraction_modules_negative": {
+      "reverse": {
+        "difference": 0.05522486772486779,
+        "se": 0.03778185785593671,
+        "t": 1.461676869767542,
+        "significant_at_2_sigma": false
+      },
+      "final_repeated": {
+        "difference": 0.05307539682539686,
+        "se": 0.03568037856063817,
+        "t": 1.487523366244452,
+        "significant_at_2_sigma": false
+      }
+    }
+  },
+  "any_contrast_significant_at_2_sigma": false,
+  "verdict": "H2 NOT SUPPORTED: no arm's LM/state gradient cosine differs from the others beyond 2 sigma, and all are within ~0.01 of orthogonal. The two objectives do not fight; they are nearly perpendicular. Per the frozen stop rule, do not sign the V2 9-run matrix.",
+  "limitations": [
+    "Measured on adapters saved at the END of training (250 optimizer steps), not as a trajectory over training. Gradients may decorrelate by convergence, so this does not exclude a transient early-training conflict.",
+    "One seed (29). Batch size 2, so each batch is a 2-example estimate.",
+    "grad_norm_ratio is unstable because L_LM is near zero at convergence (final train LM loss ~7e-4); the state gradient dominates in MAGNITUDE while being orthogonal in DIRECTION."
+  ],
+  "claim_boundary": "B2 diagnosis only. Not a capability result. TEST sealed."
+}
