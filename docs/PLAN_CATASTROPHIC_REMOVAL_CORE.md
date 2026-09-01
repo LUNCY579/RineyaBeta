@@ -530,7 +530,8 @@ Criticality is sharply concentrated rather than distributed:
 | final 27 | 1 | 0.1730 | 0.1730 |
 
 Only layers 0, 1 and 2 raise reference NLL by more than 1.43x (5.47x, 4.42x,
-4.15x). Layer 14 is indistinguishable from the intact model (ratio 0.9994).
+4.15x); the largest ratio anywhere else is layer 12 at 1.42x, and layers 3–26
+average 0.0313 criticality. Layer 14 is indistinguishable from intact (0.9994).
 Layers 6, 7 and 8 — three of the nine the historical Aegis surgery deleted — are
 individually near-free at 1.27x, 1.19x and 1.09x.
 
@@ -588,3 +589,16 @@ Candidates worth considering, in order of how much they change the question:
    "degenerate", which is the gap that made layers 0–2 unelectable;
 3. measure multi-layer joint removal, which is what the historical result
    actually did.
+
+### 12.9 A design finding that outlives this run
+
+`control_angular_high` was specified in §5 as an **orthogonal** matched control.
+The measured relationship between catastrophic-removal criticality and residual
+angular rewrite is Pearson **+0.5576**, Spearman **+0.6097**, with **5 of 6** layers
+shared between the two top-6 lists. At that correlation the "orthogonal" control
+would have been drawn from nearly the same population as the hypothesis arm, so it
+would have discriminated far less than §8's interpretation table assumes. Any
+successor should either re-derive that control from the residual after regressing
+angular distance out of criticality, or stop describing it as orthogonal.
+
+Full analysis: `experiments/catastrophic_removal_core/results/discovery_v1/DISCOVERY_ANALYSIS.md`.

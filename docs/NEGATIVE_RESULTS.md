@@ -389,6 +389,61 @@ managed rather than merely noted.*
 
 ---
 
+## 7. "Catastrophic-removal" layers as a discoverable core in Qwen3-0.6B
+
+**Idea.** The historical 19-layer artefact generated alien text, so the layers whose
+removal destroys generation should form a structurally critical core worth recovering
+and harvesting as a weight donor.
+
+**Killed by the measurement it preregistered.** All 28 one-layer bypass conditions ran
+against an intact baseline on 32 deterministic diagnostics (CUDA/bf16, pinned runtime).
+The frozen classifier elected **zero** layers, so discovery gate G0 fails on core depth
+while its other six checks pass.
+
+**What removal damage actually looks like here.** It is concentrated at the two ends of
+the stack, not distributed:
+
+| Band | mean criticality | note |
+|---|---:|---|
+| layers 0-2 | 0.5200 | NLL x5.47, x4.42, x4.15 |
+| layers 3-26 | 0.0313 | layer 14 is inert at x0.9994 |
+| layer 27 | 0.1730 | output-side transition |
+
+No layer outside 0-2 exceeds an NLL ratio of 1.43.
+
+**Why.** The historical degeneracy came from deleting **nine layers at once**
+(`[6,7,8,9,10,14,18,23,24]`). Individually those nine cost x1.27, x1.19, x1.09, x1.21,
+x1.13, x1.00, x1.23, x1.05 and x1.08 -- all near-free. The damage was a joint effect, so
+a one-layer-at-a-time instrument could not find it. "Catastrophic-removal layer" had no
+single-layer referent in this model.
+
+**Two instrument properties worth carrying forward.**
+
+- With the mechanical collapse and intelligibility components at zero, the composite
+  ceiling is `0.45+0.10 = 0.55`, under the frozen `0.60`. NLL and EOS loss alone can
+  never elect a layer. That is what H1 asks for, but it means the screen must be able to
+  see the failure mode you care about. It detects degeneracy, not semantic destruction --
+  and bypassing layer 0 yields fluent word-salad that scores "intelligible".
+- Classifying a **ratio of pooled means** dilutes the signal when sources have different
+  baselines (0.3455 vs 4.4549). Layer 2's per-source ratios are x25.96 and x2.46 while
+  the pooled ratio is x4.15: it is catastrophic in *both* sources independently and still
+  fails the overall gate that two-source support was supposed to *tighten*.
+
+**Not a bug.** Bypassed-vs-intact logits differ at every depth tested -- layer 0 changes
+100% of argmax positions, layer 14 still changes 10.5% -- and removing the hook restores
+bit-identical logits.
+
+**What survives.** Catastrophic-removal criticality and residual angular rewrite are
+substantially the *same* signal (Pearson +0.5576, Spearman +0.6097, 5 of 6 top-6 layers
+shared), which independently reproduces the roadmap's angular profile by a different
+method -- and which means the planned "orthogonal" high-angular control was not
+orthogonal. The donor hypotheses H2/H3/H4 are untested, not refuted.
+
+Full record: [`PLAN_CATASTROPHIC_REMOVAL_CORE.md`](PLAN_CATASTROPHIC_REMOVAL_CORE.md) §12
+and `experiments/catastrophic_removal_core/results/discovery_v1/DISCOVERY_ANALYSIS.md`.
+
+---
+
 ## Where these numbers live
 
 Every figure above is recomputable from a committed file. If one of them ever
