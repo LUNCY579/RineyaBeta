@@ -1,0 +1,21 @@
+# B1 diagnosis — DO NOT RUN. See docs/DAST_NEXT_EXPERIMENTS.md. TEST sealed.
+# Checkpoint 3 (layer 27, final-norm readout) → canonical state 4.
+extends: state_ordered.yaml
+
+experiment:
+  name: dast-diag-b1-ckpt4-s4
+  seed: 17
+  output_dir: ../runs/diag_b1_ckpt4_s4
+  evidence_status: exploratory_dev
+  preregistration_frozen: false
+  allow_sealed_test: false
+
+semantic:
+  supervised_stages: [3]
+
+data:
+  max_train_records: 4000
+  max_eval_records: 800
+
+evaluation:
+  do_generation: true

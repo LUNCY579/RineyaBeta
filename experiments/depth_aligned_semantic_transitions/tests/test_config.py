@@ -48,6 +48,26 @@ def test_test_split_requires_frozen_hash():
     assert_split_allowed(cfg, "test")
 
 
+def test_supervised_stages_and_stage_weights_are_exclusive():
+    cfg = DASTConfig(
+        experiment=ExperimentConfig(arm="state_ordered"),
+        semantic=SemanticConfig(state_weight=1.0, supervised_stages=(0,), stage_weights=(1.0, 0.0, 0.0, 0.0)),
+    )
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        cfg.validate()
+
+
+def test_diag_b1_configs_load_unsigned_and_keep_test_sealed():
+    root = Path(__file__).resolve().parents[1] / "configs"
+    cfg = load_config(root / "diag_b1_ckpt4_s1.yaml")
+    assert cfg.experiment.arm == "state_ordered"
+    assert cfg.semantic.supervised_stages == (3,)
+    assert cfg.semantic.target_stage_indices == (0, 1, 2, 0)
+    assert cfg.experiment.allow_sealed_test is False
+    with pytest.raises(PermissionError, match="TEST is sealed"):
+        assert_split_allowed(cfg, "test")
+
+
 def test_feedback_and_gradient_checkpointing_are_incompatible():
     cfg = DASTConfig()
     cfg.model.feedback_enabled = True

@@ -40,6 +40,33 @@ def _zero_like(reference: torch.Tensor) -> torch.Tensor:
     return reference.new_zeros(())
 
 
+def resolve_stage_weights(
+    num_stages: int,
+    *,
+    supervised_stages: tuple[int, ...] = (),
+    stage_weights: tuple[float, ...] = (),
+) -> tuple[float, ...]:
+    """Per-checkpoint weights for cosine and contrastive. Empty supervised_stages → V1."""
+
+    if supervised_stages:
+        allowed = set(supervised_stages)
+        return tuple(1.0 if index in allowed else 0.0 for index in range(num_stages))
+    if stage_weights:
+        return stage_weights
+    return ()
+
+
+def remap_stage_tensors(tensor: torch.Tensor, indices: tuple[int, ...]) -> torch.Tensor:
+    """Select which canonical/training stage sits at each checkpoint (dim 1)."""
+
+    if not indices:
+        return tensor
+    if tensor.ndim < 2:
+        raise ValueError(f"stage remap requires dim 1, got shape {tuple(tensor.shape)}")
+    index = torch.tensor(indices, device=tensor.device, dtype=torch.long)
+    return tensor.index_select(1, index)
+
+
 def cosine_alignment_loss(
     predictions: torch.Tensor,
     targets: torch.Tensor,
@@ -51,6 +78,8 @@ def cosine_alignment_loss(
     loss = 1.0 - F.cosine_similarity(predictions.float(), targets.float(), dim=-1)
     if stage_weights:
         weights = loss.new_tensor(stage_weights)
+        if float(weights.sum()) <= 0:
+            return loss.new_zeros(())
         weights = weights / weights.sum().clamp_min(1e-12)
         return (loss * weights.unsqueeze(0)).sum(dim=1).mean()
     return loss.mean()
@@ -62,6 +91,7 @@ def multi_positive_contrastive_loss(
     *,
     group_ids: torch.Tensor | None,
     temperature: float,
+    stage_weights: tuple[float, ...] = (),
 ) -> torch.Tensor:
     """Symmetric stage-wise InfoNCE with same-target rows treated as positives."""
 
@@ -70,8 +100,17 @@ def multi_positive_contrastive_loss(
     batch, stages, _ = predictions.shape
     if batch < 2:
         return predictions.new_zeros(())
+    active = [1.0] * stages
+    if stage_weights:
+        if len(stage_weights) != stages:
+            raise ValueError("contrastive stage_weights must match the stage count")
+        active = list(stage_weights)
     total = predictions.new_zeros(())
+    used = 0.0
     for stage in range(stages):
+        if active[stage] <= 0:
+            continue
+        used += 1.0
         pred = F.normalize(predictions[:, stage].float(), dim=-1)
         target = F.normalize(targets[:, stage].float(), dim=-1)
         logits = pred @ target.T / temperature
@@ -87,7 +126,9 @@ def multi_positive_contrastive_loss(
         row_loss = -((row_log_prob * positive).sum(dim=1) / row_count).mean()
         col_loss = -((col_log_prob * positive).sum(dim=0) / col_count).mean()
         total = total + 0.5 * (row_loss + col_loss)
-    return total / stages
+    if used <= 0:
+        return predictions.new_zeros(())
+    return total / used
 
 
 def compute_loss(
@@ -112,16 +153,28 @@ def compute_loss(
     if config.arm_spec.target_kind != "none":
         if training_targets is None:
             raise ValueError("semantic arm requires training_targets")
+        targets = remap_stage_tensors(training_targets, config.semantic.target_stage_indices)
+        groups = (
+            remap_stage_tensors(training_group_ids, config.semantic.target_stage_indices)
+            if training_group_ids is not None
+            else None
+        )
+        weights = resolve_stage_weights(
+            output.states.shape[1],
+            supervised_stages=config.semantic.supervised_stages,
+            stage_weights=config.semantic.stage_weights,
+        )
         state = cosine_alignment_loss(
             output.states,
-            training_targets,
-            stage_weights=config.semantic.stage_weights,
+            targets,
+            stage_weights=weights,
         )
         contrastive = multi_positive_contrastive_loss(
             output.states,
-            training_targets,
-            group_ids=training_group_ids,
+            targets,
+            group_ids=groups,
             temperature=config.semantic.contrastive_temperature,
+            stage_weights=weights,
         )
 
     if config.operators.enabled:

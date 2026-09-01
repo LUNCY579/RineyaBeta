@@ -1,0 +1,22 @@
+# B1 diagnosis — DO NOT RUN. See docs/DAST_NEXT_EXPERIMENTS.md. TEST sealed.
+# Mismatch: checkpoint 3 (layer 27) → canonical state 1.
+extends: state_ordered.yaml
+
+experiment:
+  name: dast-diag-b1-ckpt4-s1
+  seed: 17
+  output_dir: ../runs/diag_b1_ckpt4_s1
+  evidence_status: exploratory_dev
+  preregistration_frozen: false
+  allow_sealed_test: false
+
+semantic:
+  supervised_stages: [3]
+  target_stage_indices: [0, 1, 2, 0]
+
+data:
+  max_train_records: 4000
+  max_eval_records: 800
+
+evaluation:
+  do_generation: true

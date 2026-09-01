@@ -120,6 +120,13 @@ class SemanticConfig:
     contrastive_weight: float = 0.10
     contrastive_temperature: float = 0.07
     stage_weights: tuple[float, ...] = ()
+    # Empty = supervise every checkpoint (V1). Non-empty = B1 single-checkpoint
+    # diagnosis: cosine AND contrastive apply only at these 0-based indices.
+    # Mutually exclusive with stage_weights. Does not drop readouts.
+    supervised_stages: tuple[int, ...] = ()
+    # Empty = compare checkpoint k to training-target k. Length must match the
+    # checkpoint count. Used for B1 mismatch (deepest checkpoint → state 1).
+    target_stage_indices: tuple[int, ...] = ()
 
 
 @dataclass
@@ -312,6 +319,25 @@ class DASTConfig:
             errors.append("semantic.stage_weights must be empty or match checkpoint_fractions")
         if any(weight < 0 for weight in self.semantic.stage_weights):
             errors.append("semantic.stage_weights cannot be negative")
+        n_stages = len(fractions)
+        if self.semantic.supervised_stages and self.semantic.stage_weights:
+            errors.append("semantic.supervised_stages and semantic.stage_weights are mutually exclusive")
+        if self.semantic.supervised_stages:
+            if len(set(self.semantic.supervised_stages)) != len(self.semantic.supervised_stages):
+                errors.append("semantic.supervised_stages must not contain duplicates")
+            if any(index < 0 or index >= n_stages for index in self.semantic.supervised_stages):
+                errors.append(
+                    f"semantic.supervised_stages must lie in [0, {n_stages}); "
+                    f"got {self.semantic.supervised_stages}"
+                )
+        if self.semantic.target_stage_indices:
+            if len(self.semantic.target_stage_indices) != n_stages:
+                errors.append("semantic.target_stage_indices must be empty or match checkpoint_fractions")
+            if any(index < 0 or index >= n_stages for index in self.semantic.target_stage_indices):
+                errors.append(
+                    f"semantic.target_stage_indices must lie in [0, {n_stages}); "
+                    f"got {self.semantic.target_stage_indices}"
+                )
 
         spec = self.arm_spec if self.experiment.arm in ARM_SPECS else None
         auxiliary_weight = self.semantic.state_weight + self.semantic.contrastive_weight

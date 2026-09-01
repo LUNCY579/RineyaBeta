@@ -54,3 +54,32 @@ def test_operator_arm_contract():
         operators=OperatorConfig(enabled=True),
     )
     cfg.validate()
+
+
+def test_supervised_stages_ignore_unsupervised_cosine_and_contrastive():
+    torch.manual_seed(0)
+    targets = torch.nn.functional.normalize(torch.randn(4, 4, 8), dim=-1)
+    pred = targets.clone()
+    pred[:, 1:] = torch.nn.functional.normalize(torch.randn(4, 3, 8), dim=-1)
+    weights = (1.0, 0.0, 0.0, 0.0)
+    matched = cosine_alignment_loss(targets, targets, stage_weights=weights)
+    mixed = cosine_alignment_loss(pred, targets, stage_weights=weights)
+    assert torch.allclose(matched, mixed, atol=1e-6)
+    contrastive_a = multi_positive_contrastive_loss(
+        pred, targets, group_ids=None, temperature=0.1, stage_weights=weights
+    )
+    pred2 = pred.clone()
+    pred2[:, 3] = torch.nn.functional.normalize(torch.randn(4, 8), dim=-1)
+    contrastive_b = multi_positive_contrastive_loss(
+        pred2, targets, group_ids=None, temperature=0.1, stage_weights=weights
+    )
+    assert torch.allclose(contrastive_a, contrastive_b, atol=1e-5)
+
+
+def test_target_stage_remap_puts_state1_at_deepest_checkpoint():
+    from dast.losses import remap_stage_tensors
+
+    grid = torch.arange(24, dtype=torch.float32).reshape(2, 4, 3)
+    remapped = remap_stage_tensors(grid, (0, 1, 2, 0))
+    assert torch.equal(remapped[:, 3], grid[:, 0])
+    assert torch.equal(remapped[:, 0], grid[:, 0])
