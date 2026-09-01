@@ -181,3 +181,86 @@ def test_split_indices_are_disjoint_and_cover() -> None:
     train_idx, test_idx = split_indices(21, generator)
     assert len(set(train_idx.tolist()) & set(test_idx.tolist())) == 0
     assert sorted(train_idx.tolist() + test_idx.tolist()) == list(range(21))
+
+
+def test_per_problem_losses_average_to_the_pooled_landscape() -> None:
+    """Per-problem L_state must average to what the pooled scorer reports.
+
+    This ties the C2 estimator to the already-verified C1b one, so a bug in the
+    per-problem path cannot silently invent heterogeneity.
+    """
+
+    import itertools as _it
+
+    from dast.depth_probe import per_problem_permutation_losses
+
+    torch.manual_seed(23)
+    count, stages, width, state_dim = 60, 4, 10, 6
+    hidden = torch.randn(count, stages, width, dtype=torch.float64)
+    targets = center_targets(torch.randn(count, stages, state_dim, dtype=torch.float64))
+    fit_idx, eval_idx = split_indices(count, None)
+    perms = list(_it.permutations(range(stages)))
+
+    per_problem = per_problem_permutation_losses(hidden, targets, fit_idx, eval_idx, perms)
+    assert per_problem.shape == (len(eval_idx), len(perms))
+
+    factor, blocks = _solve_blocks(hidden[fit_idx], targets[fit_idx], 1.0)
+    pooled = _score_permutations(factor, blocks, hidden[eval_idx], targets[eval_idx], perms)
+    for position, scored in enumerate(pooled):
+        assert per_problem[:, position].mean().item() == pytest.approx(scored.l_state, abs=1e-9)
+
+
+def test_per_problem_losses_never_fit_on_the_evaluated_problem() -> None:
+    """Changing a FIT problem must move eval scores; changing an EVAL-only problem
+    must not move the OTHER eval problems' scores."""
+
+    import itertools as _it
+
+    from dast.depth_probe import per_problem_permutation_losses
+
+    torch.manual_seed(29)
+    count, stages, width, state_dim = 40, 3, 8, 5
+    hidden = torch.randn(count, stages, width, dtype=torch.float64)
+    targets = center_targets(torch.randn(count, stages, state_dim, dtype=torch.float64))
+    fit_idx, eval_idx = split_indices(count, None)
+    perms = list(_it.permutations(range(stages)))
+    base = per_problem_permutation_losses(hidden, targets, fit_idx, eval_idx, perms)
+
+    perturbed = hidden.clone()
+    perturbed[eval_idx[0]] += 5.0
+    moved = per_problem_permutation_losses(perturbed, targets, fit_idx, eval_idx, perms)
+    assert not torch.allclose(base[0], moved[0]), "the perturbed problem's own score must change"
+    assert torch.allclose(base[1:], moved[1:], atol=1e-10), (
+        "an eval-only problem must not influence any other problem's score"
+    )
+
+
+def test_progress_indices_duplicate_targets_are_counted_correctly() -> None:
+    """K=4 duplicates targets for 42.5% of DEV. Pin the arithmetic that says so.
+
+    The distinctness filter was once a no-op because DepthCache.trajectory_lengths
+    recorded len(canonical_texts) -- always num_stages -- instead of the RAW number
+    of semantic states. Getting this wrong hides the fact that, for a large minority
+    of problems, two depths receive the identical target and any permutation that
+    swaps them is a no-op.
+    """
+
+    from dast.alignment import _progress_indices
+
+    # raw_targets drops the pre-reasoning initial state, so a trace of length L
+    # yields L-1 usable states.
+    assert _progress_indices(2, 4) == (0, 0, 1, 1)  # two distinct of four
+    assert _progress_indices(3, 4) == (0, 1, 1, 2)  # three distinct of four
+    assert _progress_indices(4, 4) == (0, 1, 2, 3)  # the first fully distinct case
+    assert _progress_indices(5, 4) == (0, 1, 3, 4)
+
+    # The measured DEV distribution of raw target counts.
+    dev_counts = {2: 97, 3: 924, 4: 775, 5: 388, 6: 106, 7: 75, 8: 22, 9: 13}
+    assert sum(dev_counts.values()) == 2400
+    for stages, expected_distinct in ((4, 1379), (5, 604), (6, 216), (8, 35)):
+        usable = sum(
+            count for raw, count in dev_counts.items()
+            if len(set(_progress_indices(raw, stages))) == stages
+        )
+        assert usable == expected_distinct, f"K={stages}"
+    assert 2400 - 1379 == 1021  # 42.5% duplicated at the shipped K=4

@@ -60,17 +60,26 @@ def main() -> int:
         if layer not in position:
             raise SystemExit(f"cache lacks layer {layer}; rebuild with --all-layers --first-layer 0")
 
-    targets, _ = build_targets(config, cache, args.stages)
-    print(f"targets {tuple(targets.shape)} centred within problem", flush=True)
+    targets, distinct = build_targets(config, cache, args.stages)
+    # Same distinctness filter as C1b: a problem whose depth targets are not all
+    # distinct makes some permutations literal no-ops and flattens the landscape by
+    # target construction. 42.5% of DEV is affected at K=4.
+    keep = torch.tensor(distinct, dtype=torch.bool)
+    hidden_all = cache.hidden[keep]
+    targets = targets[keep]
+    count = int(keep.sum())
+    print(f"targets {tuple(targets.shape)} centred within problem; "
+          f"kept {count}/{cache.num_problems} with {args.stages} distinct depth targets",
+          flush=True)
 
     conditions = {
-        "real": cache.hidden[:, [position[layer] for layer in real], :],
-        "embedding_only": cache.hidden[:, [position[0]] * args.stages, :],
-        "embedding_x4": cache.hidden[:, [position[index] for index in range(args.stages)], :],
+        "real": hidden_all[:, [position[layer] for layer in real], :],
+        "embedding_only": hidden_all[:, [position[0]] * args.stages, :],
+        "embedding_x4": hidden_all[:, [position[index] for index in range(args.stages)], :],
     }
     # Chance floor: rotate the problem index so hidden states meet the wrong targets.
-    rotated = torch.roll(torch.arange(cache.num_problems), shifts=1)
-    conditions["shuffled_pairing"] = cache.hidden[:, [position[layer] for layer in real], :][rotated]
+    rotated = torch.roll(torch.arange(count), shifts=1)
+    conditions["shuffled_pairing"] = hidden_all[:, [position[layer] for layer in real], :][rotated]
 
     results = {}
     for name, hidden in conditions.items():
@@ -110,7 +119,8 @@ def main() -> int:
           "        (250 steps, DEV)")
 
     payload = {
-        "num_problems": cache.num_problems,
+        "num_problems": count,
+        "num_problems_before_distinctness_filter": cache.num_problems,
         "num_stages": args.stages,
         "splits": args.splits,
         "real_layers": real,

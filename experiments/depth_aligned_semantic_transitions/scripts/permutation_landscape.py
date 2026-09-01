@@ -13,19 +13,29 @@ C1b  ``--mode permutation`` exhaustive state-to-depth assignment ranking at K
 Why K=8 is NOT offered
 ----------------------
 The plan that motivated this script proposed K=8. On this corpus that is not
-measurable. ``align_trajectory`` subsamples each problem's ``compact_state_trace``
-via ``_progress_indices``, and the trace has 3-10 entries with a mode of 4. The
-count of DEV problems receiving K *distinct* depth targets is:
+measurable. ``align_trajectory`` subsamples each problem's semantic states via
+``_progress_indices``, and ``raw_targets('compact_state')`` drops the pre-reasoning
+initial state, leaving 2-9 usable states with a mode of 3. The count of DEV problems
+receiving K *distinct* depth targets is:
 
-    K=4  2303/2400 (96.0%)      K=6   604/2400 (25.2%)
-    K=5  1379/2400 (57.5%)      K=8   110/2400 ( 4.6%)
+    K=4  1379/2400 (57.5%)      K=6   216/2400 ( 9.0%)
+    K=5   604/2400 (25.2%)      K=8    35/2400 ( 1.5%)
 
-At K=8 the modal problem gets four distinct targets each repeated twice, so any
-permutation exchanging two positions holding the same target is a literal no-op and
-the landscape is flattened by the *target construction*, not by the network. That is
-the artifact the study exists to rule out. ``--require-distinct`` therefore drops
-problems whose depth targets are not all distinct, and K is capped at 6 where the
-surviving n still supports a ridge fit.
+**This bites at K=4, the shipped V1 setting**, not only at K=8: 1021 of 2400 DEV
+problems (42.5%) receive at least one duplicated depth target, so for those the
+"four distinct cumulative states" premise does not hold and the ordered arm is
+partly a final-repeated arm. Any permutation exchanging two positions that hold the
+same target is a literal no-op for them, which flattens the landscape by *target
+construction* rather than by anything about the network. That is exactly the
+artifact this study exists to rule out, so ``--require-distinct`` (default on) drops
+those problems, and K is capped at 6 where the surviving n still supports a ridge
+fit.
+
+An earlier version of this table was off by one because it counted
+``compact_state_trace`` rather than ``raw_targets``, and the filter itself was a
+no-op because ``DepthCache.trajectory_lengths`` recorded ``len(canonical_texts)`` --
+a constant equal to ``num_stages``. Both are fixed; distinctness is now derived from
+the live examples so a stale cache cannot resurrect it.
 
 Usage
 -----
@@ -81,6 +91,7 @@ def build_targets(config, cache: DepthCache, stages: int) -> tuple[torch.Tensor,
         split=cache.metadata["split"],
         limit=cache.num_problems,
     )
+    kind = ARM_SPECS["state_ordered"].target_kind
     examples = build_examples(
         records, arm=ARM_SPECS["state_ordered"], num_stages=stages, seed=config.experiment.seed
     )
@@ -92,9 +103,13 @@ def build_targets(config, cache: DepthCache, stages: int) -> tuple[torch.Tensor,
     grid = encoder.encode_grid(
         [list(item.trajectory.canonical_texts) for item in examples], device="cpu"
     )
+    # Distinctness is derived from the LIVE examples, not from cache metadata.
+    # cache.trajectory_lengths was once written as len(canonical_texts), a constant
+    # equal to num_stages, which made this filter a no-op. Deriving it here means a
+    # stale cache cannot resurrect that bug.
     distinct = [
-        len(set(_progress_indices(length, stages))) == stages
-        for length in cache.trajectory_lengths
+        len(set(_progress_indices(len(item.record.raw_targets(kind)), stages))) == stages
+        for item in examples
     ]
     return center_targets(grid), distinct
 

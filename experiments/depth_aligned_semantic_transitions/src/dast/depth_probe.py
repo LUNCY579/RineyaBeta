@@ -197,6 +197,62 @@ def _score_permutations(
     return results
 
 
+def per_problem_permutation_losses(
+    hidden: torch.Tensor,
+    targets: torch.Tensor,
+    fit_index: torch.Tensor,
+    eval_index: torch.Tensor,
+    permutations: Sequence[Sequence[int]],
+    *,
+    ridge: float = DEFAULT_RIDGE,
+    batch: int = 64,
+) -> torch.Tensor:
+    """Per-problem `L_state` under every permutation. Returns [n_eval, n_perms].
+
+    The readout is fitted ONLY on ``fit_index``, so an evaluated problem never
+    contributes to the map that scores it. This is the estimator C2 needs: a
+    per-problem preference computed by fitting on the evaluated item would
+    manufacture heterogeneity out of overfitting.
+    """
+
+    hidden = hidden.double()
+    targets = targets.double()
+    stages = hidden.shape[1]
+    factor, blocks = _solve_blocks(hidden[fit_index], targets[fit_index], ridge)
+
+    hidden_eval = hidden[eval_index]
+    targets_eval = targets[eval_index]
+    count = hidden_eval.shape[0]
+    state_dim = targets_eval.shape[-1]
+    width = blocks.shape[2]
+
+    rhs = blocks.permute(2, 0, 1, 3).reshape(width, stages * stages * state_dim)
+    gain = torch.cholesky_solve(rhs, factor).reshape(
+        width, stages, stages, state_dim
+    ).permute(1, 2, 0, 3)
+    design = _design(hidden_eval)
+    flat_gain = gain.reshape(stages * stages, width, state_dim).permute(1, 0, 2).reshape(width, -1)
+    projected = (design @ flat_gain).reshape(
+        count, stages, stages, stages, state_dim
+    ).permute(1, 2, 3, 0, 4).contiguous()
+
+    targets_unit = F.normalize(targets_eval, dim=-1)
+    losses = torch.empty(count, len(permutations), dtype=torch.float64)
+    for start in range(0, len(permutations), batch):
+        chunk = permutations[start : start + batch]
+        index = torch.tensor([list(perm) for perm in chunk], dtype=torch.long)
+        size = index.shape[0]
+        predictions = torch.zeros(size, count, stages, state_dim, dtype=projected.dtype)
+        for prior in range(stages):
+            predictions += projected[:, prior][:, index[:, prior]].permute(1, 2, 0, 3)
+        predictions = F.normalize(predictions, dim=-1)
+        raw = torch.einsum("bnkd,njd->bnkj", predictions, targets_unit)
+        assigned = index.view(size, 1, stages, 1).expand(size, count, stages, 1)
+        diagonal = raw.gather(3, assigned).squeeze(3)  # [B, n, K]
+        losses[:, start : start + size] = (1.0 - diagonal.mean(dim=2)).T
+    return losses
+
+
 def kendall_tau(perm: Sequence[int]) -> float:
     """Kendall tau of a permutation against the identity, in [-1, 1]."""
 

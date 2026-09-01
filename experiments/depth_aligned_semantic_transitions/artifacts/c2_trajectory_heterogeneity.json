@@ -1,0 +1,54 @@
+{
+  "num_problems": 1379,
+  "num_stages": 4,
+  "num_permutations": 24,
+  "replicates": 20,
+  "min_family_size": 8,
+  "strata": {
+    "generator": {
+      "split_half_r": 0.37005672012135893,
+      "split_half_r_label_null": 0.08139351114758,
+      "argmin_agreement": 0.13629514963880288,
+      "argmin_agreement_label_null": 0.046303104575163394,
+      "chance_argmin_agreement": 0.041666666666666664
+    },
+    "answer_type": {
+      "split_half_r": 0.3893422765134625,
+      "split_half_r_label_null": 0.10240690318451641,
+      "argmin_agreement": 0.1501373626373627,
+      "argmin_agreement_label_null": 0.061849816849816844,
+      "chance_argmin_agreement": 0.041666666666666664
+    },
+    "step_count": {
+      "split_half_r": 0.3649979590570965,
+      "split_half_r_label_null": 0.20759911522294952,
+      "argmin_agreement": 0.125,
+      "argmin_agreement_label_null": 0.0625,
+      "chance_argmin_agreement": 0.041666666666666664
+    }
+  },
+  "per_problem_argmin_agreement": 0.16503024649107328,
+  "chance_argmin_agreement": 0.041666666666666664,
+  "pooled_best_permutation": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "pooled_best_stability": 0.2,
+  "cache_metadata": {
+    "split": "dev",
+    "num_problems": 2400,
+    "hidden_size": 1024,
+    "model": "Qwen/Qwen3-0.6B",
+    "max_length": 512,
+    "truncation": "preserve_target",
+    "system_prompt": "Solve the problem carefully. Give a concise reasoning trace and make the final answer explicit.",
+    "config_sha256": "8256507551ca66884724d9b188e95c86d1c35c76dd53fd284c4366e91b31f8d5",
+    "seed": 29,
+    "lora_loaded": false,
+    "git_revision": "c023758d64add1de458385441f2fc29215d99b25",
+    "built_by": "scripts/build_depth_cache.py"
+  },
+  "claim_boundary": "Decodability only. A positive split-half reliability would motivate testing Adaptive DAST; it would not by itself be a capability result. A null forbids building a router."
+}

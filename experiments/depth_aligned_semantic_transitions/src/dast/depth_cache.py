@@ -241,6 +241,7 @@ def build_depth_cache(
         raise ValueError(f"no records for split {split!r}")
     # The arm only affects which TARGET texts an example carries; the hidden side is
     # arm-independent. state_ordered is used so canonical_texts is populated.
+    arm_kind = ARM_SPECS["state_ordered"].target_kind
     examples = build_examples(
         records,
         arm=ARM_SPECS["state_ordered"],
@@ -294,7 +295,15 @@ def build_depth_cache(
         categories=tuple(item.record.category for item in examples),
         generators=tuple(getattr(item.record, "generator", "") or "" for item in examples),
         answer_types=tuple(item.record.answer_type for item in examples),
-        trajectory_lengths=tuple(len(item.trajectory.canonical_texts) for item in examples),
+        # The RAW number of semantic states the problem offers, BEFORE
+        # _progress_indices subsamples them to num_stages. Recording
+        # len(canonical_texts) here instead would be a constant equal to
+        # num_stages, which silently turns every distinctness filter downstream
+        # into a no-op -- 42.5% of DEV receives a duplicated depth target at K=4,
+        # and that must stay visible.
+        trajectory_lengths=tuple(
+            len(item.record.raw_targets(arm_kind)) for item in examples
+        ),
         readout=readout,
         pooling=config.model.pooling,
         num_hidden_layers=num_hidden_layers,

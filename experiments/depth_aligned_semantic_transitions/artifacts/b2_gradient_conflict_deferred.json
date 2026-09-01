@@ -1,6 +1,7 @@
 {
   "status": "DEFERRED",
-  "reason": "GPU not idle: 7390/8188 MiB used, unrelated python experiment (scripts/run_experiment.py --phase p1) holding the device. No DAST trainer was running. Hardware policy forbids GPU-touching B2 while another job occupies the accelerator.",
-  "claim_boundary": "B2 not measured. Not a scientific null. TEST sealed. Do not interpret absence of cosine numbers as H2 refutation.",
-  "next": "Re-run: python scripts/gradient_conflict.py --run runs/g3_s29_state_ordered --batches 2 when nvidia-smi shows headroom and no trainer."
+  "checked_at": "2026-09-01T23:04:00Z",
+  "reason": "GPU not idle: 4458/8188 MiB used, utilization 27%. Unrelated python experiment (scripts/run_experiment.py --phase p2, Chat-Bubble) is a listed compute app. No DAST trainer (dast.cli train / resume_runs.py) is running. Hardware policy: one GPU job; never start B2 while another training process occupies the accelerator.",
+  "claim_boundary": "B2 not measured. Not a scientific null. H2 not selected. V2 9-run matrix stays PARKED and unsigned. TEST sealed. Do not interpret absence of cosine numbers as H2 refutation or as a license to train V2.",
+  "next": "Re-run when nvidia-smi shows headroom and no trainer: python scripts/gradient_conflict.py --run runs/g3_s29_state_ordered --batches 2 (then reverse and final-repeated). Unlock V2 only if ordered cosine is systematically more negative than both controls."
 }
