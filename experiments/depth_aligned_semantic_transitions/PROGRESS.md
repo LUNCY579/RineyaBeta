@@ -1,5 +1,60 @@
 # DAST progress
 
+## 2026-08-31 — budget escalation: mechanism learned, capability HARMED
+
+**Status: BUILT — UNRUN on a qualifying frozen multi-seed arm run. TEST CLOSED.
+EXPLORATORY_DEV, one seed. Not confirmatory, and the hypothesis is not closed.**
+
+Full report: `docs/FINDINGS_G2_BUDGET.md`. Three arms, seed 17, 4,000 train /
+800 DEV, 250 optimizer steps — 4x the G1 pilot on both axes.
+
+| arm | accuracy | order margin | top-1 | monotonic | `L_state` |
+|---|---:|---:|---:|---:|---:|
+| **`cot_baseline`** | **0.8938** | +0.0141 | 0.2750 | 0.6125 | - |
+| `state_ordered` | 0.8775 | **+0.9356** | **0.8338** | **0.9862** | 0.2622 |
+| `state_reverse` | 0.8900 | -0.1911 | 0.1047 | 0.0000 | **0.2520** |
+
+| contrast | diff | clustered 95% CI | discordant | McNemar p |
+|---|---:|---|---:|---:|
+| **ordered - baseline** | **-0.0163** | **[-0.0317, -0.0025]** | 13:26 | **0.0533** |
+| reverse - baseline | -0.0037 | [-0.0252, +0.0157] | 20:23 | 0.7608 |
+| ordered - reverse | -0.0125 | [-0.0326, +0.0100] | 19:29 | 0.1934 |
+
+**The budget confound is resolved on the mechanism side.** Four times the training
+moved `L_state` 0.5441 -> 0.2622 and the order margin 0.5751 -> 0.9356, nearly
+reaching the 0.977 that a fitted linear probe gets on the untrained backbone. Depth
+-aligned semantic states are clearly learnable.
+
+**But capability moved the other way.** `cot_baseline` is the best arm. This is the
+first contrast in the program whose interval excludes zero, and it says the
+depth supervision COSTS about 1.6 points of accuracy versus not doing it at all.
+`SSOT §13` names this exactly: "ordered improves mechanism metrics but not
+capability" is a **revise** condition.
+
+Four reasons not to over-read it: one seed (three are required; one gives 56.7%
+power); the clustered interval and exact McNemar disagree at the boundary (excludes
+zero vs p = 0.0533); **-1.63 pp is below the 2.0 pp practical margin** proposed for
+the freeze; and `ordered - reverse` still spans zero, so there is still no
+detectable forward-direction advantage.
+
+**Verified before reporting.** Seven checks passed: reverse is genuinely reversed;
+distinct config hashes and adapters; identical data hashes, checkpoints, readout,
+centering and seed; same 800 problems in order with 88.9% identical raw responses;
+extraction routes identical across arms; discordance 6.000%, matching the pilot's
+6.0% on 4x the data. One genuine scorer gap surfaced — `answer_type: state` was
+compared by exact string although its gold is an order-insensitive bag of key=value
+bindings — worth 1 problem in 800, fixed in `f160f38`.
+
+### Next permitted action
+
+Not the 18-19 h matrix. Two targeted runs answer go/no-go for ~40% of that cost:
+seed replication of these three arms at seeds 29 and 43 (~5 h, converts a borderline
+single-seed result into an answer at 97.8% power), then `state_final_repeated` at
+three seeds (~2.5 h, **G3** — decides whether the deficit comes from aligning the
+loss to reasoning order or merely from carrying any auxiliary depth loss at all).
+
+---
+
 ## 2026-08-31 — G1 pilot RE-RUN, four arms, valid scorer: EXPLORATORY_DEV
 
 **Status: BUILT — UNRUN on a qualifying (frozen, multi-seed) arm run. TEST CLOSED.

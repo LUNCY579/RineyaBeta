@@ -1,4 +1,6 @@
 {
+  "accelerator_present": true,
+  "both_device_configurations_covered": true,
   "claim_boundary": "Engineering evidence only. A qualification pass does not establish any Rineya capability claim, and it does not validate the GitHub Actions workflow file itself - only the commands that workflow would invoke.",
   "environment": {
     "accelerate": "1.14.0",
@@ -6,8 +8,8 @@
     "cuda_version": "13.0",
     "executable": "C:\\Users\\clclc\\RineyaExperiment\\.venv\\Scripts\\python.exe",
     "git_branch": "research/depth-aligned-semantic-transitions-v1",
-    "git_commit": "f5ae82f84df3f287aa54a5a850f4bed712b3576a",
-    "git_dirty": false,
+    "git_commit": "f160f38c5a56a6188f88437eb87fd483aa77bf04",
+    "git_dirty": true,
     "gpu_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
     "numpy": "2.4.6",
     "peft": "0.20.0",
@@ -19,48 +21,48 @@
     "transformers": "5.15.0"
   },
   "mode": "full",
-  "schema_version": "dast-local-qualification-v1",
+  "schema_version": "dast-local-qualification-v2",
   "steps": [
     {
-      "cuda_visible": true,
+      "accelerator_effective": true,
       "output_tail": "",
       "passed": true,
-      "seconds": 0.19,
+      "seconds": 0.2,
       "step": "compileall"
     },
     {
-      "cuda_visible": true,
+      "accelerator_effective": true,
       "output_tail": "",
       "passed": true,
-      "seconds": 0.69,
+      "seconds": 0.75,
       "step": "ruff"
     },
     {
-      "cuda_visible": true,
+      "accelerator_effective": true,
       "output_tail": "",
       "passed": true,
-      "seconds": 20.92,
+      "seconds": 22.23,
       "step": "pytest_device_visible"
     },
     {
-      "cuda_visible": false,
+      "accelerator_effective": false,
       "output_tail": "",
       "passed": true,
-      "seconds": 7.98,
+      "seconds": 7.19,
       "step": "pytest_cpu_only"
     },
     {
-      "cuda_visible": true,
+      "accelerator_effective": true,
       "output_tail": "",
       "passed": true,
-      "seconds": 2.52,
+      "seconds": 2.25,
       "step": "validate_fixture"
     },
     {
-      "cuda_visible": true,
+      "accelerator_effective": true,
       "output_tail": "",
       "passed": true,
-      "seconds": 7.44,
+      "seconds": 6.72,
       "step": "smoke"
     }
   ],
