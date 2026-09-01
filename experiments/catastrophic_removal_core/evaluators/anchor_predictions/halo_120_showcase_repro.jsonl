@@ -1,0 +1,64 @@
+{"id": "RLC-001-B", "status": "ok", "prediction": "Mosaic", "input_tokens": 1145, "generated_tokens": 3, "latency_seconds": 6.608213, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-P", "status": "ok", "prediction": "Mosaic", "input_tokens": 1152, "generated_tokens": 3, "latency_seconds": 5.851709, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-C", "status": "ok", "prediction": "Mira Nash.", "input_tokens": 1145, "generated_tokens": 5, "latency_seconds": 6.219301, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-U", "status": "ok", "prediction": "Mosaic", "input_tokens": 1143, "generated_tokens": 3, "latency_seconds": 5.727425, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-B", "status": "ok", "prediction": "4", "input_tokens": 1386, "generated_tokens": 2, "latency_seconds": 6.562788, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-P", "status": "ok", "prediction": "5", "input_tokens": 1390, "generated_tokens": 2, "latency_seconds": 6.546925, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-C", "status": "ok", "prediction": "4", "input_tokens": 1395, "generated_tokens": 2, "latency_seconds": 6.788818, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-U", "status": "ok", "prediction": "4.", "input_tokens": 1390, "generated_tokens": 3, "latency_seconds": 6.872691, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-B", "status": "ok", "prediction": "West Platform.", "input_tokens": 1163, "generated_tokens": 4, "latency_seconds": 5.989243, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-P", "status": "ok", "prediction": "Canal Office.", "input_tokens": 1163, "generated_tokens": 5, "latency_seconds": 6.415192, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-C", "status": "ok", "prediction": "Meridian Hotel.", "input_tokens": 1164, "generated_tokens": 5, "latency_seconds": 6.431831, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-U", "status": "ok", "prediction": "West Platform.", "input_tokens": 1164, "generated_tokens": 4, "latency_seconds": 5.965045, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-B", "status": "ok", "prediction": "The primary cause of the work stoppage involving the coded postcard was a mislabeled container that required a full inventory", "input_tokens": 1347, "generated_tokens": 24, "latency_seconds": 13.616576, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-P", "status": "ok", "prediction": "The stop was initiated by a mislabeled container that required a full inventory check.", "input_tokens": 1346, "generated_tokens": 18, "latency_seconds": 11.728496, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-C", "status": "ok", "prediction": "The primary cause of the work stoppage involving the coded postcard was a dispute over the chain-of-custody signature", "input_tokens": 1347, "generated_tokens": 24, "latency_seconds": 13.828777, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-U", "status": "ok", "prediction": "UNKNOWN.", "input_tokens": 1322, "generated_tokens": 3, "latency_seconds": 6.708377, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-B", "status": "ok", "prediction": "Thursday.", "input_tokens": 1166, "generated_tokens": 3, "latency_seconds": 5.988726, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-P", "status": "ok", "prediction": "Thursday.", "input_tokens": 1169, "generated_tokens": 3, "latency_seconds": 6.377609, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-C", "status": "ok", "prediction": "Friday.", "input_tokens": 1166, "generated_tokens": 3, "latency_seconds": 6.777422, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-U", "status": "ok", "prediction": "Tuesday.", "input_tokens": 1152, "generated_tokens": 3, "latency_seconds": 8.15658, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-B", "status": "ok", "prediction": "Faris Dane.", "input_tokens": 1363, "generated_tokens": 5, "latency_seconds": 8.09905, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-P", "status": "ok", "prediction": "Faris Dane.", "input_tokens": 1371, "generated_tokens": 5, "latency_seconds": 7.586715, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-C", "status": "ok", "prediction": "Faris Dane.", "input_tokens": 1363, "generated_tokens": 5, "latency_seconds": 7.944364, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-U", "status": "ok", "prediction": "Soren Orwell.", "input_tokens": 1376, "generated_tokens": 5, "latency_seconds": 8.130693, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-B", "status": "ok", "prediction": "Faris Noble.", "input_tokens": 1169, "generated_tokens": 5, "latency_seconds": 6.34225, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-P", "status": "ok", "prediction": "Faris Noble.", "input_tokens": 1166, "generated_tokens": 5, "latency_seconds": 5.669723, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-C", "status": "ok", "prediction": "Rhea Pryce.", "input_tokens": 1169, "generated_tokens": 6, "latency_seconds": 5.727764, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-U", "status": "ok", "prediction": "Rhea Pryce.", "input_tokens": 1173, "generated_tokens": 6, "latency_seconds": 6.54694, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-B", "status": "ok", "prediction": "Lucan Tern.", "input_tokens": 1332, "generated_tokens": 6, "latency_seconds": 7.348143, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-P", "status": "ok", "prediction": "Lucan Tern.", "input_tokens": 1333, "generated_tokens": 6, "latency_seconds": 6.927931, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-C", "status": "ok", "prediction": "Jasper Upton.", "input_tokens": 1328, "generated_tokens": 6, "latency_seconds": 6.990368, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-U", "status": "ok", "prediction": "Joren Aster.", "input_tokens": 1332, "generated_tokens": 5, "latency_seconds": 6.94719, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-B", "status": "ok", "prediction": "Lena Lark.", "input_tokens": 1497, "generated_tokens": 6, "latency_seconds": 8.115752, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-P", "status": "ok", "prediction": "Cinder", "input_tokens": 1504, "generated_tokens": 3, "latency_seconds": 6.682634, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-C", "status": "ok", "prediction": "Faris North.", "input_tokens": 1497, "generated_tokens": 5, "latency_seconds": 7.79056, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-U", "status": "ok", "prediction": "Cinder.", "input_tokens": 1495, "generated_tokens": 4, "latency_seconds": 7.614662, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-B", "status": "ok", "prediction": "4", "input_tokens": 1195, "generated_tokens": 2, "latency_seconds": 5.221566, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-P", "status": "ok", "prediction": "4.", "input_tokens": 1199, "generated_tokens": 3, "latency_seconds": 5.379838, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-C", "status": "ok", "prediction": "4", "input_tokens": 1204, "generated_tokens": 2, "latency_seconds": 5.344703, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-U", "status": "ok", "prediction": "4.", "input_tokens": 1199, "generated_tokens": 3, "latency_seconds": 5.339158, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-B", "status": "ok", "prediction": "Instrument Bay.", "input_tokens": 1502, "generated_tokens": 4, "latency_seconds": 7.167525, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-P", "status": "ok", "prediction": "Spectra Lab.", "input_tokens": 1502, "generated_tokens": 6, "latency_seconds": 7.730189, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-C", "status": "ok", "prediction": "West Office.", "input_tokens": 1501, "generated_tokens": 4, "latency_seconds": 8.323444, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-U", "status": "ok", "prediction": "Instrument Bay.", "input_tokens": 1502, "generated_tokens": 4, "latency_seconds": 7.712264, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-B", "status": "ok", "prediction": "The primary cause of the work stoppage involving the notebook binder was a mislabeled container that required a full inventory check", "input_tokens": 1179, "generated_tokens": 24, "latency_seconds": 10.521694, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-P", "status": "ok", "prediction": "The condition that actually triggered the initial halt in work on the notebook binder was the mislabeled container that required a full", "input_tokens": 1178, "generated_tokens": 24, "latency_seconds": 9.76753, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-C", "status": "ok", "prediction": "The primary cause of the work stoppage involving the notebook binder was a software clock that drifted by eleven minutes.", "input_tokens": 1179, "generated_tokens": 23, "latency_seconds": 8.684673, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-U", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1156, "generated_tokens": 2, "latency_seconds": 3.97388, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-B", "status": "ok", "prediction": "Saturday.", "input_tokens": 1495, "generated_tokens": 3, "latency_seconds": 5.837459, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-P", "status": "ok", "prediction": "Saturday.", "input_tokens": 1498, "generated_tokens": 3, "latency_seconds": 6.018205, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-C", "status": "ok", "prediction": "Sunday.", "input_tokens": 1495, "generated_tokens": 3, "latency_seconds": 6.818549, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-U", "status": "ok", "prediction": "Thursday.", "input_tokens": 1483, "generated_tokens": 3, "latency_seconds": 6.563932, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-B", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1161, "generated_tokens": 6, "latency_seconds": 5.376479, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-P", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1169, "generated_tokens": 6, "latency_seconds": 5.098684, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-C", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1161, "generated_tokens": 6, "latency_seconds": 5.065714, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-U", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1173, "generated_tokens": 6, "latency_seconds": 5.067112, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-B", "status": "ok", "prediction": "Darian Orwell.", "input_tokens": 1487, "generated_tokens": 5, "latency_seconds": 6.987026, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-P", "status": "ok", "prediction": "Liora Iver", "input_tokens": 1484, "generated_tokens": 6, "latency_seconds": 6.798661, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-C", "status": "ok", "prediction": "Rhea Gray.", "input_tokens": 1487, "generated_tokens": 5, "latency_seconds": 6.471154, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-U", "status": "ok", "prediction": "Darian Orwell.", "input_tokens": 1491, "generated_tokens": 5, "latency_seconds": 6.511156, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-B", "status": "ok", "prediction": "Calla Ember.", "input_tokens": 1132, "generated_tokens": 5, "latency_seconds": 4.635187, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-P", "status": "ok", "prediction": "Calla Ember.", "input_tokens": 1133, "generated_tokens": 5, "latency_seconds": 5.303751, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-C", "status": "ok", "prediction": "Elowen Dane.", "input_tokens": 1130, "generated_tokens": 6, "latency_seconds": 5.031523, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-U", "status": "ok", "prediction": "Calla Ember.", "input_tokens": 1133, "generated_tokens": 5, "latency_seconds": 4.654593, "seed": 17, "decoding": "greedy"}

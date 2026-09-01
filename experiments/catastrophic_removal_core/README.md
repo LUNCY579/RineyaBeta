@@ -3,9 +3,23 @@
 This directory anchors the **CRCC / Monster** experiment. The full preregistration is
 [`docs/PLAN_CATASTROPHIC_REMOVAL_CORE.md`](../../docs/PLAN_CATASTROPHIC_REMOVAL_CORE.md).
 
-**Current state: BUILT — UNRUN.** The checked-in code and CPU-only verifier prove
-structural contracts only; they contain no model result. The first hosted execution
-attempt was blocked before runner allocation, so no CRCC membership is currently frozen.
+**Current state: MEASURED — DISCOVERY ONLY. G0 FAILED.**
+
+The discovery scan ran to completion locally on 2026-08-31 (intact baseline plus all
+28 one-layer bypass conditions, CUDA/bfloat16, pinned runtime). **No layer satisfied
+the frozen classifier, so the automatic CRCC set is empty** and G0 fails its depth
+check while all six other G0 checks pass. Per the preregistration the progression
+stops here: no matched arms, no reduced checkpoints, no recovery training, no donor
+merge, no development gate, no sealed evaluation. H1 is closed negative for this
+instrument revision; H2/H3/H4 remain **untested**, not refuted.
+
+Evidence: [`results/discovery_v1/`](results/discovery_v1/) —
+stable summary `f5ea9f12…2884e3`, membership `002d55d1…b4b7a1`.
+
+Separately, the historical 64-row long-context evaluator has been **recovered and
+registered** with its anchors reproduced. See
+[`evaluators/`](evaluators/). That work is an evidence-boundary prerequisite; it is
+not a CRCC result and no CRCC donor has ever been scored on those cases.
 
 ## The three separable changes
 
@@ -121,3 +135,9 @@ Halo's reported `30/64`. The exact 64-row protocol and known anchors must be reg
 and reproduced before the targeted donor claim is evaluated. The local discovery runner
 never invokes DEV, the historical 64-row evaluator, recovery training, donor merging, or
 sealed evaluation.
+
+**Update 2026-08-31 — the evaluator half of that boundary is now closed.** The suite is
+identified, its protocol is pinned, and all three anchors reproduce under one executable
+path (see [`evaluators/`](evaluators/)). What remains open is the *other* half: there is
+still no CRCC donor to score, because discovery stopped at G0. Registration by itself
+licenses no comparison with `30/64`.

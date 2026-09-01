@@ -1,0 +1,64 @@
+{"id": "RLC-001-B", "status": "ok", "prediction": "Mira Nash.", "input_tokens": 1145, "generated_tokens": 5, "latency_seconds": 6.820974, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-P", "status": "ok", "prediction": "The ordinary name of the person recorded as transporting the ivory seal to Cedar Vault is **Mira Nash**.", "input_tokens": 1152, "generated_tokens": 23, "latency_seconds": 10.286099, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-C", "status": "ok", "prediction": "Mosaic", "input_tokens": 1145, "generated_tokens": 3, "latency_seconds": 4.587229, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-U", "status": "ok", "prediction": "Mosaic", "input_tokens": 1143, "generated_tokens": 3, "latency_seconds": 4.877154, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-B", "status": "ok", "prediction": "2", "input_tokens": 1386, "generated_tokens": 2, "latency_seconds": 5.827044, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-P", "status": "ok", "prediction": "2", "input_tokens": 1390, "generated_tokens": 2, "latency_seconds": 5.854364, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-C", "status": "ok", "prediction": "2", "input_tokens": 1395, "generated_tokens": 2, "latency_seconds": 7.386176, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-U", "status": "ok", "prediction": "2", "input_tokens": 1390, "generated_tokens": 2, "latency_seconds": 8.162872, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-B", "status": "ok", "prediction": "FINAL LOCATION", "input_tokens": 1163, "generated_tokens": 3, "latency_seconds": 8.563397, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-P", "status": "ok", "prediction": "FINAL LOCATION", "input_tokens": 1163, "generated_tokens": 3, "latency_seconds": 6.909701, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-C", "status": "ok", "prediction": "FINAL LOCATION", "input_tokens": 1164, "generated_tokens": 3, "latency_seconds": 5.507249, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-U", "status": "ok", "prediction": "The green valise was located at West Platform after the final transfer.", "input_tokens": 1164, "generated_tokens": 15, "latency_seconds": 8.327228, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-B", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1347, "generated_tokens": 2, "latency_seconds": 5.083232, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-P", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1346, "generated_tokens": 2, "latency_seconds": 5.101724, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-C", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1347, "generated_tokens": 2, "latency_seconds": 4.794847, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-U", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1322, "generated_tokens": 2, "latency_seconds": 5.289425, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-B", "status": "ok", "prediction": "The examination of the sample canister actually began on Thursday.", "input_tokens": 1166, "generated_tokens": 13, "latency_seconds": 6.737795, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-P", "status": "ok", "prediction": "The corrected day when the sample canister examination started is Thursday at 15:45.", "input_tokens": 1169, "generated_tokens": 21, "latency_seconds": 8.996958, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-C", "status": "ok", "prediction": "Friday.", "input_tokens": 1166, "generated_tokens": 3, "latency_seconds": 4.86246, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-U", "status": "ok", "prediction": "The examination of the sample canister actually began on Tuesday.", "input_tokens": 1152, "generated_tokens": 13, "latency_seconds": 6.9704, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-B", "status": "ok", "prediction": "Faris Dane.", "input_tokens": 1363, "generated_tokens": 5, "latency_seconds": 6.734592, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-P", "status": "ok", "prediction": "The answer is: **Faris Dane**.", "input_tokens": 1371, "generated_tokens": 11, "latency_seconds": 8.070842, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-C", "status": "ok", "prediction": "The single person who met both conditions was **Uma Yew**.", "input_tokens": 1363, "generated_tokens": 16, "latency_seconds": 9.446974, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-U", "status": "ok", "prediction": "The answer is: **Faris Dane**.", "input_tokens": 1376, "generated_tokens": 11, "latency_seconds": 7.133682, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-B", "status": "ok", "prediction": "The answer is: **Faris Noble**.", "input_tokens": 1169, "generated_tokens": 11, "latency_seconds": 6.364662, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-P", "status": "ok", "prediction": "The valid emergency delegate for the ceramic shard removal is **Faris Noble**.", "input_tokens": 1166, "generated_tokens": 17, "latency_seconds": 6.058599, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-C", "status": "ok", "prediction": "Answer: Rhea Pryce", "input_tokens": 1169, "generated_tokens": 7, "latency_seconds": 5.638579, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-U", "status": "ok", "prediction": "Answer: Rhea Pryce", "input_tokens": 1173, "generated_tokens": 7, "latency_seconds": 5.344496, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-B", "status": "ok", "prediction": "The final audit identified Lucan Tern as the person who applied the seal to the sealed specimen tube.", "input_tokens": 1332, "generated_tokens": 22, "latency_seconds": 10.512158, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-P", "status": "ok", "prediction": "The verified audit identified **Lucan Tern** as the person who sealed the sealed specimen tube.", "input_tokens": 1333, "generated_tokens": 21, "latency_seconds": 10.767246, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-C", "status": "ok", "prediction": "The final audit identified Jasper Upton as the person who applied the seal to the sealed specimen tube.", "input_tokens": 1328, "generated_tokens": 21, "latency_seconds": 10.558304, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-U", "status": "ok", "prediction": "The answer is: Jasper Upton.", "input_tokens": 1332, "generated_tokens": 9, "latency_seconds": 7.155509, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-B", "status": "ok", "prediction": "Cinder", "input_tokens": 1497, "generated_tokens": 3, "latency_seconds": 9.127897, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-P", "status": "ok", "prediction": "The ordinary name of the person recorded as transporting the ivory chess set to Roof Archive is **Faris North**.", "input_tokens": 1504, "generated_tokens": 24, "latency_seconds": 16.804216, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-C", "status": "ok", "prediction": "Cinder", "input_tokens": 1497, "generated_tokens": 3, "latency_seconds": 6.372738, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-U", "status": "ok", "prediction": "Cinder", "input_tokens": 1495, "generated_tokens": 3, "latency_seconds": 5.968792, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-B", "status": "ok", "prediction": "2", "input_tokens": 1195, "generated_tokens": 2, "latency_seconds": 4.526542, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-P", "status": "ok", "prediction": "The valid-entry count for the marble seal is 5.", "input_tokens": 1199, "generated_tokens": 13, "latency_seconds": 7.047583, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-C", "status": "ok", "prediction": "2", "input_tokens": 1204, "generated_tokens": 2, "latency_seconds": 4.454045, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-U", "status": "ok", "prediction": "2", "input_tokens": 1199, "generated_tokens": 2, "latency_seconds": 4.660347, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-B", "status": "ok", "prediction": "FINAL LOCATION", "input_tokens": 1502, "generated_tokens": 3, "latency_seconds": 6.606793, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-P", "status": "ok", "prediction": "FINAL LOCATION", "input_tokens": 1502, "generated_tokens": 3, "latency_seconds": 6.524224, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-C", "status": "ok", "prediction": "FINAL LOCATION", "input_tokens": 1501, "generated_tokens": 3, "latency_seconds": 6.665457, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-U", "status": "ok", "prediction": "The notebook binder was located at Instrument Bay.", "input_tokens": 1502, "generated_tokens": 10, "latency_seconds": 8.721859, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-B", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1179, "generated_tokens": 2, "latency_seconds": 4.334765, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-P", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1178, "generated_tokens": 2, "latency_seconds": 4.397529, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-C", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1179, "generated_tokens": 2, "latency_seconds": 4.261616, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-U", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1156, "generated_tokens": 2, "latency_seconds": 4.173949, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-B", "status": "ok", "prediction": "The examination of the master key ring actually began on Saturday at 15:45.", "input_tokens": 1495, "generated_tokens": 20, "latency_seconds": 11.176851, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-P", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1498, "generated_tokens": 2, "latency_seconds": 5.231466, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-C", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1495, "generated_tokens": 2, "latency_seconds": 5.406604, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-U", "status": "ok", "prediction": "UNKNOWN", "input_tokens": 1483, "generated_tokens": 2, "latency_seconds": 5.328303, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-B", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1161, "generated_tokens": 6, "latency_seconds": 5.082573, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-P", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1169, "generated_tokens": 6, "latency_seconds": 4.792301, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-C", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1161, "generated_tokens": 6, "latency_seconds": 4.254898, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-U", "status": "ok", "prediction": "Niko Juniper", "input_tokens": 1173, "generated_tokens": 5, "latency_seconds": 4.072635, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-B", "status": "ok", "prediction": "Liora Iver", "input_tokens": 1487, "generated_tokens": 6, "latency_seconds": 5.996887, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-P", "status": "ok", "prediction": "The valid emergency delegate for the sealed will copy removal is Liora Iver.", "input_tokens": 1484, "generated_tokens": 18, "latency_seconds": 8.49761, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-C", "status": "ok", "prediction": "Rhea Gray.", "input_tokens": 1487, "generated_tokens": 5, "latency_seconds": 5.985054, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-U", "status": "ok", "prediction": "The answer is: **Liora Iver**.", "input_tokens": 1491, "generated_tokens": 13, "latency_seconds": 7.577554, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-B", "status": "ok", "prediction": "Answer: Calla Ember", "input_tokens": 1132, "generated_tokens": 6, "latency_seconds": 3.99404, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-P", "status": "ok", "prediction": "Answer: Calla Ember", "input_tokens": 1133, "generated_tokens": 6, "latency_seconds": 4.409942, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-C", "status": "ok", "prediction": "Elowen Dane.", "input_tokens": 1130, "generated_tokens": 6, "latency_seconds": 4.353026, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-U", "status": "ok", "prediction": "Answer: Elowen Dane", "input_tokens": 1133, "generated_tokens": 7, "latency_seconds": 4.592564, "seed": 17, "decoding": "greedy"}

@@ -1,10 +1,20 @@
 # Catastrophic-Removal Critical Core (CRCC) v1
 
-**Status:** **BUILT — UNRUN**  
+**Status:** **MEASURED — DISCOVERY ONLY. G0 FAILED (empty automatic core); H1 CLOSED — NEGATIVE in this instrument revision.**  
 **Working nickname:** *Monster*  
 **Scientific name:** *Catastrophic-Removal Critical Core*  
 **Branch:** `research/catastrophic-removal-core-v1`  
 **Source coordinate system:** official full-depth Qwen3-0.6B, 28 decoder layers
+
+> **Execution record (2026-08-31).** The discovery scan in §9 step 2 ran to
+> completion on the pinned checkpoint: intact baseline plus all 28 one-layer
+> bypass conditions, CUDA/bfloat16, 32 deterministic diagnostics.
+> **No layer satisfied the frozen classifier, so the automatic CRCC set is empty
+> and G0 fails on the depth check.** Per §4.4 the scientific progression stops
+> here: no matched arms were designed, no reduced checkpoint was built, no
+> recovery ran, no donor was merged, and no sealed asset was opened. H2, H3 and
+> H4 are therefore **untested**, not refuted. Evidence:
+> `experiments/catastrophic_removal_core/results/discovery_v1/`.
 
 This document is the preregistration and execution contract for one question:
 
@@ -473,3 +483,108 @@ The correct current conclusion is:
 > CRCC is an executable, controlled hypothesis about structurally critical layer
 > transformations and donor utility. It has not yet established that “monster” layers
 > exist as an automatic set or that any resulting merge improves Rineya.
+
+---
+
+## 12. Measured discovery result — 2026-08-31
+
+This section is appended, not a rewrite. Sections 1–11 remain the preregistration
+as it stood before any model was loaded.
+
+### 12.1 What ran
+
+Intact Qwen3-0.6B baseline plus all 28 one-layer bypass conditions on the same 32
+deterministic diagnostics, resolved to `cuda:0` / `bfloat16` under the pinned
+runtime (torch 2.8.0+cu128, transformers 4.57.1). The amendment's CPU/FP32 hosted
+plan was never executed; this is a CUDA/BF16 run and is labelled as such in the
+evidence manifest.
+
+- Run identity `1b91c6d2d8cf68aed50f28e5f1aff838561538eacdcfd3871b3d77f9c7b69896`
+- Stable summary `f5ea9f1247eef5ebb4f6d710b0cdddfddcee16f73e4603b811b076f7042884e3`
+- Membership `002d55d1d3e825e40246945546376ffb0c857f022847bc499c989dcadfb4b7a1`
+
+### 12.2 G0 outcome
+
+Six of seven G0 checks pass. The single failure is
+`automatic_core_depth_in_preregistered_range_1_to_14`, because the automatic set
+is empty (depth 0). Coverage, baseline finiteness, manual-promotion policy,
+cross-source support, case count and weight hashing all pass, so this is a
+measured negative rather than an aborted run.
+
+### 12.3 Intact baseline
+
+Mean reference NLL 2.400199; collapse-case rate 0.0000; intelligibility 1.0000;
+EOS rate 1.0000; mean generated tokens 14.19. Per source, mean NLL is 0.3455
+(`rag_train`) and 4.4549 (`short_preservation_train`).
+
+### 12.4 The measured depth profile
+
+Criticality is sharply concentrated rather than distributed:
+
+| Band | n | mean criticality | max |
+|---|---:|---:|---:|
+| early 0–2 | 3 | 0.5200 | 0.5519 |
+| early-mid 3–9 | 7 | 0.0459 | 0.0728 |
+| mid 10–19 | 10 | 0.0293 | 0.0804 |
+| deep 20–26 | 7 | 0.0195 | 0.0615 |
+| final 27 | 1 | 0.1730 | 0.1730 |
+
+Only layers 0, 1 and 2 raise reference NLL by more than 1.43x (5.47x, 4.42x,
+4.15x). Layer 14 is indistinguishable from the intact model (ratio 0.9994).
+Layers 6, 7 and 8 — three of the nine the historical Aegis surgery deleted — are
+individually near-free at 1.27x, 1.19x and 1.09x.
+
+### 12.5 Why no layer qualified
+
+Two properties of the frozen instrument, both consequences of the preregistered
+design rather than defects:
+
+1. **The composite path requires generation mechanics.** With collapse and
+   intelligibility components at zero the composite ceiling is
+   `0.45*1 + 0.10*1 = 0.55`, below the frozen `0.60` threshold. NLL and EOS loss
+   alone can never elect a layer. This is exactly what H1 demands — collapse must
+   be *jointly* visible in reference NLL and generated-output mechanics — so the
+   threshold is doing what it was written to do.
+2. **Pooled-mean NLL dilutes the ratio.** The classifier divides pooled means, and
+   the two sources have very different baselines (0.3455 vs 4.4549). Layer 2's
+   per-source ratios are 25.96x and 2.46x, but the ratio of pooled means is only
+   4.15x. The overall gate is therefore systematically less sensitive than the
+   per-source gates it is combined with: layer 2 is catastrophic in *both* sources
+   individually yet fails the overall test.
+
+The mechanical screen behaved as specified. Bypassing layer 0 produces obvious
+word-salad, but that output is neither empty, repetitive, nor control-character
+laden, so it scores collapse 0.100 and reads as "intelligible". The screen detects
+degeneracy, not semantic destruction, and §4.3 says so deliberately.
+
+### 12.6 Instrument validity
+
+The negative is not a no-op bug. Directly comparing bypassed against intact logits
+on the same input: layer 0 changes the argmax at 100% of positions
+(max |Δlogit| 27.97), layer 14 at 10.5% (5.50), layer 25 at 15.8% (6.09) and
+layer 27 at 21.1% (12.09); removing the hook restores bit-identical logits. Every
+bypass genuinely perturbs computation, including the layers that scored near zero.
+
+### 12.7 What this does and does not say
+
+- **H1 is closed negative for this instrument revision and this model.** No
+  single-layer deletion in Qwen3-0.6B produces collapse that is jointly visible in
+  reference NLL and generation mechanics under the frozen thresholds.
+- **H2, H3 and H4 are untested.** They are conditional on a nonempty core. Nothing
+  here says a recovery delta would or would not be a useful donor.
+- The historical "monster" behaviour was a **nine-layer simultaneous** deletion.
+  This scan measures one layer at a time and found that removal damage is
+  concentrated in layers 0–2 and 27, none of which the historical surgery touched.
+  Those are consistent facts, not a contradiction.
+
+### 12.8 Revising the instrument is a new preregistration
+
+§4.4 permits revising the instrument after a stop; it forbids choosing a
+convenient set by eye. Any successor must freeze its changes *before* re-running.
+Candidates worth considering, in order of how much they change the question:
+
+1. score per source and combine, instead of classifying a ratio of pooled means;
+2. add a semantic-destruction signal so "fluent but wrong" is separable from
+   "degenerate", which is the gap that made layers 0–2 unelectable;
+3. measure multi-layer joint removal, which is what the historical result
+   actually did.

@@ -1,0 +1,64 @@
+{"id": "RLC-001-B", "status": "ok", "prediction": "Talia Frost.", "input_tokens": 1141, "generated_tokens": 5, "latency_seconds": 4.678377, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-P", "status": "ok", "prediction": "I do not have the record.", "input_tokens": 1148, "generated_tokens": 8, "latency_seconds": 3.477756, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-C", "status": "ok", "prediction": "Astra.", "input_tokens": 1141, "generated_tokens": 4, "latency_seconds": 3.031103, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-001-U", "status": "ok", "prediction": "Astral Academy.", "input_tokens": 1139, "generated_tokens": 5, "latency_seconds": 3.423286, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-B", "status": "ok", "prediction": "Four others.", "input_tokens": 1382, "generated_tokens": 4, "latency_seconds": 3.653782, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-P", "status": "ok", "prediction": "10:25.", "input_tokens": 1386, "generated_tokens": 7, "latency_seconds": 4.233827, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-C", "status": "ok", "prediction": "Four others.", "input_tokens": 1391, "generated_tokens": 4, "latency_seconds": 3.800063, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-005-U", "status": "ok", "prediction": "Four others.", "input_tokens": 1386, "generated_tokens": 4, "latency_seconds": 3.655304, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-B", "status": "ok", "prediction": "At 17:10 on Saturday.", "input_tokens": 1159, "generated_tokens": 11, "latency_seconds": 4.02545, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-P", "status": "ok", "prediction": "At 17:10 on Saturday.", "input_tokens": 1159, "generated_tokens": 11, "latency_seconds": 4.032217, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-C", "status": "ok", "prediction": "At 17:10 on Saturday.", "input_tokens": 1160, "generated_tokens": 11, "latency_seconds": 4.203337, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-010-U", "status": "ok", "prediction": "At 17:10 on Saturday.", "input_tokens": 1160, "generated_tokens": 11, "latency_seconds": 4.581846, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-B", "status": "ok", "prediction": "Nolan Hearth.", "input_tokens": 1343, "generated_tokens": 5, "latency_seconds": 3.878582, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-P", "status": "ok", "prediction": "Nolan Hearth.", "input_tokens": 1342, "generated_tokens": 5, "latency_seconds": 3.70342, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-C", "status": "ok", "prediction": "Nolan Hearth.", "input_tokens": 1343, "generated_tokens": 5, "latency_seconds": 3.675183, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-014-U", "status": "ok", "prediction": "Nolan Hearth.", "input_tokens": 1318, "generated_tokens": 5, "latency_seconds": 3.667442, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-B", "status": "ok", "prediction": "At 10:25.", "input_tokens": 1162, "generated_tokens": 9, "latency_seconds": 3.72043, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-P", "status": "ok", "prediction": "The corrected day is 14:20.", "input_tokens": 1165, "generated_tokens": 12, "latency_seconds": 4.431854, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-C", "status": "ok", "prediction": "At 10:25.", "input_tokens": 1162, "generated_tokens": 9, "latency_seconds": 3.841872, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-019-U", "status": "ok", "prediction": "At 10:25.", "input_tokens": 1148, "generated_tokens": 9, "latency_seconds": 4.372575, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-B", "status": "ok", "prediction": "Uma Yew.", "input_tokens": 1359, "generated_tokens": 6, "latency_seconds": 4.041881, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-P", "status": "ok", "prediction": "Uma Yew.", "input_tokens": 1367, "generated_tokens": 6, "latency_seconds": 4.019306, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-C", "status": "ok", "prediction": "Uma Yew.", "input_tokens": 1359, "generated_tokens": 6, "latency_seconds": 3.989597, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-023-U", "status": "ok", "prediction": "Uma Yew.", "input_tokens": 1372, "generated_tokens": 6, "latency_seconds": 3.943126, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-B", "status": "ok", "prediction": "Alderan Noble.", "input_tokens": 1165, "generated_tokens": 6, "latency_seconds": 3.332519, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-P", "status": "ok", "prediction": "A separate note was created during the expedition.", "input_tokens": 1162, "generated_tokens": 10, "latency_seconds": 3.923534, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-C", "status": "ok", "prediction": "Alderly.", "input_tokens": 1165, "generated_tokens": 5, "latency_seconds": 3.136195, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-028-U", "status": "ok", "prediction": "Alderan.", "input_tokens": 1169, "generated_tokens": 5, "latency_seconds": 3.392032, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-B", "status": "ok", "prediction": "Talia Porter.", "input_tokens": 1328, "generated_tokens": 6, "latency_seconds": 4.429931, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-P", "status": "ok", "prediction": "Talia Porter.", "input_tokens": 1329, "generated_tokens": 6, "latency_seconds": 3.967805, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-C", "status": "ok", "prediction": "Talia Porter.", "input_tokens": 1324, "generated_tokens": 6, "latency_seconds": 3.889442, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-032-U", "status": "ok", "prediction": "The expedition leader.", "input_tokens": 1328, "generated_tokens": 5, "latency_seconds": 3.620875, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-B", "status": "ok", "prediction": "Mara.", "input_tokens": 1493, "generated_tokens": 4, "latency_seconds": 4.053635, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-P", "status": "ok", "prediction": "Mara.", "input_tokens": 1500, "generated_tokens": 4, "latency_seconds": 4.132938, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-C", "status": "ok", "prediction": "Mara.", "input_tokens": 1493, "generated_tokens": 4, "latency_seconds": 4.048972, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-033-U", "status": "ok", "prediction": "Mara.", "input_tokens": 1491, "generated_tokens": 4, "latency_seconds": 4.313396, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-B", "status": "ok", "prediction": "Four others.", "input_tokens": 1191, "generated_tokens": 4, "latency_seconds": 3.595999, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-P", "status": "ok", "prediction": "10:25.", "input_tokens": 1195, "generated_tokens": 7, "latency_seconds": 3.86626, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-C", "status": "ok", "prediction": "Four others.", "input_tokens": 1200, "generated_tokens": 4, "latency_seconds": 3.157485, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-037-U", "status": "ok", "prediction": "Four others.", "input_tokens": 1195, "generated_tokens": 4, "latency_seconds": 3.314176, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-B", "status": "ok", "prediction": "At 17:10 on Saturday.", "input_tokens": 1498, "generated_tokens": 11, "latency_seconds": 5.472737, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-P", "status": "ok", "prediction": "17:10.", "input_tokens": 1498, "generated_tokens": 7, "latency_seconds": 4.953216, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-C", "status": "ok", "prediction": "At 17:10 on Saturday.", "input_tokens": 1497, "generated_tokens": 11, "latency_seconds": 5.731386, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-042-U", "status": "ok", "prediction": "At 17:10 on Saturday.", "input_tokens": 1498, "generated_tokens": 11, "latency_seconds": 5.955392, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-B", "status": "ok", "prediction": "Nolan Umber.", "input_tokens": 1175, "generated_tokens": 6, "latency_seconds": 3.581665, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-P", "status": "ok", "prediction": "Nolan Umber.", "input_tokens": 1174, "generated_tokens": 6, "latency_seconds": 3.439549, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-C", "status": "ok", "prediction": "Nolan Umber.", "input_tokens": 1175, "generated_tokens": 6, "latency_seconds": 3.47125, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-046-U", "status": "ok", "prediction": "Nolan Umber.", "input_tokens": 1152, "generated_tokens": 6, "latency_seconds": 3.39958, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-B", "status": "ok", "prediction": "At 11:50.", "input_tokens": 1491, "generated_tokens": 9, "latency_seconds": 5.125256, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-P", "status": "ok", "prediction": "The corrected day is 11:50.", "input_tokens": 1494, "generated_tokens": 12, "latency_seconds": 5.664964, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-C", "status": "ok", "prediction": "At 11:50.", "input_tokens": 1491, "generated_tokens": 9, "latency_seconds": 5.829237, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-051-U", "status": "ok", "prediction": "At 11:50.", "input_tokens": 1479, "generated_tokens": 9, "latency_seconds": 5.251958, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-B", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1157, "generated_tokens": 6, "latency_seconds": 3.363698, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-P", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1165, "generated_tokens": 6, "latency_seconds": 3.40175, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-C", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1157, "generated_tokens": 6, "latency_seconds": 3.363922, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-055-U", "status": "ok", "prediction": "Niko Juniper.", "input_tokens": 1169, "generated_tokens": 6, "latency_seconds": 3.491398, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-B", "status": "ok", "prediction": "Alderian Orwell.", "input_tokens": 1483, "generated_tokens": 6, "latency_seconds": 4.569757, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-P", "status": "ok", "prediction": "Alderian Orwell.", "input_tokens": 1480, "generated_tokens": 6, "latency_seconds": 4.602894, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-C", "status": "ok", "prediction": "Alderian Orwell.", "input_tokens": 1483, "generated_tokens": 6, "latency_seconds": 4.940958, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-060-U", "status": "ok", "prediction": "Alderian Orwell.", "input_tokens": 1487, "generated_tokens": 6, "latency_seconds": 4.684013, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-B", "status": "ok", "prediction": "Niko Orwell.", "input_tokens": 1128, "generated_tokens": 5, "latency_seconds": 3.007039, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-P", "status": "ok", "prediction": "Niko Orwell.", "input_tokens": 1129, "generated_tokens": 5, "latency_seconds": 3.141106, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-C", "status": "ok", "prediction": "Niko Orwell.", "input_tokens": 1126, "generated_tokens": 5, "latency_seconds": 3.105057, "seed": 17, "decoding": "greedy"}
+{"id": "RLC-064-U", "status": "ok", "prediction": "Niko Orwell.", "input_tokens": 1129, "generated_tokens": 5, "latency_seconds": 3.052191, "seed": 17, "decoding": "greedy"}
