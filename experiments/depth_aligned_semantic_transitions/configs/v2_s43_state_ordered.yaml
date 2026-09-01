@@ -1,0 +1,20 @@
+# DAST V2 — PARKED. Do not run. The 9-run matrix is unauthorized until
+# Stage B/C diagnosis selects H2 (see docs/DAST_V2_HYPOTHESIS_TREE.md).
+# TEST stays sealed. PREREGISTRATION_V2.md is unsigned.
+extends: state_ordered.yaml
+
+experiment:
+  name: dast-v2-s43-state_ordered
+  seed: 43
+  output_dir: ../runs/v2_s43_state_ordered
+  evidence_status: exploratory_dev
+  preregistration_frozen: false
+  preregistration_sha256: ""
+  allow_sealed_test: false
+
+data:
+  max_train_records: 4000
+  max_eval_records: 800
+
+evaluation:
+  do_generation: true
