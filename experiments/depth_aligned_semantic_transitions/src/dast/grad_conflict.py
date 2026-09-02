@@ -64,15 +64,31 @@ def conflict_from_losses(
         key = _group_key(name)
         per_module[key]["lm"].append(param.new_zeros(param.numel()) if glm is None else glm.detach().reshape(-1))
         per_module[key]["state"].append(param.new_zeros(param.numel()) if gst is None else gst.detach().reshape(-1))
+    # Per-module statistics are computed as TENSORS and transferred once. The
+    # readable loop this replaces called float() three times per group; with ~197
+    # groups that is ~600 device syncs per measured step, which cost 2.7s on top of a
+    # 0.63s training step. Numerically identical -- pinned by a test.
+    keys = sorted(per_module)
+    dots = torch.empty(len(keys), dtype=torch.float32, device=flat_lm.device)
+    lm_norms = torch.empty_like(dots)
+    state_norms = torch.empty_like(dots)
+    for index, key in enumerate(keys):
+        buckets = per_module[key]
+        left = torch.cat([item.float() for item in buckets["lm"]])
+        right = torch.cat([item.float() for item in buckets["state"]])
+        dots[index] = torch.dot(left, right)
+        lm_norms[index] = left.norm()
+        state_norms[index] = right.norm()
+    denominator = lm_norms * state_norms
+    cosines = torch.where(denominator > 0, dots / denominator, torch.full_like(dots, float("nan")))
+    stacked = torch.stack([cosines, lm_norms, state_norms]).cpu()  # one sync
     module_rows = []
     negative = 0
     usable = 0
-    for key, buckets in sorted(per_module.items()):
-        left = torch.cat([item.float() for item in buckets["lm"]])
-        right = torch.cat([item.float() for item in buckets["state"]])
-        cosine = vector_cosine(left, right)
-        lm_norm = float(left.norm())
-        state_norm = float(right.norm())
+    for index, key in enumerate(keys):
+        cosine = float(stacked[0, index])
+        lm_norm = float(stacked[1, index])
+        state_norm = float(stacked[2, index])
         if lm_norm > 0 and state_norm > 0:
             usable += 1
             if cosine < 0:
@@ -98,6 +114,21 @@ def conflict_from_losses(
         "lm_loss": float(lm_loss.detach().cpu()),
         "state_loss": float(state_loss.detach().cpu()),
     }
+
+
+class EarlyStop(Exception):
+    """Raised by a probe to end training after a requested global step.
+
+    Used for the EARLY-window replication runs. The point is to stop the PROCESS
+    without shortening the configured schedule: `_make_scheduler` derives warmup from
+    total_updates, so a config with fewer optimizer steps would put a different
+    learning rate in the measured window and confound the comparison with the
+    full-length run. Truncating here keeps the LR schedule identical.
+    """
+
+    def __init__(self, global_step: int) -> None:
+        super().__init__(f"probe requested stop after global step {global_step}")
+        self.global_step = global_step
 
 
 class TrajectoryProbe:
@@ -128,6 +159,7 @@ class TrajectoryProbe:
         mid_until: int = 400,
         mid_every: int = 4,
         late_every: int = 20,
+        max_global_step: int | None = None,
     ) -> None:
         self.sink = sink
         self.explicit = set(int(step) for step in schedule) if schedule is not None else None
@@ -135,6 +167,7 @@ class TrajectoryProbe:
         self.mid_until = mid_until
         self.mid_every = mid_every
         self.late_every = late_every
+        self.max_global_step = max_global_step
         self.rows: list[dict] = []
 
     def should_measure(self, global_step: int) -> bool:
@@ -183,6 +216,10 @@ class TrajectoryProbe:
         self.rows.append(row)
         if self.sink is not None:
             self.sink(row)
+        if self.max_global_step is not None and global_step >= self.max_global_step:
+            # Raised AFTER the row is recorded and flushed, so the requested window is
+            # complete rather than one step short.
+            raise EarlyStop(global_step)
 
 
 def lora_only_cosine(modules: Iterable[dict]) -> float:

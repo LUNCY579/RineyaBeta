@@ -1,13 +1,11 @@
-# B2-T: LM/state gradient conflict as a TRAJECTORY, not a step-250 snapshot.
-# FROZEN protocol: docs/PREREGISTRATION_B2_TRAJECTORY.md
+# B2-T replication seed 29, arm state_final_repeated.
+# FROZEN protocol: docs/PREREGISTRATION_B2_TRAJECTORY.md (section 10 governs).
 #
-# Matched to the V1 seed-29 runs in every scientific respect, so the LATE window
-# must reproduce the existing artifacts/b2_verdict_s29.json snapshot. Seed 29 is
-# chosen for exactly that built-in validity check.
+# The unit of replication is the INITIALISATION: within a seed all three arms share
+# one init and one batch order, so the paired per-step difference is attributable to
+# the arm. Across seeds, {D_k} is tested with a one-sample t.
 #
-# Generation is OFF. This run has no capability endpoint and its accuracy must not
-# be read: the one-seed MDE is 2.27 pp against a 1.00 pp effect
-# (artifacts/endpoint_power.json).
+# Generation is OFF. No capability endpoint; accuracy from this run must not be read.
 extends: state_final_repeated.yaml
 
 experiment:

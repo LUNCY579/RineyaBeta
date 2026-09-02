@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
+import sys
+import os
 
 import pytest
 
@@ -246,3 +249,141 @@ def test_diagnostic_grads_under_checkpointing_do_not_shift_dropout_masks() -> No
                 f"use_reentrant={reentrant}: parameter {index} diverged, so the diagnostic "
                 "backward shifted the dropout stream"
             )
+
+
+def test_batched_module_statistics_match_the_readable_per_module_loop() -> None:
+    """The device-sync optimisation must be numerically identical, not just close.
+
+    conflict_from_losses computes ~197 module groups. Calling float() per statistic
+    cost ~600 device syncs per measured step, 2.7s on top of a 0.63s training step.
+    The batched version transfers once. Since it feeds a preregistered decision rule,
+    equality is checked against a literal transcription of the loop it replaced.
+    """
+
+    import torch.nn as nn
+
+    torch.manual_seed(19)
+    model = nn.Sequential(nn.Linear(12, 12), nn.Tanh(), nn.Linear(12, 5))
+    batch = torch.randn(6, 12)
+    output = model(batch)
+    lm_like = output.pow(2).mean()
+    state_like = output.abs().mean()
+
+    report = conflict_from_losses(lm_like, state_like, model.named_parameters())
+
+    # Literal transcription of the replaced loop, from the same gradients.
+    params = [p for _, p in model.named_parameters() if p.requires_grad]
+    names = [n for n, p in model.named_parameters() if p.requires_grad]
+    grad_lm = torch.autograd.grad(lm_like, params, retain_graph=True, allow_unused=True)
+    grad_state = torch.autograd.grad(state_like, params, retain_graph=True, allow_unused=True)
+    from collections import defaultdict
+
+    from dast.grad_conflict import _group_key, vector_cosine
+
+    buckets: dict = defaultdict(lambda: {"lm": [], "state": []})
+    for name, glm, gst, param in zip(names, grad_lm, grad_state, params):
+        key = _group_key(name)
+        buckets[key]["lm"].append(
+            param.new_zeros(param.numel()) if glm is None else glm.detach().reshape(-1)
+        )
+        buckets[key]["state"].append(
+            param.new_zeros(param.numel()) if gst is None else gst.detach().reshape(-1)
+        )
+    expected = {}
+    for key, bucket in sorted(buckets.items()):
+        left = torch.cat([item.float() for item in bucket["lm"]])
+        right = torch.cat([item.float() for item in bucket["state"]])
+        expected[key] = (
+            vector_cosine(left, right), float(left.norm()), float(right.norm())
+        )
+
+    assert {row["module"] for row in report["modules"]} == set(expected)
+    for row in report["modules"]:
+        cosine, lm_norm, state_norm = expected[row["module"]]
+        assert row["cosine"] == pytest.approx(cosine, rel=1e-6, abs=1e-9), row["module"]
+        assert row["lm_norm"] == pytest.approx(lm_norm, rel=1e-6), row["module"]
+        assert row["state_norm"] == pytest.approx(state_norm, rel=1e-6), row["module"]
+
+
+def test_probe_raises_early_stop_after_the_requested_step() -> None:
+    from dast.grad_conflict import EarlyStop, TrajectoryProbe
+
+    rows: list[dict] = []
+
+    class Breakdown:
+        lm = torch.tensor(1.0)
+        state = torch.tensor(1.0)  # requires_grad False -> recorded, grads skipped
+
+    probe = TrajectoryProbe(rows.append, dense_until=10**9, max_global_step=3)
+    for step in (1, 2):
+        probe(global_step=step, optimizer_step=1, model=None, breakdown=Breakdown())
+    with pytest.raises(EarlyStop) as raised:
+        probe(global_step=3, optimizer_step=1, model=None, breakdown=Breakdown())
+    assert raised.value.global_step == 3
+    # The row for the stopping step must already be recorded, so the requested
+    # window is complete rather than one step short.
+    assert [row["global_step"] for row in rows] == [1, 2, 3]
+
+
+def test_analyser_refuses_a_verdict_on_absent_or_truncated_data(tmp_path) -> None:
+    """REFUTED must never be the default output of missing data.
+
+    Found by adversarial review of the frozen protocol. The first analyser computed
+    `refuted = all(not ci_excludes_zero)`, and a NaN interval yields
+    ci_excludes_zero = False, so three EMPTY trajectories printed
+    "H2-T REFUTED ... the DAST closure is complete" and wrote h2t_refuted: true.
+    That is the verdict which closes the whole programme, and it was unfalsifiable by
+    instrument failure: zero data, an all-NaN column and a genuine null were
+    indistinguishable in the artifact.
+    """
+
+    import importlib.util
+    import json as _json
+    import subprocess
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    runs = tmp_path / "runs"
+    for arm in ("state_ordered", "state_reverse", "state_final_repeated"):
+        directory = runs / f"diag_b2traj_s29_{arm}"
+        directory.mkdir(parents=True)
+        (directory / "grad_trajectory.jsonl").write_text("", encoding="utf-8")
+
+    out = tmp_path / "verdict.json"
+    done = subprocess.run(
+        [sys.executable, str(scripts / "gradient_trajectory_analyse.py"),
+         "--runs", str(runs), "--out", str(out)],
+        capture_output=True, text=True, timeout=600,
+        env={**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parents[1] / "src")},
+    )
+    assert done.returncode == 3, f"expected refusal exit 3, got {done.returncode}"
+    assert "INSUFFICIENT COVERAGE" in done.stdout
+    # No VERDICT line at all. The refusal text does mention the word REFUTED, in the
+    # sentence explaining why it may not be emitted, so the check is on the verdict
+    # channel rather than on the presence of the word.
+    assert "VERDICT:" not in done.stdout
+
+    payload = _json.loads(out.read_text(encoding="utf-8"))
+    assert payload["status"] == "INSUFFICIENT_COVERAGE"
+    assert payload["verdict"] is None
+    assert "h2t_refuted" not in payload, (
+        "no boolean a reader could mistake for a null result may be written"
+    )
+
+
+def test_block_bootstrap_raises_rather_than_returning_nan(tmp_path) -> None:
+    """A degenerate interval must be an error, not a value that reads as measured."""
+
+    import importlib.util
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    spec = importlib.util.spec_from_file_location(
+        "gradient_trajectory_analyse", scripts / "gradient_trajectory_analyse.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["gradient_trajectory_analyse"] = module
+    spec.loader.exec_module(module)
+
+    with pytest.raises(ValueError, match="at least 2 blocks"):
+        module.block_bootstrap({1: 0.1, 2: 0.2})  # both in the same block of 8
+    mean, low, high, blocks = module.block_bootstrap({1: 0.1, 9: 0.2, 17: 0.3})
+    assert blocks == 3 and low <= mean <= high

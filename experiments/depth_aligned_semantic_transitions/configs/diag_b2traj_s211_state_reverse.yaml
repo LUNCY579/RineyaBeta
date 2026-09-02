@@ -1,0 +1,22 @@
+# B2-T replication seed 211, arm state_reverse.
+# FROZEN protocol: docs/PREREGISTRATION_B2_TRAJECTORY.md (section 10 governs).
+#
+# The unit of replication is the INITIALISATION: within a seed all three arms share
+# one init and one batch order, so the paired per-step difference is attributable to
+# the arm. Across seeds, {D_k} is tested with a one-sample t.
+#
+# Generation is OFF. No capability endpoint; accuracy from this run must not be read.
+extends: state_reverse.yaml
+
+experiment:
+  name: dast-b2traj-s211-state_reverse
+  seed: 211
+  output_dir: ../runs/diag_b2traj_s211_state_reverse
+  evidence_status: exploratory_dev
+
+data:
+  max_train_records: 4000
+  max_eval_records: 800
+
+evaluation:
+  do_generation: false

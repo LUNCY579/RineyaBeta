@@ -219,3 +219,94 @@ through a checkpointed network with active dropout, and asserts **bit-identical*
 parameters for both `use_reentrant=True` and `False`. It passes:
 `torch.utils.checkpoint` defaults to `preserve_rng_state=True`, so recomputation
 saves and restores the RNG and the production backward sees unchanged dropout masks.
+
+---
+
+## 10. Amendment 2 (2026-09-02, still before any retained B2-T data)
+
+An adversarial design review of §1–§9 found three **invalidating** faults. All three
+are fixed below. This section governs where it conflicts with §9, which governs where
+it conflicts with §5.
+
+**One arm had begun running when the review returned. Its output was deleted, not
+analysed** (123 measured steps, `runs/diag_b2traj_s29_state_ordered/`), so no B2-T
+data has ever been retained and this remains a pre-data amendment.
+
+### 10a. Fault 1 — the arms did not share an initialisation (invalidating)
+
+`scripts/gradient_conflict_trajectory.py` built the model *before* `train()` called
+`set_global_seed`. `SharedStateProjector` and PEFT's `lora_A` both draw from the
+global RNG at construction, so every arm received a different 295K-parameter
+projector and a different LoRA draw. §9b's claim that pairing "is exact at t=1" was
+therefore **false in code**.
+
+Measured, three separate processes: projector weight sum **−24.82 / −2.74 / −5.11**
+unseeded, versus **−2.74294** every time once seeded.
+
+This is not a novel mistake here — `src/dast/cli.py:68` carries a comment recording
+that the identical bug was already found and fixed on the production path: *"seeding
+only inside train() left every arm's starting weights unreproducible and made the
+matched-seed contract unenforceable."* The diagnostic runner reintroduced it.
+
+**Fix.** Seed before construction, as `cli.py` does. Additionally record
+`torch.initial_seed()` and a SHA-256 of the initial trainable state in
+`grad_trajectory_summary.json`, and have the analyser **refuse** any seed whose three
+arms do not share that digest — the matched-init contract is now checked, not assumed.
+
+### 10b. Fault 2 — the unit of replication was the step, not the run (invalidating)
+
+§9e attached the decision to a bootstrap over steps *within one run per arm*. Any
+component of an arm's mean that is constant across the window — the initialisation
+draw, that seed's weight path — contributes exactly **zero** to such an interval. The
+review's simulation of the exact §9e rule gives P(SUPPORTED | no true effect) = 0.008
+with no run-level nuisance, rising to **0.070 at ω = 0.2 and 0.121 at ω = 0.3** in
+units of the per-step sd. The per-step sd here is 0.029–0.038, so ω = 0.3 is ≈0.009 —
+almost exactly the ordered-minus-reverse gap already measured once (0.0110).
+
+**Fix. The unit of replication becomes the INITIALISATION.**
+
+- **K = 5 init seeds** (29, 101, 211, 307, 401), all three arms at each.
+- Within a seed, all arms share one initialisation and one batch order, so the paired
+  per-step difference is attributable to the arm.
+- Per seed *k*: `D_k(control) = mean over EARLY of paired difference`.
+- **Primary test: one-sample t on {D_k} against zero, K−1 = 4 df, t_crit = 2.776.**
+- **SUPPORTED** iff both contrasts are negative and significant. **REFUTED** iff
+  neither is significant. **AMBIGUOUS** otherwise.
+
+The step-level block bootstrap from §9e is retained as **descriptive secondary
+output only**, with no decision attached.
+
+**Cost control.** The EARLY window is 120 of 2000 global steps, so replication runs
+stop after step 120 via `--stop-after-step`. Crucially they are **not** reconfigured
+to be shorter: `_make_scheduler` derives warmup from `total_updates`, so a 15-update
+config would place a different learning rate in the measured window. The full 250-step
+schedule is built and the process is stopped, keeping the measured window identical to
+an untruncated run. Seed 29 runs to completion so the MID/LATE windows and the
+snapshot check still exist as secondary evidence.
+
+### 10c. Fault 3 — REFUTED was the default output of missing data (invalidating)
+
+The first analyser computed `refuted = all(not ci_excludes_zero)`, and a NaN interval
+yields `ci_excludes_zero = False`. Three **empty** trajectory files therefore printed
+*"H2-T REFUTED … the DAST closure is complete"* and wrote `h2t_refuted: true`. Since
+REFUTED is the verdict that closes the entire programme, it was unfalsifiable by
+instrument failure: zero data, an all-NaN column and a genuine null were
+indistinguishable in the artifact. Given that the runner is deliberately designed to
+leave valid partial trajectories, and that the accelerator is contended, this was
+reachable in normal operation.
+
+**Fix.** The analyser refuses to emit any verdict unless coverage is sufficient:
+K ≥ 5 usable seeds, each with all 15 shared EARLY blocks and matching init digests
+across arms. On failure it writes `status: INSUFFICIENT_COVERAGE`, `verdict: null`,
+omits every boolean a reader could mistake for a null, and exits 3.
+`block_bootstrap` now raises rather than returning NaN. Both behaviours are pinned by
+regression tests.
+
+### 10d. Also raised and deliberately not adopted
+
+The 0.1-weighted **contrastive** term is in neither side of the cosine: the probe
+compares `L_LM` against `L_state` only, while the optimizer applies
+`L_LM + 1.0·L_state + 0.1·L_contrastive`. This is left as-is because H2 is a claim
+about the *state* term specifically, and mixing the contrastive gradient in would
+change the hypothesis rather than test it. Recorded here as a known limitation of
+what the measured cosine covers, not as a defect.

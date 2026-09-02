@@ -22,6 +22,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -34,10 +35,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from dast.config import load_config  # noqa: E402
-from dast.grad_conflict import TrajectoryProbe  # noqa: E402
+from dast.grad_conflict import EarlyStop, TrajectoryProbe  # noqa: E402
 from dast.hf import build_hf_components  # noqa: E402
 from dast.model import DASTModel  # noqa: E402
-from dast.training import train  # noqa: E402
+from dast.training import set_global_seed, train  # noqa: E402
 from gradient_conflict import trainer_running  # noqa: E402
 from teacher_forced_endpoint import accelerator_state  # noqa: E402
 
@@ -54,6 +55,14 @@ def main() -> int:
     parser.add_argument("--mid-until", type=int, default=400)
     parser.add_argument("--mid-every", type=int, default=4)
     parser.add_argument("--late-every", type=int, default=20)
+    parser.add_argument(
+        "--stop-after-step",
+        type=int,
+        default=None,
+        help="stop after this global step. The LR schedule is still built for the FULL "
+        "configured run, so the measured window matches an untruncated run exactly; "
+        "truncating via config would change warmup and confound the comparison.",
+    )
     args = parser.parse_args()
 
     if trainer_running():
@@ -90,6 +99,16 @@ def main() -> int:
         flush=True,
     )
 
+    # Seed BEFORE anything draws from the global RNG. The LoRA adapter and the shared
+    # projector are both initialised during construction below, and seeding only
+    # inside train() leaves every arm's starting weights unreproducible -- which makes
+    # the matched-init contract this experiment's pairing depends on unenforceable.
+    # cli.py:68 carries the same comment because the same bug was fixed there once
+    # already; a design review caught it here before any data was kept.
+    set_global_seed(
+        config.experiment.seed,
+        deterministic_algorithms=config.training.deterministic_algorithms,
+    )
     base, tokenizer, info = build_hf_components(config, for_training=True)
     model = DASTModel(
         base,
@@ -122,15 +141,37 @@ def main() -> int:
                 flush=True,
             )
 
+    # Auditable proof that the matched-init contract held, rather than an assumption.
+    trainable = {
+        name: value for name, value in model.state_dict().items()
+        if name in {n for n, p in model.named_parameters() if p.requires_grad}
+    }
+    init_digest = hashlib.sha256(
+        b"".join(
+            name.encode() + trainable[name].detach().cpu().float().numpy().tobytes()
+            for name in sorted(trainable)
+        )
+    ).hexdigest()
+    torch_seed = int(torch.initial_seed())
+    print(f"initial torch seed {torch_seed}; init state digest {init_digest[:16]}", flush=True)
+
     probe = TrajectoryProbe(
         sink,
         dense_until=args.dense_until,
         mid_until=args.mid_until,
         mid_every=args.mid_every,
         late_every=args.late_every,
+        max_global_step=args.stop_after_step,
     )
+    stopped_early = False
+    result = None
     try:
         result = train(model, tokenizer, config, model_info=info, step_probe=probe)
+    except EarlyStop as stop:
+        stopped_early = True
+        print(f"\nstopped early at global step {stop.global_step} as requested "
+              "(the LR schedule was still built for the FULL run, so the measured "
+              "window is identical to that of an untruncated run)", flush=True)
     finally:
         handle.close()
 
@@ -140,8 +181,12 @@ def main() -> int:
         "seed": config.experiment.seed,
         "config_sha256": config.canonical_sha256(),
         "config_path": str(args.config),
-        "global_steps": result.global_steps,
-        "optimizer_steps": result.optimizer_steps,
+        "global_steps": result.global_steps if result else probe.rows[-1]["global_step"],
+        "optimizer_steps": result.optimizer_steps if result else probe.rows[-1]["optimizer_step"],
+        "stopped_early": stopped_early,
+        "stop_after_step": args.stop_after_step,
+        "torch_initial_seed": torch_seed,
+        "init_trainable_state_sha256": init_digest,
         "measured_steps": measured,
         "trajectory": str(trajectory_path),
         "elapsed_seconds": time.perf_counter() - started,
