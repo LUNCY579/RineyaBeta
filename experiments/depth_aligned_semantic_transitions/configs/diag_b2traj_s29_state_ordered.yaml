@@ -1,0 +1,24 @@
+# B2-T: LM/state gradient conflict as a TRAJECTORY, not a step-250 snapshot.
+# FROZEN protocol: docs/PREREGISTRATION_B2_TRAJECTORY.md
+#
+# Matched to the V1 seed-29 runs in every scientific respect, so the LATE window
+# must reproduce the existing artifacts/b2_verdict_s29.json snapshot. Seed 29 is
+# chosen for exactly that built-in validity check.
+#
+# Generation is OFF. This run has no capability endpoint and its accuracy must not
+# be read: the one-seed MDE is 2.27 pp against a 1.00 pp effect
+# (artifacts/endpoint_power.json).
+extends: state_ordered.yaml
+
+experiment:
+  name: dast-b2traj-s29-state_ordered
+  seed: 29
+  output_dir: ../runs/diag_b2traj_s29_state_ordered
+  evidence_status: exploratory_dev
+
+data:
+  max_train_records: 4000
+  max_eval_records: 800
+
+evaluation:
+  do_generation: false

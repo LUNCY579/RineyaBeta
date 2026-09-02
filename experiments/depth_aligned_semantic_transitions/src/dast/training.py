@@ -342,7 +342,22 @@ def train(
     config: DASTConfig,
     *,
     model_info: dict[str, Any] | None = None,
+    step_probe: Any = None,
 ) -> TrainingResult:
+    """Train, optionally with a read-only per-step probe.
+
+    ``step_probe`` is called as ``probe(global_step, optimizer_step, model, breakdown)``
+    immediately after the loss is computed and BEFORE the production ``.backward()``,
+    so the autograd graph is still alive and a probe can take
+    ``torch.autograd.grad(..., retain_graph=True)`` on individual loss terms.
+
+    It must not perturb the run. That holds because ``torch.autograd.grad`` returns
+    gradients without accumulating into ``.grad``, and backward consumes no RNG, so
+    the optimizer sees exactly what it would have seen. `tests/test_grad_conflict.py`
+    pins this by asserting bit-identical parameters with and without a probe.
+    Default ``None`` makes the production path unchanged.
+    """
+
     config.validate()
     set_global_seed(
         config.experiment.seed,
@@ -437,6 +452,16 @@ def train(
                     operator_bank=model.operator_bank,
                 )
                 scaled_loss = breakdown.total / config.training.gradient_accumulation_steps
+            # Read-only, graph still alive, before the production backward. See train()'s
+            # docstring for why this cannot move the optimizer trajectory.
+            if step_probe is not None:
+                step_probe(
+                    global_step=global_step,
+                    optimizer_step=optimizer_step,
+                    model=model,
+                    breakdown=breakdown,
+                    learning_rate=scheduler.get_last_lr()[0],
+                )
             if scaler.is_enabled():
                 scaler.scale(scaled_loss).backward()
             else:

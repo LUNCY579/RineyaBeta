@@ -7,6 +7,7 @@ A negative cosine is not itself a capability result.
 
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from typing import Iterable
 
@@ -97,3 +98,115 @@ def conflict_from_losses(
         "lm_loss": float(lm_loss.detach().cpu()),
         "state_loss": float(state_loss.detach().cpu()),
     }
+
+
+class TrajectoryProbe:
+    """Record cosine(grad L_LM, grad L_state) at scheduled steps DURING training.
+
+    The step-250 snapshot in `artifacts/b2_verdict_s29.json` found all arms within 2
+    sigma of orthogonal. That refutes H2 at convergence, not as a mechanism: LM loss
+    there is ~7e-4, and two objectives cannot conflict over a loss that is already
+    zero. A conflict that appears early and dissipates would look exactly like that
+    snapshot. This probe measures the trajectory instead of its endpoint.
+
+    Read-only by construction. `conflict_from_losses` uses `torch.autograd.grad`,
+    which returns gradients without accumulating into `.grad`, and backward consumes
+    no RNG, so the optimizer trajectory is unchanged. `retain_graph=True` leaves the
+    graph intact for the production backward that follows.
+
+    Cost. Every measured step pays two extra backward passes, and with gradient
+    checkpointing on each one re-runs the checkpointed forward. So the schedule is
+    dense only where the hypothesis lives; see PREREGISTRATION_B2_TRAJECTORY.md.
+    """
+
+    def __init__(
+        self,
+        sink: Any,
+        *,
+        schedule: Iterable[int] | None = None,
+        dense_until: int = 120,
+        mid_until: int = 400,
+        mid_every: int = 4,
+        late_every: int = 20,
+    ) -> None:
+        self.sink = sink
+        self.explicit = set(int(step) for step in schedule) if schedule is not None else None
+        self.dense_until = dense_until
+        self.mid_until = mid_until
+        self.mid_every = mid_every
+        self.late_every = late_every
+        self.rows: list[dict] = []
+
+    def should_measure(self, global_step: int) -> bool:
+        if self.explicit is not None:
+            return global_step in self.explicit
+        if global_step <= self.dense_until:
+            return True
+        if global_step <= self.mid_until:
+            return global_step % self.mid_every == 0
+        return global_step % self.late_every == 0
+
+    def __call__(
+        self,
+        *,
+        global_step: int,
+        optimizer_step: int,
+        model: Any,
+        breakdown: Any,
+        learning_rate: float | None = None,
+    ) -> None:
+        if not self.should_measure(global_step):
+            return
+        # An arm with no state loss has a constant-zero state term; its gradient is
+        # zero and the cosine is undefined. Record the step and skip the grads rather
+        # than writing a NaN that later reads as a measurement.
+        if not breakdown.state.requires_grad:
+            row = {
+                "global_step": global_step,
+                "optimizer_step": optimizer_step,
+                "learning_rate": learning_rate,
+                "measured": False,
+                "reason": "state loss is not differentiable in this arm",
+            }
+        else:
+            report = conflict_from_losses(
+                breakdown.lm, breakdown.state, model.named_parameters()
+            )
+            report.update(
+                global_step=global_step,
+                optimizer_step=optimizer_step,
+                learning_rate=learning_rate,
+                measured=True,
+                lora_only_cosine=lora_only_cosine(report["modules"]),
+            )
+            row = report
+        self.rows.append(row)
+        if self.sink is not None:
+            self.sink(row)
+
+
+def lora_only_cosine(modules: Iterable[dict]) -> float:
+    """Cosine over the parameters BOTH losses touch, i.e. excluding the projector.
+
+    `L_LM` does not depend on `state_projector` at all, so grad_lm is identically zero
+    on that whole block. Keeping it in the global cosine inflates ||g_state|| without
+    contributing to the dot product, shrinking |cosine| toward zero for every arm
+    alike and hiding exactly the between-arm difference H2 predicts. Reconstructed
+    exactly from per-module norms and cosines:
+
+        cos = sum_m cos_m |lm_m| |st_m| / sqrt(sum_m |lm_m|^2 * sum_m |st_m|^2)
+    """
+
+    numerator = left = right = 0.0
+    for module in modules:
+        if module["module"] == "state_projector":
+            continue
+        lm_norm, state_norm = module["lm_norm"], module["state_norm"]
+        if lm_norm <= 0 or state_norm <= 0:
+            continue
+        numerator += module["cosine"] * lm_norm * state_norm
+        left += lm_norm ** 2
+        right += state_norm ** 2
+    if left <= 0 or right <= 0:
+        return float("nan")
+    return numerator / math.sqrt(left * right)
