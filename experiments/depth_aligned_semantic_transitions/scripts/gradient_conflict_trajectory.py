@@ -203,7 +203,7 @@ def main() -> int:
         json.dumps(summary, indent=2), encoding="utf-8"
     )
     print(
-        f"\ndone: {measured} measured steps of {result.global_steps} in "
+        f"\ndone: {measured} measured steps of {summary['global_steps']} in "
         f"{summary['elapsed_seconds']:.0f}s\nwrote {trajectory_path}"
     )
     return 0
