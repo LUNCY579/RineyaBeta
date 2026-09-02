@@ -1,0 +1,212 @@
+{
+  "num_problems": 1379,
+  "num_problems_before_filter": 2400,
+  "degenerate_motion_targets_before_filter": 1118,
+  "num_stages": 4,
+  "splits": 20,
+  "real_layers": [
+    7,
+    14,
+    21,
+    27
+  ],
+  "results": {
+    "absolute": {
+      "real": {
+        "true": {
+          "L_state": 0.142801943672877,
+          "order_margin": 1.1151207981225182,
+          "top1": 0.9732608675956727,
+          "spread_fraction": 0.018866951052951213
+        },
+        "shuffled": {
+          "L_state": 0.710877594399599,
+          "order_margin": 0.3742699591466462,
+          "top1": 0.6210688412189483,
+          "spread_fraction": 0.00990445420203479
+        },
+        "problem_information": 0.568075650726722
+      },
+      "embedding_x4": {
+        "true": {
+          "L_state": 0.1313825581931008,
+          "order_margin": 1.1294070848332598,
+          "top1": 0.9630978226661682,
+          "spread_fraction": 0.021009571671150706
+        },
+        "shuffled": {
+          "L_state": 0.6869441746674669,
+          "order_margin": 0.4025119751890033,
+          "top1": 0.6417210221290588,
+          "spread_fraction": 0.011242431300418528
+        },
+        "problem_information": 0.5555616164743662
+      },
+      "embedding_only": {
+        "true": {
+          "L_state": 0.8908444962341668,
+          "order_margin": 4.163336342344337e-18,
+          "top1": 0.25,
+          "spread_fraction": 4.9850362406384516e-17
+        },
+        "shuffled": {
+          "L_state": 0.9637501164319376,
+          "order_margin": -7.28583859910259e-18,
+          "top1": 0.25,
+          "spread_fraction": 2.3039644938991054e-17
+        },
+        "problem_information": 0.0729056201977708
+      },
+      "delta_hidden": {
+        "true": {
+          "L_state": 0.1467528287893122,
+          "order_margin": 1.11092044600881,
+          "top1": 0.9743659436702728,
+          "spread_fraction": 0.02705088664593985
+        },
+        "shuffled": {
+          "L_state": 0.7297154095909111,
+          "order_margin": 0.35066323152482637,
+          "top1": 0.607934781908989,
+          "spread_fraction": 0.012234137118870128
+        },
+        "problem_information": 0.5829625808015989
+      }
+    },
+    "motion_raw": {
+      "real": {
+        "true": {
+          "L_state": 0.13978901476995892,
+          "order_margin": 0.9849916651758741,
+          "top1": 0.9702898532152175,
+          "spread_fraction": 0.03065873887884787
+        },
+        "shuffled": {
+          "L_state": 0.6626264523878425,
+          "order_margin": 0.34427997624196444,
+          "top1": 0.6957608759403229,
+          "spread_fraction": 0.009932999356303748
+        },
+        "problem_information": 0.5228374376178835
+      },
+      "embedding_x4": {
+        "true": {
+          "L_state": 0.13521853972682135,
+          "order_margin": 0.9875295872456051,
+          "top1": 0.9620108753442764,
+          "spread_fraction": 0.03443687437486852
+        },
+        "shuffled": {
+          "L_state": 0.6458046976616676,
+          "order_margin": 0.3616473587338053,
+          "top1": 0.7113949298858643,
+          "spread_fraction": 0.010194572540859188
+        },
+        "problem_information": 0.5105861579348463
+      },
+      "embedding_only": {
+        "true": {
+          "L_state": 0.6737799325632411,
+          "order_margin": 0.0,
+          "top1": 0.25,
+          "spread_fraction": 7.414889297469955e-17
+        },
+        "shuffled": {
+          "L_state": 0.78689815026268,
+          "order_margin": 1.5265566588595904e-17,
+          "top1": 0.25,
+          "spread_fraction": 8.465311737646443e-17
+        },
+        "problem_information": 0.11311821769943886
+      },
+      "delta_hidden": {
+        "true": {
+          "L_state": 0.14349864168065957,
+          "order_margin": 0.9869231169389374,
+          "top1": 0.9698913037776947,
+          "spread_fraction": 0.035812622218362844
+        },
+        "shuffled": {
+          "L_state": 0.6819667612049,
+          "order_margin": 0.32440805605835527,
+          "top1": 0.6766847878694534,
+          "spread_fraction": 0.010747116652780966
+        },
+        "problem_information": 0.5384681195242405
+      }
+    },
+    "motion_centered": {
+      "real": {
+        "true": {
+          "L_state": 0.14034071470853224,
+          "order_margin": 1.1424704255422902,
+          "top1": 0.9766847908496856,
+          "spread_fraction": 0.02915563870681149
+        },
+        "shuffled": {
+          "L_state": 0.6574296472242886,
+          "order_margin": 0.4570520432965017,
+          "top1": 0.7691485524177551,
+          "spread_fraction": 0.009549804882327173
+        },
+        "problem_information": 0.5170889325157564
+      },
+      "embedding_x4": {
+        "true": {
+          "L_state": 0.13512568291520335,
+          "order_margin": 1.1494359749113687,
+          "top1": 0.972916665673256,
+          "spread_fraction": 0.03403546533355344
+        },
+        "shuffled": {
+          "L_state": 0.6331050513219576,
+          "order_margin": 0.4898763606707618,
+          "top1": 0.7884782612323761,
+          "spread_fraction": 0.008656050048757684
+        },
+        "problem_information": 0.4979793684067543
+      },
+      "embedding_only": {
+        "true": {
+          "L_state": 0.964474132519474,
+          "order_margin": -1.0408340855860842e-18,
+          "top1": 0.25,
+          "spread_fraction": 4.0289111497861647e-17
+        },
+        "shuffled": {
+          "L_state": 0.9945484698000392,
+          "order_margin": 1.1709383462843449e-18,
+          "top1": 0.25,
+          "spread_fraction": 0.0
+        },
+        "problem_information": 0.03007433728056519
+      },
+      "delta_hidden": {
+        "true": {
+          "L_state": 0.1438245302731265,
+          "order_margin": 1.137777071249844,
+          "top1": 0.9760688424110413,
+          "spread_fraction": 0.03968532520253782
+        },
+        "shuffled": {
+          "L_state": 0.68638438884278,
+          "order_margin": 0.41829837035142603,
+          "top1": 0.7417572438716888,
+          "spread_fraction": 0.009868647250649277
+        },
+        "problem_information": 0.5425598585696535
+      }
+    }
+  },
+  "absolute_reference_problem_information": 0.568075650726722,
+  "best_motion_problem_information": 0.5425598585696535,
+  "carries_problem_information": true,
+  "depth_advantage": {
+    "absolute": -0.011419385479776195,
+    "motion_raw": -0.004570475043137567,
+    "motion_centered": -0.005215031793328884
+  },
+  "needs_depth": false,
+  "verdict": "MOTION DOES NOT CLEAR THE GATE. It PASSES the problem-information control (0.96x absolute), so deltas are NOT problem-independent and the pessimistic reading of PHASE0 3.8 is wrong. But it FAILS the layer-0 recoverability control exactly as absolute states do: layers 0/1/2/3 still fit motion targets better than the V1 sites, and moving the hidden side to deltas makes it worse rather than better. Motion changes WHAT is supervised without changing the fact that the supervised quantity does not require the depth stack. Do not spend the revision budget on it.",
+  "claim_boundary": "Decodability only, frozen backbone, no training. A pass here is a licence to TEST motion, not evidence that motion improves reasoning. TEST sealed."
+}
