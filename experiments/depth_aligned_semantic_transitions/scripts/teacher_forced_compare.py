@@ -51,6 +51,12 @@ CONTRASTS = (
 )
 # Accuracy deltas (consistently scored). Negative = worse accuracy, so the NLL
 # contrast should be POSITIVE for the endpoint to agree.
+ACCURACY_ARM_MEANS = {
+    "cot_baseline": 0.8937,
+    "state_final_repeated": 0.8954,
+    "state_reverse": 0.8921,
+    "state_ordered": 0.8838,
+}
 ACCURACY = {
     ("state_ordered", "cot_baseline"): -0.0100,
     ("state_ordered", "state_final_repeated"): -0.0117,
@@ -118,6 +124,33 @@ def exact_two_sided_binomial(successes: int, trials: int) -> float:
         for index in range(low + 1)
     )
     return min(1.0, 2.0 * tail)
+
+
+def _pearson(first: list[float], second: list[float]) -> float:
+    count = len(first)
+    mean_first = sum(first) / count
+    mean_second = sum(second) / count
+    numerator = sum(
+        (first[i] - mean_first) * (second[i] - mean_second) for i in range(count)
+    )
+    denominator = math.sqrt(
+        sum((value - mean_first) ** 2 for value in first)
+        * sum((value - mean_second) ** 2 for value in second)
+    )
+    return numerator / denominator if denominator > 0 else 0.0
+
+
+def spearman_arms(nll: dict[str, float], accuracy: dict[str, float]) -> float:
+    """Rank correlation of arm-mean NLL against arm-mean accuracy. n=4: direction only."""
+
+    arms = sorted(nll)
+    def ranks(values: list[float]) -> list[float]:
+        order = sorted(range(len(values)), key=lambda i: values[i])
+        out = [0.0] * len(values)
+        for position, index in enumerate(order):
+            out[index] = position + 1
+        return out
+    return _pearson(ranks([nll[a] for a in arms]), ranks([accuracy[a] for a in arms]))
 
 
 def sign_test(differences: dict[str, float]) -> dict:
@@ -204,21 +237,51 @@ def main() -> int:
     ordered_worst = ranking[-1] == "state_ordered"
     primary = contrasts["state_ordered - cot_baseline"]
     n_agree = sum(1 for agrees, _, _ in agreements if agrees)
-    passed = ordered_worst and primary["direction_agrees"] and primary["ci_excludes_zero"]
 
-    print(f"\n=== validation gate ===")
-    print(f"  state_ordered is the worst arm by NLL: {ordered_worst}")
-    print(f"  ordered-baseline direction agrees with accuracy: {primary['direction_agrees']}")
-    print(f"  ordered-baseline CI excludes zero: {primary['ci_excludes_zero']}")
-    print(f"  contrasts whose direction agrees with accuracy: {n_agree}/{len(CONTRASTS)}")
+    # Criteria 1-3 are the ordering checks. They are necessary and NOT sufficient:
+    # every arm that carries a state loss raises LM NLL, so "same sign as accuracy"
+    # is nearly free when four of five accuracy deltas are negative. Criteria 4-6 are
+    # what decide whether the endpoint can actually stand in for accuracy.
+    magnitude_r = _pearson(
+        [row["delta_nll_mean"] for row in contrasts.values()],
+        [-row["accuracy_delta"] for row in contrasts.values()],
+    )
+    decisive = contrasts["state_ordered - state_reverse"]
+    resolves_decisive = decisive["sign_test"]["p"] < 0.05
+    null_contrast = contrasts["state_reverse - cot_baseline"]
+    false_alarm = null_contrast["sign_test"]["p"] < 0.001 and abs(
+        null_contrast["accuracy_delta"]
+    ) < 0.005
+
+    print("\n=== validation gate ===")
+    print(f"  1. state_ordered is the worst arm by NLL:            {ordered_worst}")
+    print(f"  2. ordered-baseline direction agrees:                {primary['direction_agrees']}")
+    print(f"  3. ordered-baseline CI excludes zero:                {primary['ci_excludes_zero']}")
+    print(f"     (contrasts whose direction agrees: {n_agree}/{len(CONTRASTS)})")
+    print(f"  4. magnitude tracks accuracy, Pearson r =            {magnitude_r:+.3f}"
+          f"   {'ok' if magnitude_r > 0.5 else 'FAIL (uncorrelated)'}")
+    print(f"  5. resolves ordered-reverse (accuracy -0.83 pp):     {resolves_decisive}"
+          f"   p={decisive['sign_test']['p']:.3f}")
+    print(f"  6. no false alarm on reverse-baseline (accuracy null): {not false_alarm}"
+          f"   p={null_contrast['sign_test']['p']:.1e}")
+
+    usable_as_capability_screen = (
+        ordered_worst and primary["direction_agrees"] and primary["ci_excludes_zero"]
+        and magnitude_r > 0.5 and resolves_decisive and not false_alarm
+    )
     verdict = (
-        "STAGE E VALIDATED: the paired teacher-forced endpoint reproduces the V1 ordering "
-        "with a CI excluding zero. It may be used to RANK candidates cheaply. Generated "
-        "accuracy remains the capability endpoint; never promote a mechanism on this alone."
-        if passed
-        else "STAGE E NOT VALIDATED: the endpoint does not reproduce the known V1 result. "
-        "Discard it as a screen rather than explaining it. B1/B3 remain unanswerable on "
-        "capability, which strengthens the recommendation to close the training direction."
+        "STAGE E VALIDATED as a capability screen: it reproduces the V1 ordering, its "
+        "magnitudes track accuracy, it resolves ordered-reverse, and it does not fire on "
+        "null contrasts. Generated accuracy still remains the capability endpoint."
+        if usable_as_capability_screen
+        else "STAGE E IS NOT A CAPABILITY SCREEN. It passes the ordering checks (1-3) but "
+        f"fails the ones that matter: magnitudes are uncorrelated with accuracy (r={magnitude_r:+.3f}), "
+        f"it cannot resolve ordered-reverse (p={decisive['sign_test']['p']:.3f}) which is the one "
+        "contrast carrying the V1 story, and it fires at "
+        f"p={null_contrast['sign_test']['p']:.0e} on reverse-baseline, which accuracy says is null. "
+        "What it measures with enormous power is AUXILIARY-LOSS INTERFERENCE with LM fitting -- "
+        "every state-carrying arm has higher NLL -- not reasoning capability. Keep it as an "
+        "interference monitor. It does NOT make B1/B3 answerable on capability."
     )
     print(f"\nVERDICT: {verdict}")
 
@@ -229,7 +292,16 @@ def main() -> int:
         "ranking_best_first": ranking,
         "contrasts": contrasts,
         "n_contrasts_agreeing": n_agree,
-        "validated": passed,
+        "accuracy_reference": ACCURACY_ARM_MEANS,
+        "spearman_arm_nll_vs_accuracy": spearman_arms(arm_means, ACCURACY_ARM_MEANS),
+        "magnitude_pearson_nll_vs_accuracy": magnitude_r,
+        "resolves_ordered_vs_reverse": resolves_decisive,
+        "false_alarm_on_null_contrast": false_alarm,
+        "ordering_checks_passed": bool(
+            ordered_worst and primary["direction_agrees"] and primary["ci_excludes_zero"]
+        ),
+        "validated_as_capability_screen": usable_as_capability_screen,
+        "usable_as_interference_monitor": True,
         "verdict": verdict,
         "claim_boundary": (
             "DEV only, TEST sealed. Teacher-forced NLL is a companion endpoint, never a "

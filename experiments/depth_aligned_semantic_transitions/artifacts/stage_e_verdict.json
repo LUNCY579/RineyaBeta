@@ -1,0 +1,132 @@
+{
+  "metric": "nll_mean",
+  "runs": {
+    "cot_baseline@17": "g2_budget_cot_baseline",
+    "cot_baseline@29": "g3_s29_cot_baseline",
+    "cot_baseline@43": "g3_s43_cot_baseline",
+    "state_final_repeated@17": "g3_s17_state_final_repeated",
+    "state_final_repeated@29": "g3_s29_state_final_repeated",
+    "state_final_repeated@43": "g3_s43_state_final_repeated",
+    "state_ordered@17": "g2_budget_state_ordered",
+    "state_ordered@29": "g3_s29_state_ordered",
+    "state_ordered@43": "g3_s43_state_ordered",
+    "state_reverse@17": "g2_budget_state_reverse",
+    "state_reverse@29": "g3_s29_state_reverse",
+    "state_reverse@43": "g3_s43_state_reverse"
+  },
+  "arm_means": {
+    "cot_baseline": 0.006296155602599729,
+    "state_final_repeated": 0.006492055381540327,
+    "state_ordered": 0.007033844547616286,
+    "state_reverse": 0.007025340636023067
+  },
+  "ranking_best_first": [
+    "cot_baseline",
+    "state_final_repeated",
+    "state_reverse",
+    "state_ordered"
+  ],
+  "contrasts": {
+    "state_ordered - cot_baseline": {
+      "delta_nll_mean": 0.000737688945016556,
+      "ci_low": 0.00034549737513062427,
+      "ci_high": 0.0011663274880883059,
+      "delta_nll_median": 6.848525775309937e-05,
+      "sign_test": {
+        "n_pairs": 2400,
+        "n_used": 2400,
+        "n_first_worse": 1556,
+        "n_second_worse": 844,
+        "fraction_first_worse": 0.6483333333333333,
+        "p": 2.0228292590145623e-48
+      },
+      "accuracy_delta": -0.01,
+      "direction_agrees": true,
+      "ci_excludes_zero": true
+    },
+    "state_ordered - state_final_repeated": {
+      "delta_nll_mean": 0.0005417891660759586,
+      "ci_low": 0.00024144221259319508,
+      "ci_high": 0.0008522662733354307,
+      "delta_nll_median": 3.736361890794739e-05,
+      "sign_test": {
+        "n_pairs": 2400,
+        "n_used": 2400,
+        "n_first_worse": 1413,
+        "n_second_worse": 987,
+        "fraction_first_worse": 0.58875,
+        "p": 3.380769950813116e-18
+      },
+      "accuracy_delta": -0.0117,
+      "direction_agrees": true,
+      "ci_excludes_zero": true
+    },
+    "state_ordered - state_reverse": {
+      "delta_nll_mean": 8.503911593218405e-06,
+      "ci_low": -0.0004694160047772076,
+      "ci_high": 0.0004714335723431043,
+      "delta_nll_median": 6.718062700753802e-06,
+      "sign_test": {
+        "n_pairs": 2400,
+        "n_used": 2400,
+        "n_first_worse": 1244,
+        "n_second_worse": 1156,
+        "fraction_first_worse": 0.5183333333333333,
+        "p": 0.07573079009072921
+      },
+      "accuracy_delta": -0.0083,
+      "direction_agrees": true,
+      "ci_excludes_zero": false
+    },
+    "state_reverse - cot_baseline": {
+      "delta_nll_mean": 0.0007291850334233376,
+      "ci_low": 0.00016146285555708042,
+      "ci_high": 0.001389578315168128,
+      "delta_nll_median": 5.666267805351174e-05,
+      "sign_test": {
+        "n_pairs": 2400,
+        "n_used": 2400,
+        "n_first_worse": 1542,
+        "n_second_worse": 858,
+        "fraction_first_worse": 0.6425,
+        "p": 9.108754401033818e-45
+      },
+      "accuracy_delta": -0.0017,
+      "direction_agrees": true,
+      "ci_excludes_zero": true
+    },
+    "state_final_repeated - cot_baseline": {
+      "delta_nll_mean": 0.00019589977894059722,
+      "ci_low": -0.00011860450333520379,
+      "ci_high": 0.0005064023474701298,
+      "delta_nll_median": 2.6919570277895942e-05,
+      "sign_test": {
+        "n_pairs": 2400,
+        "n_used": 2400,
+        "n_first_worse": 1428,
+        "n_second_worse": 972,
+        "fraction_first_worse": 0.595,
+        "p": 1.2137244565432503e-20
+      },
+      "accuracy_delta": 0.0017,
+      "direction_agrees": false,
+      "ci_excludes_zero": false
+    }
+  },
+  "n_contrasts_agreeing": 4,
+  "accuracy_reference": {
+    "cot_baseline": 0.8937,
+    "state_final_repeated": 0.8954,
+    "state_reverse": 0.8921,
+    "state_ordered": 0.8838
+  },
+  "spearman_arm_nll_vs_accuracy": -0.8,
+  "magnitude_pearson_nll_vs_accuracy": 0.18843879445124345,
+  "resolves_ordered_vs_reverse": false,
+  "false_alarm_on_null_contrast": true,
+  "ordering_checks_passed": true,
+  "validated_as_capability_screen": false,
+  "usable_as_interference_monitor": true,
+  "verdict": "STAGE E IS NOT A CAPABILITY SCREEN. It passes the ordering checks (1-3) but fails the ones that matter: magnitudes are uncorrelated with accuracy (r=+0.188), it cannot resolve ordered-reverse (p=0.076) which is the one contrast carrying the V1 story, and it fires at p=9e-45 on reverse-baseline, which accuracy says is null. What it measures with enormous power is AUXILIARY-LOSS INTERFERENCE with LM fitting -- every state-carrying arm has higher NLL -- not reasoning capability. Keep it as an interference monitor. It does NOT make B1/B3 answerable on capability.",
+  "claim_boundary": "DEV only, TEST sealed. Teacher-forced NLL is a companion endpoint, never a replacement for generated accuracy."
+}
