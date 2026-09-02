@@ -1,0 +1,26 @@
+{
+  "status": "DEFERRED",
+  "stage": "E — paired teacher-forced per-problem NLL from the 12 saved V1 adapters",
+  "checked_at": "2026-09-01T23:58:00Z",
+  "reason": "Accelerator taken by an unrelated job from a sibling worktree part-way through the pass: PID 162912, RineyaBeta-supa-fwa-v1 scripts/profile_scaling.py --lengths 8192 16384, holding ~6.5 GiB at 100% utilisation. The GPU was idle (7185 MiB free, no compute apps) when the pass was launched, so the pre-flight check passed and the contention began afterwards.",
+  "what_happened": "The pass did not fail. It ran roughly 100x slower than expected -- 42 of 800 problems in about ten minutes against an estimated 60-90 seconds per run -- and wrote a partial file. That is the dangerous failure mode: silent, slow, and it leaves an artifact that looks like data.",
+  "action_taken": [
+    "Stopped the Stage E pass rather than competing for the device.",
+    "Deleted every partial teacher_forced_per_problem.jsonl so no incomplete file can enter an analysis.",
+    "Added a pre-flight accelerator gate to scripts/teacher_forced_endpoint.py (--min-free-mib, --max-busy-util) that refuses and names the competing process, because trainer_running() only detects DAST's own trainers and cannot see sibling worktrees."
+  ],
+  "claim_boundary": "Stage E is NOT measured. This is not a scientific null and says nothing about whether the teacher-forced endpoint validates. Do not cite the partial run, which no longer exists on disk.",
+  "prior_expectation_recorded_before_measurement": {
+    "note": "Recorded now so it cannot be adjusted after seeing the result.",
+    "aggregate_lm_loss_seed_29": {
+      "state_final_repeated": 0.006781,
+      "cot_baseline": 0.006882,
+      "state_ordered": 0.007411,
+      "state_reverse": 0.007526
+    },
+    "expectation": "The aggregate LM loss already ranks final_repeated < baseline < ordered < reverse, whereas ACCURACY ranks baseline > final_repeated = reverse > ordered. state_reverse is therefore the WORST arm on teacher-forced loss while being middling on accuracy. If the per-problem endpoint reproduces that aggregate pattern it will FAIL the validation gate's 'state_ordered is the worst arm' criterion, and the honest reading would be that teacher-forced NLL tracks auxiliary-loss interference with LM fitting rather than reasoning capability.",
+    "secondary_observation": "Mean gold-token probability is about 0.9998 and the per-problem NLL distribution is extremely skewed (top 5% of problems carried 63.5% of total NLL in the partial run). Teacher forcing is near-perfect while free generation fails ~11% of the time, so the two endpoints may be measuring different things by construction."
+  },
+  "next": "Re-run when the accelerator is idle: for each of the 12 run dirs, python scripts/teacher_forced_endpoint.py --run runs/<dir>, then python scripts/teacher_forced_compare.py --out artifacts/stage_e_verdict.json. The compare script enforces the validation gate and will report NOT VALIDATED if the V1 ordering is not reproduced.",
+  "sealed_test": "closed, never opened"
+}
