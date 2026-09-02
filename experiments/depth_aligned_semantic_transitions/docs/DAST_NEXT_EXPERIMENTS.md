@@ -24,14 +24,14 @@ demotes B1/B3 as capability tests and promotes Stage E from optional to
 | Rank | ID | GPU-hours (est.) | Status this pass | Spends revision budget? |
 |---|---|---|---|---|
 | 1 | C1 frozen landscape K=4 + C1c controls | 0 (CPU) | **RUN**, written up | no |
-| 2 | **Stage E** paired teacher-forced NLL from the 12 existing adapters | ~0.5 (forward-only, no retraining) | **PROMOTED — run when GPU idle** | no |
+| 2 | **Stage E** paired teacher-forced NLL from the 12 existing adapters | ~0.2 (spent) | **RUN** — not a capability screen; keep as an interference monitor | no |
 | 3 | B2 gradient cosine on existing V1 adapters | ~0.3 (spent) | **RUN** — H2 not supported; V2 stays parked | no |
 | 4 | C2 per-problem π* (CPU) | 0 | **RUN** — reliable but 0.003-sized; Adaptive stays forbidden | no |
 | 5 | C1 optional K=5/6 `--require-distinct` | 0 if cache exists | optional | no |
-| 6 | B1 single-checkpoint one-seed pilots | ~4–5 (5× ~50 min) | **FROZEN** — and see the power gate below | no |
+| 6 | B1 single-checkpoint one-seed pilots | ~4–5 (5× ~50 min) | **FROZEN — precondition failed.** Stage E did not deliver a capability endpoint | no |
 | 7 | B3 λ sweep | ~4 (5 λ × one seed ordered) | freeze grid only | no |
 | 8 | Parked V2 9-run H2 matrix | ~9 | **PARKED** until B2 supports H2 | no |
-| 9 | Localized / Adaptive / Bidirectional / Motion / Rineya | large | choose **one** after B/C | motion only |
+| 9 | Localized / Adaptive / Bidirectional / **Motion** / Rineya | large | all closed: Adaptive by C2, Bidirectional by reverse-accuracy, **Motion by the H6 layer-0 gate**, Rineya by the target defect | motion budget UNSPENT |
 
 ### Power gate on B1 and B3 — read before signing either
 
@@ -152,7 +152,47 @@ assignment changes *generated capability*, not `L_state`.
 
 ---
 
-## Stage E — PROMOTED to rank 2, signed for a forward-only pass when the GPU is idle
+## Stage E — RUN. Powerful, and on the wrong axis.
+
+All 12 adapters scored, 9600 paired problems, forward-only.
+[`../artifacts/stage_e_verdict.json`](../artifacts/stage_e_verdict.json)
+
+| arm | mean per-token gold NLL | accuracy |
+|---|---:|---:|
+| `cot_baseline` | 0.006296 | 0.8937 |
+| `state_final_repeated` | 0.006492 | 0.8954 |
+| `state_reverse` | 0.007025 | 0.8921 |
+| `state_ordered` | 0.007034 | 0.8838 |
+
+The paired sign test is enormously powerful, because it uses all 2400 pairs rather
+than the 133 discordant ones McNemar is limited to: `ordered − baseline`
+**p = 2.0e-48**, `reverse − baseline` p = 9.1e-45, `final_repeated − baseline`
+p = 1.2e-20.
+
+But three checks decide whether it can stand in for accuracy, and all three fail:
+
+| check | result |
+|---|---|
+| magnitude tracks accuracy | Pearson **r = +0.188** — uncorrelated |
+| resolves `ordered − reverse` (accuracy −0.83 pp) | **no**, p = 0.076 |
+| stays quiet on a null contrast | **no**, fires at p = 9e-45 on `reverse − baseline` |
+
+Every arm carrying a state loss shows higher LM NLL, and the size of that penalty
+has little to do with the accuracy it costs. `reverse` is flagged as hard as
+`ordered` while costing 0.17 pp instead of 1.00; `final_repeated` is flagged at
+p = 1e-20 while being slightly *better* than baseline on accuracy.
+
+> **Verdict: Stage E is an AUXILIARY-LOSS INTERFERENCE monitor, not a capability
+> screen.** Keep it for that. It does **not** make B1/B3 answerable on capability,
+> so B1's precondition has failed.
+
+Two reasons this was predictable in hindsight and worth remembering: mean gold-token
+probability is ~0.9998 while free generation fails ~11%, so teacher forcing and
+generation occupy different regimes by construction; and the NLL distribution is
+severely skewed (mean/median 19×), which is why the robust sign test is reported
+next to the clustered-bootstrap mean.
+
+## Original Stage E rationale (superseded by the result above)
 
 **Why it moved.** It is the only route to an endpoint that can resolve the effects
 B1/B3 are about, and it is nearly free: all twelve V1 runs saved `adapter/` and

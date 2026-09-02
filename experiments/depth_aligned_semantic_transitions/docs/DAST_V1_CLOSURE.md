@@ -190,9 +190,15 @@ H1–H7 are stated in [`DAST_V2_HYPOTHESIS_TREE.md`](DAST_V2_HYPOTHESIS_TREE.md)
 | **B2** (H2, gradient conflict) | **Not supported.** All three arms within 2σ of each other and within ~0.01 of orthogonal. V2 matrix stays parked. |
 | **C2** (H5, example heterogeneity) | **Reliable but negligible.** Split-half r ≈ 0.37–0.39 against a null of 0.08–0.10, but the whole permutation spread is 1.89% of `L_state`. Adaptive DAST stays forbidden. |
 | **C1c** (H6, target object) | **Defect diagnosed.** The objective is satisfiable from the layer-0 token embedding, and four bottom layers fit it better than V1's sites. |
-| **B1** (H1/H4, localization) | **Not run, and not answerable on this endpoint** — a one-seed pilot has MDE 2.27 pp against a full deficit of 1.00 pp (§3b). |
+| **B1** (H1/H4, localization) | **Not run, and not answerable** — a one-seed pilot has MDE 2.27 pp against a full deficit of 1.00 pp (§3b), and Stage E did not supply a substitute endpoint. |
+| **H6 motion gate** | **Motion disqualified.** It retains 96% of absolute states' problem information — so the pessimistic reading of PHASE0 §3.8 was wrong — but fails the layer-0 recoverability control identically (depth advantage −0.005 vs absolute's −0.011). Revision budget **unspent**. |
+| **Stage E** (higher-powered endpoint) | **Not a capability screen.** Sign test reaches p≈1e-48, but magnitude is uncorrelated with accuracy (r=+0.188), it cannot resolve ordered−reverse (p=0.076), and it fires at p=9e-45 on a contrast accuracy calls null. It measures auxiliary-loss interference with LM fitting. Keep as a monitor. |
 
-**Consequence: the recommendation is to CLOSE the DAST training direction as formulated and keep the probe framework.** This is a close on the *target object*, not merely on the depth mapping. Any successor must change what is supervised and must first clear a **layer-0 recoverability control**.
+**Consequence: CLOSE the DAST training direction as formulated, and keep the probe framework.** This is a close on the *target object*, not merely on the depth mapping.
+
+Every successor route has now been measured and closed rather than left unfunded — Localized and B1 by power, Adaptive by C2's magnitude failure, Bidirectional by reverse's baseline-like accuracy, Motion by the H6 layer-0 gate, and cross-scale/Rineya because replicating a defective objective propagates the defect. The **one-mechanism revision budget is unspent.**
+
+The durable outputs are the frozen-probe framework and the **layer-0 recoverability control**, which is now a standing gate: any future depth-supervision target must be shown *not* to be recoverable from the token-embedding centroid before GPU budget is committed to it.
 
 ## 9. Stop rules still in force
 

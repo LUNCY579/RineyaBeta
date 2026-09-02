@@ -71,7 +71,18 @@ Different problems prefer different state→depth assignments, so a universal π
 Semantic motion Δh_k ↔ Δs_k may capture computation better than absolute identities.
 
 - **Currently:** materially strengthened by C1c, though still not a capability result. PHASE0 noted between-problem same-stage delta cosine 0.94–0.99 vs within-problem cross-stage −0.32. C1c adds the sharper point: because `FrozenTextTargetEncoder` builds targets from the **frozen input embedding**, the absolute-state objective is essentially satisfiable from the prompt's token-embedding centroid, and the depth stack neither supplies nor improves it. That is a defect in the *target object*, not in the depth mapping — which is exactly H6's claim, arrived at independently of the motion geometry. A motion target would at minimum have to demonstrate it is **not** similarly recoverable at layer 0; that becomes a mandatory control, not an optional one.
-- **Test:** only after B/C, and only if motion wins on **capability and conflict**, not prettier probes. **Spends the SSOT §13 one-mechanism revision budget.**
+- **MEASURED — DOES NOT CLEAR THE GATE.** [`../artifacts/h6_motion_target_control.json`](../artifacts/h6_motion_target_control.json). Two criteria, CPU only, no training, no budget spent.
+
+  | criterion | absolute | motion_raw | motion_centered |
+  |---|---:|---:|---:|
+  | problem information (`L_shuf − L_true`) | 0.568 | 0.538 (0.95×) | 0.543 (0.96×) |
+  | depth advantage (`L(0/1/2/3) − L(7/14/21/27)`) | −0.0114 | **−0.0046** | **−0.0052** |
+
+  Criterion 1 **passes**, contrary to the prediction that PHASE0 §3.8's 0.94–0.99 between-problem delta cosine made deltas per-stage constants: motion retains 95–96% of the problem-specific information absolute states carry. That pessimistic reading is **wrong** and is recorded as such.
+
+  Criterion 2 **fails**, exactly as absolute states do. Layers 0/1/2/3 still fit motion targets better than the V1 sites, and putting motion on the hidden side too (`delta_hidden`) makes every variant *worse*. Motion is mildly less harmed by the real depths (−0.005 vs −0.011) — a real difference, still the wrong sign.
+- **Verdict:** motion changes *what* is supervised without changing the fact that the supervised quantity does not require the depth stack. **Revision budget NOT spent.**
+- Practical note: 1118 motion targets are exactly zero before filtering, because a duplicated consecutive state gives a zero delta. The distinctness filter is load-bearing for this variant, not optional.
 
 ### H7 — Scale / depth dependence
 
@@ -143,7 +154,9 @@ Three of the four cheap diagnostics have run, and they converge:
 | **B2** | cosines orthogonal, no arm difference | H2 dropped; V2 matrix stays parked |
 | **C2** | reliability passes (r≈0.37–0.39 vs null 0.08–0.10), magnitude fails (spread 1.89% of `L_state`) | Adaptive DAST stays forbidden |
 | **C1c** | the objective is satisfiable from the layer-0 token embedding; four bottom layers beat the V1 sites | H6 raised to a diagnosed target-design defect |
-| **B1** | not run — and the endpoint power analysis shows its accuracy column *cannot* answer the localization question at any affordable seed count | H1/H4 remain formally open but are not reachable on this endpoint |
+| **B1** | not run — the endpoint power analysis shows its accuracy column cannot answer the localization question at any affordable seed count | H1/H4 remain formally open but are not reachable |
+| **H6 motion gate** | passes problem-information (0.96×), **fails** the layer-0 control (−0.005) | motion disqualified; revision budget unspent |
+| **Stage E** | huge power (p≈1e-48) but magnitude uncorrelated with accuracy (r=+0.188), cannot resolve ordered−reverse (p=0.076), fires at p=9e-45 on a null contrast | **not** a capability screen; B1/B3 stay unanswerable |
 
 **Recommendation: CLOSE the DAST training direction as formulated, and keep the
 probe/instrumentation framework.** The tree's close-out branch asked for B2 similar
@@ -152,9 +165,24 @@ even though it is positive in reliability. C1c supplies the reason the whole
 formulation underdelivers: `L_state` supervises a quantity that needs no depth.
 
 This is a close on the **target object**, not merely on the depth mapping. Any
-successor must therefore change what is supervised, and must clear a **layer-0
-recoverability control** before anything else — including motion/ΔH (H6), which is
-the only remaining candidate with a mechanism-level argument behind it and which
-spends the SSOT §13 revision budget.
+successor must change what is supervised and must clear a **layer-0 recoverability
+control** first. Motion/ΔH was the only remaining candidate with a mechanism-level
+argument, and it has now been tested against that control and **failed it** without
+spending the revision budget.
+
+**The tree is therefore fully traversed.** Every branch that could have licensed a
+successor has been measured and closed:
+
+- H1/H4 → unreachable on any affordable endpoint (power), and Stage E does not fix it.
+- H2 → refuted (orthogonal gradients).
+- H3 → supported, which is a diagnosis rather than a mechanism to build.
+- H5 → reliable but 1.89%-of-`L_state` small; Adaptive forbidden.
+- H6 → motion fails the layer-0 control.
+- H7 → would replicate a defective objective; not licensed.
+
+CLOSE is now a *complete* negative rather than a stopping point: the alternatives
+were excluded, not merely left unfunded. The durable output is the probe and
+instrumentation framework, plus the layer-0 recoverability control as a standing
+gate on any future depth-supervision target.
 
 **Do not implement more than one successor.** Bidirectional requires reverse **accuracy** advantage. Adaptive requires C2. Motion spends the revision budget. The parked V2 9-run matrix is H2-only and stays unsigned until B2 supports it.

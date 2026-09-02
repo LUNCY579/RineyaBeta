@@ -1,5 +1,78 @@
 # DAST progress
 
+## 2026-09-01 (close-out) — H6 gate and Stage E both run. Tree fully traversed.
+
+**Status: V1 CLOSED — NEGATIVE. DAST training direction recommended for CLOSURE as
+a COMPLETE negative: every successor route measured and excluded, not merely
+unfunded. Revision budget UNSPENT. TEST sealed. 173 tests pass.**
+
+### 11. H6 motion gate — motion disqualified, and my prediction was half wrong
+CPU only, existing cache, no training, no budget spent.
+
+| criterion | absolute | motion_raw | motion_centered |
+|---|---:|---:|---:|
+| problem information (`L_shuf − L_true`) | 0.568 | 0.538 (0.95×) | 0.543 (0.96×) |
+| depth advantage (`L(0/1/2/3) − L(7/14/21/27)`) | −0.0114 | −0.0046 | −0.0052 |
+
+I predicted motion would score near zero on criterion 1, reading PHASE0 §3.8's
+0.94–0.99 between-problem delta cosine as making deltas per-stage constants.
+**Wrong** — motion retains 95–96% of the problem information absolute states carry.
+Recorded as such.
+
+Criterion 2 **fails** identically to absolute states: layers 0/1/2/3 still fit motion
+better than the V1 sites, and putting motion on the hidden side too makes every
+variant worse. Motion changes *what* is supervised without changing the fact that the
+supervised quantity does not need the depth stack.
+
+### 12. Stage E — enormous power, wrong axis
+All 12 adapters scored, 9600 paired problems, forward-only, ~60s per run.
+
+| arm | mean gold NLL | accuracy |
+|---|---:|---:|
+| `cot_baseline` | 0.006296 | 0.8937 |
+| `state_final_repeated` | 0.006492 | 0.8954 |
+| `state_reverse` | 0.007025 | 0.8921 |
+| `state_ordered` | 0.007034 | 0.8838 |
+
+The paired sign test uses all 2400 pairs rather than McNemar's 133 discordant ones:
+`ordered − baseline` **p = 2.0e-48**. My recorded prediction — that reverse would be
+worst and criterion 1 would fail — was **wrong**; ordered is nominally worst, though
+only by 0.000009 and `ordered − reverse` is the one contrast it cannot resolve.
+
+Three checks decide usability and all fail: magnitude vs accuracy **r = +0.188**;
+`ordered − reverse` **p = 0.076** (the contrast carrying the V1 story);
+`reverse − baseline` fires at **p = 9e-45** while accuracy calls it null. Every
+state-carrying arm shows higher LM NLL and the penalty size barely relates to the
+accuracy cost.
+
+> **Stage E is an auxiliary-loss interference monitor, not a capability screen.**
+> B1's precondition has therefore failed; B1/B3 remain unanswerable on capability.
+
+My original gate was too lax — "ordering agrees" is nearly free when 4 of 5 accuracy
+deltas are negative and all 5 NLL deltas are positive. Criteria 4–6 were added and
+the verdict is the honest one.
+
+### 13. The tree is fully traversed
+| branch | result | consequence |
+|---|---|---|
+| H1/H4 (B1) | unreachable on any affordable endpoint; Stage E does not fix it | closed |
+| H2 (B2) | orthogonal gradients, no arm difference | refuted |
+| H3 (C1/C1c) | supported — a diagnosis, not a mechanism to build | closed |
+| H5 (C2) | reliable but 1.89%-of-`L_state` small | Adaptive forbidden |
+| H6 (motion gate) | fails the layer-0 control | Motion disqualified |
+| H7 | would replicate a defective objective | not licensed |
+
+**Durable outputs:** the frozen-probe framework, and the **layer-0 recoverability
+control** as a standing gate on any future depth-supervision target.
+
+### Process note
+One hardware-policy violation this session: Stage E was launched into an idle GPU
+window that closed when a sibling worktree started a job, and it crawled ~100x slower
+and wrote a partial file rather than failing. Partial files were deleted and
+`teacher_forced_endpoint.py` now refuses on a busy device and names the competing
+process — `trainer_running()` only saw DAST's own trainers.
+
+
 ## 2026-09-01 (final pass) — B2 RUN: H2 not supported. Recommendation: CLOSE.
 
 **Status: V1 CLOSED — NEGATIVE. Recommendation now extends to closing the DAST
