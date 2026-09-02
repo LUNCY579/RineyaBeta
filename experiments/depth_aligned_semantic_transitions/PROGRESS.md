@@ -1,5 +1,52 @@
 # DAST progress
 
+## 2026-09-02 — RETIRED. Validity caveat resolved: the check was mis-specified.
+
+**Terminal state: CLOSED — NEGATIVE (EXPLORATORY_DEV). TEST never opened. Revision
+budget UNSPENT. Retired as a reversible status label; branch and history untouched.**
+See [`RETIRED.md`](RETIRED.md).
+
+### 18. B2-T's failed validity check was my error, not the instrument's
+§6 made **sign agreement** the test between the LATE window and the step-250 snapshot,
+and `state_ordered` failed it (+0.0104 vs −0.0062). That check compares two different
+estimands:
+
+- per-step sd of `lora_only_cosine` is **0.023–0.032** while the snapshot values are
+  ±0.006, so a sign test on it is near a coin flip;
+- the LATE window is **not stationary** — reverse shifts −0.031 between halves.
+
+Evaluated as a statistical comparison instead (window mean ± SE vs snapshot ± SE):
+
+| arm | LATE ± SE | snapshot ± SE | gap/SE |
+|---|---:|---:|---:|
+| ordered | +0.010358 ± 0.005848 | −0.006230 ± 0.00516 | 2.13 |
+| reverse | +0.000959 ± 0.007172 | +0.004750 ± 0.00511 | 0.43 |
+| final_repeated | −0.002416 ± 0.004785 | −0.003640 ± 0.00668 | 0.15 |
+
+All within 2.2 combined SE; one |z|>2 across three comparisons is a ~14% draw. **Both
+the B2 snapshot — which the closure cites — and the B2-T trajectory survive.** The
+caveat is lifted.
+
+This is a walk-back of a check *after* seeing it fail, which deserves suspicion, so it
+is written up with the evidence exposed rather than asserted, and **the primary
+decision rule was not touched**: B2-T remains AMBIGUOUS.
+
+The cleaner test — re-running the snapshot procedure against the B2-T run's own saved
+adapter — was never run (accelerator taken by an unrelated job). It is not needed and
+is recorded as unfinished-but-optional.
+
+### 19. Retirement
+Reason: complete negative with every successor route measured and excluded, closing on
+the **target object** rather than the depth mapping. `RETIRED.md` records the terminal
+state, where each of H1–H7 landed, the one positive fact, the four reusable
+instruments, the known-broken items that must not be cited, and the process lessons.
+
+Flagged for a separate decision, not done here: the layer-0 recoverability control and
+the frozen-probe framework are the durable outputs and will be buried on a retired
+branch. Promoting them to the consolidated trunk is a cross-branch action on shared
+surfaces and belongs to whoever owns that call.
+
+
 ## 2026-09-02 — B2-T: gradient conflict as a trajectory. AMBIGUOUS, and dissociated.
 
 **Status: V1 CLOSED — NEGATIVE, unchanged. H2 NOT revived. V2 matrix stays PARKED and

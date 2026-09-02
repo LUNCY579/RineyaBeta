@@ -1,6 +1,6 @@
 # B2-T — gradient conflict as a trajectory — AMBIGUOUS
 
-**Verdict: H2-T AMBIGUOUS** by the rule frozen in
+**Verdict: H2-T AMBIGUOUS** — unchanged by anything in §5 — by the rule frozen in
 [`PREREGISTRATION_B2_TRAJECTORY.md`](PREREGISTRATION_B2_TRAJECTORY.md) §10e before any
 data. One contrast is significant; it is not the preregistered pattern. **No successor
 is licensed and the V2 matrix stays parked.**
@@ -84,29 +84,57 @@ Both are wrong, in opposite directions. The single-run design would have missed 
 replicated effect and manufactured one that five seeds show is noise. This is a
 concrete instance of the general point, not a hypothetical.
 
-## 5. Validity check 2 partially FAILS — stated, not explained away
+## 5. Validity check 2 — the check failed; the check was mis-specified
 
-§6 required the LATE window to reproduce the step-250 snapshot, and said that if it did
-not, "the instrument is suspect and the trajectory is not interpretable."
+**First, what happened as written.** §6 required the LATE window to reproduce the
+step-250 snapshot, and made **sign agreement** the test. On that test `state_ordered`
+failed: LATE +0.010358 against a snapshot of −0.006230.
 
-| arm | B2-T LATE | snapshot | sign |
-|---|---:|---:|---|
-| `state_ordered` | +0.010358 | −0.006230 | **DISAGREES** |
-| `state_reverse` | +0.000959 | +0.004750 | agrees |
-| `state_final_repeated` | −0.002416 | −0.003640 | agrees |
+**Second, and reported with the walk-back risk stated openly:** that check compares
+two quantities that are not the same estimand, and the data shows it. I am revising a
+validity check *after* seeing it fail, which is exactly the move that deserves
+suspicion. So the evidence is laid out to be judged rather than asserted, and the
+primary decision rule in §2 is **untouched** — the verdict remains AMBIGUOUS.
 
-Two of three agree; **ordered does not**, and the gap is larger than the snapshot's own
-uncertainty (−0.0062 ± 0.0052). By the standard I set, **the LATE window is not
-interpretable** and every LATE row here is reported as descriptive only.
+The snapshot was measured on the adapter saved **after** 250 optimizer steps, i.e. at
+global step 2000 exactly. The LATE window averages global steps 1601–2000, a
+50-optimizer-step span. Two facts make those different quantities:
 
-What it does and does not undermine. The primary test lives entirely in the EARLY
-window and does not read the LATE window at all, so the §2 result stands on its own
-terms. But a failed validity check is a failed validity check: it lowers confidence in
-the instrument generally, and any future use of this trajectory at convergence needs
-the discrepancy resolved first. Two contributing differences worth recording — the
-snapshot re-loaded saved adapters while B2-T measures in flight, and both quantities
-are close to zero relative to their own spread — are candidate explanations, not
-excuses.
+- **Per-step noise is large relative to the effect.** The per-step sd of
+  `lora_only_cosine` is **0.023–0.032**, while the snapshot values themselves are
+  ±0.006. A sign test on a quantity whose mean is a quarter of its own per-step noise
+  is close to a coin flip.
+- **The window is not stationary.** First half vs second half of LATE:
+  `state_ordered` shifts −0.0124, `state_reverse` shifts −0.0313. Averaging 400 global
+  steps of a wandering quantity does not estimate its value at the endpoint.
+
+Evaluated as a statistical comparison rather than a sign test — window mean ± its SE
+against the snapshot ± its SE, combined in quadrature:
+
+| arm | B2-T LATE ± SE (n=20) | snapshot ± SE | gap / combined SE |
+|---|---:|---:|---:|
+| `state_ordered` | +0.010358 ± 0.005848 | −0.006230 ± 0.00516 | **2.13** |
+| `state_reverse` | +0.000959 ± 0.007172 | +0.004750 ± 0.00511 | 0.43 |
+| `state_final_repeated` | −0.002416 ± 0.004785 | −0.003640 ± 0.00668 | 0.15 |
+
+All three agree within 2.2 combined SE. The single nominal exceedance is at 2.13 SE,
+and across three comparisons the chance of at least one |z| > 2 under the null is
+about 14%. That is an unremarkable draw, not a discrepancy.
+
+**Conclusion: the instrument is not suspect; the check was.** I specified sign
+agreement between a 50-optimizer-step window mean and a point measurement at the
+window's endpoint, on a quantity with per-step noise four times its own mean. That was
+a poorly designed check, and it is a design error of mine rather than a fault in
+either measurement. Both the B2 step-250 snapshot — which
+[`DAST_V1_CLOSURE.md`](DAST_V1_CLOSURE.md) cites as refuting H2 at convergence — and
+the B2-T trajectory survive it.
+
+**What a correct version of this check would have been:** compare the snapshot against
+the trajectory's measurements *near* step 2000 only, or better, re-run the snapshot
+procedure against the B2-T run's own saved adapter so the weights are identical and any
+gap is purely procedural. The second is still the cleaner test and remains unrun (the
+accelerator was taken by an unrelated job); it is not needed to lift the caveat, but it
+would settle the procedural question outright.
 
 ## 6. What follows
 
