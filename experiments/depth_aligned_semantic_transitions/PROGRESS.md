@@ -1,5 +1,71 @@
 # DAST progress
 
+## 2026-09-02 — B2-T: gradient conflict as a trajectory. AMBIGUOUS, and dissociated.
+
+**Status: V1 CLOSED — NEGATIVE, unchanged. H2 NOT revived. V2 matrix stays PARKED and
+unsigned. TEST sealed. 15 diagnostic runs, generation disabled, no capability endpoint.**
+Full write-up: `docs/FINDINGS_B2T_TRAJECTORY.md`. Artifact: `artifacts/b2t_verdict.json`.
+
+### 14. The premise was right, the hypothesis is not supported
+Early training is genuinely different from the step-250 snapshot: `lora_only_cosine`
+swings ±0.09 per step with LM loss 0.9–2.2, against ∓0.006 at LM loss 7e-4. So the
+objection to the snapshot was well founded.
+
+Primary test — 5 init seeds x 3 arms, paired per-step in the EARLY window (matched init
+digests verified per seed), one-sample t over seeds, 4 df:
+
+| contrast | mean D | sd | t | p | significant |
+|---|---:|---:|---:|---:|---|
+| **ordered − reverse** | **−0.003566** | 0.001746 | **−4.57** | **0.0103** | **yes**, 5/5 seeds |
+| ordered − final_repeated | +0.001047 | 0.011364 | +0.21 | 0.847 | no |
+
+The frozen rule required BOTH controls, so: **AMBIGUOUS**. No successor licensed.
+
+### 15. The dissociation is the real finding
+| contrast | accuracy | early gradient conflict |
+|---|---|---|
+| ordered − final_repeated | **−1.17 pp, p=0.0167 (sig)** | +0.0010, t=+0.21 (null) |
+| ordered − reverse | −0.83 pp, p=0.128 (null) | **−0.0036, t=−4.57 (sig)** |
+
+**The conflict appears exactly where the deficit is absent, and is absent where the
+deficit is.** H2 was proposed as the explanation *for* the ordered deficit; a candidate
+explanation with that pattern is anti-correlated with the story, not merely
+under-powered. One narrow positive fact does enter the record: forward and reverse
+depth assignment differ reliably in early-training gradient geometry at **matched
+target multiset** — optimisation geometry, not reasoning, and dissociated from
+capability.
+
+### 16. Amendment 2 changed both answers, demonstrably
+The review replaced a within-run bootstrap with replication over initialisations. What
+seed 29 alone would have concluded:
+
+| contrast, seed-29 within-run, EARLY | interval | would have read as |
+|---|---|---|
+| ordered − reverse | [−0.01081, +0.00524] | null — **the real effect missed** |
+| ordered − final_repeated | [+0.00029, +0.00876] | significant POSITIVE — **spurious** |
+
+Wrong in both directions. Not a hypothetical.
+
+### 17. Validity check 2 partially FAILED
+`state_ordered` LATE = +0.0104 against the snapshot's −0.0062: signs disagree, and by
+more than the snapshot's own uncertainty (±0.0052). Two of three arms agree. By the
+standard set in §6, **the LATE window is not interpretable** and is reported as
+descriptive only. The primary test never reads it, so §2 stands on its own terms, but
+a failed check is a failed check and it lowers confidence in the instrument generally.
+
+### Process note — the review earned its cost
+An adversarial design review found **three invalidating faults** in a protocol I had
+already called frozen, two of them statistical rather than code:
+1. the arms did not share an initialisation (the runner built the model before `train()`
+   seeded — the identical bug `cli.py:68` already records having been fixed once);
+2. the unit of replication was the step, not the run, inflating P(SUPPORTED | no effect)
+   from 0.008 to 0.07–0.12;
+3. `H2-T REFUTED` — the verdict that closes the programme — was the DEFAULT output of
+   empty data.
+One arm had started; its 123 steps were deleted rather than analysed. The
+frozen-protocol discipline caught none of these; the review did.
+
+
 ## 2026-09-01 (close-out) — H6 gate and Stage E both run. Tree fully traversed.
 
 **Status: V1 CLOSED — NEGATIVE. DAST training direction recommended for CLOSURE as

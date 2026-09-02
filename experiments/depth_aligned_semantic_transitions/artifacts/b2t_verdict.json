@@ -1,0 +1,246 @@
+{
+  "metric": "lora_only_cosine",
+  "protocol": "docs/PREREGISTRATION_B2_TRAJECTORY.md (section 10 governs)",
+  "windows": {
+    "EARLY": [
+      1,
+      120
+    ],
+    "MID": [
+      121,
+      400
+    ],
+    "LATE": [
+      1601,
+      2000
+    ]
+  },
+  "accumulation_block": 8,
+  "coverage": {
+    "29": {
+      "per_arm": {
+        "state_ordered": {
+          "measured": 270,
+          "early_blocks": 15,
+          "max_step": 2000
+        },
+        "state_reverse": {
+          "measured": 270,
+          "early_blocks": 15,
+          "max_step": 2000
+        },
+        "state_final_repeated": {
+          "measured": 270,
+          "early_blocks": 15,
+          "max_step": 2000
+        }
+      },
+      "early_blocks_shared": 15,
+      "init_digests_match": true,
+      "usable": true
+    },
+    "101": {
+      "per_arm": {
+        "state_ordered": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        },
+        "state_reverse": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        },
+        "state_final_repeated": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        }
+      },
+      "early_blocks_shared": 15,
+      "init_digests_match": true,
+      "usable": true
+    },
+    "211": {
+      "per_arm": {
+        "state_ordered": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        },
+        "state_reverse": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        },
+        "state_final_repeated": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        }
+      },
+      "early_blocks_shared": 15,
+      "init_digests_match": true,
+      "usable": true
+    },
+    "307": {
+      "per_arm": {
+        "state_ordered": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        },
+        "state_reverse": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        },
+        "state_final_repeated": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        }
+      },
+      "early_blocks_shared": 15,
+      "init_digests_match": true,
+      "usable": true
+    },
+    "401": {
+      "per_arm": {
+        "state_ordered": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        },
+        "state_reverse": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        },
+        "state_final_repeated": {
+          "measured": 120,
+          "early_blocks": 15,
+          "max_step": 120
+        }
+      },
+      "early_blocks_shared": 15,
+      "init_digests_match": true,
+      "usable": true
+    }
+  },
+  "usable_seeds": [
+    29,
+    101,
+    211,
+    307,
+    401
+  ],
+  "per_seed_early_paired_difference": {
+    "state_reverse": [
+      -0.002958615055807206,
+      -0.005133948370383614,
+      -0.0024481192907009714,
+      -0.005658151178136585,
+      -0.0016336401434541902
+    ],
+    "state_final_repeated": [
+      0.004487232796736495,
+      0.0115247056351388,
+      -0.01801633228227993,
+      0.0005968159496094657,
+      0.006641239711480877
+    ]
+  },
+  "primary_one_sample_t": {
+    "state_ordered - state_reverse": {
+      "n": 5,
+      "mean": -0.0035664948076965133,
+      "sd": 0.0017455762505572746,
+      "se": 0.0007806454312310542,
+      "t": -4.568648793694032,
+      "df": 4,
+      "t_critical": 2.776,
+      "significant": true,
+      "ci_low": -0.005733566524793919,
+      "ci_high": -0.0013994230905991071
+    },
+    "state_ordered - state_final_repeated": {
+      "n": 5,
+      "mean": 0.0010467323621371413,
+      "sd": 0.011363607900305722,
+      "se": 0.005081959946947449,
+      "t": 0.2059702109155496,
+      "df": 4,
+      "t_critical": 2.776,
+      "significant": false,
+      "ci_low": -0.013060788450588976,
+      "ci_high": 0.015154253174863259
+    }
+  },
+  "secondary_descriptive": {
+    "EARLY": {
+      "state_ordered - state_reverse": {
+        "paired_mean": -0.002958615055807206,
+        "ci_low": -0.010814184317654938,
+        "ci_high": 0.0052416908061856575,
+        "n_blocks": 15
+      },
+      "state_ordered - state_final_repeated": {
+        "paired_mean": 0.004487232796736495,
+        "ci_low": 0.0002926896148763804,
+        "ci_high": 0.008761468207430045,
+        "n_blocks": 15
+      }
+    },
+    "MID": {
+      "state_ordered - state_reverse": {
+        "paired_mean": -2.2234848472854222e-05,
+        "ci_low": -0.005997058297845796,
+        "ci_high": 0.005630137220321616,
+        "n_blocks": 35
+      },
+      "state_ordered - state_final_repeated": {
+        "paired_mean": 0.006004762314305043,
+        "ci_low": 0.0005195586157294626,
+        "ci_high": 0.012131590331611644,
+        "n_blocks": 35
+      }
+    },
+    "LATE": {
+      "state_ordered - state_reverse": {
+        "paired_mean": 0.00939961443229552,
+        "ci_low": -0.0019339494387995422,
+        "ci_high": 0.023916846340849552,
+        "n_blocks": 20
+      },
+      "state_ordered - state_final_repeated": {
+        "paired_mean": 0.012774344567484233,
+        "ci_low": 0.002979619308582833,
+        "ci_high": 0.022149190021756224,
+        "n_blocks": 20
+      }
+    },
+    "snapshot_check": {
+      "state_ordered": {
+        "b2t_late": 0.010358231858258805,
+        "snapshot": -0.00623,
+        "sign_agrees": false
+      },
+      "state_reverse": {
+        "b2t_late": 0.0009586174259632854,
+        "snapshot": 0.00475,
+        "sign_agrees": true
+      },
+      "state_final_repeated": {
+        "b2t_late": -0.0024161127092254264,
+        "snapshot": -0.00364,
+        "sign_agrees": true
+      }
+    }
+  },
+  "h2t_supported": false,
+  "h2t_refuted": false,
+  "status": "COMPLETE",
+  "verdict": "H2-T AMBIGUOUS: one contrast is significant but not the preregistered pattern (ordered more negative than BOTH controls). Recorded as ambiguous; no successor is licensed and the V2 matrix stays parked.",
+  "claim_boundary": "Diagnosis only, DEV only, TEST sealed. No capability endpoint: these runs disabled generation and their accuracy must not be reported."
+}

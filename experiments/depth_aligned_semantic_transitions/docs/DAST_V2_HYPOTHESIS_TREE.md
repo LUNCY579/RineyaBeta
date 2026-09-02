@@ -40,7 +40,17 @@ One checkpoint/state pairing, especially the deepest coherent checkpoint (layer
 
   Every contrast is inside 2σ (largest |t| = 1.51). The ordering is consistently in H2's predicted direction — ordered is most negative and most anti-aligned on all three metrics — but the magnitudes settle it: |cosine| ≈ 0.006. **The objectives are not fighting; they are essentially orthogonal**, which is what two unrelated objectives look like in a 10M-dimensional space.
 - **Consequence:** per the frozen stop rule, H2 is **not** the primary story and [`PREREGISTRATION_V2.md`](PREREGISTRATION_V2.md) stays **PARKED and unsigned**.
-- **Not excluded:** a *transient* early-training conflict. B2 reads adapters saved at step 250, not a trajectory. Reopening H2 requires a step-resolved measurement, not a re-run of this one.
+- **The transient possibility was then TESTED — B2-T, AMBIGUOUS.** 5 init seeds x 3 arms, paired per-step in the EARLY window, one-sample t over seeds ([`FINDINGS_B2T_TRAJECTORY.md`](FINDINGS_B2T_TRAJECTORY.md)):
+
+  | contrast | mean D | t | p | significant |
+  |---|---:|---:|---:|---|
+  | **ordered − reverse** | **−0.003566** | **−4.57** | **0.0103** | **yes**, 5/5 seeds negative |
+  | ordered − final_repeated | +0.001047 | +0.21 | 0.847 | no |
+
+  The frozen rule required BOTH, so the verdict is AMBIGUOUS and no successor is licensed.
+- **But the stronger reason not to revive H2 is a dissociation.** Accuracy: ordered−final_repeated is **significant** (−1.17 pp, p=0.0167) while ordered−reverse is **null** (p=0.128). Gradients: exactly the reverse. **The conflict appears where the deficit is absent and is absent where the deficit is.** H2 was proposed as the explanation *for the deficit*; this pattern is anti-correlated with that story, not merely short of significance.
+- **What survives as a fact:** forward vs reverse depth assignment differ reliably in early-training gradient geometry at matched target multiset. That is optimisation geometry, not reasoning, and it is dissociated from capability.
+- **Caveat on the instrument:** validity check 2 partially FAILED — ordered's LATE window disagrees in sign with the step-250 snapshot, so the trajectory's convergence end is not interpretable. The primary test does not read that window.
 
 ### H3 — Overconstraint
 
@@ -155,6 +165,7 @@ Three of the four cheap diagnostics have run, and they converge:
 | **C2** | reliability passes (r≈0.37–0.39 vs null 0.08–0.10), magnitude fails (spread 1.89% of `L_state`) | Adaptive DAST stays forbidden |
 | **C1c** | the objective is satisfiable from the layer-0 token embedding; four bottom layers beat the V1 sites | H6 raised to a diagnosed target-design defect |
 | **B1** | not run — the endpoint power analysis shows its accuracy column cannot answer the localization question at any affordable seed count | H1/H4 remain formally open but are not reachable |
+| **B2-T** (H2 as a trajectory) | AMBIGUOUS. ordered−reverse replicates (t=−4.57, 5/5 seeds); ordered−final_repeated null. Dissociated from where the accuracy deficit actually is | H2 not revived; V2 stays parked |
 | **H6 motion gate** | passes problem-information (0.96×), **fails** the layer-0 control (−0.005) | motion disqualified; revision budget unspent |
 | **Stage E** | huge power (p≈1e-48) but magnitude uncorrelated with accuracy (r=+0.188), cannot resolve ordered−reverse (p=0.076), fires at p=9e-45 on a null contrast | **not** a capability screen; B1/B3 stay unanswerable |
 
