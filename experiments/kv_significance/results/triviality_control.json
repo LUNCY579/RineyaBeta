@@ -1,0 +1,756 @@
+{
+  "preregistration": "docs/PREREG_CORNERSTONE2_TRIVIALITY_CONTROL.md (v3)",
+  "endpoint": "contract_fulfillment_score >= 0.999, strict cases, ANSWER stratum, paired exact McNemar",
+  "datasets": {
+    "rag_long4k": {
+      "dataset": "rag_long4k",
+      "n_expected": 200,
+      "reproduction": {
+        "reference": "long4k-sig-k0.25-rf0.15__rag_long4k",
+        "n_paired": 200,
+        "identical": 200,
+        "licenses_F": true,
+        "status": "PASS -- the campaign inherits the committed arms' provenance"
+      },
+      "gates": {
+        "problems": [],
+        "notes": [
+          "arm B: 185/200 replies identical to A",
+          "arm C: 179/200 replies identical to A",
+          "arm D: 78/200 replies identical to A",
+          "arm E: 64/200 replies identical to A",
+          "arm G: 114/200 replies identical to A",
+          "arm N: 25/200 replies identical to A",
+          "arm Ndoc: 23/200 replies identical to A"
+        ],
+        "arms_present": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "G",
+          "N",
+          "Ndoc",
+          "F"
+        ]
+      },
+      "strata": {
+        "answer": {
+          "n": 144,
+          "rates": {
+            "A": 0.8056,
+            "B": 0.8194,
+            "C": 0.7847,
+            "D": 0.7361,
+            "E": 0.625,
+            "G": 0.8472,
+            "N": 0.1806,
+            "Ndoc": 0.1597,
+            "F": 0.1875
+          },
+          "contrasts": {
+            "A_vs_L": {
+              "arm_a": "A",
+              "arm_b": "L",
+              "n_paired": 144,
+              "rate_a": 0.8056,
+              "rate_b": 0.8472,
+              "a_better": 1,
+              "b_better": 7,
+              "tied": 136,
+              "diff_a_minus_b": -0.0417,
+              "ci95_diff": [
+                -0.0552,
+                0.0029
+              ],
+              "mcnemar_exact_p": 0.0703125
+            },
+            "A_vs_G": {
+              "arm_a": "A",
+              "arm_b": "G",
+              "n_paired": 144,
+              "rate_a": 0.8056,
+              "rate_b": 0.8472,
+              "a_better": 1,
+              "b_better": 7,
+              "tied": 136,
+              "diff_a_minus_b": -0.0417,
+              "ci95_diff": [
+                -0.0552,
+                0.0029
+              ],
+              "mcnemar_exact_p": 0.0703125
+            },
+            "A_vs_D": {
+              "arm_a": "A",
+              "arm_b": "D",
+              "n_paired": 144,
+              "rate_a": 0.8056,
+              "rate_b": 0.7361,
+              "a_better": 14,
+              "b_better": 4,
+              "tied": 126,
+              "diff_a_minus_b": 0.0694,
+              "ci95_diff": [
+                0.0059,
+                0.109
+              ],
+              "mcnemar_exact_p": 0.0308837890625
+            },
+            "A_vs_E": {
+              "arm_a": "A",
+              "arm_b": "E",
+              "n_paired": 144,
+              "rate_a": 0.8056,
+              "rate_b": 0.625,
+              "a_better": 29,
+              "b_better": 3,
+              "tied": 112,
+              "diff_a_minus_b": 0.1806,
+              "ci95_diff": [
+                0.111,
+                0.2134
+              ],
+              "mcnemar_exact_p": 2.5560148060321808e-06
+            },
+            "A_vs_B": {
+              "arm_a": "A",
+              "arm_b": "B",
+              "n_paired": 144,
+              "rate_a": 0.8056,
+              "rate_b": 0.8194,
+              "a_better": 1,
+              "b_better": 3,
+              "tied": 140,
+              "diff_a_minus_b": -0.0139,
+              "ci95_diff": [
+                -0.0274,
+                0.017
+              ],
+              "mcnemar_exact_p": 0.625
+            },
+            "A_vs_C": {
+              "arm_a": "A",
+              "arm_b": "C",
+              "n_paired": 144,
+              "rate_a": 0.8056,
+              "rate_b": 0.7847,
+              "a_better": 5,
+              "b_better": 2,
+              "tied": 137,
+              "diff_a_minus_b": 0.0208,
+              "ci95_diff": [
+                -0.0204,
+                0.045
+              ],
+              "mcnemar_exact_p": 0.453125
+            },
+            "L_vs_N": {
+              "arm_a": "L",
+              "arm_b": "N",
+              "n_paired": 144,
+              "rate_a": 0.8472,
+              "rate_b": 0.1806,
+              "a_better": 96,
+              "b_better": 0,
+              "tied": 48,
+              "diff_a_minus_b": 0.6667,
+              "ci95_diff": [
+                0.6164,
+                0.6667
+              ],
+              "mcnemar_exact_p": 2.524354896707238e-29
+            },
+            "G_vs_Ndoc": {
+              "arm_a": "G",
+              "arm_b": "Ndoc",
+              "n_paired": 144,
+              "rate_a": 0.8472,
+              "rate_b": 0.1597,
+              "a_better": 100,
+              "b_better": 1,
+              "tied": 43,
+              "diff_a_minus_b": 0.6875,
+              "ci95_diff": [
+                0.6257,
+                0.701
+              ],
+              "mcnemar_exact_p": 8.04638123325432e-29
+            },
+            "D_vs_N": {
+              "arm_a": "D",
+              "arm_b": "N",
+              "n_paired": 144,
+              "rate_a": 0.7361,
+              "rate_b": 0.1806,
+              "a_better": 80,
+              "b_better": 0,
+              "tied": 64,
+              "diff_a_minus_b": 0.5556,
+              "ci95_diff": [
+                0.5055,
+                0.5556
+              ],
+              "mcnemar_exact_p": 1.6543612251060553e-24
+            },
+            "F_vs_N": {
+              "arm_a": "F",
+              "arm_b": "N",
+              "n_paired": 144,
+              "rate_a": 0.1875,
+              "rate_b": 0.1806,
+              "a_better": 17,
+              "b_better": 16,
+              "tied": 111,
+              "diff_a_minus_b": 0.0069,
+              "ci95_diff": [
+                -0.0754,
+                0.088
+              ],
+              "mcnemar_exact_p": 1.0
+            },
+            "Ndoc_vs_N": {
+              "arm_a": "Ndoc",
+              "arm_b": "N",
+              "n_paired": 144,
+              "rate_a": 0.1597,
+              "rate_b": 0.1806,
+              "a_better": 17,
+              "b_better": 20,
+              "tied": 107,
+              "diff_a_minus_b": -0.0208,
+              "ci95_diff": [
+                -0.1054,
+                0.0672
+              ],
+              "mcnemar_exact_p": 0.7428293587290682
+            }
+          },
+          "recovery": {
+            "positional": {
+              "family_arms": [
+                "D",
+                "E"
+              ],
+              "arms_present": [
+                "D",
+                "E"
+              ],
+              "complete": true,
+              "floor": "N",
+              "best_arm": "D",
+              "rate_A": 0.8056,
+              "rate_floor": 0.1806,
+              "rate_L": 0.7361,
+              "range_A_minus_floor": 0.625,
+              "R_point": 0.8889,
+              "R_ci95": [
+                0.8041,
+                0.9767
+              ],
+              "bootstrap_undefined_fraction": 0.0,
+              "R_reportable": true
+            },
+            "structural": {
+              "family_arms": [
+                "G"
+              ],
+              "arms_present": [
+                "G"
+              ],
+              "complete": true,
+              "floor": "Ndoc",
+              "best_arm": "G",
+              "rate_A": 0.8056,
+              "rate_floor": 0.1597,
+              "rate_L": 0.8472,
+              "range_A_minus_floor": 0.6458,
+              "R_point": 1.0645,
+              "R_ci95": [
+                1.0101,
+                1.1319
+              ],
+              "bootstrap_undefined_fraction": 0.0,
+              "R_reportable": true
+            }
+          }
+        },
+        "abstain": {
+          "n": 56,
+          "rates": {
+            "A": 0.8571,
+            "B": 0.8571,
+            "C": 0.8929,
+            "D": 0.0,
+            "E": 0.0,
+            "G": 0.0,
+            "N": 0.0179,
+            "Ndoc": 0.0,
+            "F": 0.0
+          },
+          "contrasts": {
+            "A_vs_L": {
+              "arm_a": "A",
+              "arm_b": "L",
+              "n_paired": 56,
+              "rate_a": 0.8571,
+              "rate_b": 0.0,
+              "a_better": 48,
+              "b_better": 0,
+              "tied": 8,
+              "diff_a_minus_b": 0.8571,
+              "ci95_diff": [
+                0.7303,
+                0.8571
+              ],
+              "mcnemar_exact_p": 7.105427357601002e-15
+            },
+            "A_vs_G": {
+              "arm_a": "A",
+              "arm_b": "G",
+              "n_paired": 56,
+              "rate_a": 0.8571,
+              "rate_b": 0.0,
+              "a_better": 48,
+              "b_better": 0,
+              "tied": 8,
+              "diff_a_minus_b": 0.8571,
+              "ci95_diff": [
+                0.7303,
+                0.8571
+              ],
+              "mcnemar_exact_p": 7.105427357601002e-15
+            },
+            "A_vs_D": {
+              "arm_a": "A",
+              "arm_b": "D",
+              "n_paired": 56,
+              "rate_a": 0.8571,
+              "rate_b": 0.0,
+              "a_better": 48,
+              "b_better": 0,
+              "tied": 8,
+              "diff_a_minus_b": 0.8571,
+              "ci95_diff": [
+                0.7303,
+                0.8571
+              ],
+              "mcnemar_exact_p": 7.105427357601002e-15
+            },
+            "A_vs_E": {
+              "arm_a": "A",
+              "arm_b": "E",
+              "n_paired": 56,
+              "rate_a": 0.8571,
+              "rate_b": 0.0,
+              "a_better": 48,
+              "b_better": 0,
+              "tied": 8,
+              "diff_a_minus_b": 0.8571,
+              "ci95_diff": [
+                0.7303,
+                0.8571
+              ],
+              "mcnemar_exact_p": 7.105427357601002e-15
+            },
+            "A_vs_B": {
+              "arm_a": "A",
+              "arm_b": "B",
+              "n_paired": 56,
+              "rate_a": 0.8571,
+              "rate_b": 0.8571,
+              "a_better": 0,
+              "b_better": 0,
+              "tied": 56,
+              "diff_a_minus_b": 0.0,
+              "ci95_diff": [
+                -0.0536,
+                0.0536
+              ],
+              "mcnemar_exact_p": 1.0
+            },
+            "A_vs_C": {
+              "arm_a": "A",
+              "arm_b": "C",
+              "n_paired": 56,
+              "rate_a": 0.8571,
+              "rate_b": 0.8929,
+              "a_better": 0,
+              "b_better": 2,
+              "tied": 54,
+              "diff_a_minus_b": -0.0357,
+              "ci95_diff": [
+                -0.0357,
+                0.0244
+              ],
+              "mcnemar_exact_p": 0.5
+            },
+            "L_vs_N": {
+              "arm_a": "L",
+              "arm_b": "N",
+              "n_paired": 56,
+              "rate_a": 0.0,
+              "rate_b": 0.0179,
+              "a_better": 0,
+              "b_better": 1,
+              "tied": 55,
+              "diff_a_minus_b": -0.0179,
+              "ci95_diff": [
+                -0.0179,
+                0.017
+              ],
+              "mcnemar_exact_p": 1.0
+            },
+            "G_vs_Ndoc": {
+              "arm_a": "G",
+              "arm_b": "Ndoc",
+              "n_paired": 56,
+              "rate_a": 0.0,
+              "rate_b": 0.0,
+              "a_better": 0,
+              "b_better": 0,
+              "tied": 56,
+              "diff_a_minus_b": 0.0,
+              "ci95_diff": [
+                -0.0536,
+                0.0536
+              ],
+              "mcnemar_exact_p": 1.0
+            },
+            "D_vs_N": {
+              "arm_a": "D",
+              "arm_b": "N",
+              "n_paired": 56,
+              "rate_a": 0.0,
+              "rate_b": 0.0179,
+              "a_better": 0,
+              "b_better": 1,
+              "tied": 55,
+              "diff_a_minus_b": -0.0179,
+              "ci95_diff": [
+                -0.0179,
+                0.017
+              ],
+              "mcnemar_exact_p": 1.0
+            },
+            "F_vs_N": {
+              "arm_a": "F",
+              "arm_b": "N",
+              "n_paired": 56,
+              "rate_a": 0.0,
+              "rate_b": 0.0179,
+              "a_better": 0,
+              "b_better": 1,
+              "tied": 55,
+              "diff_a_minus_b": -0.0179,
+              "ci95_diff": [
+                -0.0179,
+                0.017
+              ],
+              "mcnemar_exact_p": 1.0
+            },
+            "Ndoc_vs_N": {
+              "arm_a": "Ndoc",
+              "arm_b": "N",
+              "n_paired": 56,
+              "rate_a": 0.0,
+              "rate_b": 0.0179,
+              "a_better": 0,
+              "b_better": 1,
+              "tied": 55,
+              "diff_a_minus_b": -0.0179,
+              "ci95_diff": [
+                -0.0179,
+                0.017
+              ],
+              "mcnemar_exact_p": 1.0
+            }
+          },
+          "recovery": {
+            "positional": {
+              "family_arms": [
+                "D",
+                "E"
+              ],
+              "arms_present": [
+                "D",
+                "E"
+              ],
+              "complete": true,
+              "floor": "N",
+              "best_arm": "D",
+              "rate_A": 0.8571,
+              "rate_floor": 0.0179,
+              "rate_L": 0.0,
+              "range_A_minus_floor": 0.8393,
+              "R_point": -0.0213,
+              "R_ci95": [
+                -0.0714,
+                0.0
+              ],
+              "bootstrap_undefined_fraction": 0.0,
+              "R_reportable": true
+            },
+            "structural": {
+              "family_arms": [
+                "G"
+              ],
+              "arms_present": [
+                "G"
+              ],
+              "complete": true,
+              "floor": "Ndoc",
+              "best_arm": "G",
+              "rate_A": 0.8571,
+              "rate_floor": 0.0,
+              "rate_L": 0.0,
+              "range_A_minus_floor": 0.8571,
+              "R_point": 0.0,
+              "R_ci95": [
+                0.0,
+                0.0
+              ],
+              "bootstrap_undefined_fraction": 0.0,
+              "R_reportable": true
+            }
+          }
+        }
+      },
+      "arms": {
+        "A": {
+          "tag": "c4-sig-b6f0__rag_long4k",
+          "label": "significance, causal (6,0)",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": 4500.0,
+          "elapsed_s": 391.0,
+          "composite_diagnostic_only": 0.3873
+        },
+        "B": {
+          "tag": "c4-sig-centred__rag_long4k",
+          "label": "significance, centred (3,3)",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": 4500.0,
+          "elapsed_s": 397.6,
+          "composite_diagnostic_only": 0.3888
+        },
+        "C": {
+          "tag": "c4-sig-nopool__rag_long4k",
+          "label": "significance, no pooling",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": 4500.0,
+          "elapsed_s": 384.3,
+          "composite_diagnostic_only": 0.3745
+        },
+        "D": {
+          "tag": "c4-lex-idf-b6f0__rag_long4k",
+          "label": "trivial: per-position IDF",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": 4500.0,
+          "elapsed_s": 482.9,
+          "composite_diagnostic_only": 0.1426
+        },
+        "E": {
+          "tag": "c4-lex-naive-b6f0__rag_long4k",
+          "label": "trivial: naive question-token match",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": 4500.0,
+          "elapsed_s": 499.5,
+          "composite_diagnostic_only": 0.1288
+        },
+        "G": {
+          "tag": "c4-lex-docbm25-b6f0__rag_long4k",
+          "label": "trivial: document-level BM25",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": 4500.0,
+          "elapsed_s": 528.0,
+          "composite_diagnostic_only": 0.1701
+        },
+        "N": {
+          "tag": "c4-random-prepool__rag_long4k",
+          "label": "floor: contiguity-matched random (7-token)",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": 4500.0,
+          "elapsed_s": 458.2,
+          "composite_diagnostic_only": 0.0744
+        },
+        "Ndoc": {
+          "tag": "c4-random-doc__rag_long4k",
+          "label": "floor: granularity-matched random (record)",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": 4500.0,
+          "elapsed_s": 518.2,
+          "composite_diagnostic_only": 0.0623
+        },
+        "F": {
+          "tag": "long4k-random-k0.25__rag_long4k",
+          "label": "floor: random, post-pool (committed, legacy)",
+          "n": 200,
+          "mean_kept_ratio": 0.25,
+          "cap_mib": null,
+          "elapsed_s": 449.6,
+          "composite_diagnostic_only": 0.0737
+        }
+      }
+    },
+    "rag_long16k": {
+      "dataset": "rag_long16k",
+      "n_expected": 100,
+      "reproduction": {
+        "status": "arm A absent",
+        "identical": null,
+        "licenses_F": false
+      },
+      "gates": {
+        "problems": [
+          "arm A absent -- reported NOT RUN, never a null (prereg 8)",
+          "arm B absent -- reported NOT RUN, never a null (prereg 8)",
+          "arm C absent -- reported NOT RUN, never a null (prereg 8)",
+          "arm D absent -- reported NOT RUN, never a null (prereg 8)",
+          "arm E absent -- reported NOT RUN, never a null (prereg 8)",
+          "arm G absent -- reported NOT RUN, never a null (prereg 8)",
+          "arm N absent -- reported NOT RUN, never a null (prereg 8)",
+          "arm Ndoc absent -- reported NOT RUN, never a null (prereg 8)",
+          "arm A absent: no reference to diff against"
+        ],
+        "notes": [
+          "arm F absent: F-relative rows are not run (it is optional)"
+        ],
+        "arms_present": []
+      },
+      "strata": {
+        "answer": {
+          "n": 0,
+          "rates": {},
+          "contrasts": {
+            "A_vs_L": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_G": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_D": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_E": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_B": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_C": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "L_vs_N": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "G_vs_Ndoc": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "D_vs_N": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "F_vs_N": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "Ndoc_vs_N": {
+              "status": "arm absent -- not run, not a null"
+            }
+          },
+          "recovery": {}
+        },
+        "abstain": {
+          "n": 0,
+          "rates": {},
+          "contrasts": {
+            "A_vs_L": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_G": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_D": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_E": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_B": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "A_vs_C": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "L_vs_N": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "G_vs_Ndoc": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "D_vs_N": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "F_vs_N": {
+              "status": "arm absent -- not run, not a null"
+            },
+            "Ndoc_vs_N": {
+              "status": "arm absent -- not run, not a null"
+            }
+          },
+          "recovery": {}
+        }
+      },
+      "arms": {}
+    }
+  },
+  "primary_verdict": {
+    "verdict": "TRIVIAL",
+    "reading": "the score is this programme's L_state",
+    "primary_family": "structural",
+    "R_point": 1.0645,
+    "R_ci95": [
+      1.0101,
+      1.1319
+    ],
+    "floor": "Ndoc",
+    "best_trivial_arm": "G",
+    "mcnemar_p_A_vs_L": 0.0703125,
+    "ci95_diff_A_minus_L": [
+      -0.0552,
+      0.0029
+    ],
+    "R_by_family": {
+      "positional": 0.8889,
+      "structural": 1.0645
+    },
+    "directionality": "UNDERPOWERED/INDETERMINATE: A-B = -0.0139, p = 0.625. Exact McNemar first reaches p<0.05 at 6/0, so nothing below ~6pp can resolve here. NOT evidence of absence.",
+    "pooling_worth": {
+      "diff_A_minus_C": 0.0208,
+      "p": 0.453125
+    }
+  },
+  "replication_16k": {
+    "note": "direction only -- n=72 cannot certify equivalence, and it is the SAME 100 items as the first 100 of the 4K cell (prereg 9.2)",
+    "verdict": "REFUSED",
+    "reason": "coverage/validity gates failed; a verdict here would be the default output of missing data (prereg 8)",
+    "problems": [
+      "arm A absent -- reported NOT RUN, never a null (prereg 8)",
+      "arm B absent -- reported NOT RUN, never a null (prereg 8)",
+      "arm C absent -- reported NOT RUN, never a null (prereg 8)",
+      "arm D absent -- reported NOT RUN, never a null (prereg 8)",
+      "arm E absent -- reported NOT RUN, never a null (prereg 8)",
+      "arm G absent -- reported NOT RUN, never a null (prereg 8)",
+      "arm N absent -- reported NOT RUN, never a null (prereg 8)",
+      "arm Ndoc absent -- reported NOT RUN, never a null (prereg 8)",
+      "arm A absent: no reference to diff against"
+    ]
+  }
+}

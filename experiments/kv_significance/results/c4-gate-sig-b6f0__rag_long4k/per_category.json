@@ -1,0 +1,30 @@
+{
+  "multi_fact_supported": {
+    "n": 1,
+    "mean_quality_score": 0.0
+  },
+  "prompt_injection": {
+    "n": 1,
+    "mean_quality_score": 0.8796428571428571
+  },
+  "qualified_answer": {
+    "n": 1,
+    "mean_quality_score": 0.27374999999999994
+  },
+  "stale_evidence": {
+    "n": 1,
+    "mean_quality_score": 0.0
+  },
+  "supported": {
+    "n": 4,
+    "mean_quality_score": 0.12349999999999997
+  },
+  "supported_paraphrase": {
+    "n": 1,
+    "mean_quality_score": 0.0
+  },
+  "supported_with_distractor": {
+    "n": 1,
+    "mean_quality_score": 0.8796428571428571
+  }
+}
