@@ -1,0 +1,55 @@
+{
+  "dataset": "rag_long4k",
+  "n_cases": 200,
+  "keep_frac": 0.25,
+  "sinks": 4,
+  "recent_frac": 0.15,
+  "n_kv_heads": 8,
+  "decode_steps": 20,
+  "seed": 20260826,
+  "mean_system_prompt_tokens": 71.0,
+  "cases_containing_the_refusal_text": 200,
+  "note": "Fractions are means over cases AND over the 8 KV heads. 'first' is after the first eviction (when the answer's opening tokens are produced); 'last' after decode_steps evictions. The significance arm is NOT here: its selection depends on the accumulated score, which needs a real forward pass.",
+  "arms": {
+    "G": {
+      "select": "lexical-doc-bm25",
+      "label": "trivial: document-level BM25",
+      "sys_frac_first": 0.0563,
+      "refusal_intact_first": 0.0,
+      "sys_frac_last": 0.0563,
+      "refusal_intact_last": 0.0
+    },
+    "D": {
+      "select": "lexical-idf",
+      "label": "trivial: per-position IDF",
+      "sys_frac_first": 0.3263,
+      "refusal_intact_first": 0.0,
+      "sys_frac_last": 0.3263,
+      "refusal_intact_last": 0.0
+    },
+    "E": {
+      "select": "lexical-naive",
+      "label": "trivial: naive question-token match",
+      "sys_frac_first": 0.1037,
+      "refusal_intact_first": 0.0,
+      "sys_frac_last": 0.1013,
+      "refusal_intact_last": 0.0
+    },
+    "Ndoc": {
+      "select": "random-doc",
+      "label": "floor: granularity-matched random",
+      "sys_frac_first": 0.0563,
+      "refusal_intact_first": 0.0,
+      "sys_frac_last": 0.0563,
+      "refusal_intact_last": 0.0
+    },
+    "N": {
+      "select": "random-prepool",
+      "label": "floor: contiguity-matched random",
+      "sys_frac_first": 0.2533,
+      "refusal_intact_first": 0.0244,
+      "sys_frac_last": 0.1639,
+      "refusal_intact_last": 0.0163
+    }
+  }
+}

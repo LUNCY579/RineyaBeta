@@ -1,6 +1,9 @@
 # Preregistration — the triviality control for Cornerstone 2's score
 
-**Version 3. v1 and v2 were frozen before any campaign data existed; v3 was written with three of the fourteen arms already run and its disclosure is the first entry in §10 — read that before anything else.**
+**Version 4. v1 and v2 were frozen before any campaign data existed; v3 was written
+with three arms already run; v4 is post-data and adds a new cell, corrects an
+instrument and records an audit. Every disclosure is in §10, most recent first —
+read it before anything else.**
 
 Written 2026-09-02 on `research/cornerstone2-v1`. **v2** was the revision after a
 six-lens adversarial design review found faults that would have invalidated v1; no
@@ -120,7 +123,7 @@ cases only):
 | lexical-idf (v1's decisive arm) | **0.736** | **0.681** |
 | **lexical-doc-bm25 (arm G)** | **1.000** | **1.000** |
 
-Arm G also ranks the *true support document* first in 142/144 and 65/72 cases. Two
+Arm G also ranks the *true support document* first in 144/144 and 72/72 cases (corrected in §10 v4.4). Two
 consequences:
 
 1. Per-position IDF is not the strongest trivial baseline, and it is not even really
@@ -457,6 +460,69 @@ Stated now, so it cannot be quietly dropped later.
 
 ## 10. Amendments
 
+### v4 — 2026-09-03, AFTER the main campaign. Post-data; scope and instrument only.
+
+Written after both keep-0.25 cells were complete and analysed, following a six-lens
+correctness audit. **Nothing here alters the frozen decision rule, the endpoint, the
+stratification or any arm of the original design**, and the primary verdict from §7
+is unchanged (TRIVIAL at 4K). What v4 does is add a new *cell* on a new axis, correct
+an instrument, and record what the audit proved.
+
+1. **The tight-budget extension, preregistered in O14 before it ran.** Arms A and G
+   only, `rag_long4k`, 200 cases, everything else at the campaign constants, at
+   **keep 0.05 and keep 0.02**. O14's stated rule — "if A collapses and G does not,
+   the verdict becomes BEATEN at a budget that matters" — is the rule applied. The
+   predictions recorded there (doc-BM25 phrase retention 0.993 and 0.931; IDF
+   collapsing to 0.056 and 0.000) were CPU simulations made before any GPU time.
+   Result: A 0.5972 / 0.4861 against G 0.8681 / 0.8611, with **0/39 and 0/54**
+   discordant pairs. This is the §7 **BEATEN** row on both new cells.
+
+2. **§6.1's reproduction gate is the wrong instrument at 16K, and is corrected to
+   endpoint-identity there.** Byte-identity presupposes a bitwise deterministic
+   pipeline. Four independent runs of the identical 16K config show exactly **one
+   case of 100** varying, with **zero endpoint flips** in all six pairwise
+   comparisons and the hard endpoint 0.7000 in all four; three of the four agree, and
+   the outlier is the arm produced under GPU contention at 86–88 °C. 4K is
+   deterministic across three runs (200/200, no flips). Consequence: the 16K gate
+   failure was spurious and its arm-F drop unjustified; no number moved, because the
+   varying case fails the endpoint in every version. **The gate is retained as
+   byte-identity at 4K and read as endpoint-identity at 16K, with the byte count
+   reported either way.** This is an instrument correction, made after seeing the
+   data, and it is labelled as such.
+
+3. **The equivalence clause in §7's TRIVIAL row does no work and must not be cited as
+   evidence.** `paired_diff_ci` is conditional on the discordant count and is
+   algebraically bounded within ±n_disc/n, so at 8/144 and 4/72 the "±10 pp" test is
+   automatically satisfied. TRIVIAL at 4K therefore rests on R and the exact McNemar
+   p. An independent profile-likelihood interval is ~2× wider and still clears
+   ±10 pp, so the verdict stands; the clause is disclosed as inert rather than
+   quietly relied on.
+
+4. **§2.2's support-document figure is corrected** from "142/144 and 65/72" to
+   **144/144 and 72/72** — the original spliced two different criteria. Independently
+   reproduced, with no ties at the top, and unchanged when the `[doc_…]` header is
+   stripped.
+
+5. **§2.3's and §4's instruction-retention figures now come from a committed
+   generator** (`scripts/design/instruction_survival.py`), over the real 8 KV heads
+   and the real multi-eviction path rather than an uncommitted single-head
+   simulation. The retention values are confirmed (G 0.0563 = exactly 4/71, i.e. the
+   four sinks and nothing else; D 0.3263; E 0.1037; N 0.2533). One figure was wrong
+   in units and is fixed: N's refusal-span retention is a fraction of (case, head)
+   pairs, 0.0244, not "5/200".
+
+6. **§9's "arm D ~26%" is corrected to 30.4–32.6%**, and §3.1's claim that the
+   refusal text sits "inside the protected sink region" is withdrawn — it occupies
+   prompt positions ~51–59 against a 4-position sink region, which is precisely why
+   the trivial arms lose it.
+
+7. **Recorded, not amended:** the audit proved five code defects in the analyser,
+   runner and tests. All are fixed and all were verified to leave the analysis
+   artifact byte-identical. They are listed in
+   `FINDINGS_TRIVIALITY_CONTROL.md` §9 rather than here, because none of them
+   changes anything this preregistration fixed in advance.
+
+
 ### v3 — 2026-09-03, with three of the fourteen arms already run. READ THE DISCLOSURE.
 
 **Disclosure first, because this amendment is not pre-data.** When v3 was written the
@@ -535,7 +601,7 @@ experiment:**
   "at keep 0.25 on this benchmark", not as a general statement about the score.
 * **Arm G deletes the instructions.** `doc_bm25_weights` writes 0.0 outside the
   evidence block, so arm G retains ~1.5% of the 66-token system prompt against arm
-  N's ~21% and arm D's ~26%. Any residual A-over-G advantage is confounded with "G
+  N's ~25% and arm D's ~33% (corrected in §10 v4.5). Any residual A-over-G advantage is confounded with "G
   discarded the instructions", which is not a property of the score. This is a second
   reason the primary statistic is the answer stratum, and it is why the abstain
   stratum is reported per arm rather than pooled.

@@ -1,0 +1,113 @@
+{
+  "note": "Every run in a group is the same configuration. 'bitwise_deterministic' is the property prereg 6.1 assumes; 'endpoint_identical_across_runs' is the property every published number actually depends on.",
+  "endpoint": "contract_fulfillment_score >= 0.999",
+  "datasets": {
+    "rag_long4k": {
+      "runs_present": [
+        "long4k-sig-k0.25-rf0.15",
+        "c4-sig-b6f0",
+        "_determinism-sig4k"
+      ],
+      "n_runs": 3,
+      "pairs": [
+        {
+          "a": "long4k-sig-k0.25-rf0.15",
+          "b": "c4-sig-b6f0",
+          "n": 200,
+          "identical_replies": 200,
+          "endpoint_flips": 0
+        },
+        {
+          "a": "long4k-sig-k0.25-rf0.15",
+          "b": "_determinism-sig4k",
+          "n": 200,
+          "identical_replies": 200,
+          "endpoint_flips": 0
+        },
+        {
+          "a": "c4-sig-b6f0",
+          "b": "_determinism-sig4k",
+          "n": 200,
+          "identical_replies": 200,
+          "endpoint_flips": 0
+        }
+      ],
+      "cases_that_ever_varied": [],
+      "n_cases_that_ever_varied": 0,
+      "total_endpoint_flips": 0,
+      "hard_endpoint_per_run": {
+        "long4k-sig-k0.25-rf0.15": 0.82,
+        "c4-sig-b6f0": 0.82,
+        "_determinism-sig4k": 0.82
+      },
+      "endpoint_identical_across_runs": true,
+      "bitwise_deterministic": true
+    },
+    "rag_long16k": {
+      "runs_present": [
+        "long16k-sig-k0.25-rf0.15",
+        "c4-sig-b6f0",
+        "_determinism-sig16k",
+        "_determinism-sig16k-b"
+      ],
+      "n_runs": 4,
+      "pairs": [
+        {
+          "a": "long16k-sig-k0.25-rf0.15",
+          "b": "c4-sig-b6f0",
+          "n": 100,
+          "identical_replies": 99,
+          "endpoint_flips": 0
+        },
+        {
+          "a": "long16k-sig-k0.25-rf0.15",
+          "b": "_determinism-sig16k",
+          "n": 100,
+          "identical_replies": 100,
+          "endpoint_flips": 0
+        },
+        {
+          "a": "long16k-sig-k0.25-rf0.15",
+          "b": "_determinism-sig16k-b",
+          "n": 100,
+          "identical_replies": 100,
+          "endpoint_flips": 0
+        },
+        {
+          "a": "c4-sig-b6f0",
+          "b": "_determinism-sig16k",
+          "n": 100,
+          "identical_replies": 99,
+          "endpoint_flips": 0
+        },
+        {
+          "a": "c4-sig-b6f0",
+          "b": "_determinism-sig16k-b",
+          "n": 100,
+          "identical_replies": 99,
+          "endpoint_flips": 0
+        },
+        {
+          "a": "_determinism-sig16k",
+          "b": "_determinism-sig16k-b",
+          "n": 100,
+          "identical_replies": 100,
+          "endpoint_flips": 0
+        }
+      ],
+      "cases_that_ever_varied": [
+        "v175_fact_225_pinerelay_1225_13_region_conflict__L16384_d0.5"
+      ],
+      "n_cases_that_ever_varied": 1,
+      "total_endpoint_flips": 0,
+      "hard_endpoint_per_run": {
+        "long16k-sig-k0.25-rf0.15": 0.7,
+        "c4-sig-b6f0": 0.7,
+        "_determinism-sig16k": 0.7,
+        "_determinism-sig16k-b": 0.7
+      },
+      "endpoint_identical_across_runs": true,
+      "bitwise_deterministic": false
+    }
+  }
+}

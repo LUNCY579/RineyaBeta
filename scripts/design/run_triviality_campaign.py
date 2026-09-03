@@ -138,20 +138,22 @@ def run_arm(arm, dataset: str, limit: int, tag: str, args) -> bool:
     if complete(out_dir, limit) and not args.force:
         print(f"[{arm[0]}] {tag}__{dataset}: already complete, skipping")
         return True
-    if out_dir.exists():
-        # A partial artifact is deleted, not analysed. An incomplete arm that
-        # survives to the analyser is how a null gets manufactured from missing
-        # data.
-        stale = sum(1 for _ in out_dir.glob("*"))
-        print(f"[{arm[0]}] removing {stale} stale file(s) in {out_dir.name}")
-        if not args.dry_run:
-            for p in out_dir.glob("*"):
-                p.unlink()
     cmd = cmd_for(arm, dataset, limit, tag, args.cap_mib)
     print(f"\n[{arm[0]}] {tag}__{dataset}\n  {' '.join(cmd[1:])}", flush=True)
     if args.dry_run:
         return True
+    # WAIT FOR THE CARD **BEFORE** TOUCHING THE OUTPUT DIRECTORY. The other order
+    # empties a complete 200-case arm and then raises SystemExit because the GPU is
+    # busy -- destroying data and running nothing. Reachable with --force on this
+    # host's shared card, which is precisely when --force gets used.
     wait_for_gpu(args.min_free_check, args.wait)
+    if out_dir.exists():
+        # A partial artifact is deleted, not analysed. An incomplete arm that
+        # survives to the analyser is how a null gets manufactured from missing data.
+        stale = sum(1 for _ in out_dir.glob("*"))
+        print(f"[{arm[0]}] removing {stale} stale file(s) in {out_dir.name}")
+        for f in out_dir.glob("*"):
+            f.unlink()
     t0 = time.time()
     p = subprocess.run(cmd, cwd=str(ROOT))
     ok = p.returncode == 0 and complete(out_dir, limit)
@@ -196,7 +198,10 @@ def gate(args) -> bool:
                       "FAIL -- arms stay internally comparable, but NO result may be "
                       "compared to a committed number from the earlier code state. "
                       "Report this as a finding (prereg 6.1)."))
-    return True
+    # Return the GATE's outcome, not merely "the run completed". Returning True on a
+    # failed gate made `--gate` exit 0 while printing FAIL, so a scripted caller read
+    # a failed provenance check as success.
+    return same == len(new)
 
 
 def main() -> None:

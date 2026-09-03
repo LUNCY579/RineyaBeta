@@ -134,8 +134,13 @@ w1 = torch.zeros(N)
 w1[100] = 1.0
 sig.reset_scores()
 lex3 = w1.view(1, 1, -1).expand(1, 2, -1).contiguous()
-pol_b = sig.Policy(budget=20, sinks=2, recent=4, pool=7, pool_back=6, pool_fwd=0,
-                   select="lexical-naive")
+# heavy is set to EXACTLY the 7 positions a (6,0) window can reach from one match.
+# With heavy larger than that, the surplus slots are filled by the tie-break jitter
+# among the zero-weight positions, which can land on 94..99 and fail the "does not
+# reach backward" assertion by luck -- observed failing about 1 run in 6 before this
+# was pinned. A flaky assertion is worse than none: it teaches you to re-run.
+pol_b = sig.Policy(budget=2 + 4 + 7, sinks=2, recent=4, pool=7, pool_back=6,
+                   pool_fwd=0, select="lexical-naive")
 kb = set(sig.select_keep(torch.zeros(1, 2, N), N, pol_b, torch.device("cpu"),
                          lexical=lex3)[0, 0].tolist())
 fwd_in = [p for p in range(101, 107) if p in kb]
@@ -143,8 +148,8 @@ back_in = [p for p in range(94, 100) if p in kb]
 check("positions AFTER the match inherit it", len(fwd_in) == 6, f"{fwd_in}")
 check("positions BEFORE the match do not", len(back_in) == 0, f"{back_in}")
 
-pol_c = sig.Policy(budget=20, sinks=2, recent=4, pool=7, pool_back=3, pool_fwd=3,
-                   select="lexical-naive")
+pol_c = sig.Policy(budget=2 + 4 + 7, sinks=2, recent=4, pool=7, pool_back=3,
+                   pool_fwd=3, select="lexical-naive")
 kc = set(sig.select_keep(torch.zeros(1, 2, N), N, pol_c, torch.device("cpu"),
                          lexical=lex3)[0, 0].tolist())
 check("the centred window is genuinely different",
@@ -307,6 +312,111 @@ try:
           "same carving as arm G, only the score differs")
 except Exception as _e:                                   # noqa: BLE001
     check("doc-bm25 weight construction", False, f"raised {type(_e).__name__}: {_e}")
+
+# --------------------------------------------------------------------------- #
+print("\n9. select_keep returns BUDGET DISTINCT positions, for every select")
+# --------------------------------------------------------------------------- #
+
+# A MUTATION STUDY on this file found that deleting the post-pool mask re-assertion
+# gave 30-32 of 32 KV heads DUPLICATE slots at campaign scale while every assertion
+# above stayed green -- and `mean_kept_ratio` still read 0.25, so the analyser's own
+# gate was blind to it too. Nothing anywhere asserted that the kept set has no
+# repeats. A duplicated slot silently shrinks the effective budget and inflates the
+# apparent compression, which is a wrong number in the direction that flatters the
+# mechanism.
+BIG_N, BIG_B = 4210, 1052          # the real 4K geometry
+w_big = torch.zeros(BIG_N)
+w_big[1000:1064] = 1.0             # one "record" scoring top
+for name, pol_kw, lex in (
+    ("significance b6f0", dict(pool=7, pool_back=6, pool_fwd=0,
+                               select="significance"), None),
+    ("significance pool1", dict(pool=1, select="significance"), None),
+    ("random", dict(pool=7, pool_back=6, pool_fwd=0, select="random"), None),
+    ("random-prepool", dict(pool=7, pool_back=6, pool_fwd=0,
+                            select="random-prepool"), None),
+    ("lexical-doc-bm25", dict(pool=7, pool_back=6, pool_fwd=0,
+                              select="lexical-doc-bm25"), w_big),
+    ("random-doc", dict(pool=7, pool_back=6, pool_fwd=0, select="random-doc"), w_big),
+    ("lexical-idf", dict(pool=7, pool_back=6, pool_fwd=0,
+                         select="lexical-idf"), w_big),
+    ("lexical-naive", dict(pool=7, pool_back=6, pool_fwd=0,
+                           select="lexical-naive"), w_big),
+    ("streaming", dict(pool=7, pool_back=6, pool_fwd=0, select="streaming"), None),
+):
+    sig.reset_scores()
+    torch.manual_seed(20260826)
+    n_kv_big = 8                                    # the real core's KV head count
+    pol = sig.Policy(budget=BIG_B, sinks=4, recent_frac=0.15, **pol_kw)
+    lx = (lex.view(1, 1, -1).expand(1, n_kv_big, -1).contiguous()
+          if lex is not None else None)
+    # streaming is realised by the CALLER spending the budget on sinks+recent
+    if pol_kw["select"] == "streaming":
+        pol = sig.Policy(budget=BIG_B, sinks=4, recent=BIG_B - 4, **{
+            k: v for k, v in pol_kw.items() if k != "select"}, select="streaming")
+    got = sig.select_keep(torch.rand(1, n_kv_big, BIG_N), BIG_N, pol,
+                          torch.device("cpu"), lexical=lx)
+    dup_heads = sum(1 for h in range(n_kv_big)
+                    if len(set(got[0, h].tolist())) != got.shape[-1])
+    check(f"{name}: no duplicate slots in any of {n_kv_big} KV heads",
+          dup_heads == 0, f"{dup_heads} head(s) with repeats")
+    check(f"{name}: slot count == budget", got.shape[-1] == BIG_B,
+          f"{got.shape[-1]} vs {BIG_B}")
+    check(f"{name}: indices in range", int(got.min()) >= 0 and int(got.max()) < BIG_N)
+
+# --------------------------------------------------------------------------- #
+print("\n9b. the tie-break is load-bearing: without it a lexical arm is POSITIONAL")
+# --------------------------------------------------------------------------- #
+
+# A surviving mutation replaced the 1e-3 jitter with zeros. Nothing failed, because
+# a deterministic arm still returns distinct slots -- but topk then resolves the
+# constant weight by INDEX, so the arm becomes "keep the earliest eligible
+# positions" while the manifest still says lexical. Two consequences are asserted:
+# heads must differ (the jitter is drawn per KV head), and the kept set must not be
+# the lowest-index block.
+sig.reset_scores()
+N9, B9, HEADS9 = 1000, 200, 8
+flat = torch.ones(N9)                       # zero lexical information
+pol_j = sig.Policy(budget=B9, sinks=4, recent_frac=0.15, pool=7, pool_back=6,
+                   pool_fwd=0, select="lexical-doc-bm25")
+torch.manual_seed(20260826)
+idxj = sig.select_keep(torch.zeros(1, HEADS9, N9), N9, pol_j, torch.device("cpu"),
+                       lexical=flat.view(1, 1, -1).expand(1, HEADS9, -1).contiguous())
+sets = [tuple(idxj[0, h].tolist()) for h in range(HEADS9)]
+check("a constant weight still selects DIFFERENTLY per KV head",
+      len(set(sets)) > 1, f"{len(set(sets))} distinct selections over {HEADS9} heads")
+n_sink9, n_rec9 = pol_j.n_sinks(), pol_j.n_recent()
+earliest = set(range(n_sink9, n_sink9 + pol_j.heavy()))
+check("the kept heavy set is NOT the lowest-index block",
+      set(x for x in sets[0] if n_sink9 <= x < N9 - n_rec9) != earliest,
+      "identical to the earliest-eligible block means topk resolved by index")
+
+# --------------------------------------------------------------------------- #
+print("\n10. the pre-pool masks are load-bearing (sinks must not bleed through)")
+# --------------------------------------------------------------------------- #
+
+# Deleting the pre-pool sinks/recent masking survived the whole suite while
+# reintroducing a bug this file's own comments say was measured and fixed: R2 puts
+# 46.3% of its attention on the first 4 positions, so with a backward window those
+# slots win top-k unconditionally. Asserted here directly.
+# The heavy budget must be SMALLER than the number of genuinely-scoring positions,
+# or every zero-score position ties and topk resolves by index -- which looks exactly
+# like bleed and is not. This is the same defect class the file's own header warns
+# about, and the first version of this assertion had it.
+sig.reset_scores()
+s_sink = torch.zeros(1, 1, 300)
+s_sink[..., :4] = 1e6                       # all the mass on the sinks
+s_sink[..., 200] = 1.0                      # one genuine content token
+pol_m = sig.Policy(budget=17, sinks=4, recent=8, pool=7, pool_back=6, pool_fwd=0,
+                   select="significance")
+check("this probe really has heavy < the scoring span", pol_m.heavy() == 5,
+      f"heavy={pol_m.heavy()}")
+kept_m = sorted(sig.select_keep(s_sink, 300, pol_m, torch.device("cpu"))[0, 0].tolist())
+heavy_m = [x for x in kept_m if 4 <= x < 292]
+check("every heavy slot goes to the real scorer's span, not the sinks' neighbours",
+      all(200 <= x <= 206 for x in heavy_m), f"heavy slots {heavy_m}")
+check("sink mass does not bleed into slots 4..10 through the pool",
+      not any(4 <= x <= 10 for x in kept_m),
+      f"bled into {[x for x in kept_m if 4 <= x <= 10]}")
 
 print()
 if FAILED:

@@ -34,17 +34,27 @@ BOOT_N, BOOT_SEED = 10_000, 20260902
 MIN_RANGE = 0.40             # prereg 6.5 dynamic-range gate
 KEEP_FRAC, KEEP_TOL = 0.25, 0.01
 
-# arm id -> (tag, label, required). Must agree with run_triviality_campaign.ARMS.
+# arm id -> (tag, label, required, EXPECTED select, EXPECTED pool).
+# Must agree with run_triviality_campaign.ARMS.
+# `select` and `pool` are ASSERTED, not whitelisted. They used to be free-running,
+# which meant a directory holding one arm's run under another arm's name passed all
+# eight gates and flipped the verdict -- the same defect shape as `--select
+# streaming` once performing significance selection while the manifest said
+# streaming. An arm's identity is now checked against what it claims to be.
 ARMS = {
-    "A": ("c4-sig-b6f0", "significance, causal (6,0)", True),
-    "B": ("c4-sig-centred", "significance, centred (3,3)", True),
-    "C": ("c4-sig-nopool", "significance, no pooling", True),
-    "D": ("c4-lex-idf-b6f0", "trivial: per-position IDF", True),
-    "E": ("c4-lex-naive-b6f0", "trivial: naive question-token match", True),
-    "G": ("c4-lex-docbm25-b6f0", "trivial: document-level BM25", True),
-    "N": ("c4-random-prepool", "floor: contiguity-matched random (7-token)", True),
-    "Ndoc": ("c4-random-doc", "floor: granularity-matched random (record)", True),
-    "F": (None, "floor: random, post-pool (committed, legacy)", False),
+    "A": ("c4-sig-b6f0", "significance, causal (6,0)", True, "significance", 7),
+    "B": ("c4-sig-centred", "significance, centred (3,3)", True, "significance", 7),
+    "C": ("c4-sig-nopool", "significance, no pooling", True, "significance", 1),
+    "D": ("c4-lex-idf-b6f0", "trivial: per-position IDF", True, "lexical-idf", 7),
+    "E": ("c4-lex-naive-b6f0", "trivial: naive question-token match", True,
+          "lexical-naive", 7),
+    "G": ("c4-lex-docbm25-b6f0", "trivial: document-level BM25", True,
+          "lexical-doc-bm25", 7),
+    "N": ("c4-random-prepool", "floor: contiguity-matched random (7-token)", True,
+          "random-prepool", 7),
+    "Ndoc": ("c4-random-doc", "floor: granularity-matched random (record)", True,
+             "random-doc", 7),
+    "F": (None, "floor: random, post-pool (committed, legacy)", False, "random", 7),
 }
 # Arm F is reused from committed data and its tag differs per length (prereg 2.4).
 F_TAG = {"rag_long4k": "long4k-random-k0.25", "rag_long16k": "long16k-random-k0.25"}
@@ -69,6 +79,8 @@ CONTRASTS = [("A", "L"), ("A", "G"), ("A", "D"), ("A", "E"), ("A", "B"), ("A", "
 # GPU-contention conditions are silently pooled. It is asserted equal to arm A's.
 FREE_FIELDS = {"tag", "elapsed_s", "recent", "recent_effective_mean",
                "heavy_zero_count", "case_count", "select"}
+# `select` stays in FREE_FIELDS only so the arm-vs-A DIFF does not double-report it;
+# its VALUE is asserted against ARMS[k][3] in gate_report.
 POOL_FIELDS = {"pool", "pool_back", "pool_fwd", "pool_back_flag", "pool_fwd_flag",
                "pool_window_uniform", "directional"}
 
@@ -211,7 +223,7 @@ def reproduction_check(arms: dict, dataset: str) -> dict:
 def gate_report(arms: dict, expect: int) -> dict:
     problems, notes = [], []
     present = [k for k, v in arms.items() if v]
-    for k, (_t, _l, required) in ARMS.items():
+    for k, (_t, _l, required, _sel, _pool) in ARMS.items():
         if required and k not in present:
             problems.append(f"arm {k} absent -- reported NOT RUN, never a null (prereg 8)")
     if "F" not in present:
@@ -238,6 +250,14 @@ def gate_report(arms: dict, expect: int) -> dict:
         if mk is None or abs(float(mk) - KEEP_FRAC) > KEEP_TOL:
             problems.append(f"arm {k}: mean_kept_ratio {mk} is not {KEEP_FRAC} "
                             f"+/-{KEEP_TOL} -- this arm did not compress as configured")
+        want_sel, want_pool = ARMS[k][3], ARMS[k][4]
+        if m.get("select") != want_sel:
+            problems.append(f"arm {k}: manifest select={m.get('select')!r} but this "
+                            f"arm is defined as {want_sel!r} -- the directory holds a "
+                            f"different arm than its name claims (prereg 6.2)")
+        if m.get("pool") != want_pool:
+            problems.append(f"arm {k}: manifest pool={m.get('pool')} but this arm is "
+                            f"defined at pool={want_pool} (prereg 6.2)")
         if k == "F":
             continue                      # committed arm, different tag family
         # prereg 6.2: cap_mib is ASSERTED equal across the cell. Arm A was run at
@@ -371,7 +391,11 @@ def verdict_for(d: dict) -> dict:
         v, why = "TRIVIAL", "the score is this programme's L_state"
     elif above90 and diff > 0 and p < 0.05:
         v, why = "PARTIAL (upper)", "residual real but bounded at <=10% of the advantage"
-    elif above50:
+    elif above50 and rh < 0.90:
+        # BOUNDED ABOVE, because prereg 7 row 4 is literally 0.50 <= R < 0.90. Left
+        # unbounded, a cell with the whole R interval above 1 and the trivial arm
+        # 11.8 pp BETTER printed "a trivial selector recovers most of the advantage"
+        # and prescribed re-scoping, where the frozen table says close nothing.
         v, why = "PARTIAL", "a trivial selector recovers most of the advantage"
     elif below50 and diff > 0 and p < 0.05:
         # MONOTONE SAFETY. A subset of the trivial arms can only LOWER the maximum,
@@ -417,8 +441,8 @@ def verdict_for(d: dict) -> dict:
 
 def analyse_dataset(dataset: str, expect: int) -> dict:
     arms = {}
-    for k, (tag, _label, _req) in ARMS.items():
-        arms[k] = load_arm(tag or F_TAG[dataset], dataset)
+    for k, spec in ARMS.items():
+        arms[k] = load_arm(spec[0] or F_TAG[dataset], dataset)
     repro = reproduction_check(arms, dataset)
     if not repro["licenses_F"] and arms.get("F"):
         # prereg 2.4/6.1: committed data may only be reused if arm A reproduced.
@@ -457,11 +481,25 @@ def analyse_dataset(dataset: str, expect: int) -> dict:
         if ids:
             for fam, (pool, floor) in FAMILIES.items():
                 rec[fam] = recovery(vals, ids, pool, floor)
-        # L is derived: the best trivial arm across BOTH families, which is what
-        # prereg 2.5's "best of the trivial arms" means.
+        # L MUST BE THE ELECTED FAMILY'S OWN BEST ARM, not a global argmax over
+        # rates. Two independent arm selections used to coexist here: this line
+        # picked by rate across D/E/G while _primary_family elected a family by R and
+        # recovery() picked a best arm inside it. When they disagreed, verdict_for
+        # printed one arm's name beside another arm's p-value and CI -- demonstrated
+        # to flip TRIVIAL into BEATEN on constructed data, and the disagreement
+        # already occurs on the committed 4K abstain stratum (best_arm G, global L D).
+        # It is a no-op on both answer strata, where G is both, so no published
+        # number moves; it is fixed because the next cell would not have been caught.
         cand = [k for k in ("D", "E", "G") if k in vals]
         if cand and ids:
-            vals["L"] = vals[max(cand, key=lambda k: sum(vals[k][i] for i in ids))]
+            fam, frec = _primary_family({"recovery": rec})
+            if frec and frec.get("best_arm") in vals:
+                vals["L"] = vals[frec["best_arm"]]
+            else:
+                # No reportable family: fall back to the global best so the contrast
+                # is still computable, but verdict_for will REFUSE on the missing
+                # reportable R rather than read a verdict off it.
+                vals["L"] = vals[max(cand, key=lambda k: sum(vals[k][i] for i in ids))]
         out["strata"][stratum] = {
             "n": len(ids),
             "rates": {k: round(sum(v[i] for i in ids) / max(len(ids), 1), 4)
