@@ -16,13 +16,19 @@ budget rather than on the card.
 **On the retrieval task the score is replaceable. On the instruction task it is not,
 and that is the finding worth keeping.**
 
-The preregistered primary verdict at 4K, answer stratum, n = 144, is **TRIVIAL**: a
+The preregistered primary verdict, 4K answer stratum, n = 144, is **TRIVIAL**: a
 document-level BM25 selector that needs no forward pass at all is statistically
 indistinguishable from — and numerically above — accumulated-attention significance.
+**The 16K cell returns TRIVIAL too**, with the two arms exactly equal (§7).
 
-But the same selector scores **0.000** where the mechanism scores **0.857**, on the
-28% of cases that ask the model to abstain. It does not fail to retrieve; it deletes
-the system prompt. That is measured, not inferred (§4).
+But the same selector scores **0.000** where the mechanism scores **0.857** (4K) and
+**0.214** (16K), on the ~28% of cases that ask the model to abstain. It does not fail
+to retrieve; it deletes the system prompt. That is measured, not inferred (§4).
+
+Neither of the two things the paper argues for — that the pooling window must reach
+backward, and that it must reach at all — produces a resolvable effect at either
+length, and the point estimate for directionality is on the wrong side in both
+cells (§3).
 
 ---
 
@@ -189,9 +195,73 @@ why the primary statistic is stratified and why these two strata are never poole
 
 ---
 
-## 7. The 16K cell
+## 7. The 16K cell — same verdict, cleaner
 
-*Running at the time of writing. It is the same 100 source questions as the first 100
-of the 4K cell (§9.2 of the preregistration), so it is a length replication on one
-item set, not an independent sample, and §5 rules that no equivalence verdict may be
-read from it — direction only.*
+The 16K cell is the same 100 source questions as the first 100 of the 4K cell
+(preregistration §9.2), so it is a length replication on one item set, not an
+independent sample, and §5 forbids reading an equivalence verdict from n = 72 —
+direction only. Its verdict is also **TRIVIAL**, and the point estimate is exact:
+
+| arm | answer (n=72) | abstain (n=28) |
+|---|---:|---:|
+| B — significance, centred | 0.9028 | 0.2143 |
+| **A — significance, causal** | **0.8889** | **0.2143** |
+| **G — trivial doc-BM25** | **0.8889** | **0.0000** |
+| C — significance, no pooling | 0.8472 | 0.2143 |
+| D — trivial per-position IDF | 0.7778 | 0.0000 |
+| E — trivial naive match | 0.5417 | 0.0000 |
+| N — contiguity floor | 0.1944 | 0.0357 |
+| Ndoc — granularity floor | 0.1528 | 0.0000 |
+
+* **A − G = 0.0000 exactly**, 2/2 discordant, p = 1, CI [−0.048, +0.048].
+  **R_structural = 1.0000**, bootstrap CI [0.9259, 1.0769]. R_positional = 0.84,
+  CI [0.717, 0.9545].
+* **A − B = −1.4 pp**, 0/1 discordant, p = 1 — the same sign as 4K, and again
+  underpowered. Two cells, both with the point estimate against the paper's claim.
+* A − C = +4.2 pp, 3/0, p = 0.25 — pooling again not resolvable.
+* A − D = +11.1 pp, p = 0.0215; A − E = +34.7 pp, p = 4.2e−07.
+* **Abstain: A 0.2143 against 0.0000 for every trivial arm, 6/0, p = 0.0312** — the
+  instruction finding replicates and is significant even at n = 28.
+
+### The reproduction gate fired here, and it was right to
+
+Arm A at 16K is **99/100** byte-identical to the committed
+`long16k-sig-k0.25-rf0.15`, not 100/100. By the preregistered rule that is a FAIL:
+the analyser dropped arm F from the 16K cell on its own and flagged that no 16K number
+may be compared to a committed one from the earlier code state.
+
+The single divergence is immaterial to the endpoint and is reported so a reader can
+judge it:
+
+```
+v175_fact_225_pinerelay_1225_13_region_conflict__L16384_d0.5
+  committed: 'PineRelay 1225 is launched in Australia.'
+  now      : 'PineRelay 1225 launches in Australia.'
+  contract_fulfillment: 0.3333 both
+```
+
+A paraphrase that fails the hard endpoint in both versions, so **no hard-endpoint
+count in this document is affected**. The gate is deliberately stricter than the
+endpoint; it fired, it cost one optional arm, and that is the behaviour that was
+written down before the data.
+
+### One arm failed and was re-run
+
+`random-prepool` at 16K failed on its first attempt under GPU contention (another
+project held ~3 GB throughout; the card sat at 86–88 °C and arms ran 550–720 s
+against 390–530 s at 4K). Its partial artifacts were deleted rather than analysed,
+per §8, and the campaign continued through the remaining arms — the arm order exists
+so that a mid-campaign death costs the least valuable arm. It completed on the retry
+in 623 s with no code change. The campaign log recorded `FAILED: 1 ['N/rag_long16k']`
+and refused to treat the gap as a null.
+
+---
+
+## 8. Both cells, one sentence
+
+At keep 0.25, on both lengths, a BM25 retriever over the delimiters the prompt already
+prints is indistinguishable from accumulated-attention significance on the retrieval
+task (R = 1.06 and 1.00, both CIs containing or above 1), and loses to it completely
+on the instruction task (0.857/0.214 against 0.000/0.000). The mechanism's
+demonstrated value on natural language at length is **not** finding the evidence; it
+is keeping context the query does not lexically match.

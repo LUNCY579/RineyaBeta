@@ -14,7 +14,7 @@ a detour.
 Status: **open** until the cause is named and demonstrated. Closing an entry requires a
 measurement, not an argument.
 
-**Register state, 2026-08-29: 13 entries (O1–O13), 13 closed, 0 open.** Counted by
+**Register state, 2026-09-03: 14 entries (O1–O14), 13 closed, 1 OPEN (O14).** Counted by
 distinct question, not by heading — several entries carry more than one heading because
 they were re-opened and re-resolved, and counting headings inflates the total. *(An
 earlier status line in this programme said "16 closed"; that was a heading count and is
@@ -28,6 +28,74 @@ resolved anomaly records how the mechanism actually behaves, and that reasoning 
 the verdict.
 
 ---
+
+## O14 — OPEN 2026-09-03: the score's only demonstrated advantage is instruction retention, and nobody knows how far that generalises
+
+**Observed.** The preregistered triviality control
+([`PREREG_CORNERSTONE2_TRIVIALITY_CONTROL.md`](PREREG_CORNERSTONE2_TRIVIALITY_CONTROL.md),
+results in [`FINDINGS_TRIVIALITY_CONTROL.md`](FINDINGS_TRIVIALITY_CONTROL.md)) ran
+nine matched arms at two lengths and returned **TRIVIAL** at both. On the
+answer-bearing stratum a BM25 retriever over the record delimiters the prompt already
+prints is indistinguishable from accumulated-attention significance — 0.8472 against
+0.8056 at 4K (1/7 discordant, p = 0.0703) and **exactly equal** at 16K (0.8889 both,
+2/2, p = 1). The trivial-recovery fraction against a granularity-matched floor is
+1.0645 [1.0101, 1.1319] and 1.0000 [0.9259, 1.0769].
+
+The one thing the score does that no trivial arm does is keep the **system prompt**.
+Every trivial arm scores 0.0000 on the abstain stratum against the mechanism's 0.8571
+(4K) and 0.2143 (16K, 6/0, p = 0.0312), and the cause is measured: `doc_bm25_weights`
+writes 0.0 outside the evidence block, so doc-BM25 keeps 5.6% of the 71-token system
+prompt and retains the refusal sentence intact in **0 of 200** cases.
+
+**Why it matters.** This is a *reframing*, not a refutation, and the reframing is
+narrower than anything the paper currently claims. The mechanism's demonstrated value
+on natural language at length is not finding the evidence — it is retaining
+load-bearing context that has **no lexical overlap with the query at all**. That is a
+real property, it is exactly what a lexical index cannot have, and it is untested
+beyond one 71-token system prompt on one benchmark.
+
+**What is unexplained, and why this is open rather than closed.** Three things.
+
+1. **Is instruction retention the whole residual, or just the part this benchmark
+   exposes?** The abstain stratum is 28% of two slices that share one item set. A
+   single system prompt is a thin basis for a mechanism claim.
+2. **Why does the abstain rate collapse from 0.8571 at 4K to 0.2143 at 16K** while
+   the answer rate *rises* (0.8056 → 0.8889)? The mechanism keeps the instruction at
+   both lengths, so the abstention loss is not an eviction story. Prefer a bug
+   explanation first, per this register's own rule.
+3. **Directionality did not transfer, and the sign is wrong in both cells.** Causal
+   (6,0) against centred (3,3) is −1.4 pp at 4K (1/3, p = 0.625) and −1.4 pp at 16K
+   (0/1, p = 1); removing pooling entirely costs +2.1 pp and +4.2 pp, neither
+   resolvable. On passkey the same contrast is 1.000 against 0.028. Underpowered is
+   the correct verdict at these n — but the operating point is the likelier culprit:
+   at keep 0.25 compression costs the mechanism only 5 of 144 answer cases, so there
+   is almost nothing for an ablation to move.
+
+**Decisive tests, in cost order.**
+
+* **A tight-budget cell** — arms A and G at keep 0.05 and keep 0.02 on `rag_long4k`,
+  ~10 GPU-min each and *faster* than the keep-0.25 arms because the caches are
+  smaller. CPU simulation puts doc-BM25 at 0.993 and 0.931 phrase retention there
+  while per-position IDF collapses to 0.056 and 0.000. If A collapses and G does not,
+  the verdict becomes BEATEN at a budget that matters; if A holds and G collapses,
+  the mechanism has an advantage this campaign's operating point could not see.
+  **This is the highest-value unrun experiment in the programme.**
+* **An instruction-retention cell** — vary the system prompt's length and position and
+  measure whether the A-over-G margin tracks it. Converts finding 3 from one number
+  into a law or kills it.
+* **P4** (`PLAN_LONG_REASONING.md`) — question and evidence sharing no content words.
+  Still unrun, and still the only test that turns a TRIVIAL verdict into a statement
+  about the score rather than about benchmarks that print their own document
+  boundaries.
+
+**One measurement issue found on the way, recorded because it is the kind that hides.**
+The 16K reproduction gate came out **99/100** rather than 100/100 against the
+committed arm under `transformers 5.15.0` / `torch 2.13.0+cu130`. The single
+divergence is a paraphrase (`'is launched in'` → `'launches in'`) scoring
+`contract_fulfillment = 0.3333` in both versions, so no hard-endpoint count moved —
+but the gate is stricter than the endpoint by design, it fired, and it cost the 16K
+cell its optional legacy floor arm. The 4K cell reproduced 200/200.
+
 
 ## O1 — CLOSED 2026-08-27 as SUPERSEDED: the measurement behind it was withdrawn
 
