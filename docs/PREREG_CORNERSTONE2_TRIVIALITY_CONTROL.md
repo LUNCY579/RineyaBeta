@@ -104,7 +104,8 @@ fields.
   *this* prompt. Parameter-free.
 * **lexical-doc-bm25** — segment the prompt on the record delimiters it already
   prints (`[doc_… | trust=… | updated_at=…]`), stopping at `</FACTUAL_EVIDENCE>`;
-  score each record against the question with textbook BM25 (k1=1.5, b=0.75) at
+  score each record against the question with BM25 (k1=1.5, b=0.75, Lucene
+  non-negative IDF) at
   **record-level** document frequency; broadcast a record's score to its positions.
 
 All three pass through **exactly the same machinery as the score** — same sink mask,

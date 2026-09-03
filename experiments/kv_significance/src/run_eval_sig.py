@@ -150,7 +150,8 @@ def doc_bm25_weights(prompt: str, enc, question: str, tok,
     The evidence block prints its own delimiters --
     `[doc_v175_fact_225_... | trust=standard | updated_at=...] text` -- so a
     selector needing no forward pass can segment the prompt into records, score
-    each record against the question with textbook BM25 at RECORD-level document
+    each record against the question with BM25 (Lucene non-negative IDF) at
+    RECORD-level document
     frequency, and broadcast a record's score to all of its positions.
 
     WHY THIS ARM EXISTS. The per-position `lexical-idf` arm computes df as a term
@@ -186,6 +187,14 @@ def doc_bm25_weights(prompt: str, enc, question: str, tok,
         for q in qids:
             f = tf.get(q, 0)
             if f:
+                # Lucene's non-negative IDF, not the textbook Robertson/Sparck-Jones
+                # form log((N-df+0.5)/(df+0.5)), which goes to -1.95 for a term
+                # present in every record and would penalise ubiquitous question
+                # words instead of merely ignoring them. Measured on these prompts,
+                # swapping in the textbook form changes top-1 on 76/200 cases and
+                # collapses gold top-1 retrieval from 144/144 to 88/144, so the
+                # non-negative variant is the defensible choice and is named here
+                # rather than left to look like the textbook one.
                 idf = math.log(1 + (n_docs - df[q] + 0.5) / (df[q] + 0.5))
                 s += idf * f * (k1 + 1) / (f + k1 * (1 - b + b * dl / avgdl))
         scores.append(s)
@@ -214,9 +223,13 @@ def lexical_weights(ids: list[int], question: str, tok, variant: str) -> torch.T
                      in THIS prompt. Parameter-free -- no threshold is tuned, so
                      there is no knob that could have been fitted to the answer.
 
-    Both forms of a word are matched: the question is tokenised bare and with a
-    leading space, because "PineRelay" mid-sentence and at a sentence start are
-    different ids in a byte-level BPE and matching only one halves the signal.
+    The question is tokenised bare AND with a leading space. Note what that does and
+    does not buy: in a byte-level BPE only the FIRST word changes form between the two
+    tokenisations -- every later word already carries its leading space in both -- so
+    the union adds the space-prefixed variant of the first word and nothing else. An
+    earlier version of this docstring claimed both forms were matched for every word,
+    which is false; the union is kept because it is strictly better than either
+    tokenisation alone, not because it is complete.
     """
     n = len(ids)
     df = Counter(ids)
