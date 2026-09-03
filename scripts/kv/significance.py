@@ -46,7 +46,19 @@ _SCORES: dict[int, torch.Tensor] = {}
 # needle in chunk 0 retrieved at 1.00 while one in chunk 4 retrieved at 0.33 --
 # backwards, since the later needle is no less relevant, only less observed.
 _COUNTS: dict[int, torch.Tensor] = {}
-_STATE = {"enabled": False, "window": 16, "patched": False}
+# layer_idx -> [batch, n_kv_heads, n_positions] TRIVIAL lexical weight, carried
+# through eviction exactly like _SCORES and _COUNTS. This is not part of the
+# mechanism: it is the control arm that asks whether the accumulated-attention
+# score does anything a token-id overlap with the question could not. It must be
+# gathered by the same `idx` on every eviction, because after the first one each
+# KV head holds a DIFFERENT subset of positions and a mask indexed by original
+# position would silently address the wrong tokens.
+_LEXICAL: dict[int, torch.Tensor] = {}
+_STATE = {"enabled": False, "window": 16, "patched": False, "lexical_seed": None}
+
+LEXICAL_SELECTS = ("lexical-idf", "lexical-naive", "lexical-doc-bm25")
+# Every arm whose selection consumes the RNG and therefore needs a per-case seed.
+STOCHASTIC_SELECTS = ("random", "random-prepool") + LEXICAL_SELECTS
 
 
 # --------------------------------------------------------------------------- #
@@ -150,6 +162,68 @@ def set_recording(enabled: bool, window: int | None = None) -> None:
 def reset_scores() -> None:
     _SCORES.clear()
     _COUNTS.clear()
+    _LEXICAL.clear()
+    _STATE["lexical_seed"] = None
+
+
+def set_lexical_weights(weights: torch.Tensor | None) -> None:
+    """Install the per-prompt-position trivial lexical weight for the next case.
+
+    `weights` is 1-D, length = prompt length, values in [0, 1]; 0 means "this
+    position's token id carries no lexical evidence about the question". It is
+    broadcast to every KV head on the first eviction of each layer and then
+    gathered through the surviving indices, so it stays aligned with the cache.
+
+    Must be called per case, AFTER reset_scores(), by any caller using a
+    `lexical-*` select. `select_keep` raises rather than falling back if it is
+    missing -- a lexical arm that silently ranked by accumulated attention would
+    write "lexical" into the manifest while measuring the mechanism, which is the
+    same defect shape as `--select streaming` once yielding significance
+    selection.
+    """
+    if weights is None:
+        _STATE["lexical_seed"] = None
+        return
+    w = weights.detach().to(torch.float32).flatten()
+    if w.numel() == 0:
+        raise ValueError("set_lexical_weights: empty weight vector")
+    if not torch.isfinite(w).all():
+        raise ValueError("set_lexical_weights: non-finite weights")
+    _STATE["lexical_seed"] = w
+
+
+def _lexical_for(layer_idx: int, b: int, n_kv: int, n: int,
+                 device) -> torch.Tensor:
+    """[b, n_kv, n] lexical weight for this layer, materialised or lag-padded.
+
+    Padding the decode lag with ZERO, not +inf: an un-scored newly generated
+    token carries no lexical evidence, and it sits inside the protected recent
+    window anyway. Padding with +inf would let the newest tokens win the heavy
+    top-k unconditionally -- the failure `_evict` already guards for on the score
+    path.
+    """
+    cur = _LEXICAL.get(layer_idx)
+    if cur is None:
+        seed = _STATE.get("lexical_seed")
+        if seed is None:
+            raise RuntimeError(
+                f"layer {layer_idx}: a lexical select was requested but no "
+                f"weights were installed. Call significance.set_lexical_weights() "
+                f"per case after reset_scores(). Falling back to the accumulated "
+                f"score here would measure the mechanism and label it the control.")
+        cur = seed.to(device).view(1, 1, -1).expand(b, n_kv, -1).contiguous()
+    have = cur.shape[-1]
+    if have < n:
+        pad = torch.zeros(cur.shape[0], cur.shape[1], n - have,
+                          device=cur.device, dtype=cur.dtype)
+        cur = torch.cat([cur, pad], dim=-1)
+    elif have > n:
+        raise RuntimeError(
+            f"layer {layer_idx}: {have} lexical weights against a cache of {n}. "
+            f"Truncating would misalign the mask; call reset_scores() between "
+            f"sequences.")
+    _LEXICAL[layer_idx] = cur
+    return cur
 
 
 def ranked_scores(layer_idx: int, exponent: float = 0.0):
@@ -299,7 +373,16 @@ class SignificanceLayer(DynamicLayer):
                              device=k.device, dtype=torch.float32)
             s = torch.cat([s.to(k.device).float(), pad], dim=-1)
 
-        idx = select_keep(s, n, pol, k.device)
+        lex = None
+        if pol.select in LEXICAL_SELECTS:
+            lex = _lexical_for(self.layer_idx, b, n_kv, n, k.device)
+
+        idx = select_keep(s, n, pol, k.device, lexical=lex)
+        if lex is not None:
+            # Same discipline as the scores and the counts: carry the mask
+            # through the compaction or it addresses the wrong positions from the
+            # second eviction onward.
+            _LEXICAL[self.layer_idx] = lex.gather(2, idx).contiguous()
         gather_idx = idx.unsqueeze(-1).expand(-1, -1, -1, d)
         self.keys = k.gather(2, gather_idx).contiguous()
         self.values = v.gather(2, gather_idx).contiguous()
@@ -434,7 +517,8 @@ def grow_spans(s: torch.Tensor, mult: float, max_reach: int) -> torch.Tensor:
     return grown
 
 
-def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
+def select_keep(s: torch.Tensor, n: int, policy, device,
+                lexical: torch.Tensor | None = None) -> torch.Tensor:
     """Indices to keep: sinks + top-heavy + recent. Returns [b, n_kv, budget]."""
     b, n_kv = s.shape[0], s.shape[1]
     n_sink = min(policy.n_sinks(), n)
@@ -458,6 +542,56 @@ def select_keep(s: torch.Tensor, n: int, policy, device) -> torch.Tensor:
         middle[..., :n_sink] = float("-inf")
     if n_recent:
         middle[..., n - n_recent:] = float("-inf")
+
+    # THE TRIVIALITY CONTROL, substituted HERE -- after the masks, before the
+    # pool. The question this arm answers is whether the accumulated-attention
+    # score does anything a token-id overlap with the question could not, so the
+    # lexical weight must pass through the SAME backward pool, the same top-k and
+    # the same slot count as the score. Substituting it after the pool (which is
+    # where `random` is substituted, below) would compare a pooled score against
+    # an unpooled heuristic and attribute the pooling to the score.
+    #
+    # `random` is deliberately NOT moved to join it: its post-pool position is
+    # what every committed random arm was measured with, and it is the cleaner
+    # definition of the floor -- uniform among eligible positions, with no
+    # neighbour correlation introduced by max-pooling a uniform field.
+    # THE CONTIGUITY-MATCHED FLOOR. `random` is substituted AFTER the pool, so the
+    # pool is inert for it and it keeps scattered singletons. Every lexical arm is
+    # substituted BEFORE the pool, so its tie-break noise is max-pooled into
+    # contiguous runs of pool_back+1 positions -- and contiguity alone preserves
+    # spans. Measured on the campaign's own records with a CONSTANT weight vector
+    # carrying zero lexical information: 0.097 (4K) / 0.042 (16K) gold-span
+    # retention against post-pool random's 0.014 / 0.014. Small, but it is a
+    # difference in PLUMBING, and R would charge it to the lexical signal. This arm
+    # is that plumbing with the signal removed, and it is the floor R is computed
+    # against. `random` is kept unchanged so the committed random arms stay
+    # comparable.
+    if policy.select == "random-prepool":
+        r = torch.rand(middle.shape, device=middle.device, dtype=middle.dtype)
+        middle = torch.where(torch.isfinite(middle), r,
+                             torch.full_like(r, float("-inf")))
+
+    if policy.select in LEXICAL_SELECTS:
+        if lexical is None:
+            raise ValueError(
+                f"select={policy.select!r} requires a lexical weight tensor; "
+                f"select_keep was called without one. Ranking by the accumulated "
+                f"score here would measure the mechanism and record it as the "
+                f"control.")
+        if lexical.shape != middle.shape:
+            raise ValueError(
+                f"lexical weights {tuple(lexical.shape)} do not match the score "
+                f"field {tuple(middle.shape)}; a misaligned mask selects the "
+                f"wrong positions silently.")
+        # A tie-break three orders of magnitude below the smallest weight level,
+        # drawn per KV head exactly as the `random` arm draws. Without it, topk
+        # on a field of equal weights resolves ties by index and the arm becomes
+        # "keep the earliest lexical matches", a positional policy wearing a
+        # lexical label.
+        jitter = torch.rand(middle.shape, device=middle.device,
+                            dtype=middle.dtype) * 1e-3
+        middle = torch.where(torch.isfinite(middle), lexical.to(middle.dtype) + jitter,
+                             torch.full_like(middle, float("-inf")))
 
     # SnapKV pooling: an evidence span is useful as a span, and scoring each
     # position independently tends to keep scattered singletons out of several
@@ -576,11 +710,19 @@ class Policy:
     pool: int = 1              # max-pool width over scores before top-k (SnapKV)
     pool_back: int | None = None   # reach behind i; None = pool // 2 (centred)
     pool_fwd: int | None = None    # reach ahead of i;  None = pool // 2 (centred)
-    select: str = "significance"   # "significance" | "random" | "streaming".
-                                   # The last two are BASELINES, not policies to
-                                   # deploy: they exist so the mechanism can be
+    select: str = "significance"   # "significance" | "random" | "streaming"
+                                   # | "lexical-idf" | "lexical-naive".
+                                   # All but the first are BASELINES, not policies
+                                   # to deploy: they exist so the mechanism can be
                                    # compared against something other than earlier
                                    # versions of itself. See select_keep.
+                                   #
+                                   # The two lexical arms are the TRIVIALITY
+                                   # CONTROL: they rank by whether a position's
+                                   # token id occurs in the question, which needs
+                                   # no forward pass at all. If they match the
+                                   # score, the score is not the contribution.
+                                   # They require set_lexical_weights() per case.
     grow: float | None = None      # if set, DERIVE the reach: geodesic dilation
                                    # gated at this MULTIPLE of the stream's median
                                    # score, instead of a fixed pool_back. 2.0 means
@@ -603,6 +745,20 @@ class Policy:
     normalize: bool = False    # shorthand for count_exponent = 1.0
     count_exponent: float | None = None   # rank on sum / count**e; 0 = sum, 1 = mean
     stats: dict = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        # An unrecognised `select` is the worst possible typo here: select_keep
+        # special-cases known strings and otherwise ranks by the accumulated
+        # score, so `select="lexical_idf"` (underscore) would run the MECHANISM
+        # and write the control's name into the manifest. Same failure shape as
+        # `--select streaming` once yielding significance selection, and as
+        # pool_back-without-pool_fwd. Name the class, then close all of it.
+        known = ("significance", "streaming") + STOCHASTIC_SELECTS
+        if self.select not in known:
+            raise ValueError(
+                f"select={self.select!r} is not one of {known}. An unknown value "
+                f"would silently fall through to significance ranking while the "
+                f"manifest recorded the name you passed.")
 
     def rank_exponent(self) -> float:
         """Exponent actually used for ranking. `normalize` is the e=1 shorthand."""

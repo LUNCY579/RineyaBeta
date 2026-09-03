@@ -26,8 +26,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import re
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 
 import torch
@@ -77,6 +80,132 @@ def normalize(record: dict) -> dict:
     rec["category"] = (rec.get("category") or meta.get("category")
                        or meta.get("reply_class") or "uncategorized")
     return rec
+
+
+DOC_HEADER = re.compile(r"\[doc_[^\]\n]*\]")
+
+
+def doc_bm25_weights(prompt: str, enc, question: str, tok,
+                     k1: float = 1.5, b: float = 0.75) -> torch.Tensor:
+    """THE STRONGEST TRIVIAL BASELINE: BM25 over the prompt's own record structure.
+
+    The evidence block prints its own delimiters --
+    `[doc_v175_fact_225_... | trust=standard | updated_at=...] text` -- so a
+    selector needing no forward pass can segment the prompt into records, score
+    each record against the question with textbook BM25 at RECORD-level document
+    frequency, and broadcast a record's score to all of its positions.
+
+    WHY THIS ARM EXISTS. The per-position `lexical-idf` arm computes df as a term
+    count inside ONE document, which is inverse collection frequency on a
+    collection of size one -- degenerate, and it is not what IDF means. Measured on
+    the exact 200/100 records this campaign runs, per-position IDF retains the gold
+    span in 0.736 / 0.681 of answerable cases while this arm retains it in
+    **1.000 / 1.000** (144/144 and 72/72). A control that loses to an obvious
+    variant of itself cannot support the conclusion "the score does work no lexical
+    index reproduces", so the weaker arm alone would have made a SUBSTANTIVE
+    verdict unsound.
+
+    Still trivial under the preregistration's own definition: it reads the
+    `question` field, the prompt's token ids and the delimiters the prompt already
+    prints. It never touches `support_document_ids`, the gold phrase or the depth.
+    """
+    offsets = enc["offset_mapping"]
+    ids = enc["input_ids"]
+    heads = [m.start() for m in DOC_HEADER.finditer(prompt)]
+    if len(heads) < 2:
+        raise ValueError(
+            f"doc-bm25 found {len(heads)} record delimiters; this arm is only "
+            f"defined for prompts that print their own record structure")
+    # STOP AT THE END OF THE EVIDENCE BLOCK. The last record otherwise runs to the
+    # end of the prompt and swallows `<QUESTION> ... </QUESTION>`, so the trailing
+    # distractor contains the query verbatim and wins BM25 on every single case --
+    # an arm that always selects the last document while looking like retrieval.
+    # Caught by the unit test below, which is why it asserts on the SCORE of the
+    # answer-bearing record and not merely on the span surviving: the span survived
+    # anyway, and the bug would have shipped.
+    tail = prompt.find("</FACTUAL_EVIDENCE>")
+    end = tail if tail > (heads[0] if heads else 0) else len(prompt)
+    heads = [h for h in heads if h < end]
+    if len(heads) < 2:
+        raise ValueError(
+            f"doc-bm25 found {len(heads)} record delimiters before the end of the "
+            f"evidence block; this arm needs the prompt's record structure")
+    bounds = heads + [end]
+    segments = []
+    for i in range(len(heads)):
+        s, e = bounds[i], bounds[i + 1]
+        tok_ids = [j for j, (a, z) in enumerate(offsets) if a >= s and z <= e and z > a]
+        if tok_ids:
+            segments.append((tok_ids, [ids[j] for j in tok_ids]))
+    if not segments:
+        raise ValueError("doc-bm25 segmented the prompt into nothing")
+
+    qids = set(tok(question, add_special_tokens=False)["input_ids"])
+    qids |= set(tok(" " + question, add_special_tokens=False)["input_ids"])
+    n_docs = len(segments)
+    df: Counter = Counter()
+    for _, toks in segments:
+        for t in set(toks):
+            df[t] += 1
+    avgdl = sum(len(t) for _, t in segments) / n_docs
+
+    scores = []
+    for _, toks in segments:
+        tf = Counter(toks)
+        dl = len(toks)
+        s = 0.0
+        for q in qids:
+            f = tf.get(q, 0)
+            if f:
+                idf = math.log(1 + (n_docs - df[q] + 0.5) / (df[q] + 0.5))
+                s += idf * f * (k1 + 1) / (f + k1 * (1 - b + b * dl / avgdl))
+        scores.append(s)
+    top = max(scores)
+    w = torch.zeros(len(ids), dtype=torch.float32)
+    if top > 0:
+        for (tok_ids, _), s in zip(segments, scores):
+            if s > 0:
+                w[tok_ids] = s / top
+    return w
+
+
+def lexical_weights(ids: list[int], question: str, tok, variant: str) -> torch.Tensor:
+    """Per-position trivial lexical weight in [0, 1]. ANSWER-BLIND by construction.
+
+    Reads only the prompt's token ids and the record's `question` string. It never
+    sees the gold phrase, the support document id or the needle depth -- which is
+    what makes it a control rather than an oracle.
+
+      lexical-naive  1.0 where the token id occurs in the tokenised question.
+                     The literal reading, and badly unselective: on rag_long the
+                     question's stopwords and punctuation flag 22.6% of all
+                     positions, so this arm keeps nearly every match and ranks
+                     almost nothing.
+      lexical-idf    log(n/df(t)) normalised to [0, 1], with df the token's count
+                     in THIS prompt. Parameter-free -- no threshold is tuned, so
+                     there is no knob that could have been fitted to the answer.
+
+    Both forms of a word are matched: the question is tokenised bare and with a
+    leading space, because "PineRelay" mid-sentence and at a sentence start are
+    different ids in a byte-level BPE and matching only one halves the signal.
+    """
+    n = len(ids)
+    df = Counter(ids)
+    qids = set(tok(question, add_special_tokens=False)["input_ids"])
+    qids |= set(tok(" " + question, add_special_tokens=False)["input_ids"])
+    if variant == "lexical-naive":
+        return torch.tensor([1.0 if t in qids else 0.0 for t in ids],
+                            dtype=torch.float32)
+    w = {t: math.log(n / df[t]) for t in qids if df.get(t)}
+    mx = max(w.values(), default=0.0)
+    if mx <= 0.0:
+        # Every question token occupies every position -- impossible on real
+        # prompts, but a zero divisor would produce a NaN field that topk would
+        # resolve arbitrarily, so it is refused rather than normalised away.
+        raise ValueError("degenerate IDF: no question token is rarer than the "
+                         "whole prompt")
+    return torch.tensor([w.get(t, 0.0) / mx if t in w else 0.0 for t in ids],
+                        dtype=torch.float32)
 
 
 def load_records(path: Path, limit: int | None) -> list[dict]:
@@ -164,13 +293,20 @@ def main() -> None:
                     help="PEFT adapter directory (trainer checkpoint or saved "
                          "adapter). Merged before evaluation and recorded in the "
                          "manifest with its base model and step.")
-    ap.add_argument("--select", choices=("significance", "random", "streaming"),
+    ap.add_argument("--select", choices=("significance", "random", "streaming",
+                                         "random-prepool", "lexical-idf",
+                                         "lexical-naive", "lexical-doc-bm25"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
                          "same number of positions chosen uniformly -- the only "
                          "control that isolates the SCORE rather than the budget. "
                          "`streaming` spends everything on sinks plus recent and "
-                         "ranks nothing.")
+                         "ranks nothing. The two `lexical-*` arms are the "
+                         "TRIVIALITY CONTROL: they rank by overlap between a "
+                         "position's token id and the question's, which needs no "
+                         "forward pass at all, and pass through the same pool, "
+                         "top-k and slot count as the score. See "
+                         "docs/PREREG_CORNERSTONE2_TRIVIALITY_CONTROL.md.")
     ap.add_argument("--seed", type=int, default=20260826,
                     help="seeds the `random` selection arm so it is reproducible; "
                          "the significance arm is deterministic and ignores it.")
@@ -312,10 +448,43 @@ def main() -> None:
 
         # Seed per case so the `random` arm is reproducible AND independent
         # across cases. passkey.py does the same per trial; without it a random
-        # baseline is neither replicable nor properly varied.
-        if args.select == "random":
+        # baseline is neither replicable nor properly varied. The lexical arms
+        # draw a tie-break from the same generator and need the same treatment.
+        if args.select in sig.STOCHASTIC_SELECTS:
             torch.manual_seed(args.seed + i)
         sig.reset_scores()
+        if args.select in sig.LEXICAL_SELECTS:
+            # reset_scores() clears the previous case's mask, so this must come
+            # after it. Installing before would leave every case ranking on an
+            # empty mask and raising -- loudly, which is the intent, but the
+            # ordering is load-bearing and worth stating.
+            q = rec.get("question")
+            if not q:
+                raise SystemExit(
+                    f"--select {args.select} needs a `question` field and case "
+                    f"{rec.get('id')!r} has none. The lexical control is only "
+                    f"defined for datasets that carry the question separately "
+                    f"from the prompt.")
+            if args.select == "lexical-doc-bm25":
+                # A SECOND encoding, for offsets only. The generation path's `enc`
+                # is left exactly as every committed run produced it -- adding
+                # return_offsets_mapping to it would change the object handed to
+                # model.generate, and "the control arm quietly altered the shared
+                # prompt path" is not a difference anyone would find later.
+                off = tok(prompt, return_offsets_mapping=True)
+                if off["input_ids"] != enc["input_ids"][0].tolist():
+                    # If the two encodings ever diverge, the weight vector is
+                    # indexed against a different tokenisation than the cache and
+                    # every position it protects is the wrong one -- silently.
+                    raise SystemExit(
+                        f"case {rec.get('id')!r}: the offsets encoding "
+                        f"({len(off['input_ids'])} ids) does not match the "
+                        f"generation encoding ({n_prompt} ids); the doc-bm25 "
+                        f"weights would address the wrong positions")
+                w = doc_bm25_weights(prompt, off, q, tok)
+            else:
+                w = lexical_weights(enc["input_ids"][0].tolist(), q, tok, args.select)
+            sig.set_lexical_weights(w)
         sig.set_recording(evicting, window=args.window)
         cache = sig.SignificanceCache(config=model.config, policy=policy)
         with torch.no_grad():
