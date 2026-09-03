@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Analyse the triviality control. Implements ONLY what
-docs/PREREG_CORNERSTONE2_TRIVIALITY_CONTROL.md (v2) fixed in advance.
+docs/PREREG_CORNERSTONE2_TRIVIALITY_CONTROL.md (v3) fixed in advance.
 
 THE ONE RULE THIS FILE EXISTS TO ENFORCE: **no verdict from missing data.** In this
 repository an analyser once printed "REFUTED -- the closure is complete" from three
@@ -42,13 +42,17 @@ ARMS = {
     "D": ("c4-lex-idf-b6f0", "trivial: per-position IDF", True),
     "E": ("c4-lex-naive-b6f0", "trivial: naive question-token match", True),
     "G": ("c4-lex-docbm25-b6f0", "trivial: document-level BM25", True),
-    "N": ("c4-random-prepool", "floor: contiguity-matched random", True),
+    "N": ("c4-random-prepool", "floor: contiguity-matched random (7-token)", True),
+    "Ndoc": ("c4-random-doc", "floor: granularity-matched random (record)", True),
     "F": (None, "floor: random, post-pool (committed, legacy)", False),
 }
 # Arm F is reused from committed data and its tag differs per length (prereg 2.4).
 F_TAG = {"rag_long4k": "long4k-random-k0.25", "rag_long16k": "long16k-random-k0.25"}
-TRIVIAL_ARMS = ("D", "E", "G")
-POSITIONAL_TRIVIAL = ("D", "E")
+# Each trivial family is scored against the floor with ITS OWN contiguity, so a
+# selector is credited only for what it achieves above noise of the same shape.
+#   positional  D, E  keep pooled 7-token runs   -> floor N   (random-prepool)
+#   structural  G     keeps whole ~64-token records -> floor Ndoc (random-doc)
+FAMILIES = {"positional": (("D", "E"), "N"), "structural": (("G",), "Ndoc")}
 
 DATASETS = {
     "rag_long4k": (200, "artifacts/eval_sets/rag_long4k_d0.5.jsonl"),
@@ -56,11 +60,13 @@ DATASETS = {
 }
 
 CONTRASTS = [("A", "L"), ("A", "G"), ("A", "D"), ("A", "E"), ("A", "B"), ("A", "C"),
-             ("L", "N"), ("D", "N"), ("F", "N")]
+             ("L", "N"), ("G", "Ndoc"), ("D", "N"), ("F", "N"), ("Ndoc", "N")]
 
 # prereg 6.2: fields allowed to differ between an arm and arm A.
 # mean_kept_ratio is NOT here -- it is asserted, because an arm that never evicted
 # would otherwise pass this gate and be scored as a policy.
+# cap_mib is NOT free: every arm in a cell must share it, or arms run in different
+# GPU-contention conditions are silently pooled. It is asserted equal to arm A's.
 FREE_FIELDS = {"tag", "elapsed_s", "recent", "recent_effective_mean",
                "heavy_zero_count", "case_count", "select"}
 POOL_FIELDS = {"pool", "pool_back", "pool_fwd", "pool_back_flag", "pool_fwd_flag",
@@ -163,6 +169,45 @@ def load_arm(tag: str, dataset: str):
 # gates
 # --------------------------------------------------------------------------- #
 
+# prereg 6.1: the committed arm each cell's arm A must reproduce byte-for-byte
+# before any committed data may be reused as arm F.
+REPRO_REFERENCE = {"rag_long4k": "long4k-sig-k0.25-rf0.15",
+                   "rag_long16k": "long16k-sig-k0.25-rf0.15"}
+
+
+def reproduction_check(arms: dict, dataset: str) -> dict:
+    """Does this campaign's arm A reproduce the committed reference exactly?
+
+    prereg 6.1 makes arm F's reuse conditional on this, and prereg 2.4 repeats the
+    condition -- but until now nothing enforced it, so the licence to reuse committed
+    data rested on the operator remembering to check. That is the failure class this
+    repository has already paid for once.
+    """
+    ref_dir = RES / f"{REPRO_REFERENCE[dataset]}__{dataset}"
+    f = ref_dir / "results.jsonl"
+    if not arms.get("A"):
+        return {"status": "arm A absent", "identical": None, "licenses_F": False}
+    if not f.exists():
+        return {"status": f"no committed reference at {ref_dir.name}",
+                "identical": None, "licenses_F": False}
+    ref = {}
+    for line in f.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            r = json.loads(line)
+            ref[r["id"]] = r
+    rows = arms["A"]["rows"]
+    ids = sorted(set(rows) & set(ref))
+    same = sum(1 for i in ids if rows[i]["reply"] == ref[i]["reply"])
+    ok = bool(ids) and same == len(ids)
+    return {"reference": ref_dir.name, "n_paired": len(ids), "identical": same,
+            "licenses_F": ok,
+            "status": ("PASS -- the campaign inherits the committed arms' provenance"
+                       if ok else
+                       "FAIL -- arms stay internally comparable, but no result may be "
+                       "compared to a committed number from the earlier code state, "
+                       "and arm F is dropped (prereg 6.1)")}
+
+
 def gate_report(arms: dict, expect: int) -> dict:
     problems, notes = [], []
     present = [k for k, v in arms.items() if v]
@@ -195,6 +240,15 @@ def gate_report(arms: dict, expect: int) -> dict:
                             f"+/-{KEEP_TOL} -- this arm did not compress as configured")
         if k == "F":
             continue                      # committed arm, different tag family
+        # prereg 6.2: cap_mib is ASSERTED equal across the cell. Arm A was run at
+        # 4500 while another project held part of the card; an arm at the runner's
+        # 7000 default would be a different memory regime pooled in silently, and
+        # the generic "unexpected manifest difference" message would send the
+        # operator to relax a frozen gate after the data rather than to re-run.
+        if m.get("cap_mib") != base.get("cap_mib"):
+            problems.append(f"arm {k}: cap_mib {m.get('cap_mib')} != arm A's "
+                            f"{base.get('cap_mib')}; re-run this arm at A's cap "
+                            f"rather than widening the gate")
         allowed = set(FREE_FIELDS) | ({"pool"} if k == "C" else set())
         if k in ("B", "C"):
             allowed |= POOL_FIELDS
@@ -235,55 +289,155 @@ def contrast(vals: dict, a: str, b: str, ids: list) -> dict:
             "mcnemar_exact_p": mcnemar_exact(wa, wb)}
 
 
-def recovery(vals: dict, ids: list, pool: tuple) -> dict | None:
-    """R = (L - N) / (A - N) with L the best of `pool`. prereg 7."""
-    if "A" not in vals or "N" not in vals or not any(k in vals for k in pool):
-        return None
-    if not all(k in vals for k in pool):
-        return {"status": f"undefined: L = max{pool} needs all of them present; "
-                          f"a missing arm can only lower the maximum (prereg 8)"}
-    mean = {k: sum(vals[k][i] for i in ids) / len(ids) for k in ("A", "N") + pool}
-    best = max(pool, key=lambda k: mean[k])
-    denom = mean["A"] - mean["N"]
+def recovery(vals: dict, ids: list, pool: tuple, floor: str) -> dict | None:
+    """R = (L - floor) / (A - floor), L the best of `pool`. prereg 7.
+
+    Returns the bootstrap CI as well, and the verdict logic USES it: a threshold
+    counts as crossed only when the interval lies wholly on one side of it. R's
+    half-width at the preregistered n is about +/-0.09, which straddles the 0.50 and
+    0.90 boundaries at the very values section 4 predicts -- so branching on the
+    point estimate alone would resolve a threshold the data cannot resolve.
+    """
+    if "A" not in vals or floor not in vals:
+        return {"status": f"undefined: needs arm A and floor {floor}"}
+    have = [k for k in pool if k in vals]
+    if not have:
+        return {"status": f"undefined: no arm of {pool} present"}
+    mean = {k: sum(vals[k][i] for i in ids) / len(ids) for k in ("A", floor) + tuple(have)}
+    best = max(have, key=lambda k: mean[k])
+    denom = mean["A"] - mean[floor]
     rng = random.Random(BOOT_SEED)
     boots, undef = [], 0
     for _ in range(BOOT_N):
-        s = [rng.randrange(len(ids)) for _ in ids]
-        ma = sum(vals["A"][ids[j]] for j in s) / len(s)
-        mn = sum(vals["N"][ids[j]] for j in s) / len(s)
-        ml = sum(vals[best][ids[j]] for j in s) / len(s)
-        if abs(ma - mn) < 1e-12:
+        smp = [rng.randrange(len(ids)) for _ in ids]
+        ma = sum(vals["A"][ids[j]] for j in smp) / len(smp)
+        mf = sum(vals[floor][ids[j]] for j in smp) / len(smp)
+        ml = sum(vals[best][ids[j]] for j in smp) / len(smp)
+        if abs(ma - mf) < 1e-12:
             undef += 1
             continue
-        boots.append((ml - mn) / (ma - mn))
+        boots.append((ml - mf) / (ma - mf))
     boots.sort()
     frac = undef / BOOT_N
-    return {"best_arm": best, "rate_A": round(mean["A"], 4),
-            "rate_N": round(mean["N"], 4), "rate_L": round(mean[best], 4),
-            "range_A_minus_N": round(denom, 4),
-            "R_point": round((mean[best] - mean["N"]) / denom, 4) if abs(denom) > 1e-12
-                       else None,
-            "R_ci95": ([round(boots[int(0.025 * len(boots))], 4),
-                        round(boots[int(0.975 * len(boots))], 4)] if boots else None),
-            "bootstrap_undefined_fraction": round(frac, 4),
-            # prereg 6.5 + 7: a ratio needs its denominator safely positive.
+    ci = ([round(boots[int(0.025 * len(boots))], 4),
+           round(boots[int(0.975 * len(boots))], 4)] if boots else None)
+    return {"family_arms": list(pool), "arms_present": have, "complete": len(have) == len(pool),
+            "floor": floor, "best_arm": best,
+            "rate_A": round(mean["A"], 4), "rate_floor": round(mean[floor], 4),
+            "rate_L": round(mean[best], 4), "range_A_minus_floor": round(denom, 4),
+            "R_point": round((mean[best] - mean[floor]) / denom, 4) if abs(denom) > 1e-12 else None,
+            "R_ci95": ci, "bootstrap_undefined_fraction": round(frac, 4),
             "R_reportable": bool(boots) and frac <= 0.05 and denom >= MIN_RANGE}
+
+
+def _primary_family(strat: dict) -> tuple[str, dict] | tuple[None, None]:
+    """The family with the highest reportable R -- the strongest trivial selector."""
+    best, blk = None, None
+    for name, rec in strat.get("recovery", {}).items():
+        if not rec or not rec.get("R_reportable") or rec.get("R_point") is None:
+            continue
+        if blk is None or rec["R_point"] > blk["R_point"]:
+            best, blk = name, rec
+    return best, blk
+
+
+def verdict_for(d: dict) -> dict:
+    """prereg 7, on the ANSWER stratum, from a cell that cleared every gate."""
+    if d["gates"]["problems"]:
+        return {"verdict": "REFUSED",
+                "reason": "coverage/validity gates failed; a verdict here would be the "
+                          "default output of missing data (prereg 8)",
+                "problems": d["gates"]["problems"]}
+    s = d["strata"]["answer"]
+    fam, rec = _primary_family(s)
+    if rec is None:
+        return {"verdict": "REFUSED",
+                "reason": "no family has a reportable R: either the floor or arm A is "
+                          "missing, or the dynamic-range gate (prereg 6.5) failed"}
+    con = s["contrasts"]["A_vs_L"]
+    if "status" in con:
+        return {"verdict": "REFUSED", "reason": "A_vs_L not computable"}
+    R, p = rec["R_point"], con["mcnemar_exact_p"]
+    lo_d, hi_d = con["ci95_diff"]
+    diff = con["diff_a_minus_b"]
+    rl, rh = (rec["R_ci95"] or [R, R])
+    # A THRESHOLD COUNTS AS CROSSED ONLY IF THE WHOLE INTERVAL IS PAST IT.
+    above90, above50, below50 = rl >= 0.90, rl >= 0.50, rh < 0.50
+    equivalent = p >= 0.05 and hi_d <= 0.10 and lo_d >= -0.10
+
+    if diff < 0 and p < 0.05:
+        v, why = "BEATEN", "a selector with no forward pass outperforms the mechanism"
+    elif above90 and equivalent:
+        v, why = "TRIVIAL", "the score is this programme's L_state"
+    elif above90 and diff > 0 and p < 0.05:
+        v, why = "PARTIAL (upper)", "residual real but bounded at <=10% of the advantage"
+    elif above50:
+        v, why = "PARTIAL", "a trivial selector recovers most of the advantage"
+    elif below50 and diff > 0 and p < 0.05:
+        # MONOTONE SAFETY. A subset of the trivial arms can only LOWER the maximum,
+        # so R from a subset is a lower bound on the true R -- which makes BEATEN,
+        # TRIVIAL and both PARTIAL rows safe under partial coverage, and makes
+        # SUBSTANTIVE the one verdict a missing arm can manufacture. It therefore
+        # needs complete coverage of its family; the others do not.
+        if not rec["complete"]:
+            v, why = ("INCONCLUSIVE",
+                      f"R < 0.50 but family {fam} is incomplete "
+                      f"({rec['arms_present']} of {rec['family_arms']}); a missing "
+                      f"trivial arm can only lower R, so SUBSTANTIVE is not safe")
+        else:
+            v, why = "SUBSTANTIVE", "no trivial selector reproduces the score, on this benchmark"
+    else:
+        v, why = "INCONCLUSIVE", ("no preregistered row matches once the bootstrap CI on "
+                                  "R is required to clear the threshold; close nothing")
+    out = {"verdict": v, "reading": why, "primary_family": fam,
+           "R_point": R, "R_ci95": rec["R_ci95"], "floor": rec["floor"],
+           "best_trivial_arm": rec["best_arm"], "mcnemar_p_A_vs_L": p,
+           "ci95_diff_A_minus_L": [lo_d, hi_d],
+           "R_by_family": {k: (r or {}).get("R_point")
+                           for k, r in s.get("recovery", {}).items()}}
+    # Secondary: the directionality ablation, SYMMETRIC in both directions.
+    b = s["contrasts"].get("A_vs_B")
+    if b and "status" not in b:
+        if b["diff_a_minus_b"] > 0 and b["mcnemar_exact_p"] < 0.05:
+            out["directionality"] = "TRANSFERS: causal beats centred at length"
+        elif b["diff_a_minus_b"] < 0 and b["mcnemar_exact_p"] < 0.05:
+            out["directionality"] = ("DOES NOT TRANSFER: centred beats causal at length, "
+                                     "at p<0.05 -- abstract-level consequence")
+        else:
+            out["directionality"] = (
+                f"UNDERPOWERED/INDETERMINATE: A-B = {b['diff_a_minus_b']:+.4f}, "
+                f"p = {b['mcnemar_exact_p']:.3g}. Exact McNemar first reaches p<0.05 at "
+                f"6/0, so nothing below ~6pp can resolve here. NOT evidence of absence.")
+    c = s["contrasts"].get("A_vs_C")
+    if c and "status" not in c:
+        out["pooling_worth"] = {"diff_A_minus_C": c["diff_a_minus_b"],
+                                "p": c["mcnemar_exact_p"]}
+    return out
 
 
 def analyse_dataset(dataset: str, expect: int) -> dict:
     arms = {}
     for k, (tag, _label, _req) in ARMS.items():
         arms[k] = load_arm(tag or F_TAG[dataset], dataset)
+    repro = reproduction_check(arms, dataset)
+    if not repro["licenses_F"] and arms.get("F"):
+        # prereg 2.4/6.1: committed data may only be reused if arm A reproduced.
+        arms["F"] = None
     gates = gate_report(arms, expect)
+    if repro["identical"] is not None and not repro["licenses_F"]:
+        gates["notes"].append(
+            f"reproduction: {repro['identical']}/{repro['n_paired']} against "
+            f"{repro['reference']} -- arm F dropped (prereg 6.1)")
     dec = decisions(dataset, expect)
 
-    out = {"dataset": dataset, "n_expected": expect, "gates": gates,
-           "strata": {}, "arms": {}}
+    out = {"dataset": dataset, "n_expected": expect, "reproduction": repro,
+           "gates": gates, "strata": {}, "arms": {}}
     for k, v in arms.items():
         if v:
             out["arms"][k] = {
                 "tag": v["dir"], "label": ARMS[k][1], "n": len(v["rows"]),
                 "mean_kept_ratio": v["manifest"].get("mean_kept_ratio"),
+                "cap_mib": v["manifest"].get("cap_mib"),
                 "elapsed_s": v["manifest"].get("elapsed_s"),
                 "composite_diagnostic_only": round(
                     sum(float(r.get("quality_score") or 0.0)
@@ -299,68 +453,30 @@ def analyse_dataset(dataset: str, expect: int) -> dict:
             vals[k] = sel
             ids = set(sel) if ids is None else ids & set(sel)
         ids = sorted(ids or [])
-        # L is a derived arm, not a run one.
-        rec_s = recovery(vals, ids, TRIVIAL_ARMS) if ids else None
-        rec_p = recovery(vals, ids, POSITIONAL_TRIVIAL) if ids else None
-        if rec_s and "best_arm" in rec_s:
-            vals["L"] = vals[rec_s["best_arm"]]
-        block = {
+        rec = {}
+        if ids:
+            for fam, (pool, floor) in FAMILIES.items():
+                rec[fam] = recovery(vals, ids, pool, floor)
+        # L is derived: the best trivial arm across BOTH families, which is what
+        # prereg 2.5's "best of the trivial arms" means.
+        cand = [k for k in ("D", "E", "G") if k in vals]
+        if cand and ids:
+            vals["L"] = vals[max(cand, key=lambda k: sum(vals[k][i] for i in ids))]
+        out["strata"][stratum] = {
             "n": len(ids),
             "rates": {k: round(sum(v[i] for i in ids) / max(len(ids), 1), 4)
                       for k, v in vals.items() if k != "L"},
-            "contrasts": {f"{a}_vs_{b}": contrast(vals, a, b, ids)
-                          for a, b in CONTRASTS},
-            "R_structural": rec_s, "R_positional": rec_p,
+            "contrasts": {f"{a}_vs_{b}": contrast(vals, a, b, ids) for a, b in CONTRASTS},
+            "recovery": rec,
         }
-        out["strata"][stratum] = block
     return out
-
-
-def verdict_for(d: dict) -> dict:
-    """prereg 7, on the ANSWER stratum, and only from a cell that cleared every gate."""
-    if d["gates"]["problems"]:
-        return {"verdict": "REFUSED",
-                "reason": "coverage/validity gates failed; a verdict here would be the "
-                          "default output of missing data (prereg 8)",
-                "problems": d["gates"]["problems"]}
-    s = d["strata"]["answer"]
-    rec = s.get("R_structural")
-    if not rec or "R_point" not in rec:
-        return {"verdict": "REFUSED",
-                "reason": (rec or {}).get("status", "recovery fraction not computable")}
-    if not rec["R_reportable"]:
-        return {"verdict": "REFUSED",
-                "reason": f"instrument failure (prereg 6.5): A - N = "
-                          f"{rec['range_A_minus_N']} < {MIN_RANGE}, or "
-                          f"{rec['bootstrap_undefined_fraction']:.1%} of bootstrap "
-                          f"resamples had a vanishing denominator"}
-    con = s["contrasts"]["A_vs_L"]
-    R, p = rec["R_point"], con["mcnemar_exact_p"]
-    lo, hi = con["ci95_diff"]
-    d_al = con["diff_a_minus_b"]
-    if d_al < 0 and p < 0.05:
-        v, why = "BEATEN", "a selector with no forward pass outperforms the mechanism"
-    elif R >= 0.90 and p >= 0.05 and hi <= 0.10 and lo >= -0.10:
-        v, why = "TRIVIAL", "the score is this programme's L_state"
-    elif R >= 0.90 and d_al > 0 and p < 0.05:
-        v, why = "PARTIAL (upper)", "residual is real but bounded at <=10% of the advantage"
-    elif 0.50 <= R < 0.90:
-        v, why = "PARTIAL", "a trivial selector recovers most of the advantage"
-    elif R < 0.50 and d_al > 0 and p < 0.05:
-        v, why = "SUBSTANTIVE", "no trivial selector reproduces the score, on this benchmark"
-    else:
-        v, why = "INCONCLUSIVE", "no preregistered row matches; close nothing"
-    return {"verdict": v, "reading": why, "R_structural": R,
-            "R_positional": (s.get("R_positional") or {}).get("R_point"),
-            "best_trivial_arm": rec["best_arm"], "mcnemar_p_A_vs_L": p,
-            "ci95_diff_A_minus_L": [lo, hi]}
 
 
 def derive() -> dict:
     per = {ds: analyse_dataset(ds, n) for ds, (n, _p) in DATASETS.items()}
     primary = per.get("rag_long4k")
     rep = per.get("rag_long16k")
-    return {"preregistration": "docs/PREREG_CORNERSTONE2_TRIVIALITY_CONTROL.md (v2)",
+    return {"preregistration": "docs/PREREG_CORNERSTONE2_TRIVIALITY_CONTROL.md (v3)",
             "endpoint": f"contract_fulfillment_score >= {HARD}, strict cases, "
                         f"ANSWER stratum, paired exact McNemar",
             "datasets": per,
@@ -382,6 +498,10 @@ def main() -> None:
         print(f"\n===== {ds} (expected n={d['n_expected']}) =====")
         for pb in d["gates"]["problems"]:
             print(f"  GATE FAIL: {pb}")
+        rp = d.get("reproduction") or {}
+        if rp.get("identical") is not None:
+            print(f"  reproduction vs {rp['reference']}: "
+                  f"{rp['identical']}/{rp['n_paired']} byte-identical -- {rp['status']}")
         for nt in d["gates"]["notes"]:
             print(f"  note: {nt}")
         for stratum, blk in d["strata"].items():
@@ -397,11 +517,14 @@ def main() -> None:
                       f"diff {c['diff_a_minus_b']:+.4f} "
                       f"CI[{c['ci95_diff'][0]:+.4f},{c['ci95_diff'][1]:+.4f}]  "
                       f"{c['a_better']}/{c['b_better']}  p={c['mcnemar_exact_p']:.3g}")
-            for tag in ("R_structural", "R_positional"):
-                r = blk.get(tag)
-                if r and "R_point" in r:
-                    print(f"      {tag}: {r['R_point']} CI {r['R_ci95']} "
-                          f"(best {r['best_arm']}, reportable={r['R_reportable']})")
+            for tag, r in (blk.get("recovery") or {}).items():
+                if r and r.get("R_point") is not None:
+                    print(f"      R[{tag}] = {r['R_point']} CI {r['R_ci95']}  "
+                          f"floor {r['floor']}  best {r['best_arm']}  "
+                          f"reportable={r['R_reportable']}"
+                          + ("" if r["complete"] else "  INCOMPLETE FAMILY"))
+                elif r:
+                    print(f"      R[{tag}]: {r.get('status', 'not computable')}")
 
     print(f"\nPRIMARY (4K, answer stratum): "
           f"{json.dumps(data['primary_verdict'], indent=2)}")

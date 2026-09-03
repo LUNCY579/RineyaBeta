@@ -57,8 +57,15 @@ _LEXICAL: dict[int, torch.Tensor] = {}
 _STATE = {"enabled": False, "window": 16, "patched": False, "lexical_seed": None}
 
 LEXICAL_SELECTS = ("lexical-idf", "lexical-naive", "lexical-doc-bm25")
+# Arms that need a per-case weight vector installed by the caller. `random-doc` is
+# the GRANULARITY-MATCHED floor: the same record segmentation as lexical-doc-bm25
+# with the BM25 signal replaced by one uniform draw per record. Without it,
+# lexical-doc-bm25's advantage is measured against a floor matched to the 7-token
+# contiguity of the per-position arms rather than to its own ~64-token record
+# contiguity, and roughly ten points of the difference is granularity, not signal.
+WEIGHTED_SELECTS = LEXICAL_SELECTS + ("random-doc",)
 # Every arm whose selection consumes the RNG and therefore needs a per-case seed.
-STOCHASTIC_SELECTS = ("random", "random-prepool") + LEXICAL_SELECTS
+STOCHASTIC_SELECTS = ("random", "random-prepool") + WEIGHTED_SELECTS
 
 
 # --------------------------------------------------------------------------- #
@@ -374,7 +381,7 @@ class SignificanceLayer(DynamicLayer):
             s = torch.cat([s.to(k.device).float(), pad], dim=-1)
 
         lex = None
-        if pol.select in LEXICAL_SELECTS:
+        if pol.select in WEIGHTED_SELECTS:
             lex = _lexical_for(self.layer_idx, b, n_kv, n, k.device)
 
         idx = select_keep(s, n, pol, k.device, lexical=lex)
@@ -571,7 +578,7 @@ def select_keep(s: torch.Tensor, n: int, policy, device,
         middle = torch.where(torch.isfinite(middle), r,
                              torch.full_like(r, float("-inf")))
 
-    if policy.select in LEXICAL_SELECTS:
+    if policy.select in WEIGHTED_SELECTS:
         if lexical is None:
             raise ValueError(
                 f"select={policy.select!r} requires a lexical weight tensor; "

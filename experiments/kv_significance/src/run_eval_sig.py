@@ -85,6 +85,64 @@ def normalize(record: dict) -> dict:
 DOC_HEADER = re.compile(r"\[doc_[^\]\n]*\]")
 
 
+def segment_records(prompt: str, enc) -> list[tuple[list[int], list[int]]]:
+    """Split the prompt into the records it already prints. [(token idx, ids)].
+
+    STOP AT THE END OF THE EVIDENCE BLOCK. The last record otherwise runs to the end
+    of the prompt and swallows `<QUESTION> ... </QUESTION>`, so the trailing
+    distractor contains the query verbatim and wins BM25 on every single case -- an
+    arm that always selects the last document while looking like retrieval. Caught by
+    scripts/kv/test_lexical_select.py, which asserts on the SCORE of the
+    answer-bearing record and not merely on the gold span surviving: the span
+    survived anyway, at 1.000, so the span-retention proxy could not see the bug.
+
+    Shared by lexical-doc-bm25 and its granularity-matched floor random-doc, so the
+    two cannot drift apart in how they carve the prompt -- the only thing that may
+    differ between them is the score each record gets.
+    """
+    offsets = enc["offset_mapping"]
+    ids = enc["input_ids"]
+    heads = [m.start() for m in DOC_HEADER.finditer(prompt)]
+    tail = prompt.find("</FACTUAL_EVIDENCE>")
+    end = tail if heads and tail > heads[0] else len(prompt)
+    heads = [h for h in heads if h < end]
+    if len(heads) < 2:
+        raise ValueError(
+            f"found {len(heads)} record delimiters before the end of the evidence "
+            f"block; the record-level arms need the prompt's own structure")
+    bounds = heads + [end]
+    segments = []
+    for i in range(len(heads)):
+        a0, z0 = bounds[i], bounds[i + 1]
+        tok_ids = [j for j, (a, z) in enumerate(offsets)
+                   if a >= a0 and z <= z0 and z > a]
+        if tok_ids:
+            segments.append((tok_ids, [ids[j] for j in tok_ids]))
+    if not segments:
+        raise ValueError("record segmentation produced nothing")
+    return segments
+
+
+def doc_random_weights(prompt: str, enc) -> torch.Tensor:
+    """THE GRANULARITY-MATCHED FLOOR: one uniform draw per record, broadcast.
+
+    `random-prepool` is matched to the per-position arms' 7-token pooled contiguity,
+    not to the ~64-token record contiguity that lexical-doc-bm25 gets for free by
+    keeping whole records. Measured on the campaign's own prompts, a record-uniform
+    floor retains the required phrase at 0.224 against random-prepool's 0.126, so
+    roughly ten points of the document arm's apparent advantage is granularity
+    rather than lexical signal. This arm is that granularity with the signal removed,
+    and it is the floor the document arm is scored against.
+
+    Uses the RNG seeded per case by the caller, exactly as the other floors do.
+    """
+    segments = segment_records(prompt, enc)
+    w = torch.zeros(len(enc["input_ids"]), dtype=torch.float32)
+    for (tok_ids, _), d in zip(segments, torch.rand(len(segments))):
+        w[tok_ids] = float(d)
+    return w
+
+
 def doc_bm25_weights(prompt: str, enc, question: str, tok,
                      k1: float = 1.5, b: float = 0.75) -> torch.Tensor:
     """THE STRONGEST TRIVIAL BASELINE: BM25 over the prompt's own record structure.
@@ -109,37 +167,8 @@ def doc_bm25_weights(prompt: str, enc, question: str, tok,
     `question` field, the prompt's token ids and the delimiters the prompt already
     prints. It never touches `support_document_ids`, the gold phrase or the depth.
     """
-    offsets = enc["offset_mapping"]
+    segments = segment_records(prompt, enc)
     ids = enc["input_ids"]
-    heads = [m.start() for m in DOC_HEADER.finditer(prompt)]
-    if len(heads) < 2:
-        raise ValueError(
-            f"doc-bm25 found {len(heads)} record delimiters; this arm is only "
-            f"defined for prompts that print their own record structure")
-    # STOP AT THE END OF THE EVIDENCE BLOCK. The last record otherwise runs to the
-    # end of the prompt and swallows `<QUESTION> ... </QUESTION>`, so the trailing
-    # distractor contains the query verbatim and wins BM25 on every single case --
-    # an arm that always selects the last document while looking like retrieval.
-    # Caught by the unit test below, which is why it asserts on the SCORE of the
-    # answer-bearing record and not merely on the span surviving: the span survived
-    # anyway, and the bug would have shipped.
-    tail = prompt.find("</FACTUAL_EVIDENCE>")
-    end = tail if tail > (heads[0] if heads else 0) else len(prompt)
-    heads = [h for h in heads if h < end]
-    if len(heads) < 2:
-        raise ValueError(
-            f"doc-bm25 found {len(heads)} record delimiters before the end of the "
-            f"evidence block; this arm needs the prompt's record structure")
-    bounds = heads + [end]
-    segments = []
-    for i in range(len(heads)):
-        s, e = bounds[i], bounds[i + 1]
-        tok_ids = [j for j, (a, z) in enumerate(offsets) if a >= s and z <= e and z > a]
-        if tok_ids:
-            segments.append((tok_ids, [ids[j] for j in tok_ids]))
-    if not segments:
-        raise ValueError("doc-bm25 segmented the prompt into nothing")
-
     qids = set(tok(question, add_special_tokens=False)["input_ids"])
     qids |= set(tok(" " + question, add_special_tokens=False)["input_ids"])
     n_docs = len(segments)
@@ -294,8 +323,9 @@ def main() -> None:
                          "adapter). Merged before evaluation and recorded in the "
                          "manifest with its base model and step.")
     ap.add_argument("--select", choices=("significance", "random", "streaming",
-                                         "random-prepool", "lexical-idf",
-                                         "lexical-naive", "lexical-doc-bm25"),
+                                         "random-prepool", "random-doc",
+                                         "lexical-idf", "lexical-naive",
+                                         "lexical-doc-bm25"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
                          "same number of positions chosen uniformly -- the only "
@@ -453,7 +483,7 @@ def main() -> None:
         if args.select in sig.STOCHASTIC_SELECTS:
             torch.manual_seed(args.seed + i)
         sig.reset_scores()
-        if args.select in sig.LEXICAL_SELECTS:
+        if args.select in sig.WEIGHTED_SELECTS:
             # reset_scores() clears the previous case's mask, so this must come
             # after it. Installing before would leave every case ranking on an
             # empty mask and raising -- loudly, which is the intent, but the
@@ -465,7 +495,7 @@ def main() -> None:
                     f"{rec.get('id')!r} has none. The lexical control is only "
                     f"defined for datasets that carry the question separately "
                     f"from the prompt.")
-            if args.select == "lexical-doc-bm25":
+            if args.select in ("lexical-doc-bm25", "random-doc"):
                 # A SECOND encoding, for offsets only. The generation path's `enc`
                 # is left exactly as every committed run produced it -- adding
                 # return_offsets_mapping to it would change the object handed to
@@ -481,7 +511,9 @@ def main() -> None:
                         f"({len(off['input_ids'])} ids) does not match the "
                         f"generation encoding ({n_prompt} ids); the doc-bm25 "
                         f"weights would address the wrong positions")
-                w = doc_bm25_weights(prompt, off, q, tok)
+                w = (doc_bm25_weights(prompt, off, q, tok)
+                     if args.select == "lexical-doc-bm25"
+                     else doc_random_weights(prompt, off))
             else:
                 w = lexical_weights(enc["input_ids"][0].tolist(), q, tok, args.select)
             sig.set_lexical_weights(w)

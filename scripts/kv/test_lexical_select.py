@@ -287,6 +287,24 @@ try:
     check("weights are per-record, not per-token",
           len(hot) > len(span),
           f"{len(hot)} positions at the top weight (whole record, not just the span)")
+
+    # --- the granularity-matched floor uses the SAME segmentation -------------
+    segs = _res.segment_records(doc_prompt, e)
+    check("segmentation stops at </FACTUAL_EVIDENCE>",
+          all(not any("QUESTION" in _tok.decode([ids[j]]) for j in tid)
+              for tid, _ in segs),
+          "no record may contain the question, or it wins BM25 unconditionally")
+    torch.manual_seed(5)
+    wr = _res.doc_random_weights(doc_prompt, e)
+    lv = {round(float(wr[j]), 6) for tid, _ in segs for j in tid}
+    check("random-doc is constant WITHIN each record",
+          all(len({round(float(wr[j]), 6) for j in tid}) == 1 for tid, _ in segs),
+          "a per-position draw would not be granularity-matched")
+    check("random-doc differs BETWEEN records", len(lv) == len(segs),
+          f"{len(lv)} distinct levels over {len(segs)} records")
+    check("random-doc carries no lexical signal",
+          _res.segment_records(doc_prompt, e) == segs,
+          "same carving as arm G, only the score differs")
 except Exception as _e:                                   # noqa: BLE001
     check("doc-bm25 weight construction", False, f"raised {type(_e).__name__}: {_e}")
 

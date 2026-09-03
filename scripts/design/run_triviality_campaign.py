@@ -57,6 +57,7 @@ ARMS = [
     ("A", "c4-sig-b6f0",         "significance",     7, 6, 0),
     ("G", "c4-lex-docbm25-b6f0", "lexical-doc-bm25", 7, 6, 0),
     ("N", "c4-random-prepool",   "random-prepool",   7, 6, 0),
+    ("Ndoc", "c4-random-doc",    "random-doc",       7, 6, 0),
     ("D", "c4-lex-idf-b6f0",     "lexical-idf",      7, 6, 0),
     ("B", "c4-sig-centred",      "significance",     7, 3, 3),
     ("C", "c4-sig-nopool",       "significance",     1, None, None),
@@ -97,7 +98,7 @@ def wait_for_gpu(limit_mib: int, wait: bool) -> None:
         time.sleep(120)
 
 
-def cmd_for(arm, dataset: str, limit: int, tag: str) -> list[str]:
+def cmd_for(arm, dataset: str, limit: int, tag: str, cap: int) -> list[str]:
     _id, _stem, select, pool, back, fwd = arm
     c = [sys.executable, str(RUNNER),
          "--dataset", dataset,
@@ -110,7 +111,7 @@ def cmd_for(arm, dataset: str, limit: int, tag: str) -> list[str]:
          "--select", select,
          "--seed", str(SEED),
          "--limit", str(limit),
-         "--cap-mib", str(CAP_MIB),
+         "--cap-mib", str(cap),
          "--tag", tag]
     if pool > 1:
         # BOTH or NEITHER -- Policy raises otherwise, and the reason it raises is
@@ -146,7 +147,7 @@ def run_arm(arm, dataset: str, limit: int, tag: str, args) -> bool:
         if not args.dry_run:
             for p in out_dir.glob("*"):
                 p.unlink()
-    cmd = cmd_for(arm, dataset, limit, tag)
+    cmd = cmd_for(arm, dataset, limit, tag, args.cap_mib)
     print(f"\n[{arm[0]}] {tag}__{dataset}\n  {' '.join(cmd[1:])}", flush=True)
     if args.dry_run:
         return True
@@ -212,6 +213,12 @@ def main() -> None:
                     help="do NOT delete a failed arm's artifacts (debugging only)")
     ap.add_argument("--wait", action="store_true",
                     help="poll until the GPU frees instead of refusing to start")
+    ap.add_argument("--cap-mib", type=int, default=CAP_MIB,
+                    help="hard ceiling on THIS process's GPU allocation. Lower it "
+                         "when another project holds part of the card: the cap keeps "
+                         "the failure inside our own budget instead of taking the "
+                         "device down under someone else's job. Recorded in every "
+                         "manifest, so all arms in a cell must share it.")
     ap.add_argument("--min-free-check", type=int, default=3000,
                     help="refuse to start while more than this many MiB are in use")
     args = ap.parse_args()
