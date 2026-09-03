@@ -143,6 +143,73 @@ def doc_random_weights(prompt: str, enc) -> torch.Tensor:
     return w
 
 
+def protect_instructions(w: torch.Tensor, prompt: str, enc) -> torch.Tensor:
+    """Give every position BEFORE the evidence block the top weight.
+
+    WHY. The record-level selectors write 0.0 everywhere outside the evidence block,
+    so the system prompt survives only through the four attention sinks -- 4 of 71
+    positions. On rag_long that is catastrophic and measurable: the abstention
+    instruction and its verbatim refusal sentence live only there, and
+    lexical-doc-bm25 scores 0.0000 against the uncompressed model's 0.8214 on the
+    abstain stratum, 0/138 discordant.
+
+    That is a defect of the selector, not a limit of compression, and it is repaired
+    by a rule any deployed system would apply anyway: never evict the instructions.
+    The rule stays BLIND -- it reads the position of the prompt's own evidence
+    delimiter and nothing about the answer.
+    """
+    heads = list(DOC_HEADER.finditer(prompt))
+    if not heads:
+        return w
+    first = heads[0].start()
+    offsets = enc["offset_mapping"]
+    for j, (a, z) in enumerate(offsets):
+        if z <= first:
+            w[j] = 1.0
+    return w
+
+
+def oracle_support_weights(prompt: str, enc, support_ids) -> torch.Tensor:
+    """MECHANISM PROBE, NOT AN ARM. Keep only the gold record(s).
+
+    This reads `support_document_ids` and is therefore an ORACLE. It may never be
+    reported as a control or compared to the mechanism as though it were one. Its
+    only job is to put a CEILING on selection: if keeping exactly the right record
+    and discarding all ~64 distractors does not beat the uncompressed model, then
+    the uncompressed model's remaining failures are not caused by distractor
+    interference and no selector -- clever or trivial -- can fix them.
+
+    Raises if the support record cannot be located, rather than silently degrading
+    to an all-zero field, which would make the oracle a random arm wearing an
+    oracle's name.
+    """
+    segments = segment_records(prompt, enc)
+    want = [str(x) for x in (support_ids or [])]
+    if not want:
+        # An ABSTAIN case has no gold record by construction, so "keep only the gold
+        # record" is legitimately "keep none of the evidence". That is not the silent
+        # degradation the guard below exists to catch, and it cannot contaminate the
+        # probe's conclusion: this probe is only ever read on the ANSWER stratum,
+        # where every case has a support id (verified 144/144 and 72/72).
+        return torch.zeros(len(enc["input_ids"]), dtype=torch.float32)
+    offsets = enc["offset_mapping"]
+    heads = [m for m in DOC_HEADER.finditer(prompt)]
+    w = torch.zeros(len(enc["input_ids"]), dtype=torch.float32)
+    hit = 0
+    for tok_ids, _ in segments:
+        a0 = offsets[tok_ids[0]][0]
+        header = next((m.group(0) for m in heads if m.start() <= a0 <= m.end() + 4), "")
+        if not header:
+            header = next((m.group(0) for m in heads if m.start() >= a0), "")
+        if any(sid in header for sid in want):
+            w[tok_ids] = 1.0
+            hit += 1
+    if hit == 0:
+        raise ValueError(f"oracle-support: none of {want} matched a printed record "
+                         f"header; the oracle would be an all-zero field")
+    return w
+
+
 def doc_bm25_weights(prompt: str, enc, question: str, tok,
                      k1: float = 1.5, b: float = 0.75) -> torch.Tensor:
     """THE STRONGEST TRIVIAL BASELINE: BM25 over the prompt's own record structure.
@@ -338,7 +405,8 @@ def main() -> None:
     ap.add_argument("--select", choices=("significance", "random", "streaming",
                                          "random-prepool", "random-doc",
                                          "lexical-idf", "lexical-naive",
-                                         "lexical-doc-bm25"),
+                                         "lexical-doc-bm25",
+                                         "lexical-doc-bm25-sys", "oracle-support"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
                          "same number of positions chosen uniformly -- the only "
@@ -508,7 +576,8 @@ def main() -> None:
                     f"{rec.get('id')!r} has none. The lexical control is only "
                     f"defined for datasets that carry the question separately "
                     f"from the prompt.")
-            if args.select in ("lexical-doc-bm25", "random-doc"):
+            if args.select in ("lexical-doc-bm25", "lexical-doc-bm25-sys",
+                               "random-doc", "oracle-support"):
                 # A SECOND encoding, for offsets only. The generation path's `enc`
                 # is left exactly as every committed run produced it -- adding
                 # return_offsets_mapping to it would change the object handed to
@@ -524,9 +593,15 @@ def main() -> None:
                         f"({len(off['input_ids'])} ids) does not match the "
                         f"generation encoding ({n_prompt} ids); the doc-bm25 "
                         f"weights would address the wrong positions")
-                w = (doc_bm25_weights(prompt, off, q, tok)
-                     if args.select == "lexical-doc-bm25"
-                     else doc_random_weights(prompt, off))
+                if args.select in ("lexical-doc-bm25", "lexical-doc-bm25-sys"):
+                    w = doc_bm25_weights(prompt, off, q, tok)
+                    if args.select == "lexical-doc-bm25-sys":
+                        w = protect_instructions(w, prompt, off)
+                elif args.select == "oracle-support":
+                    w = oracle_support_weights(prompt, off,
+                                               rec.get("support_document_ids"))
+                else:
+                    w = doc_random_weights(prompt, off)
             else:
                 w = lexical_weights(enc["input_ids"][0].tolist(), q, tok, args.select)
             sig.set_lexical_weights(w)

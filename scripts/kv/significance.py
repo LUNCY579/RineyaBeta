@@ -56,14 +56,21 @@ _COUNTS: dict[int, torch.Tensor] = {}
 _LEXICAL: dict[int, torch.Tensor] = {}
 _STATE = {"enabled": False, "window": 16, "patched": False, "lexical_seed": None}
 
-LEXICAL_SELECTS = ("lexical-idf", "lexical-naive", "lexical-doc-bm25")
+LEXICAL_SELECTS = ("lexical-idf", "lexical-naive", "lexical-doc-bm25",
+                   "lexical-doc-bm25-sys")
 # Arms that need a per-case weight vector installed by the caller. `random-doc` is
 # the GRANULARITY-MATCHED floor: the same record segmentation as lexical-doc-bm25
 # with the BM25 signal replaced by one uniform draw per record. Without it,
 # lexical-doc-bm25's advantage is measured against a floor matched to the 7-token
 # contiguity of the per-position arms rather than to its own ~64-token record
 # contiguity, and roughly ten points of the difference is granularity, not signal.
-WEIGHTED_SELECTS = LEXICAL_SELECTS + ("random-doc",)
+WEIGHTED_SELECTS = LEXICAL_SELECTS + ("random-doc", "oracle-support")
+# `oracle-support` is NOT an experimental arm and must never be reported as one: it
+# reads support_document_ids, so it is an ORACLE. It exists to bound the question
+# "how much of the uncompressed model's failure is fixable by better selection at
+# all?" -- keep only the gold record and nothing else. If a blind selector already
+# matches it, selection is saturated and the residual failures are the model's.
+ORACLE_SELECTS = ("oracle-support",)
 # Every arm whose selection consumes the RNG and therefore needs a per-case seed.
 STOCHASTIC_SELECTS = ("random", "random-prepool") + WEIGHTED_SELECTS
 
