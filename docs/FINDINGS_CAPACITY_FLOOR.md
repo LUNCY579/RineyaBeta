@@ -187,6 +187,26 @@ weaker here than the same phrase at 4K; that caveat was registered in advance.
 
 ---
 
+## 5a. The gain does not depend on where the evidence sits
+
+Every result above places the evidence at depth 0.5. `rag_long4k_d0.1` and `_d0.9`
+put it near the start and near the end. At B = 256, n = 200 per depth:
+
+| depth | uncompressed | B = 256 | diff | win/lose | p |
+|---|---:|---:|---:|---:|---:|
+| 0.1 | 0.7950 | 0.8250 | **+3.0 pp** | 6/0 | 0.031 |
+| 0.5 | 0.8600 | 0.9000 | **+4.0 pp** | 9/1 | 0.021 |
+| 0.9 | 0.8200 | 0.8700 | **+5.0 pp** | 10/0 | 0.0020 |
+
+Significantly above the uncompressed model at all three, with zero or one regression
+each. A retrieval-based selector should be depth-invariant — it finds the record by
+its text, not its position — and it is. This also rules out a lingering positional
+explanation for the gain: if compression were helping by shortening the distance
+between evidence and question, depth 0.9 (evidence already adjacent) would gain least.
+It gains most.
+
+---
+
 ## 6. An attempt at the instruction term that does NOT work, recorded so it is not retried
 
 The formula has an `|instructions|` term, and the corpus offers what looks like a free
