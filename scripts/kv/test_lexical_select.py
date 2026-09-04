@@ -418,6 +418,73 @@ check("sink mass does not bleed into slots 4..10 through the pool",
       not any(4 <= x <= 10 for x in kept_m),
       f"bled into {[x for x in kept_m if 4 <= x <= 10]}")
 
+# --------------------------------------------------------------------------- #
+print("\n11. the structure-free chunker and the instruction guard")
+# --------------------------------------------------------------------------- #
+
+try:
+    doc_prompt2 = ("<|im_start|>system\nBe concise. When the evidence does not "
+                   "support the answer, reply exactly: \"I don't know based on the "
+                   "available information.\"<|im_end|>\n<|im_start|>user\n"
+                   "<FACTUAL_EVIDENCE>\n"
+                   + "".join(f"[doc_{i} | trust=standard] Filler record {i} about "
+                             f"unrelated topic number {i}.\n" for i in range(40))
+                   + "[doc_gold | trust=standard] The launch date for PineRelay 1225 "
+                     "is June 9, 2032.\n"
+                   + "".join(f"[doc_z{i} | trust=standard] More filler {i}.\n"
+                             for i in range(20))
+                   + "</FACTUAL_EVIDENCE>\n<QUESTION>\nWhen does PineRelay 1225 "
+                     "launch?\n</QUESTION><|im_end|>\n<|im_start|>assistant\n")
+    q2 = "When does PineRelay 1225 launch?"
+    e2 = _tok(doc_prompt2, return_offsets_mapping=True)
+    ids2 = e2["input_ids"]
+
+    ilen = _res.instruction_prefix_len(doc_prompt2, e2)
+    first_doc = doc_prompt2.find("[doc_0")
+    want = sum(1 for a, z in e2["offset_mapping"] if z <= first_doc and z > a)
+    check("instruction_prefix_len counts tokens before the first record",
+          ilen == want and ilen > 0, f"{ilen} vs {want}")
+
+    wp = _res.protect_instructions(torch.zeros(len(ids2)), doc_prompt2, e2)
+    check("protect_instructions raises exactly that prefix to 1.0",
+          bool((wp[:ilen] >= 0.999).all()) and bool((wp[ilen:] == 0).all()),
+          f"{int((wp >= 0.999).sum())} positions at 1.0, prefix is {ilen}")
+
+    CH = 32
+    cw = _res.chunk_bm25_weights(doc_prompt2, e2, q2, _tok, CH)
+    check("chunk-bm25 needs no delimiters and produces weight",
+          float(cw.max()) >= 0.999, f"max weight {float(cw.max()):.4f}")
+
+    # the query's own chunk must be excluded from candidacy
+    qat = doc_prompt2.rfind(q2)
+    qtok = [j for j, (a, z) in enumerate(e2["offset_mapping"]) if z > qat and z > a]
+    check("the query's own chunk is not a candidate",
+          float(cw[min(qtok):].max()) == 0.0,
+          f"weight on the query tail: {float(cw[min(qtok):].max()):.4f}")
+
+    # the top-weighted chunk must overlap the gold record
+    gat = doc_prompt2.find("[doc_gold")
+    gend = doc_prompt2.find("\n", gat)
+    gtok = [j for j, (a, z) in enumerate(e2["offset_mapping"])
+            if a >= gat and z <= gend and z > a]
+    top = [j for j in range(len(ids2)) if cw[j] >= 0.999]
+    check("the top chunk overlaps the gold record",
+          bool(set(top) & set(gtok)), f"{len(top)} top positions, gold is {gtok[:3]}...")
+
+    # chunks are FIXED SIZE -- the defining property against the record arm
+    lev = {}
+    for j in range(len(ids2)):
+        lev.setdefault(round(float(cw[j]), 6), []).append(j)
+    sizes = {len(v) for k, v in lev.items() if k > 0}
+    check("non-zero weight levels come in fixed-size blocks",
+          all(s % CH == 0 for s in sizes), f"block sizes {sorted(sizes)} vs chunk {CH}")
+
+    # doc-bm25 and chunk-bm25 must be DIFFERENT selectors
+    dw = _res.doc_bm25_weights(doc_prompt2, e2, q2, _tok)
+    check("chunk and record selectors differ", not torch.equal(cw, dw))
+except Exception as _e2:                                   # noqa: BLE001
+    check("structure-free chunker", False, f"raised {type(_e2).__name__}: {_e2}")
+
 print()
 if FAILED:
     print(f"{len(FAILED)} FAILED: {FAILED}")

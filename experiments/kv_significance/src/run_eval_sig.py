@@ -143,6 +143,95 @@ def doc_random_weights(prompt: str, enc) -> torch.Tensor:
     return w
 
 
+def instruction_prefix_len(prompt: str, enc) -> int:
+    """Tokens before the first evidence delimiter: system prompt plus preamble.
+
+    NOT a constant. It is 100 tokens on 532 of the 600 rag_long4k prompts and
+    131-140 on the other 68, because those carry TRUSTED_PROCEDURES content instead
+    of "(none)". A fixed `--sinks 100` would therefore under-protect 68 cases and
+    quietly reintroduce the abstention collapse on exactly the prompts that carry
+    the most instruction text.
+    """
+    heads = list(DOC_HEADER.finditer(prompt))
+    if not heads:
+        return 0
+    first = heads[0].start()
+    return sum(1 for a, z in enc["offset_mapping"] if z <= first and z > a)
+
+
+def _bm25(segments, qids, k1: float, b: float) -> list[float]:
+    """BM25 (Lucene non-negative IDF) of each segment against the question tokens.
+
+    Shared by the delimiter-based and the structure-free selectors so the two differ
+    ONLY in how the prompt is carved, never in how a carve is scored.
+    """
+    n_docs = len(segments)
+    df: Counter = Counter()
+    for _, toks in segments:
+        for t in set(toks):
+            df[t] += 1
+    avgdl = sum(len(t) for _, t in segments) / n_docs
+    out = []
+    for _, toks in segments:
+        tf = Counter(toks)
+        dl = len(toks)
+        s = 0.0
+        for q in qids:
+            f = tf.get(q, 0)
+            if f:
+                idf = math.log(1 + (n_docs - df[q] + 0.5) / (df[q] + 0.5))
+                s += idf * f * (k1 + 1) / (f + k1 * (1 - b + b * dl / avgdl))
+        out.append(s)
+    return out
+
+
+def chunk_bm25_weights(prompt: str, enc, question: str, tok, chunk: int = 64,
+                       k1: float = 1.5, b: float = 0.75) -> torch.Tensor:
+    """STRUCTURE-FREE. Fixed-size chunks, no delimiters, same BM25.
+
+    The delimiter-based selector only works because rag_long prints
+    `[doc_... | trust=... ]` headers. Most prompts do not. This carves the prompt into
+    fixed `chunk`-token windows instead and is otherwise identical, so the comparison
+    isolates exactly one thing: whether the method needs the prompt to mark its own
+    records.
+
+    The chunk containing the question is excluded from scoring. That is not a use of
+    prompt structure -- it is what any retriever does with its own query, and the
+    question string is already an input to this function. Without it the query chunk
+    always ranks first, which is harmless for the ordering (max-normalisation is
+    rank-preserving and the question sits inside the protected recent window) but
+    wastes ranked slots on the straddling chunk.
+    """
+    ids = enc["input_ids"]
+    n = len(ids)
+    qspan = None
+    qat = prompt.rfind(question)
+    if qat >= 0:
+        offs = enc["offset_mapping"]
+        qtok = [j for j, (a, z) in enumerate(offs) if z > qat and z > a]
+        if qtok:
+            qspan = (min(qtok), n)
+    segments = []
+    for i in range(0, n, chunk):
+        idx = list(range(i, min(i + chunk, n)))
+        if qspan and idx[-1] >= qspan[0]:
+            continue                      # the query's own chunk is not a candidate
+        segments.append((idx, [ids[j] for j in idx]))
+    if len(segments) < 2:
+        raise ValueError(f"chunk-bm25: {len(segments)} chunks at chunk={chunk}; "
+                         f"the prompt is too short for this selector")
+    qids = set(tok(question, add_special_tokens=False)["input_ids"])
+    qids |= set(tok(" " + question, add_special_tokens=False)["input_ids"])
+    scores = _bm25(segments, qids, k1, b)
+    top = max(scores)
+    w = torch.zeros(n, dtype=torch.float32)
+    if top > 0:
+        for (idx, _), s in zip(segments, scores):
+            if s > 0:
+                w[idx] = s / top
+    return w
+
+
 def protect_instructions(w: torch.Tensor, prompt: str, enc) -> torch.Tensor:
     """Give every position BEFORE the evidence block the top weight.
 
@@ -239,32 +328,10 @@ def doc_bm25_weights(prompt: str, enc, question: str, tok,
     ids = enc["input_ids"]
     qids = set(tok(question, add_special_tokens=False)["input_ids"])
     qids |= set(tok(" " + question, add_special_tokens=False)["input_ids"])
-    n_docs = len(segments)
-    df: Counter = Counter()
-    for _, toks in segments:
-        for t in set(toks):
-            df[t] += 1
-    avgdl = sum(len(t) for _, t in segments) / n_docs
-
-    scores = []
-    for _, toks in segments:
-        tf = Counter(toks)
-        dl = len(toks)
-        s = 0.0
-        for q in qids:
-            f = tf.get(q, 0)
-            if f:
-                # Lucene's non-negative IDF, not the textbook Robertson/Sparck-Jones
-                # form log((N-df+0.5)/(df+0.5)), which goes to -1.95 for a term
-                # present in every record and would penalise ubiquitous question
-                # words instead of merely ignoring them. Measured on these prompts,
-                # swapping in the textbook form changes top-1 on 76/200 cases and
-                # collapses gold top-1 retrieval from 144/144 to 88/144, so the
-                # non-negative variant is the defensible choice and is named here
-                # rather than left to look like the textbook one.
-                idf = math.log(1 + (n_docs - df[q] + 0.5) / (df[q] + 0.5))
-                s += idf * f * (k1 + 1) / (f + k1 * (1 - b + b * dl / avgdl))
-        scores.append(s)
+    # Delegated to the shared scorer so the delimiter-based and structure-free arms
+    # cannot drift in their BM25 while claiming to differ only in segmentation.
+    # Verified identical to the inline version this replaced on all 600 prompts.
+    scores = _bm25(segments, qids, k1, b)
     top = max(scores)
     w = torch.zeros(len(ids), dtype=torch.float32)
     if top > 0:
@@ -393,6 +460,17 @@ def main() -> None:
     # refused -- which is how three runs died. A cap makes the failure mode
     # "slower, or an honest OOM inside our own process" instead of "the card is
     # exhausted and whatever else is running dies too". Slower beats dying.
+    ap.add_argument("--chunk-tokens", type=int, default=64,
+                    help="chunk size for the structure-free lexical-chunk-bm25 "
+                         "selectors. Only meaningful for those arms.")
+    ap.add_argument("--protect-instructions", action="store_true",
+                    help="INSTRUCTION SINKS: extend the always-kept prefix from the "
+                         "4 attention sinks to cover the whole instruction span, so "
+                         "it is held OUTSIDE the ranked budget instead of competing "
+                         "with the evidence through a tie-break. The span is measured "
+                         "per case -- it is 100 tokens on most rag_long prompts but "
+                         "131-140 where TRUSTED_PROCEDURES is non-empty, so a fixed "
+                         "--sinks would under-protect exactly those.")
     ap.add_argument("--cap-mib", type=float, default=None,
                     help="hard ceiling on this process's GPU allocation, in MiB. "
                          "Enforced via torch.cuda.set_per_process_memory_fraction, "
@@ -406,7 +484,10 @@ def main() -> None:
                                          "random-prepool", "random-doc",
                                          "lexical-idf", "lexical-naive",
                                          "lexical-doc-bm25",
-                                         "lexical-doc-bm25-sys", "oracle-support"),
+                                         "lexical-doc-bm25-sys",
+                                         "lexical-chunk-bm25",
+                                         "lexical-chunk-bm25-sys",
+                                         "oracle-support"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
                          "same number of positions chosen uniformly -- the only "
@@ -515,6 +596,7 @@ def main() -> None:
 
     rows, t0 = [], time.time()
     kept_ratios = []
+    sinks_used = []
     recents_used = []
     windows_used = []
     for i, rec in enumerate(records):
@@ -542,7 +624,18 @@ def main() -> None:
             # different mechanism than the caller asked for.
             if args.select == "streaming":
                 recent = max(0, budget - (0 if args.no_sinks else args.sinks))
-            policy = sig.Policy(budget=budget, sinks=args.sinks, recent=recent,
+            # INSTRUCTION SINKS. The always-kept prefix is normally 4 attention
+            # sinks. With --protect-instructions it is extended to cover the whole
+            # instruction span, measured PER CASE, so the instructions are held
+            # outside the ranked budget instead of competing with the evidence
+            # through a 1e-3 tie-break. Measured per case because the span is 100
+            # tokens on 532 of 600 rag_long4k prompts and 131-140 on the rest.
+            case_sinks = args.sinks
+            if args.protect_instructions:
+                _off = tok(prompt, return_offsets_mapping=True)
+                case_sinks = max(args.sinks, instruction_prefix_len(prompt, _off))
+            sinks_used.append(case_sinks)
+            policy = sig.Policy(budget=budget, sinks=case_sinks, recent=recent,
                                 protect_sinks=not args.no_sinks, pool=args.pool,
                                 pool_back=args.pool_back, pool_fwd=args.pool_fwd,
                                 grow=args.grow, grow_max=args.grow_max,
@@ -577,6 +670,7 @@ def main() -> None:
                     f"defined for datasets that carry the question separately "
                     f"from the prompt.")
             if args.select in ("lexical-doc-bm25", "lexical-doc-bm25-sys",
+                               "lexical-chunk-bm25", "lexical-chunk-bm25-sys",
                                "random-doc", "oracle-support"):
                 # A SECOND encoding, for offsets only. The generation path's `enc`
                 # is left exactly as every committed run produced it -- adding
@@ -593,15 +687,17 @@ def main() -> None:
                         f"({len(off['input_ids'])} ids) does not match the "
                         f"generation encoding ({n_prompt} ids); the doc-bm25 "
                         f"weights would address the wrong positions")
-                if args.select in ("lexical-doc-bm25", "lexical-doc-bm25-sys"):
+                if args.select.startswith("lexical-doc-bm25"):
                     w = doc_bm25_weights(prompt, off, q, tok)
-                    if args.select == "lexical-doc-bm25-sys":
-                        w = protect_instructions(w, prompt, off)
+                elif args.select.startswith("lexical-chunk-bm25"):
+                    w = chunk_bm25_weights(prompt, off, q, tok, args.chunk_tokens)
                 elif args.select == "oracle-support":
                     w = oracle_support_weights(prompt, off,
                                                rec.get("support_document_ids"))
                 else:
                     w = doc_random_weights(prompt, off)
+                if args.select.endswith("-sys"):
+                    w = protect_instructions(w, prompt, off)
             else:
                 w = lexical_weights(enc["input_ids"][0].tolist(), q, tok, args.select)
             sig.set_lexical_weights(w)
@@ -671,7 +767,13 @@ def main() -> None:
         "cap_mib": args.cap_mib,
         "adapter_base": (adapter_cfg or {}).get("base_model_name_or_path"),
         "budget": args.budget, "keep_frac": args.keep_frac,
-        "sinks": 0 if args.no_sinks else args.sinks,
+        "sinks": (0 if args.no_sinks else
+                  (round(sum(sinks_used) / len(sinks_used), 2) if sinks_used
+                   else args.sinks)),
+        "sinks_flag": args.sinks,
+        "protect_instructions": bool(args.protect_instructions),
+        "chunk_tokens": (args.chunk_tokens
+                         if "chunk" in args.select else None),
         "recent_flag": args.recent,
         "recent": (round(sum(recents_used) / len(recents_used), 2)
                    if recents_used else args.recent),
