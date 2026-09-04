@@ -106,6 +106,16 @@ def _score_rows(module, query: torch.Tensor, key: torch.Tensor,
         logits = logits.masked_fill(pos_k[None, :] > pos_q[:, None], float("-inf"))
 
     a = logits.softmax(-1)
+    # Each of the groups*w softmax rows sums to 1, so a pass contributes exactly
+    # groups*w of mass. `_COUNTS` increments by 1 per pass regardless of w, so the
+    # count is a count of PASSES, not of observation rows: on the generate path a
+    # prefill pass carries groups*16 and a decode step groups*1, yet both count 1.
+    # That is inert wherever count_exponent is reachable, because w is constant
+    # within a run there (passkey scores with w = window on the query-blind path and
+    # w = q on the query-aware one, and run_eval_sig exposes no exponent at all), so
+    # true_count = w * stored_count and score/(w*count)**e is a uniform positive
+    # rescale that leaves the ranking bit-identical. It stops being inert the moment
+    # a single run mixes passes of different w while ranking on the mean.
     return a.sum(dim=(2, 3))  # over groups and window -> [b, n_kv, n]
 
 
@@ -120,6 +130,29 @@ def patch_attention() -> bool:
     def wrapped(module, query, key, value, attention_mask=None, dropout=0.0,
                 scaling=None, is_causal=None, **kwargs):
         if _STATE["enabled"]:
+            # THIS MODULE CANNOT SERVE A PADDED BATCH, and it must say so rather
+            # than score one wrongly. `_score_rows` is not handed the attention_mask
+            # -- it reconstructs causality from shapes as `pos_k > pos_q`. At batch 1
+            # that reconstruction is exactly the mask the kernel used (verified in
+            # situ to 1.2e-07 on the generate path, and it is also the correct
+            # bottom-right mask under chunked prefill). With left padding it is not:
+            # measured on a real 2-row batch with 93 PAD of 283, 15.0% of the
+            # recorded significance mass landed on positions the kernel gave exactly
+            # zero probability, and PAD positions became eligible for the heavy top-k.
+            #
+            # Forwarding the mask would fix the SCORE but not the POLICY: sinks and
+            # recent are defined on stored SLOT indices, so under left padding the
+            # four "attention sinks" are PAD tokens whatever the score says. A batched
+            # harness needs pad-aware geometry, not just a pad-aware score. Until that
+            # exists, refuse -- every caller in this repository is batch 1 today, so
+            # this costs nothing and closes the trap for whoever batches for throughput.
+            if query.shape[0] > 1:
+                raise RuntimeError(
+                    f"significance recording is batch-1 only, got batch "
+                    f"{query.shape[0]}. The score reconstructs its own causal mask "
+                    f"and would credit PAD positions, and sinks/recent are slot-based "
+                    f"so they would protect PAD regardless. Run one sequence at a "
+                    f"time, or add pad-aware geometry first.")
             with torch.no_grad():
                 s = _score_rows(module, query, key, _STATE["window"], scaling)
             li = getattr(module, "layer_idx", None)

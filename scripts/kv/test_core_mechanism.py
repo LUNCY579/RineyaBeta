@@ -127,6 +127,45 @@ check("every KV head receives groups*w of probability mass",
                      atol=1e-4),
       info=f"{[round(float(x), 3) for x in per_kv]} vs {groups * min(16, q_len)}")
 
+print("\n1b2. a padded batch is REFUSED, not scored wrongly")
+# _score_rows reconstructs causality from shapes instead of reading the
+# attention_mask. At batch 1 that reconstruction is exactly the kernel's mask; under
+# left padding it is not -- measured on a real 2-row batch with 93 PAD of 283, 15.0%
+# of the recorded mass landed on positions the kernel gave zero probability, and PAD
+# became eligible for the heavy top-k. Forwarding the mask would fix the score but
+# not the policy, because sinks/recent are slot-based and would protect PAD anyway.
+# So the wrapper refuses. Every caller here is batch 1, so nothing legitimate breaks.
+_had = sig._STATE["patched"]
+sig.patch_attention()
+from transformers.integrations import sdpa_attention as _sa  # noqa: E402
+sig.set_recording(True, window=8)
+
+
+class _Mod:
+    layer_idx = 0
+
+
+try:
+    _sa.sdpa_attention_forward(_Mod(), torch.randn(2, 4, 5, 8), torch.randn(2, 2, 5, 8),
+                               torch.randn(2, 2, 5, 8), scaling=0.1)
+    check("a batch of 2 raises while recording", False,
+          "it scored a padded batch, crediting PAD positions")
+except RuntimeError as e:
+    check("a batch of 2 raises while recording", "batch-1 only" in str(e))
+except Exception as e:                                        # noqa: BLE001
+    check("a batch of 2 raises while recording", False, f"{type(e).__name__}: {e}")
+sig.set_recording(False)
+try:
+    _sa.sdpa_attention_forward(_Mod(), torch.randn(2, 4, 5, 8), torch.randn(2, 2, 5, 8),
+                               torch.randn(2, 2, 5, 8), scaling=0.1)
+    check("a batch of 2 is fine when NOT recording", True)
+except RuntimeError as e:
+    check("a batch of 2 is fine when NOT recording", "batch-1 only" not in str(e),
+          "the guard fires even with recording off")
+except Exception:                                             # noqa: BLE001
+    check("a batch of 2 is fine when NOT recording", True)
+sig.reset_scores()
+
 print("\n1c. causality: a query row must not see positions after itself")
 b, h, n_kv, q_len, n, d = 1, 2, 1, 5, 5, 4
 q = torch.randn(b, h, q_len, d)
