@@ -146,6 +146,40 @@ floor and §1 must be retracted, however well the knee itself lands.
 
 ---
 
+## 3b. AMENDMENT, 2026-09-04, written before any 16K budget was run: the sharpest
+## consequence of the formula
+
+If the floor is set by **absolute span lengths** rather than by a compression ratio,
+it must not move when the prompt gets longer. The spans that have to fit are the
+instruction prefix (~104 tokens) and one evidence record (~63); neither depends on
+how many distractors surround them. On `rag_long16k` the prompt is 16,500 tokens
+instead of 4,226, but the instruction prefix and the record are the same size.
+
+**F3 — the floor is absolute, not proportional.** The 16K floor is the same
+`B* ≈ 196` tokens as at 4K. Since the prompt is ~4× longer, that is an **84×**
+cache reduction rather than 21.6×, and quality at B = 256 should still be at or
+above the uncompressed model.
+
+This is the strongest and most falsifiable claim the formula makes, and it is
+cheap: budgets **B ∈ {512, 256, 196, 160}** on `rag_long16k`, n = 100, against the
+existing `long16k-off` reference. Both segmentations (`-doc-` and `-line-`) at
+B = 256 to check the boundary-awareness result transfers too.
+
+* **F3 confirmed** if the 16K knee is in {160, 196, 256}, matching 4K.
+* **F3 refuted** if the knee scales with prompt length — a proportional floor would
+  put it near 196 × (16500/4226) ≈ 765, i.e. B = 512 would already be below it.
+
+The competing account is that what matters is the *fraction* of context retained, in
+which case B = 256 at 16K (1.6% kept) should fail where B = 256 at 4K (6.1% kept)
+succeeded. The two accounts differ by a factor of four and cannot both be right.
+
+**Power caveat, stated in advance.** n = 100 at 16K gives 72 answer and 28 abstain
+cases against 432/168 at 4K, so a small degradation may not reach significance.
+"Not significantly below uncompressed" at 16K is therefore weaker evidence than the
+same phrase at 4K, and the knee is read from the pooled column with that in mind.
+
+---
+
 ## 4. What this cannot settle
 
 One model, one dataset, one depth, one seed, one recent_frac. The floor is a property
