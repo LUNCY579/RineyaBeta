@@ -187,7 +187,37 @@ weaker here than the same phrase at 4K; that caveat was registered in advance.
 
 ---
 
-## 6. What this does not show
+## 6. An attempt at the instruction term that does NOT work, recorded so it is not retried
+
+The formula has an `|instructions|` term, and the corpus offers what looks like a free
+test of it: 532 of the 600 prompts carry a 100-token instruction prefix and 68 carry
+136 on average, which should push their floor from 196 to (4 + 136 + 63)/0.85 = 238.
+The long-instruction group should therefore break at a *higher* budget.
+
+It does not, and the comparison is worthless rather than negative:
+
+| B | short instructions (n = 532) | long instructions (n = 68) |
+|---:|---:|---:|
+| 256 | 0.8759 (+5.8 pp, 32/1) | 0.5441 (+1.5 pp, 2/1) |
+| 196 | 0.8647 (+4.7 pp, 31/6) | 0.4853 (−4.4 pp, 0/3) |
+| 160 | 0.7820 (−3.6 pp, 21/40 *) | 0.5147 (−1.5 pp, 1/2) |
+| 128 | 0.5695 (−24.8 pp, 7/139 *) | 0.4853 (−4.4 pp, 5/8) |
+
+**Two defects, either one fatal.** The groups are *confounded*: the long-instruction
+prompts are exactly the ones carrying `TRUSTED_PROCEDURES` content, so instruction
+length is perfectly correlated with question type, and their uncompressed baseline is
+0.53 against 0.82. And the test is *underpowered*: 68 cases yield 2–8 discordant pairs,
+so the long column never reaches significance at any budget, including B = 128 where
+the short column has fallen 24.8 pp.
+
+A null from an instrument this weak is not evidence that the instruction term is
+absent, and it would have been easy to report it as one. **The instruction term
+remains untested**, and testing it needs prompts that vary instruction length while
+holding the task fixed.
+
+---
+
+## 7. What this does not show
 
 1. One dataset family, one model, one depth, one seed. **The claim under test is
    the formula, not the number 196.** The length axis is now tested (§5) and the
