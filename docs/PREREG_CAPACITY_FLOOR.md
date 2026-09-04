@@ -105,6 +105,47 @@ Partial artifacts are deleted, not analysed.
 
 ---
 
+## 3a. AMENDMENT, 2026-09-03, written while the sweep was still running and before
+## any of its numbers had been read: F1 as stated is CONFOUNDED
+
+The recent window is `0.15 · B`, and the question tail is **29 tokens**. So the
+budget at which the recent window stops covering the question is
+
+```
+0.15 · B ≥ 29   ⟹   B ≥ 193
+```
+
+which is **within 3 tokens of the predicted floor of 196**. The two accounts are
+therefore not separated by the Stage-1 sweep at all:
+
+* **A — span capacity.** Below B\*, the budget cannot hold instructions (104) plus
+  one record (63), so evidence or instructions get evicted.
+* **B — query truncation.** Below B\*, the recent window is shorter than the
+  question, so part of the question itself is evicted. The question region carries
+  no BM25 weight (segmentation stops at `</FACTUAL_EVIDENCE>`), so nothing else
+  protects it.
+
+Both predict a knee at ~195. Confirming F1 would therefore confirm *nothing about
+which mechanism is responsible*, and I would have reported a formula that happens to
+coincide with an artefact of the recent-window policy. This was not noticed when §1
+was written; it is recorded here rather than discovered afterwards.
+
+**Stage 4 — the separating arm.** Re-run the two budgets furthest below the floor,
+**B ∈ {128, 96}**, with a FIXED `--recent 32` instead of `--recent-frac 0.15`, so the
+question is fully covered at every budget. Everything else identical.
+
+* **A predicts** little or no recovery: 32 + 4 + 104 + 63 = 203 still exceeds 128, so
+  the spans still do not fit and quality stays down.
+* **B predicts** substantial recovery at both budgets, because the question is now
+  intact and the only thing that changed is query coverage.
+
+**Scoring.** A is supported if pooled quality at B = 128 with fixed recent stays
+significantly below uncompressed; B is supported if it is no longer significantly
+below. If both budgets recover fully, F1's arithmetic is the wrong account of the
+floor and §1 must be retracted, however well the knee itself lands.
+
+---
+
 ## 4. What this cannot settle
 
 One model, one dataset, one depth, one seed, one recent_frac. The floor is a property
