@@ -407,6 +407,21 @@ class SignificanceLayer(DynamicLayer):
         # Gather the RAW accumulated score, not the ranking key -- writing the
         # mean back would compound the division on every subsequent round.
         raw = _SCORES.get(self.layer_idx)
+        if raw is not None and raw.shape[-1] < n:
+            # PAD THE RAW SCORE THE SAME WAY `s` WAS PADDED, or this guard can never
+            # fire on the self-compressing path -- which is the only path that has a
+            # lag, so `raw.shape[-1] == n` was false exactly when it mattered and the
+            # RANKING KEY got written back instead. At count_exponent 0 that is
+            # harmless because the ranking key IS the sum; at exponent 1 it divided
+            # the accumulator by the observation count on every eviction, compounding:
+            # a raw 8.0 with count 4 became 2.0, then 0.5, then 0.125 over three
+            # rounds. Zero is the right pad -- a position no query has attended to yet
+            # has accumulated no score, and _gather_counts pads its counts with zero
+            # to match, so ranked_scores gives 0 / max(0,1)**e = 0.
+            raw = torch.cat(
+                [raw.to(k.device).float(),
+                 torch.zeros(raw.shape[0], raw.shape[1], n - raw.shape[-1],
+                             device=k.device, dtype=torch.float32)], dim=-1)
         if raw is not None and raw.shape[-1] == n:
             kept = raw.gather(2, idx)
         else:

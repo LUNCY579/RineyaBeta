@@ -458,6 +458,42 @@ check("counts survived the eviction at the cache length",
       sig._COUNTS[0].shape[-1] == B5, info=f"{sig._COUNTS[0].shape[-1]} vs {B5}")
 
 
+def writeback(exponent, rounds=3):
+    """What _SCORES holds on a surviving slot after each eviction."""
+    sig.reset_scores()
+    pol = sig.Policy(budget=B5, sinks=2, recent=4, pool=1, select="significance",
+                     count_exponent=exponent)
+    lay = sig.SignificanceLayer(layer_idx=0, policy=pol)
+    k = torch.zeros(1, KV5, N5, D5)
+    k[..., 0] = torch.arange(N5, dtype=torch.float32)
+    lay.update(k, k.clone())
+    sig._SCORES[0] = torch.full((1, KV5, N5), 8.0)     # raw accumulated 8.0
+    sig._COUNTS[0] = torch.full((1, KV5, N5), 4.0)     # observed 4 times -> mean 2.0
+    seen = []
+    for r in range(rounds):
+        t = torch.zeros(1, KV5, 1, D5)
+        t[..., 0] = float(N5 + r)
+        lay.update(t, t.clone())
+        seen.append(round(float(sig._SCORES[0][0, 0, 0]), 6))
+    return seen
+
+
+# REGRESSION for a second bug in the same function, found by this audit. _evict
+# means to write the RAW accumulator back -- its own comment says "writing the mean
+# back would compound the division on every subsequent round" -- but it guarded on
+# `raw.shape[-1] == n`, which is false precisely on the self-compressing path,
+# because that is the only path with a score lag. So the RANKING KEY was written
+# back instead. At exponent 0 that is harmless (the ranking key IS the sum); at
+# exponent 1 a raw 8.0 with count 4 became 2.0, then 0.5, then 0.125.
+# No committed number was affected: every run that set a non-zero exponent used
+# SignificanceCache(policy=None) and evicted through compress(), which writes the
+# raw correctly, and every self-compressing run used exponent 0.
+for e in (0.0, 1.0):
+    seen = writeback(e)
+    check(f"exponent {e:.0f}: the RAW accumulator is written back, not the ranking key",
+          all(abs(x - 8.0) < 1e-6 for x in seen), info=f"{seen}")
+
+
 # --------------------------------------------------------------------------- #
 # 6. compress() and the self-compressing path must agree
 # --------------------------------------------------------------------------- #
