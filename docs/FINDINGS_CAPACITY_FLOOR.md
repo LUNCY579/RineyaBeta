@@ -94,6 +94,13 @@ answer stratum (18/39) despite identical abstention.
 It is post-hoc and labelled so, which is why it was checked out-of-sample: on the
 disjoint records 200–599, **0.7475 → 0.7900, +4.3 pp, 19/2, p = 2.2e−04.**
 
+**And newlines have a *lower* floor.** At B = 160, where record segmentation has
+already broken (−3.3 pp, 22/42, significantly below), newlines are still at parity
+(−0.2 pp, 19/20, not significant). The two cross over: records win above the floor,
+newlines survive further below it. That is what the capacity account predicts — the
+floor scales with the size of the unit you are forced to keep whole, and a line is
+smaller than a record.
+
 So the requirement is not a bespoke schema — it is *boundary awareness*. Newlines are
 universal in real prompts and suffice. That converts a benchmark-scoped result into a
 method with a stated, checkable precondition: the text must have lines, and a
@@ -124,11 +131,49 @@ sinks require `B > |instructions| + recent`.
 
 ---
 
-## 5. What this does not show
+## 5. The floor is absolute, not proportional — so longer context buys more compression
 
-1. One dataset, one model, one depth, one seed. **The claim under test is the
-   formula, not the number 196.** A corpus with 300-token records should put the
-   floor near (4 + 104 + 300)/0.85 = 480. Untested, and the obvious next step.
+`rag_long16k` has the same instruction prefix and the same 63-token records as
+`rag_long4k`; only the number of distractors changes, and the prompt grows from
+4,226 to 16,520 tokens. **F3, registered before these runs, predicted the floor
+would not move.**
+
+| B | reduction | answer | pooled | |
+|---:|---:|---:|---:|---|
+| 512 | 32× | −2.8 pp (0/2) | −2.0 pp (0/2, p = 0.50) | |
+| **256** | **65×** | −2.8 pp (1/3) | **−2.0 pp (1/3, p = 0.63)** | knee |
+| 196 | 84× | −15.3 pp (1/12) | −9.0 pp (3/12, p = 0.035) | * |
+| 160 | 103× | −36.1 pp (0/26) | −27.0 pp (0/27) | * |
+| 128 | 129× | −72.2 pp (0/52) | −53.0 pp (1/54) | * |
+
+**The 16K knee is B = 256 against 196 at 4K** — inside the preregistered
+confirmation band {160, 196, 256}. **F3 confirmed.**
+
+The competing account is refuted with room to spare. A floor set by the *fraction*
+of context retained would scale with prompt length to ≈ 765 tokens, which would put
+B = 512 well below it; B = 512 is not below it at all (0/2 discordant). The floor
+moved by a factor of 1.3, not 4.
+
+The practical consequence is the useful one: **because the floor is a fixed number
+of tokens and the prompt is not, the achievable compression ratio grows with
+context length.** 16.5× at 4K where quality *rises* by +5.3 pp; **65× at 16K** with
+no significant loss. The same selector, the same budget in tokens.
+
+Two honest qualifications. The knee did drift upward slightly (196 → 256), so the
+floor is *nearly* absolute rather than exactly so — at 16K there are 187 distractors
+against 65, and BM25's graded weights spread over more records. And n = 100 at 16K
+gives 72 answer cases and few discordant pairs, so "not significantly below" is
+weaker here than the same phrase at 4K; that caveat was registered in advance.
+
+---
+
+## 6. What this does not show
+
+1. One dataset family, one model, one depth, one seed. **The claim under test is
+   the formula, not the number 196.** The length axis is now tested (§5) and the
+   floor held; the *record-length* axis is not — a corpus with 300-token records
+   should put the floor near (4 + 104 + 300)/0.85 = 480, and that remains the
+   sharpest untested consequence.
 2. B = 256 is the best of six swept points, not a fitted optimum; the true peak lies
    somewhere in [196, 512] and was not bracketed more finely.
 3. Newline segmentation is post-hoc. Its out-of-sample confirmation is real but it
