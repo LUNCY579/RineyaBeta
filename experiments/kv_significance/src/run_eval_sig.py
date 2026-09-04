@@ -185,6 +185,50 @@ def _bm25(segments, qids, k1: float, b: float) -> list[float]:
     return out
 
 
+def line_bm25_weights(prompt: str, enc, question: str, tok, chunk: int = 0,
+                      k1: float = 1.5, b: float = 0.75) -> torch.Tensor:
+    """DELIMITER-FREE BUT BOUNDARY-AWARE: segment on newlines, then BM25.
+
+    Fixed-size chunking fails on this task -- at B=256 it scores 0.7222 on the answer
+    stratum against the record-based selector's 0.8056, because a 64-token window
+    splits a 63-token record and the answer is cut in half. But the record-based
+    selector needs the prompt to print `[doc_...]` headers, which is a property of
+    this benchmark and not of prompts in general.
+
+    Newlines are the middle ground: they are universal in real prompts, they are not
+    a bespoke schema, and they track the boundaries an author actually wrote. This
+    selector needs no schema at all -- only that the text has lines.
+    """
+    ids = enc["input_ids"]
+    n = len(ids)
+    offs = enc["offset_mapping"]
+    qat = prompt.rfind(question)
+    bounds = [0] + [i + 1 for i, ch in enumerate(prompt) if ch == chr(10)] + [len(prompt)]
+    bounds = sorted(set(bounds))
+    segments = []
+    for a0, z0 in zip(bounds, bounds[1:]):
+        if z0 - a0 < 2:
+            continue
+        if qat >= 0 and z0 > qat:
+            continue                      # the query's own line is not a candidate
+        tid = [j for j, (a, z) in enumerate(offs) if a >= a0 and z <= z0 and z > a]
+        if tid:
+            segments.append((tid, [ids[j] for j in tid]))
+    if len(segments) < 2:
+        raise ValueError(f"line-bm25: {len(segments)} lines; this selector needs a "
+                         f"prompt with line structure")
+    qids = set(tok(question, add_special_tokens=False)["input_ids"])
+    qids |= set(tok(" " + question, add_special_tokens=False)["input_ids"])
+    scores = _bm25(segments, qids, k1, b)
+    top = max(scores)
+    w = torch.zeros(n, dtype=torch.float32)
+    if top > 0:
+        for (tid, _), sc in zip(segments, scores):
+            if sc > 0:
+                w[tid] = sc / top
+    return w
+
+
 def chunk_bm25_weights(prompt: str, enc, question: str, tok, chunk: int = 64,
                        k1: float = 1.5, b: float = 0.75) -> torch.Tensor:
     """STRUCTURE-FREE. Fixed-size chunks, no delimiters, same BM25.
@@ -487,6 +531,8 @@ def main() -> None:
                                          "lexical-doc-bm25-sys",
                                          "lexical-chunk-bm25",
                                          "lexical-chunk-bm25-sys",
+                                         "lexical-line-bm25",
+                                         "lexical-line-bm25-sys",
                                          "oracle-support"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
@@ -671,6 +717,7 @@ def main() -> None:
                     f"from the prompt.")
             if args.select in ("lexical-doc-bm25", "lexical-doc-bm25-sys",
                                "lexical-chunk-bm25", "lexical-chunk-bm25-sys",
+                               "lexical-line-bm25", "lexical-line-bm25-sys",
                                "random-doc", "oracle-support"):
                 # A SECOND encoding, for offsets only. The generation path's `enc`
                 # is left exactly as every committed run produced it -- adding
@@ -689,6 +736,8 @@ def main() -> None:
                         f"weights would address the wrong positions")
                 if args.select.startswith("lexical-doc-bm25"):
                     w = doc_bm25_weights(prompt, off, q, tok)
+                elif args.select.startswith("lexical-line-bm25"):
+                    w = line_bm25_weights(prompt, off, q, tok)
                 elif args.select.startswith("lexical-chunk-bm25"):
                     w = chunk_bm25_weights(prompt, off, q, tok, args.chunk_tokens)
                 elif args.select == "oracle-support":

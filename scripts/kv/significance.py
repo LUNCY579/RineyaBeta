@@ -58,7 +58,8 @@ _STATE = {"enabled": False, "window": 16, "patched": False, "lexical_seed": None
 
 LEXICAL_SELECTS = ("lexical-idf", "lexical-naive", "lexical-doc-bm25",
                    "lexical-doc-bm25-sys", "lexical-chunk-bm25",
-                   "lexical-chunk-bm25-sys")
+                   "lexical-chunk-bm25-sys", "lexical-line-bm25",
+                   "lexical-line-bm25-sys")
 # Arms that need a per-case weight vector installed by the caller. `random-doc` is
 # the GRANULARITY-MATCHED floor: the same record segmentation as lexical-doc-bm25
 # with the BM25 signal replaced by one uniform draw per record. Without it,
