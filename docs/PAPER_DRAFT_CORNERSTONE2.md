@@ -1,5 +1,40 @@
 # Evidence lives in spans: the unit of KV-cache eviction, and why its reach must be derived
 
+> # ⚠ THIS DRAFT IS SUPERSEDED IN ITS CENTRAL CLAIM. DO NOT SUBMIT AS WRITTEN.
+>
+> Work on 2026-09-03/04 ran the control this paper never had, and the paper did not
+> survive it. Read
+> [`FINDINGS_TRIVIALITY_CONTROL.md`](FINDINGS_TRIVIALITY_CONTROL.md),
+> [`FINDINGS_COMPRESSION_IMPROVES_QUALITY.md`](FINDINGS_COMPRESSION_IMPROVES_QUALITY.md)
+> and [`FINDINGS_CAPACITY_FLOOR.md`](FINDINGS_CAPACITY_FLOOR.md) before this document.
+>
+> **What no longer holds.**
+> 1. **The directionality claim does not transfer to natural language at length.**
+>    Causal (6,0) against centred (3,3) is −1.4 pp — the *wrong sign* — at both 4K
+>    (1/3, p = 0.625) and 16K (0/1, p = 1). On passkey the same contrast is 1.000
+>    against 0.028. The ablation had never been run on language; it has now.
+>    Removing pooling entirely costs nothing measurable either (+2.1 pp, p = 0.45).
+> 2. **The accumulated-attention score is replaceable, then beaten.** A
+>    document-level BM25 selector needing *no forward pass* equals it at keep 0.25
+>    (0.8472 vs 0.8056, p = 0.070; exactly equal at 16K) and beats it decisively
+>    where compression bites: **0/39 and 0/54 discordant pairs** at keep 0.05 and
+>    0.02, p = 3.6e−12 and 1.1e−16.
+> 3. **"Accumulated importance" is the wrong description.** O11 already showed the
+>    score is query similarity. Its one demonstrated advantage over a lexical index
+>    is retaining *instruction* text the query never lexically matches.
+>
+> **What replaced it, and it is a stronger result than the one being withdrawn.**
+> BM25 over the prompt's own segments plus one rule — never evict the instructions —
+> beats the **uncompressed** model by **+5.3 pp** at a 16.5× cache reduction
+> (34/2, p = 1.9e−08, n = 600), replicating out-of-sample at +6.0 pp. The capacity
+> floor is `4 + 0.15·B + |instructions| + |record| ≤ B`, predicted at 196 tokens and
+> observed at 196; because it is absolute rather than proportional, the achievable
+> ratio grows with context: **65× at 16K and 129× at 32K** with no significant loss.
+>
+> Every number *in this draft* still reproduces — `verify_claims.py` is 252/252 and
+> the passkey results are untouched. The retrieval findings stand. It is the
+> language-side framing and the causal-window claim that do not.
+
 **Submission draft, revised 2026-08-29** (first draft 2026-08-24). Cornerstone 2 of the
 Rineya significance-matrix programme. Companion to `PAPER_DRAFT_SIGNIFICANCE.md`
 (cornerstone 1, branch `main`), which introduces the significance matrix itself. This
