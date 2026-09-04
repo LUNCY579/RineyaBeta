@@ -537,6 +537,45 @@ got_cmp = [set(int(x) for x in lay_cmp.keys[0, h, :, 0].tolist()) for h in range
 check("both paths keep the same positions in every KV head", got_self == got_cmp,
       f"head diffs: {[sorted(a ^ b)[:6] for a, b in zip(got_self, got_cmp) if a != b][:2]}")
 
+print("\n6b. the bookkeeping guards around compress()")
+
+# ranked_scores must refuse a non-zero exponent without counts rather than quietly
+# returning the sum, which is how count_exponent went inert here once before.
+sig.reset_scores()
+sig._SCORES[0] = torch.rand(1, 2, 40)
+check("exponent 0 without counts is fine (the sum IS the ranking key)",
+      sig.ranked_scores(0, 0.0) is not None)
+for label, cnt in (("absent", None), ("mis-shaped", torch.ones(1, 2, 33))):
+    sig._COUNTS.pop(0, None)
+    if cnt is not None:
+        sig._COUNTS[0] = cnt
+    try:
+        sig.ranked_scores(0, 1.0)
+        check(f"exponent 1 with {label} counts raises", False,
+              "it returned the raw sum, making count_exponent silently inert")
+    except RuntimeError as e:
+        check(f"exponent 1 with {label} counts raises", "silently inert" in str(e))
+
+# compress() must source its write-back from the dict it was GIVEN, and must zero
+# non-finite entries the way _evict does.
+sig.reset_scores()
+pol6b = sig.Policy(budget=24, sinks=4, recent=4, pool=1, select="significance")
+lay6b = sig.SignificanceLayer(layer_idx=0, policy=None)
+kk = torch.zeros(1, 2, 80, 4)
+kk[..., 0] = torch.arange(80, dtype=torch.float32)
+lay6b.update(kk, kk.clone())
+external = {0: torch.rand(1, 2, 80)}
+external[0][..., 5] = float("inf")               # a +inf placeholder to be cleaned
+sig._SCORES[0] = torch.full((1, 2, 80), -1.0)    # globals hold a DIFFERENT value
+sig._COUNTS[0] = torch.ones(1, 2, 80)
+sig.compress(_Bag([lay6b]), pol6b, scores=external)
+check("compress() writes back from its own scores argument, not the globals",
+      bool((external[0] != -1.0).all()),
+      "it sourced the write-back from the module globals")
+check("compress() zeroes non-finite entries, as _evict does",
+      bool(torch.isfinite(external[0]).all()),
+      "a +inf placeholder would win the next heavy top-k unconditionally")
+
 sig.reset_scores()
 lay_bad = sig.SignificanceLayer(layer_idx=0, policy=pol6)
 lay_bad.update(base_k.clone(), base_k.clone())

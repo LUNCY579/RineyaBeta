@@ -281,7 +281,18 @@ def ranked_scores(layer_idx: int, exponent: float = 0.0):
         return s
     c = _COUNTS.get(layer_idx)
     if c is None or c.shape != s.shape:
-        return s
+        # RAISE, do not return the sum. Returning it makes count_exponent inert
+        # with no error, which is the exact defect this module has already shipped
+        # once: _gather_counts dropped the counts, ranked_scores fell back to the
+        # sum, and the published ranking was of a different quantity than the flag
+        # said. A caller that wants the sum can ask for exponent 0.
+        raise RuntimeError(
+            f"layer {layer_idx}: exponent {exponent} requested but the observation "
+            f"counts are "
+            + ("absent" if c is None else f"shaped {tuple(c.shape)} against scores "
+                                          f"{tuple(s.shape)}")
+            + ". Returning the raw sum here would make count_exponent silently "
+              "inert. Call reset_scores() between sequences, or pass exponent 0.")
     return s / c.clamp_min(1.0).pow(exponent)
 
 
@@ -948,9 +959,17 @@ def compress(cache, policy: Policy, scores: dict[int, torch.Tensor] | None = Non
         gather_idx = idx.unsqueeze(-1).expand(-1, -1, -1, d)
         layer.keys = k.gather(2, gather_idx).contiguous()
         layer.values = v.gather(2, gather_idx).contiguous()
-        raw = _SCORES.get(li)
-        scores[li] = ((raw if raw is not None and raw.shape[-1] == n else s)
-                      .gather(2, idx).contiguous())
+        # Read the raw from the dict this function was GIVEN. Reaching into the
+        # module globals means a caller that passes its own `scores` gets a write-back
+        # sourced from somewhere else -- the two silently disagree.
+        raw = scores.get(li)
+        kept = (raw if raw is not None and raw.shape[-1] == n else s).gather(2, idx)
+        # Zero non-finite entries, as _evict does. A +inf lag placeholder that
+        # survives into the next round wins the heavy top-k unconditionally, which
+        # is the "sinks + newest chunk" degradation the guards elsewhere exist to
+        # prevent; compress() was the one path that let it through.
+        scores[li] = torch.where(torch.isfinite(kept), kept,
+                                 torch.zeros_like(kept)).contiguous()
         _gather_counts(li, idx, n)
 
         report["layers"] += 1
