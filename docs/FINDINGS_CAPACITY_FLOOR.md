@@ -159,6 +159,26 @@ of tokens and the prompt is not, the achievable compression ratio grows with
 context length.** 16.5× at 4K where quality *rises* by +5.3 pp; **65× at 16K** with
 no significant loss. The same selector, the same budget in tokens.
 
+### The length series, one budget
+
+Holding **B = 256 fixed** and varying only the context length:
+
+| dataset | prompt | reduction | pooled vs uncompressed | n |
+|---|---:|---:|---:|---:|
+| rag_long4k | 4,226 | **16.5×** | **+5.3 pp** (34/2, p = 1.9e−08) | 600 |
+| rag_long16k | 16,520 | **65×** | −2.0 pp (1/3, p = 0.63) | 100 |
+| rag_long32k | 32,902 | **129×** | −2.0 pp (3/4, p = 1.0) | 50 |
+
+Same selector, same 256-token budget. The reduction ratio grows 8× across the
+series while the measured cost stays flat at about −2 pp and never reaches
+significance. At the shortest length it is not a cost at all but a gain.
+
+The 32K cell is a probe, not a result: n = 50 with 38 answer cases and 7 discordant
+pairs has almost no power, and the uncompressed model never abstains at that length
+(0.0000), so the pooled figure is carried by the answer stratum. It is reported
+because its point estimate sits exactly where the 16K cell's does, which is what the
+absolute-floor account predicts and what a proportional account cannot accommodate.
+
 Two honest qualifications. The knee did drift upward slightly (196 → 256), so the
 floor is *nearly* absolute rather than exactly so — at 16K there are 187 distractors
 against 65, and BM25's graded weights spread over more records. And n = 100 at 16K
