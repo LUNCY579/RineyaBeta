@@ -409,6 +409,139 @@ def real_model_section():
           info=f"{sig.cache_bytes(c)} bytes")
 
 
+# --------------------------------------------------------------------------- #
+# 5. count_exponent MUST be live on the self-compressing path
+# --------------------------------------------------------------------------- #
+
+# This is a REGRESSION test for a bug this repository already shipped once:
+# _gather_counts used to drop _COUNTS whenever its length did not match the cache,
+# which is the normal case on the self-compressing path (the score vector is padded
+# for the decode lag, the counts were not). ranked_scores then silently fell back to
+# the raw sum, so count_exponent was inert and the ranking was wrong with no error.
+# The fix must stay fixed: e=0 and e=1 have to select DIFFERENT positions.
+print("\n5. count_exponent is live end to end, not silently ignored")
+N5, KV5, D5, B5 = 120, 2, 4, 20
+
+
+def evict_with(exponent):
+    sig.reset_scores()
+    pol = sig.Policy(budget=B5, sinks=2, recent=4, pool=1, select="significance",
+                     count_exponent=exponent)
+    lay = sig.SignificanceLayer(layer_idx=0, policy=pol)
+    k = torch.zeros(1, KV5, N5, D5)
+    k[..., 0] = torch.arange(N5, dtype=torch.float32)
+    lay.update(k, k.clone())
+    # position 50: large SUM but observed many times -> small mean
+    # position 60: smaller sum but observed once     -> large mean
+    s = torch.full((1, KV5, N5), 0.10)
+    c = torch.ones(1, KV5, N5)
+    s[..., 50] = 9.0
+    c[..., 50] = 100.0        # mean 0.09, below the 0.10 background
+    s[..., 60] = 1.0
+    c[..., 60] = 1.0          # mean 1.00, far above
+    sig._SCORES[0] = s
+    sig._COUNTS[0] = c
+    t = torch.zeros(1, KV5, 1, D5)
+    t[..., 0] = float(N5)
+    lay.update(t, t.clone())
+    return set(int(x) for x in lay.keys[0, 0, :, 0].tolist())
+
+
+keep_sum = evict_with(0.0)      # rank on the raw sum
+keep_mean = evict_with(1.0)     # rank on sum / count
+check("ranking on the SUM keeps the high-sum position 50", 50 in keep_sum)
+check("ranking on the MEAN drops it", 50 not in keep_mean)
+check("ranking on the MEAN keeps the high-mean position 60", 60 in keep_mean)
+check("the two exponents therefore select differently", keep_sum != keep_mean,
+      "count_exponent is inert -- the documented regression is back")
+check("counts survived the eviction at the cache length",
+      sig._COUNTS[0].shape[-1] == B5, info=f"{sig._COUNTS[0].shape[-1]} vs {B5}")
+
+
+# --------------------------------------------------------------------------- #
+# 6. compress() and the self-compressing path must agree
+# --------------------------------------------------------------------------- #
+
+print("\n6. the standalone compress() selects what the self-compressing path does")
+
+
+class _Bag:                      # the minimal duck-typed cache compress() expects
+    def __init__(self, layers):
+        self.layers = layers
+
+
+sig.reset_scores()
+pol6 = sig.Policy(budget=32, sinks=4, recent=6, pool=7, pool_back=6, pool_fwd=0,
+                  select="significance")
+N6, KV6, D6 = 200, 3, 4
+base_k = torch.zeros(1, KV6, N6, D6)
+base_k[..., 0] = torch.arange(N6, dtype=torch.float32)
+sc6 = torch.rand(1, KV6, N6)
+
+lay_self = sig.SignificanceLayer(layer_idx=0, policy=pol6)
+lay_self.update(base_k.clone(), base_k.clone())
+sig._SCORES[0] = sc6.clone()
+sig._COUNTS[0] = torch.ones(1, KV6, N6)
+# self-compressing: the cache has grown by one un-scored token when it evicts, and
+# select_keep therefore sees n = N6 + 1. Reproduce that exactly for compress().
+t6 = torch.zeros(1, KV6, 1, D6)
+t6[..., 0] = float(N6)
+lay_self.update(t6, t6.clone())
+got_self = [set(int(x) for x in lay_self.keys[0, h, :, 0].tolist()) for h in range(KV6)]
+
+sig.reset_scores()
+lay_cmp = sig.SignificanceLayer(layer_idx=0, policy=pol6)
+lay_cmp.update(torch.cat([base_k, t6], dim=2).clone(),
+               torch.cat([base_k, t6], dim=2).clone())
+pad = torch.full((1, KV6, 1), float("inf"))
+sig._SCORES[0] = torch.cat([sc6.clone(), pad], dim=-1)
+sig._COUNTS[0] = torch.ones(1, KV6, N6 + 1)
+sig.compress(_Bag([lay_cmp]), pol6)
+got_cmp = [set(int(x) for x in lay_cmp.keys[0, h, :, 0].tolist()) for h in range(KV6)]
+check("both paths keep the same positions in every KV head", got_self == got_cmp,
+      f"head diffs: {[sorted(a ^ b)[:6] for a, b in zip(got_self, got_cmp) if a != b][:2]}")
+
+sig.reset_scores()
+lay_bad = sig.SignificanceLayer(layer_idx=0, policy=pol6)
+lay_bad.update(base_k.clone(), base_k.clone())
+sig._SCORES[0] = torch.rand(1, KV6, N6 - 7)          # scores shorter than the cache
+try:
+    sig.compress(_Bag([lay_bad]), pol6)
+    check("compress() refuses a score/cache length mismatch", False,
+          "it used to skip the layer and report success, leaving it UNCOMPRESSED")
+except RuntimeError as e:
+    check("compress() refuses a score/cache length mismatch",
+          "positions but the cache" in str(e))
+
+
+# --------------------------------------------------------------------------- #
+# 7. the chunked-prefill mask: eviction must not corrupt what a chunk may see
+# --------------------------------------------------------------------------- #
+
+print("\n7. the chunked-prefill attention mask is bottom-right aligned")
+sys.path.insert(0, str(ROOT / "scripts/kv"))
+from scripts.kv import chunked_prefill as cp  # noqa: E402
+
+NEG_OK = torch.finfo(torch.float32).min
+m = cp.causal_lower_right(3, 3, torch.device("cpu"), torch.float32)[0, 0]
+check("kv_len == q_len reduces to the ordinary causal mask",
+      bool((m == 0).sum() == 6 and m[0, 1] == NEG_OK and m[2, 0] == 0),
+      info=f"{int((m == 0).sum())} attendable cells of 9")
+# after an eviction the cache holds `stored` survivors and the chunk appends q more
+m2 = cp.causal_lower_right(4, 20, torch.device("cpu"), torch.float32)[0, 0]
+check("every surviving cached key is visible to every query in the chunk",
+      bool((m2[:, :16] == 0).all()),
+      "a chunk cannot see part of the cache -- eviction would corrupt attention")
+check("the chunk's own tokens stay causal among themselves",
+      bool(m2[0, 17] == NEG_OK and m2[3, 19] == 0),
+      info="query 0 cannot see chunk token 1; query 3 can see chunk token 3")
+try:
+    cp.causal_lower_right(8, 4, torch.device("cpu"), torch.float32)
+    check("a cache shorter than the chunk raises", False, "it would build a wrong mask")
+except ValueError:
+    check("a cache shorter than the chunk raises", True)
+
+
 ap = argparse.ArgumentParser()
 ap.add_argument("--fast", action="store_true", help="skip the real-model sections")
 args = ap.parse_args()
