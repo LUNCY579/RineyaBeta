@@ -533,6 +533,7 @@ def main() -> None:
                                          "lexical-chunk-bm25-sys",
                                          "lexical-line-bm25",
                                          "lexical-line-bm25-sys",
+                                         "hybrid-doc-sig-sys",
                                          "oracle-support"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
@@ -718,6 +719,7 @@ def main() -> None:
             if args.select in ("lexical-doc-bm25", "lexical-doc-bm25-sys",
                                "lexical-chunk-bm25", "lexical-chunk-bm25-sys",
                                "lexical-line-bm25", "lexical-line-bm25-sys",
+                               "hybrid-doc-sig-sys",
                                "random-doc", "oracle-support"):
                 # A SECOND encoding, for offsets only. The generation path's `enc`
                 # is left exactly as every committed run produced it -- adding
@@ -734,7 +736,7 @@ def main() -> None:
                         f"({len(off['input_ids'])} ids) does not match the "
                         f"generation encoding ({n_prompt} ids); the doc-bm25 "
                         f"weights would address the wrong positions")
-                if args.select.startswith("lexical-doc-bm25"):
+                if args.select.startswith(("lexical-doc-bm25", "hybrid-doc-sig")):
                     w = doc_bm25_weights(prompt, off, q, tok)
                 elif args.select.startswith("lexical-line-bm25"):
                     w = line_bm25_weights(prompt, off, q, tok)

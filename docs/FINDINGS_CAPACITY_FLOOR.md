@@ -207,6 +207,39 @@ It gains most.
 
 ---
 
+## 5b. The last place the attention score could have earned its keep — it does not
+
+Having lost its own triviality control as a *selector*, the accumulated-attention
+score had one role left: a **secondary** signal ordering positions inside a set that
+retrieval has already chosen. The `hybrid-doc-sig-sys` arm is byte-identical to
+`lexical-doc-bm25-sys` except that the 1e-3 tie-break is the rank-normalised score
+instead of uniform noise. BM25 still decides which records survive; the score only
+breaks ties the lexical signal cannot.
+
+| B | random tie-break | score tie-break | score − random |
+|---:|---:|---:|---:|
+| 256 (above floor) | 0.8383 | 0.8383 | **0.0000** (1/1, p = 1) |
+| 160 (below floor) | 0.7517 | 0.6867 | **−6.5 pp** (31/70, **p = 1.3e−04**) |
+
+Above the floor it contributes **exactly nothing** — identical to four decimals,
+because the budget is comfortable and ties barely arise. Below the floor, where an
+extra signal has the most room to help, it is **significantly worse than random
+noise**.
+
+The mechanism is this programme's own earlier finding. P2.2 measured that the score
+retains query-shaped *framing* at 54% and the *payload* it introduces at 35% — it
+prefers the label over the content. Inside a record, that is exactly the wrong
+preference: it spends scarce slots on the header that matched the query and drops the
+answer text. Uniform noise, having no preference, spreads across the record and keeps
+more payload. Backward pooling was invented to repair precisely this, and at these
+budgets it does not.
+
+**So the score has no remaining role in this pipeline** — not as the selector, not as
+a tie-breaker. That is a stronger negative than the triviality control alone
+established, and it was worth one more experiment to find out.
+
+---
+
 ## 6. An attempt at the instruction term that does NOT work, recorded so it is not retried
 
 The formula has an `|instructions|` term, and the corpus offers what looks like a free

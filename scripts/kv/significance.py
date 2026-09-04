@@ -59,7 +59,7 @@ _STATE = {"enabled": False, "window": 16, "patched": False, "lexical_seed": None
 LEXICAL_SELECTS = ("lexical-idf", "lexical-naive", "lexical-doc-bm25",
                    "lexical-doc-bm25-sys", "lexical-chunk-bm25",
                    "lexical-chunk-bm25-sys", "lexical-line-bm25",
-                   "lexical-line-bm25-sys")
+                   "lexical-line-bm25-sys", "hybrid-doc-sig-sys")
 # Arms that need a per-case weight vector installed by the caller. `random-doc` is
 # the GRANULARITY-MATCHED floor: the same record segmentation as lexical-doc-bm25
 # with the BM25 signal replaced by one uniform draw per record. Without it,
@@ -604,8 +604,22 @@ def select_keep(s: torch.Tensor, n: int, policy, device,
         # on a field of equal weights resolves ties by index and the arm becomes
         # "keep the earliest lexical matches", a positional policy wearing a
         # lexical label.
-        jitter = torch.rand(middle.shape, device=middle.device,
-                            dtype=middle.dtype) * 1e-3
+        #
+        # THE HYBRID ARM replaces that noise with the accumulated-attention score,
+        # rank-normalised to the same 1e-3 scale. The lexical weight still decides
+        # WHICH records survive; the score only orders positions the lexical signal
+        # cannot separate. This is the last place Cornerstone 2's score could earn
+        # its keep after losing its own triviality control: as a secondary signal
+        # inside a retrieval-chosen set rather than as the selector.
+        if policy.select == "hybrid-doc-sig-sys":
+            fin = torch.isfinite(s)
+            sn = torch.where(fin, s, torch.zeros_like(s))
+            lo = sn.amin(dim=-1, keepdim=True)
+            rng = (sn.amax(dim=-1, keepdim=True) - lo).clamp_min(1e-12)
+            jitter = ((sn - lo) / rng).to(middle.dtype) * 1e-3
+        else:
+            jitter = torch.rand(middle.shape, device=middle.device,
+                                dtype=middle.dtype) * 1e-3
         middle = torch.where(torch.isfinite(middle), lexical.to(middle.dtype) + jitter,
                              torch.full_like(middle, float("-inf")))
 
