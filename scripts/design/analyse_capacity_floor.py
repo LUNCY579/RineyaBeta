@@ -78,11 +78,12 @@ def derive() -> dict:
         return {"error": f"reference {REFERENCE} absent -- nothing to compare against"}
 
     rows, void = {}, {}
+    K = str      # JSON has no integer keys; --check could never pass with int keys
     for B in BUDGETS:
         tag = ARM.format(B)
         X, man = load(tag), manifest(tag)
         if X is None or man is None:
-            rows[B] = {"status": "NOT RUN"}
+            rows[K(B)] = {"status": "NOT RUN"}
             continue
         # prereg 3: void conditions, checked before anything is read off the arm.
         problems = []
@@ -96,8 +97,8 @@ def derive() -> dict:
         if man.get("select") != "lexical-doc-bm25-sys":
             problems.append(f"select={man.get('select')!r}")
         if problems:
-            void[B] = problems
-            rows[B] = {"status": "VOID", "problems": problems}
+            void[K(B)] = problems
+            rows[K(B)] = {"status": "VOID", "problems": problems}
             continue
         cell = {"status": "ok", "budget": B, "mean_kept_ratio": mk,
                 "reduction_x": round(4226.0 / B, 1), "elapsed_s": man.get("elapsed_s")}
@@ -112,15 +113,15 @@ def derive() -> dict:
                              "diff": round(rx - ro, 4), "win": b, "lose": c,
                              "p": mcnemar_exact(b, c),
                              "below_uncompressed": bool(rx < ro and mcnemar_exact(b, c) < 0.05)}
-        rows[B] = cell
+        rows[K(B)] = cell
 
-    ok = [B for B in BUDGETS if rows[B].get("status") == "ok"]
+    ok = [B for B in BUDGETS if rows[K(B)].get("status") == "ok"]
     floor, reason = None, None
     for B in sorted(ok, reverse=True):
         smaller = [b2 for b2 in ok if b2 < B]
-        if rows[B]["pooled"]["below_uncompressed"]:
+        if rows[K(B)]["pooled"]["below_uncompressed"]:
             continue
-        if smaller and all(rows[b2]["pooled"]["below_uncompressed"] for b2 in smaller):
+        if smaller and all(rows[K(b2)]["pooled"]["below_uncompressed"] for b2 in smaller):
             floor = B
             break
     if floor is None:
@@ -135,8 +136,8 @@ def derive() -> dict:
         below = [b2 for b2 in ok if b2 < floor]
         if below:
             nb = max(below)
-            da = rows[nb]["answer"]["diff"]
-            db = rows[nb]["abstain"]["diff"]
+            da = rows[K(nb)]["answer"]["diff"]
+            db = rows[K(nb)]["abstain"]["diff"]
             f2 = {"first_budget_below_floor": nb, "answer_diff": da,
                   "abstain_diff": db,
                   "F2_confirmed": bool(db < da),
@@ -163,7 +164,7 @@ def main() -> None:
     print(f"{'B':>5} {'x':>6} {'kept':>7} | "
           f"{'answer':>21} | {'abstain':>21} | {'pooled':>21}")
     for B in BUDGETS:
-        r = d["budgets"][B]
+        r = d["budgets"][str(B)]
         if r.get("status") != "ok":
             print(f"{B:5d} {r.get('status')}"
                   + (f"  {r.get('problems')}" if r.get("problems") else ""))
