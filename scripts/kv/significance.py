@@ -66,13 +66,18 @@ LEXICAL_SELECTS = ("lexical-idf", "lexical-naive", "lexical-doc-bm25",
 # lexical-doc-bm25's advantage is measured against a floor matched to the 7-token
 # contiguity of the per-position arms rather than to its own ~64-token record
 # contiguity, and roughly ten points of the difference is granularity, not signal.
-WEIGHTED_SELECTS = LEXICAL_SELECTS + ("random-doc", "oracle-support")
+# `random-doc-sys` and `oracle-support-sys` are the same two selectors with the
+# instruction prefix pinned. They exist because every `-sys` arm in the campaign
+# was a BM25 variant, which leaves "does selection do anything GIVEN protection?"
+# unidentified -- see docs/PREREG_INSTRUCTION_IDENTIFICATION.md.
+WEIGHTED_SELECTS = LEXICAL_SELECTS + ("random-doc", "random-doc-sys",
+                                      "oracle-support", "oracle-support-sys")
 # `oracle-support` is NOT an experimental arm and must never be reported as one: it
 # reads support_document_ids, so it is an ORACLE. It exists to bound the question
 # "how much of the uncompressed model's failure is fixable by better selection at
 # all?" -- keep only the gold record and nothing else. If a blind selector already
 # matches it, selection is saturated and the residual failures are the model's.
-ORACLE_SELECTS = ("oracle-support",)
+ORACLE_SELECTS = ("oracle-support", "oracle-support-sys")
 # Every arm whose selection consumes the RNG and therefore needs a per-case seed.
 STOCHASTIC_SELECTS = ("random", "random-prepool") + WEIGHTED_SELECTS
 
