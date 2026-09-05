@@ -50,7 +50,41 @@ DOCS = {
     "p2": ROOT / "experiments/stabilizer/results/FINDINGS_P2.md",
     "c2paper": ROOT / "docs/PAPER_DRAFT_CORNERSTONE2.md",
     "ledger": ROOT / "docs/CORNERSTONE_LEDGER.md",
+    # These three carry claims C1-C7 and were guarded by NOTHING until
+    # 2026-09-04, which is how "(4 + 104 + 63) / 0.85 = 196" survived in a
+    # headline formula when the division is 201.18.
+    "improves": ROOT / "docs/FINDINGS_COMPRESSION_IMPROVES_QUALITY.md",
+    "floor": ROOT / "docs/FINDINGS_CAPACITY_FLOOR.md",
+    "ident": ROOT / "docs/FINDINGS_INSTRUCTION_IDENTIFICATION.md",
 }
+
+
+def ident(arm_tag: str, stratum: str) -> float:
+    """A stratum mean from the committed identification analysis.
+
+    Sourced from a committed JSON rather than from results.jsonl, which is
+    gitignored by repo policy, so this guard still works in a fresh clone.
+    """
+    d = json.loads((KVS / "instruction_identification.json").read_text(
+        encoding="utf-8"))
+    for arm, row in d["ladder"].items():
+        if arm.startswith(arm_tag):
+            return float(row[stratum])
+    raise KeyError(arm_tag)
+
+
+def ident_contrast(label: str, stratum: str, field: str) -> float:
+    d = json.loads((KVS / "instruction_identification.json").read_text(
+        encoding="utf-8"))
+    return float(d["contrasts"][label][stratum][field])
+
+
+def abstain_audit(*path) -> float:
+    d = json.loads((KVS / "abstain_endpoint_audit.json").read_text(
+        encoding="utf-8"))
+    for k in path:
+        d = d[k]
+    return float(d)
 
 
 def summary(base: Path, tag: str, ds: str = "rag_dev"):
@@ -444,6 +478,53 @@ def concentration(k: int):
 # (label, documented value, how to recompute, tolerance, text that must appear,
 #  which document(s) must state it -- comma-separated means "all of these")
 CLAIMS = [
+    # --- FINDINGS_COMPRESSION_IMPROVES_QUALITY.md, previously unguarded -------
+    ("improves: uncompressed answer", 0.7708,
+     lambda: ident("c7-off-n600", "answer"), 5e-5, "0.7708", "improves"),
+    ("improves: uncompressed abstain", 0.8214,
+     lambda: ident("c7-off-n600", "abstain"), 5e-5, "0.8214", "improves"),
+    ("improves: uncompressed pooled", 0.7850,
+     lambda: ident("c7-off-n600", "pooled"), 5e-5, "0.7850", "improves"),
+    ("improves: bm25+sys answer", 0.8032,
+     lambda: ident("c8-docbm25sys", "answer"), 5e-5, "0.8032", "improves"),
+    ("improves: bm25+sys abstain", 0.9226,
+     lambda: ident("c8-docbm25sys", "abstain"), 5e-5, "0.9226", "improves"),
+    ("improves: bm25+sys pooled", 0.8367,
+     lambda: ident("c8-docbm25sys", "pooled"), 5e-5, "0.8367", "improves"),
+    ("improves: bm25 no-sys answer", 0.8056,
+     lambda: ident("c7-docbm25-k0.05", "answer"), 5e-5, "0.8056", "improves"),
+    ("improves: bm25 no-sys pooled", 0.5800,
+     lambda: ident("c7-docbm25-k0.05", "pooled"), 5e-5, "0.5800", "improves"),
+    ("improves: oracle answer", 0.8102,
+     lambda: ident("c7-oracle-k0.05", "answer"), 5e-5, "0.8102", "improves"),
+    ("improves: oracle pooled", 0.5833,
+     lambda: ident("c7-oracle-k0.05", "pooled"), 5e-5, "0.5833", "improves"),
+
+    # --- the endpoint correction on the same document ------------------------
+    ("improves: crossed de-confound", 0.53,
+     lambda: abstain_audit("crossed", "delta_pp"), 5e-3, "+0.53 pp", "improves"),
+    ("improves: semantic abstention", 3.33,
+     lambda: abstain_audit("semantic", "pooled", "delta_pp"), 5e-3,
+     "+3.33", "improves"),
+    ("improves: drop partial_support", 2.67,
+     lambda: abstain_audit("excluding_partial_support", "delta_pp"), 5e-3,
+     "+2.67", "improves"),
+    ("improves: partial_support gain", 44.74,
+     lambda: abstain_audit("by_category", "partial_support", "delta_pp"), 5e-3,
+     "+44.74", "improves,ident"),
+
+    # --- FINDINGS_INSTRUCTION_IDENTIFICATION.md ------------------------------
+    ("ident: random floor answer", 0.0486,
+     lambda: ident("c19-randomdocsys", "answer"), 5e-5, "0.0486", "ident"),
+    ("ident: oracle+sys answer", 0.8009,
+     lambda: ident("c19-oraclesys", "answer"), 5e-5, "0.8009", "ident"),
+    ("ident: A vs C answer", -75.46,
+     lambda: ident_contrast("A vs C  identification", "answer", "delta_pp"),
+     5e-3, "75.46", "ident"),
+    ("ident: B vs C ceiling", -0.23,
+     lambda: ident_contrast("B vs C  ceiling", "answer", "delta_pp"),
+     5e-3, "0.23", "ident"),
+
     ("quality: no eviction", 0.66939,
      lambda: summary(KVS, "off"), 5e-6, "0.66939", "findings"),
     ("quality: keep 0.75", 0.65677,

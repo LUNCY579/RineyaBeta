@@ -79,8 +79,10 @@ B +3.01 pp (14W/1L, p = 9.8e−04).
 
 **Not licensed, and the pooled numbers must stop being quoted alone.** The pooled
 +5.17 pp is roughly half an artifact of the abstain endpoint: the whole abstain
-gain is one 38-case category whose contract is a substring test for a canned
-sentence (see [`audit_abstain_endpoint.py`](../scripts/design/audit_abstain_endpoint.py)
+gain is one 38-case category, `partial_support`, at **+44.74 pp**, while every
+other abstain category moves exactly 0.00 pp — and there the contract is a
+substring test for a canned sentence
+(see [`audit_abstain_endpoint.py`](../scripts/design/audit_abstain_endpoint.py)
 and the correction in `FINDINGS_COMPRESSION_IMPROVES_QUALITY.md`). Any pooled
 figure in this programme sums a real answer-stratum effect with an artifactual
 abstain-stratum one, and the two have opposite relationships to the truth.
