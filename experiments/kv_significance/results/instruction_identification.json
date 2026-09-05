@@ -1,0 +1,138 @@
+{
+ "contrasts": {
+  "A vs C  identification": {
+   "abstain": {
+    "delta_pp": 2.9762,
+    "losses": 0,
+    "n": 168,
+    "p": 0.0625,
+    "power_ceiling": 0.0625,
+    "wins": 5
+   },
+   "answer": {
+    "delta_pp": -75.463,
+    "losses": 326,
+    "n": 432,
+    "p": 1.46302e-98,
+    "power_ceiling": 1.46302e-98,
+    "wins": 0
+   },
+   "pooled": {
+    "delta_pp": -53.5,
+    "losses": 326,
+    "n": 600,
+    "p": 1.49125e-89,
+    "power_ceiling": 4.57195e-100,
+    "wins": 5
+   }
+  },
+  "A vs R": {
+   "abstain": {
+    "delta_pp": 13.0952,
+    "losses": 0,
+    "n": 168,
+    "p": 4.76837e-07,
+    "power_ceiling": 4.76837e-07,
+    "wins": 22
+   },
+   "answer": {
+    "delta_pp": -72.2222,
+    "losses": 312,
+    "n": 432,
+    "p": 2.39702e-94,
+    "power_ceiling": 2.39702e-94,
+    "wins": 0
+   },
+   "pooled": {
+    "delta_pp": -48.3333,
+    "losses": 312,
+    "n": 600,
+    "p": 8.97787e-67,
+    "power_ceiling": 5.71494e-101,
+    "wins": 22
+   }
+  },
+  "C vs R": {
+   "abstain": {
+    "delta_pp": 10.119,
+    "losses": 2,
+    "n": 168,
+    "p": 0.000221252,
+    "power_ceiling": 9.53674e-07,
+    "wins": 19
+   },
+   "answer": {
+    "delta_pp": 3.2407,
+    "losses": 1,
+    "n": 432,
+    "p": 0.000518799,
+    "power_ceiling": 3.05176e-05,
+    "wins": 15
+   },
+   "pooled": {
+    "delta_pp": 5.1667,
+    "losses": 3,
+    "n": 600,
+    "p": 1.23313e-07,
+    "power_ceiling": 1.45519e-11,
+    "wins": 34
+   }
+  }
+ },
+ "gates": {
+  "c19-oraclesys-k0.05-n600__rag_long4k": {
+   "present": false
+  },
+  "c19-randomdocsys-k0.05-n600__rag_long4k": {
+   "abstain_rate": 0.9524,
+   "canned_emission_rate": 0.75,
+   "cases": 600,
+   "cases_ok": true,
+   "heavy_zero_count": 0,
+   "heavy_zero_ok": true,
+   "manifest_ok": true,
+   "present": true,
+   "protection_fired": true,
+   "reference_abstain_rate": 0.9226,
+   "shared_manifest_diff": [
+    "elapsed_s",
+    "select",
+    "tag"
+   ]
+  }
+ },
+ "gates_pass": false,
+ "ladder": {
+  "c19-randomdocsys-k0.05-n600__rag_long4k": {
+   "abstain": 0.9524,
+   "answer": 0.0486,
+   "label": "random-doc  +sys  (floor)",
+   "pooled": 0.3017
+  },
+  "c7-docbm25-k0.05-n600__rag_long4k": {
+   "abstain": 0.0,
+   "answer": 0.8056,
+   "label": "doc-bm25     no sys",
+   "pooled": 0.58
+  },
+  "c7-off-n600__rag_long4k": {
+   "abstain": 0.8214,
+   "answer": 0.7708,
+   "label": "UNCOMPRESSED",
+   "pooled": 0.785
+  },
+  "c7-oracle-k0.05-n600__rag_long4k": {
+   "abstain": 0.0,
+   "answer": 0.8102,
+   "label": "oracle       no sys",
+   "pooled": 0.5833
+  },
+  "c8-docbm25sys-k0.05-n600__rag_long4k": {
+   "abstain": 0.9226,
+   "answer": 0.8032,
+   "label": "doc-bm25    +sys",
+   "pooled": 0.8367
+  }
+ },
+ "verdict": "NO VERDICT -- coverage gates failed"
+}

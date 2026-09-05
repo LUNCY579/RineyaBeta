@@ -125,6 +125,28 @@ No verdict of any kind is emitted unless **all** hold:
 
 If a run aborts, its partial artifact is **deleted, not analysed**.
 
+## 6a. Amendment, 2026-09-04, after arm A ran and before its result was read
+
+Section 2 says the manifest diff against C "must show differences in `tag`,
+`select` and `elapsed_s` only. Any other difference voids the cell." Arm A's diff
+also shows `sinks_flag`, `protect_instructions`, `chunk_tokens` and `sinks`.
+
+That wording was stricter than its intent and would void a valid cell. The three
+extra fields **do not exist in C's manifest at all**: they were added to the
+manifest schema after `c8-docbm25sys-k0.05-n600` ran, so `c8.get(k)` returns
+`None` for each. Arm A's manifest is a strict superset of C's. `sinks` differs as
+`4.0` against `4`, the same value written by a later code path.
+
+Restated, and this is the rule the analyser enforces: **among keys present in both
+manifests, the only permitted differences are `tag`, `select` and `elapsed_s`, and
+numeric fields compare by value rather than by repr.** Verified for arm A: every
+shared field is equal, including `budget`, `keep_frac`, `sinks`, `recent` (31.86),
+`recent_frac`, `pool`, `pool_back`, `pool_fwd`, `window`, `seed`, `cap_mib`,
+`model`, `adapter`, `protocol`, `case_count` and `mean_kept_ratio` (0.05).
+
+Disclosed rather than silently applied, because the amendment was written after
+the run existed. It was written before any outcome was computed.
+
 ## 7. Hardware discipline
 
 One RTX 4070 8 GB shared with the desktop. `nvidia-smi

@@ -44,13 +44,30 @@ p = 8.0e−07.**
 Before the sweep, from measured span lengths alone:
 
 ```
-4 sinks + 0.15·B recent + 104 instructions + 63 one record  ≤  B
-⟹  B ≥ (4 + 104 + 63) / 0.85 = 196
+4 sinks + 0.15·B recent + 100 instructions + 63 one record  ≤  B
+⟹  B ≥ (4 + 100 + 63) / 0.85 = 196.5
 ```
 
 **The observed knee is 196.** F1 confirmed. F2 also holds: at the first budget below
 the floor, abstention falls faster than answering (−6.0 pp against −2.3 pp), which is
-what the larger instruction span (104 vs 63) predicts.
+what the larger instruction span (100 vs 63) predicts.
+
+> **Correction, 2026-09-04.** This block previously read `104 instructions` and
+> `(4 + 104 + 63) / 0.85 = 196`. That arithmetic is wrong: 171/0.85 is **201.18**.
+> The 196 comes from `|instructions| = 100`, and 104 is a different quantity — the
+> mean *sink span* of the `c11-sinkinstr-B160` arm — which was transcribed into the
+> formula by mistake. The corrected line is arithmetically consistent.
+>
+> The correction also exposes something the original claim glossed. `|instructions|`
+> is **not a constant**: `instruction_prefix_len` measures 100 tokens on 532 of the
+> 600 prompts and 131–140 on the other 68, which carry `TRUSTED_PROCEDURES` content
+> instead of `(none)`. So the floor is 196 for the modal prompt and as high as
+> `(4 + 140 + 63)/0.85 = 243.5` for the longest. "Predicted to the token" is true of
+> the modal prompt only; **11% of prompts have a strictly higher floor**, and the
+> B = 196 cell is therefore below the floor for those cases rather than at it.
+> The knee's *location* is unchanged, because the grid was 128/160/196/256 and the
+> modal prompt dominates, but the claim that one number predicts the floor for the
+> corpus does not survive.
 
 ### The confound, and why the formula survives it
 
