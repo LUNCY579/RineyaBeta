@@ -485,6 +485,63 @@ try:
 except Exception as _e2:                                   # noqa: BLE001
     check("structure-free chunker", False, f"raised {type(_e2).__name__}: {_e2}")
 
+# --------------------------------------------------------------------------- #
+print("\n12. the -sys suffix composes with EVERY record selector, not just BM25")
+# --------------------------------------------------------------------------- #
+# The identification cell the campaign is missing needs random-doc-sys and
+# oracle-support-sys. Both route through the same `select.endswith("-sys")`
+# branch as lexical-doc-bm25-sys, so what has to hold is that protection is
+# applied ON TOP of the selector rather than instead of it: the instruction
+# prefix goes to 1.0 and the record structure underneath survives untouched.
+try:
+    sys_prompt = ("You are a careful assistant. If the evidence does not answer "
+                  "the question, reply exactly: I don't know based on the "
+                  "available information." + chr(10) + doc_prompt)
+    es = _tok(sys_prompt, return_offsets_mapping=True)
+    first_doc = sys_prompt.index("[doc_a")
+    prefix = [k for k, (a, z) in enumerate(es["offset_mapping"]) if z <= first_doc]
+    check("the fixture actually has an instruction prefix to protect",
+          len(prefix) > 10, f"{len(prefix)} prefix positions")
+
+    for name, build in (
+            ("random-doc", lambda: _res.doc_random_weights(sys_prompt, es)),
+            ("oracle-support",
+             lambda: _res.oracle_support_weights(sys_prompt, es, ["doc_b"])),
+            ("lexical-doc-bm25",
+             lambda: _res.doc_bm25_weights(sys_prompt, es,
+                                           "When does PineRelay 1225 launch?", _tok))):
+        torch.manual_seed(11)
+        bare = build()
+        torch.manual_seed(11)
+        prot = _res.protect_instructions(build(), sys_prompt, es)
+        check(f"{name}-sys pins the whole instruction prefix",
+              all(float(prot[k]) >= 0.999 for k in prefix),
+              f"lowest prefix weight {min(float(prot[k]) for k in prefix):.4f}")
+        moved = sum(1 for k in range(len(bare))
+                    if k not in prefix and abs(float(prot[k]) - float(bare[k])) >= 1e-9)
+        check(f"{name}-sys leaves the evidence block alone", moved == 0,
+              f"{len(bare) - len(prefix)} evidence positions, {moved} changed by "
+              f"protection")
+        check(f"{name} WITHOUT -sys leaves the prefix unprotected",
+              not all(float(bare[k]) >= 0.999 for k in prefix),
+              f"{sum(1 for k in prefix if float(bare[k]) >= 0.999)}/{len(prefix)} "
+              f"prefix positions already at top weight before protection")
+
+    # oracle-support-sys must still be an oracle: the gold record stays top.
+    torch.manual_seed(11)
+    ow = _res.protect_instructions(
+        _res.oracle_support_weights(sys_prompt, es, ["doc_b"]), sys_prompt, es)
+    gold = [k for k, (a, z) in enumerate(es["offset_mapping"])
+            if a >= sys_prompt.index("[doc_b") and z <= sys_prompt.index("[doc_c")]
+    other = [k for k, (a, z) in enumerate(es["offset_mapping"])
+             if a >= sys_prompt.index("[doc_c") and z <= sys_prompt.index("</FACTUAL")]
+    check("oracle-support-sys still keeps the gold record above distractors",
+          bool(gold) and bool(other) and min(float(ow[k]) for k in gold)
+          > max(float(ow[k]) for k in other),
+          "protecting the prefix must not flatten the oracle")
+except Exception as _e12:                                  # noqa: BLE001
+    check("-sys composition", False, f"raised {type(_e12).__name__}: {_e12}")
+
 print()
 if FAILED:
     print(f"{len(FAILED)} FAILED: {FAILED}")

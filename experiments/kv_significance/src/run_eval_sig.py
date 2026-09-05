@@ -526,6 +526,7 @@ def main() -> None:
                          "manifest with its base model and step.")
     ap.add_argument("--select", choices=("significance", "random", "streaming",
                                          "random-prepool", "random-doc",
+                                         "random-doc-sys",
                                          "lexical-idf", "lexical-naive",
                                          "lexical-doc-bm25",
                                          "lexical-doc-bm25-sys",
@@ -534,7 +535,8 @@ def main() -> None:
                                          "lexical-line-bm25",
                                          "lexical-line-bm25-sys",
                                          "hybrid-doc-sig-sys",
-                                         "oracle-support"),
+                                         "oracle-support",
+                                         "oracle-support-sys"),
                     default="significance",
                     help="BASELINE arms, matching passkey.py. `random` keeps the "
                          "same number of positions chosen uniformly -- the only "
@@ -720,7 +722,8 @@ def main() -> None:
                                "lexical-chunk-bm25", "lexical-chunk-bm25-sys",
                                "lexical-line-bm25", "lexical-line-bm25-sys",
                                "hybrid-doc-sig-sys",
-                               "random-doc", "oracle-support"):
+                               "random-doc", "random-doc-sys",
+                               "oracle-support", "oracle-support-sys"):
                 # A SECOND encoding, for offsets only. The generation path's `enc`
                 # is left exactly as every committed run produced it -- adding
                 # return_offsets_mapping to it would change the object handed to
@@ -742,7 +745,7 @@ def main() -> None:
                     w = line_bm25_weights(prompt, off, q, tok)
                 elif args.select.startswith("lexical-chunk-bm25"):
                     w = chunk_bm25_weights(prompt, off, q, tok, args.chunk_tokens)
-                elif args.select == "oracle-support":
+                elif args.select.startswith("oracle-support"):
                     w = oracle_support_weights(prompt, off,
                                                rec.get("support_document_ids"))
                 else:
