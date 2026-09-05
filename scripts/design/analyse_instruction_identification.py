@@ -241,10 +241,21 @@ def main():
             print("  SELECTION CONTRIBUTES. C beats A on the answer stratum by "
                   "{0:+.2f} pp ({1}W/{2}L, p={3:.3g}).".format(
                       -r["delta_pp"], r["losses"], r["wins"], r["p"]))
-            if "selection_saturation" in out:
-                print("  It is nonetheless SATURATED, not merely present: BM25 "
-                      "captures {0:.1%} of the range a perfect oracle spans.".format(
-                          out["selection_saturation"]))
+            ceil = out["contrasts"].get("B vs C  ceiling", {}).get("answer")
+            if ceil is not None and ceil["p"] > 0.05:
+                print("  It is nonetheless SATURATED. A perfect oracle with the "
+                      "same protection is indistinguishable from BM25: "
+                      "{0:+.2f} pp, {1}W/{2}L, p={3:.3g}. No better selector can "
+                      "help on this corpus.".format(
+                          ceil["delta_pp"], ceil["wins"], ceil["losses"], ceil["p"]))
+                if "selection_saturation" in out:
+                    print("  (The floor-to-ceiling fraction reads {0:.1%}; it is "
+                          "not meaningfully distinct from 100% because the "
+                          "ceiling contrast is null.)".format(
+                              out["selection_saturation"]))
+            elif ceil is not None:
+                print("  A better selector still has room: oracle vs BM25 is "
+                      "{0:+.2f} pp, p={1:.3g}.".format(ceil["delta_pp"], ceil["p"]))
         elif r["p"] > 0.05 and abs(r["delta_pp"]) < 2.0:
             out["verdict"] = "SELECTION IS INERT"
             print("  SELECTION IS INERT on this corpus.")

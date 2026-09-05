@@ -1,5 +1,37 @@
 # Compression that improves quality: +5.2 pp at 20× KV cache reduction
 
+> ## CORRECTION, 2026-09-04 — read this before the claim below
+>
+> The +5.2 pp headline reproduces exactly, but **it must not be quoted pooled**.
+> An adversarial design review and two new preregistered arms established three
+> things that change what it means.
+>
+> **1. Half of it is an endpoint artifact.** The entire +10.1 pp abstain-stratum
+> gain is one 38-case category, `partial_support`, at +44.74 pp; every other
+> abstain category moves exactly 0.00 pp. There the response contract is two
+> `any_phrases` rules over one literal sentence, so the endpoint is a substring
+> test for a canned refusal. Of the 17 cases the uncompressed model "lost", **12
+> had already abstained in different words** and 10 stated a claim the evidence
+> supports. `max_new_tokens` is 32 and the mandated sentence costs 10, so 10 of
+> 21 failures could not physically have appended it. Under successive
+> de-confounders the headline reads **+5.33 → +3.33 → +2.67 → +0.53 pp (p = 0.51)**.
+> See [`audit_abstain_endpoint.py`](../scripts/design/audit_abstain_endpoint.py).
+>
+> **2. The answer stratum survives, and is the claim worth keeping.** +3.24 pp,
+> 15W/1L, p = 5.2e−04, with a topic-level cluster bootstrap over the 47 real
+> topics giving [+1.38, +5.28]. Case-level independence was a threat and it
+> **died**; see [`cluster_bootstrap.py`](../scripts/design/cluster_bootstrap.py).
+>
+> **3. Section 4's oracle reading was right for the wrong reason.** "The blind
+> selector is at 99% of the oracle's ceiling" is true — but it was asserted
+> against no floor. With a floor arm now run, selection spans 76 pp
+> (random-record 0.0486 → oracle 0.8009 on the answer stratum) and BM25 sits at
+> the top of it: selection is **saturated, not inert**. See
+> [`FINDINGS_INSTRUCTION_IDENTIFICATION.md`](FINDINGS_INSTRUCTION_IDENTIFICATION.md).
+>
+> Everything below is the original text and its numbers still reproduce. The
+> pooled framing is what is withdrawn.
+
 **Claim.** On `rag_long4k`, evicting 95% of the KV cache with a selector that needs
 no forward pass makes the model **better**, not merely no worse: +5.2 pp on the
 repository's hard endpoint over the uncompressed model, 34 wins against 3 losses,

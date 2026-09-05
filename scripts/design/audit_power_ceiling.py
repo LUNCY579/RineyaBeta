@@ -49,6 +49,14 @@ def exact_mcnemar(wins, losses):
     return min(1.0, 2 * sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n)
 
 
+def sig6(x):
+    """Round to 6 significant figures. round(2.1e-09, 6) is 0.0, and a p-value
+    printed as exactly zero is a claim no finite test can make."""
+    if x == 0 or not math.isfinite(x):
+        return x
+    return round(x, -int(math.floor(math.log10(abs(x)))) + 5)
+
+
 def power_ceiling(n_disc):
     """Smallest p this cell could ever have returned, over all outcomes."""
     if n_disc == 0:
@@ -149,8 +157,8 @@ def cell(ref, arm, ids):
         "n_discordant": n_disc,
         "delta_pp": round(100.0 * sum(arm[i][0] - ref[i][0] for i in ids) / len(ids), 4)
         if ids else 0.0,
-        "p_observed": round(exact_mcnemar(wins, losses), 6),
-        "power_ceiling": round(power_ceiling(n_disc), 6),
+        "p_observed": sig6(exact_mcnemar(wins, losses)),
+        "power_ceiling": sig6(power_ceiling(n_disc)),
         "could_reach_significance": power_ceiling(n_disc) <= CEILING_TARGET,
     }
 

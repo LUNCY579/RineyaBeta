@@ -52,6 +52,58 @@
     "wins": 22
    }
   },
+  "B vs C  ceiling": {
+   "abstain": {
+    "delta_pp": 1.7857,
+    "losses": 0,
+    "n": 168,
+    "p": 0.25,
+    "power_ceiling": 0.25,
+    "wins": 3
+   },
+   "answer": {
+    "delta_pp": -0.2315,
+    "losses": 2,
+    "n": 432,
+    "p": 1.0,
+    "power_ceiling": 0.25,
+    "wins": 1
+   },
+   "pooled": {
+    "delta_pp": 0.3333,
+    "losses": 2,
+    "n": 600,
+    "p": 0.6875,
+    "power_ceiling": 0.03125,
+    "wins": 4
+   }
+  },
+  "B vs R": {
+   "abstain": {
+    "delta_pp": 11.9048,
+    "losses": 0,
+    "n": 168,
+    "p": 1.90735e-06,
+    "power_ceiling": 1.90735e-06,
+    "wins": 20
+   },
+   "answer": {
+    "delta_pp": 3.0093,
+    "losses": 1,
+    "n": 432,
+    "p": 0.000976562,
+    "power_ceiling": 6.10352e-05,
+    "wins": 14
+   },
+   "pooled": {
+    "delta_pp": 5.5,
+    "losses": 1,
+    "n": 600,
+    "p": 2.09548e-09,
+    "power_ceiling": 5.82077e-11,
+    "wins": 34
+   }
+  },
   "C vs R": {
    "abstain": {
     "delta_pp": 10.119,
@@ -81,7 +133,21 @@
  },
  "gates": {
   "c19-oraclesys-k0.05-n600__rag_long4k": {
-   "present": false
+   "abstain_rate": 0.9405,
+   "canned_emission_rate": 0.3667,
+   "cases": 600,
+   "cases_ok": true,
+   "heavy_zero_count": 0,
+   "heavy_zero_ok": true,
+   "manifest_ok": true,
+   "present": true,
+   "protection_fired": true,
+   "reference_abstain_rate": 0.9226,
+   "shared_manifest_diff": [
+    "elapsed_s",
+    "select",
+    "tag"
+   ]
   },
   "c19-randomdocsys-k0.05-n600__rag_long4k": {
    "abstain_rate": 0.9524,
@@ -101,8 +167,14 @@
    ]
   }
  },
- "gates_pass": false,
+ "gates_pass": true,
  "ladder": {
+  "c19-oraclesys-k0.05-n600__rag_long4k": {
+   "abstain": 0.9405,
+   "answer": 0.8009,
+   "label": "oracle      +sys  (ceiling)",
+   "pooled": 0.84
+  },
   "c19-randomdocsys-k0.05-n600__rag_long4k": {
    "abstain": 0.9524,
    "answer": 0.0486,
@@ -134,5 +206,6 @@
    "pooled": 0.8367
   }
  },
- "verdict": "NO VERDICT -- coverage gates failed"
+ "selection_saturation": 1.0031,
+ "verdict": "SELECTION CONTRIBUTES"
 }
