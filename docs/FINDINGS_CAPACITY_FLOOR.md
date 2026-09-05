@@ -111,6 +111,38 @@ answer stratum (18/39) despite identical abstention.
 It is post-hoc and labelled so, which is why it was checked out-of-sample: on the
 disjoint records 200–599, **0.7475 → 0.7900, +4.3 pp, 19/2, p = 2.2e−04.**
 
+> **CORRECTION, 2026-09-05. That out-of-sample check is pooled, and it does not
+> reject on the primary stratum.** It is the only guard this section has against
+> post-hoc selection, so it matters that it is stated correctly. Rows 200–599:
+>
+> | segmenter | answer (primary), n=288 | abstain, n=112 | pooled, n=400 |
+> |---|---:|---:|---:|
+> | record / doc | **+4.17 pp** (13/1, p = 1.8e−03) | +10.71 (12/0) | +6.00 (25/1) |
+> | **newline** | **+2.43 pp** (9/2, **p = 0.065**) | +8.93 (10/0) | *+4.25 (19/2, p = 2.2e−04)* |
+> | fixed 64-chunk | −1.74 pp (13/18, p = 0.47) | **+10.71** (12/0) | +1.75 (25/18, p = 0.36) |
+>
+> With 11 discordant pairs the newline answer cell has a power ceiling of
+> 9.8e−04, so **p = 0.065 is a genuine non-rejection, not a power failure**. The
+> pooled +4.25 pp crosses significance only because the abstain stratum is folded
+> in — and that stratum **cannot discriminate segmenters at all**: the refuted
+> fixed-chunk arm scores **+10.71 pp, identical to the winning record arm**, and
+> better than newlines. All 10 of the newline arm's out-of-sample abstain wins
+> fall in `partial_support`, the single canned-refusal category.
+>
+> So: **"newlines work" is not established out-of-sample on the primary
+> stratum.** What the answer stratum does establish, and cleanly, is the
+> *ordering*: record (+4.17, rejects) > newline (+2.43, does not) > fixed chunk
+> (−1.74, does not, and negative). Boundary awareness helps; the specific claim
+> that newlines recover the loss is unsupported at n = 288 and would need roughly
+> three times the sample to settle.
+>
+> Head-to-head on the full 600 cases, cluster-bootstrapped over the 47 topics,
+> agrees and sharpens it: **newline vs record** on the answer stratum is 2W/7L,
+> CI **[−2.50, +0.23]**, crossing zero — the two are not distinguishable, and
+> pooled newline is actually *worse* ([−2.63, −0.49]). **Chunk vs record** is
+> 1W/37L, CI **[−10.91, −5.73]** — decisively worse, which is the one part of C6
+> that was never in doubt.
+
 **And newlines have a *lower* floor.** At B = 160, where record segmentation has
 already broken (−3.3 pp, 22/42, significantly below), newlines are still at parity
 (−0.2 pp, 19/20, not significant). The two cross over: records win above the floor,
@@ -290,6 +322,45 @@ breaks ties the lexical signal cannot.
 |---:|---:|---:|---:|
 | 256 (above floor) | 0.8383 | 0.8383 | **0.0000** (1/1, p = 1) |
 | 160 (below floor) | 0.7517 | 0.6867 | **−6.5 pp** (31/70, **p = 1.3e−04**) |
+
+> **CORRECTION, 2026-09-05. Both rows of this table are pooled, and the
+> programme's own rule makes the answer stratum primary.** Restated:
+>
+> | B | stratum | score − random | W/L | discordant | p | ceiling |
+> |---:|---|---:|---:|---:|---:|---:|
+> | 160 | **answer (primary)** | **−13.66 pp** | 8/67 | 75 | **1.0e−12** | 5.3e−23 |
+> | 160 | abstain | +11.90 pp | 23/3 | 26 | 8.8e−05 | 3.0e−08 |
+> | 160 | *pooled, as printed* | *−6.50 pp* | *31/70* | *101* | *1.3e−04* | *7.9e−31* |
+> | 256 | **answer (primary)** | 0.00 pp | 1/1 | **2** | 1 | **0.50** |
+> | 256 | abstain | 0.00 pp | 0/0 | **0** | 1 | **1.00** |
+>
+> **The below-floor conclusion strengthens.** The real harm on the primary
+> stratum is **twice** the printed figure. The pooled −6.5 pp nets a genuine
+> answer-stratum harm against a +11.90 pp abstain move that is composed of newly
+> emitted canned refusals — the artifact this programme has already withdrawn.
+> Pooling a real harm against a withdrawn artifact is the exact failure mode the
+> abstain correction was written to prevent, and it happened in the table that
+> justified retiring the mechanism.
+>
+> **The above-floor conclusion does not survive as written.** "Contributes
+> exactly nothing" rests on **2 discordant pairs** on the answer stratum (power
+> ceiling 0.50) and **0** on the abstain stratum (ceiling 1.00). That cell could
+> not have detected the score working, so `p = 1` is not evidence of inertness.
+>
+> What the data *does* support is a bound, and a topic-level cluster bootstrap
+> over the 47 source topics supplies it: the score tie-break changes the answer
+> stratum by no more than **[−0.68, +0.69] pp (95%)**. That is a real equivalence
+> claim with a stated margin. On the abstain stratum the interval is
+> [0.00, 0.00] over **zero** discordant pairs — no information whatever, and it
+> must not be read as agreement.
+>
+> Note also that **15 of 600 replies change** between the two arms and only 2
+> flip the endpoint. Inertness is bounded to within ±0.7 pp, not demonstrated.
+>
+> Both cells were invisible to `audit_power_ceiling.py` (which enumerates
+> arm-versus-uncompressed pairings only) and to `cluster_bootstrap.py` (whose
+> contrast list had no head-to-head rows). The single most load-bearing negative
+> in the programme was its least audited contrast. Both tools now carry it.
 
 Above the floor it contributes **exactly nothing** — identical to four decimals,
 because the budget is comfortable and ties barely arise. Below the floor, where an

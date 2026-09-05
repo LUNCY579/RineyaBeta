@@ -159,6 +159,218 @@
     "wins": 21
    }
   },
+  "C4 tiebreak B=160": {
+   "abstain": {
+    "arm": "c18-hybrid-B160__rag_long4k",
+    "cluster_ci95_pp": [
+     6.25,
+     17.4699
+    ],
+    "crosses_zero": false,
+    "delta_pp": 11.9048,
+    "losses": 3,
+    "max_cases_per_topic": 4,
+    "n_cases": 168,
+    "n_topics": 46,
+    "p_cluster_bootstrap": 0.0,
+    "p_mcnemar_case_level": 8.798e-05,
+    "reference": "c9-sys-B160__rag_long4k",
+    "wins": 23
+   },
+   "answer": {
+    "arm": "c18-hybrid-B160__rag_long4k",
+    "cluster_ci95_pp": [
+     -16.9725,
+     -10.3865
+    ],
+    "crosses_zero": false,
+    "delta_pp": -13.6574,
+    "losses": 67,
+    "max_cases_per_topic": 10,
+    "n_cases": 432,
+    "n_topics": 47,
+    "p_cluster_bootstrap": 0.0,
+    "p_mcnemar_case_level": 0.0,
+    "reference": "c9-sys-B160__rag_long4k",
+    "wins": 8
+   },
+   "pooled": {
+    "arm": "c18-hybrid-B160__rag_long4k",
+    "cluster_ci95_pp": [
+     -9.164,
+     -3.7338
+    ],
+    "crosses_zero": false,
+    "delta_pp": -6.5,
+    "losses": 70,
+    "max_cases_per_topic": 14,
+    "n_cases": 600,
+    "n_topics": 47,
+    "p_cluster_bootstrap": 0.0,
+    "p_mcnemar_case_level": 0.00013082,
+    "reference": "c9-sys-B160__rag_long4k",
+    "wins": 31
+   }
+  },
+  "C4 tiebreak B=256": {
+   "abstain": {
+    "arm": "c18-hybrid-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     0.0,
+     0.0
+    ],
+    "crosses_zero": true,
+    "delta_pp": 0.0,
+    "losses": 0,
+    "max_cases_per_topic": 4,
+    "n_cases": 168,
+    "n_topics": 46,
+    "p_cluster_bootstrap": 0.0,
+    "p_mcnemar_case_level": 1.0,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 0
+   },
+   "answer": {
+    "arm": "c18-hybrid-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     -0.6849,
+     0.6912
+    ],
+    "crosses_zero": true,
+    "delta_pp": 0.0,
+    "losses": 1,
+    "max_cases_per_topic": 10,
+    "n_cases": 432,
+    "n_topics": 47,
+    "p_cluster_bootstrap": 0.6844,
+    "p_mcnemar_case_level": 1.0,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 1
+   },
+   "pooled": {
+    "arm": "c18-hybrid-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     -0.4918,
+     0.4967
+    ],
+    "crosses_zero": true,
+    "delta_pp": 0.0,
+    "losses": 1,
+    "max_cases_per_topic": 14,
+    "n_cases": 600,
+    "n_topics": 47,
+    "p_cluster_bootstrap": 0.6844,
+    "p_mcnemar_case_level": 1.0,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 1
+   }
+  },
+  "C6 chunk vs record": {
+   "abstain": {
+    "arm": "c10-chunk-sys-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     -1.7442,
+     1.7647
+    ],
+    "crosses_zero": true,
+    "delta_pp": 0.0,
+    "losses": 1,
+    "max_cases_per_topic": 4,
+    "n_cases": 168,
+    "n_topics": 46,
+    "p_cluster_bootstrap": 0.6938,
+    "p_mcnemar_case_level": 1.0,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 1
+   },
+   "answer": {
+    "arm": "c10-chunk-sys-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     -10.9091,
+     -5.7339
+    ],
+    "crosses_zero": false,
+    "delta_pp": -8.3333,
+    "losses": 37,
+    "max_cases_per_topic": 10,
+    "n_cases": 432,
+    "n_topics": 47,
+    "p_cluster_bootstrap": 0.0,
+    "p_mcnemar_case_level": 0.0,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 1
+   },
+   "pooled": {
+    "arm": "c10-chunk-sys-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     -7.8597,
+     -4.1254
+    ],
+    "crosses_zero": false,
+    "delta_pp": -6.0,
+    "losses": 38,
+    "max_cases_per_topic": 14,
+    "n_cases": 600,
+    "n_topics": 47,
+    "p_cluster_bootstrap": 0.0,
+    "p_mcnemar_case_level": 0.0,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 2
+   }
+  },
+  "C6 newline vs record": {
+   "abstain": {
+    "arm": "c13-line-sys-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     -4.7619,
+     -0.5814
+    ],
+    "crosses_zero": false,
+    "delta_pp": -2.381,
+    "losses": 4,
+    "max_cases_per_topic": 4,
+    "n_cases": 168,
+    "n_topics": 46,
+    "p_cluster_bootstrap": 0.0,
+    "p_mcnemar_case_level": 0.125,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 0
+   },
+   "answer": {
+    "arm": "c13-line-sys-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     -2.5,
+     0.2262
+    ],
+    "crosses_zero": true,
+    "delta_pp": -1.1574,
+    "losses": 7,
+    "max_cases_per_topic": 10,
+    "n_cases": 432,
+    "n_topics": 47,
+    "p_cluster_bootstrap": 0.0546,
+    "p_mcnemar_case_level": 0.1796875,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 2
+   },
+   "pooled": {
+    "arm": "c13-line-sys-B256__rag_long4k",
+    "cluster_ci95_pp": [
+     -2.6316,
+     -0.4918
+    ],
+    "crosses_zero": false,
+    "delta_pp": -1.5,
+    "losses": 11,
+    "max_cases_per_topic": 14,
+    "n_cases": 600,
+    "n_topics": 47,
+    "p_cluster_bootstrap": 0.0014,
+    "p_mcnemar_case_level": 0.02246094,
+    "reference": "c9-sys-B256__rag_long4k",
+    "wins": 2
+   }
+  },
   "chunk-sys B=256": {
    "abstain": {
     "arm": "c10-chunk-sys-B256__rag_long4k",

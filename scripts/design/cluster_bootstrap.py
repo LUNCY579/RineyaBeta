@@ -44,6 +44,17 @@ CONTRASTS = [
     ("B=512", "c9-sys-B512__rag_long4k", "c7-off-n600__rag_long4k"),
     ("B=196", "c9-sys-B196__rag_long4k", "c7-off-n600__rag_long4k"),
     ("B=160", "c9-sys-B160__rag_long4k", "c7-off-n600__rag_long4k"),
+    # HEAD-TO-HEAD. Every row above pairs an arm against uncompressed, which is
+    # why the two cells carrying claim C4 -- the score used as a tie-break
+    # inside a BM25-chosen set -- were invisible to this tool and to
+    # audit_power_ceiling.py, which enumerates arm-vs-eviction-off only. C4 is
+    # what justified retiring this programme's original mechanism, so it should
+    # not have been the least-audited contrast in the repo.
+    ("C4 tiebreak B=256", "c18-hybrid-B256__rag_long4k", "c9-sys-B256__rag_long4k"),
+    ("C4 tiebreak B=160", "c18-hybrid-B160__rag_long4k", "c9-sys-B160__rag_long4k"),
+    # C6: segmentation, head to head rather than each against uncompressed.
+    ("C6 newline vs record", "c13-line-sys-B256__rag_long4k", "c9-sys-B256__rag_long4k"),
+    ("C6 chunk vs record", "c10-chunk-sys-B256__rag_long4k", "c9-sys-B256__rag_long4k"),
 ]
 
 
