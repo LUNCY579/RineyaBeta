@@ -1,0 +1,1453 @@
+{
+ "items": [
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0000",
+   "question": "What warranty does PineGauge 1255 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0001",
+   "question": "What warranty does SolarSensor 1228 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0002",
+   "question": "What warranty does QuartzDock 1226 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0003",
+   "question": "In Willow threshold audit 5156, record 4, does the candidate pass?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Relay Birch"
+   ],
+   "item_id": "ext3_0004",
+   "question": "In Birch latency audit 5154, record 5, which relay is faster?",
+   "reply": "Birch latency audit 5154, record 5: Relay Cedar is faster."
+  },
+  {
+   "gold_answer": [
+    "Relay Birch"
+   ],
+   "item_id": "ext3_0005",
+   "question": "In Birch latency audit 5154, record 3, which relay is faster?",
+   "reply": "The relay with the smaller latency is the one with the faster speed, which is Relay Cedar."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0006",
+   "question": "What warranty does JuniperEngine 1249 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Task Maple"
+   ],
+   "item_id": "ext3_0007",
+   "question": "In Juniper priority audit 5157, record 2, which task has higher priority?",
+   "reply": "Task Cedar has higher priority."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0008",
+   "question": "What warranty does VioletTerminal 1231 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0009",
+   "question": "What warranty does ThistleEngine 1229 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0010",
+   "question": "What warranty does UmberLink 1230 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.7.4"
+   ],
+   "item_id": "ext3_0011",
+   "question": "In Cedar semver audit 5152, record 5, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext3_0012",
+   "question": "Which wireless protocol does FernRelay 1245 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0013",
+   "question": "What warranty does HarborKit 1247 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.3.0"
+   ],
+   "item_id": "ext3_0014",
+   "question": "In Cedar semver audit 5152, record 1, which version is newer with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0015",
+   "question": "What warranty does OpalUnit 1254 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0016",
+   "question": "What warranty does RiverKit 1227 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0017",
+   "question": "What warranty does LumenTerminal 1251 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0018",
+   "question": "What warranty does DawnCrate 1243 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "145 GB"
+   ],
+   "item_id": "ext3_0019",
+   "question": "What capacity does VioletTerminal 1231 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0020",
+   "question": "What warranty does IvorySensor 1248 have?",
+   "reply": "IvorySensor 1248 has a 1-year warranty."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0021",
+   "question": "What warranty does AmberBeacon 1240 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext3_0022",
+   "question": "Which wireless protocol does QuartzNode 1256 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0023",
+   "question": "What warranty does BerylVault 1237 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0024",
+   "question": "What warranty does VioletInstrument 1261 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.3.0"
+   ],
+   "item_id": "ext3_0025",
+   "question": "In Cedar semver audit 5152, record 1, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2031-06-05"
+   ],
+   "item_id": "ext3_0026",
+   "question": "In Maple date audit 5153, record 5, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "August 8, 2033"
+   ],
+   "item_id": "ext3_0027",
+   "question": "Give me just the release date for KestrelLink 1250.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Candidate Pine"
+   ],
+   "item_id": "ext3_0028",
+   "question": "In Pine budget audit 5155, record 1, which qualifying candidate should I choose with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "March 8, 2033"
+   ],
+   "item_id": "ext3_0029",
+   "question": "Give me just the release date for BirchInstrument 1241.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0030",
+   "question": "What warranty does WillowFilter 1232 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Task Maple"
+   ],
+   "item_id": "ext3_0031",
+   "question": "In Juniper priority audit 5157, record 5, which task has higher priority?",
+   "reply": "The task with higher priority is Cedar."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0032",
+   "question": "What warranty does QuartzDock 1226 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0033",
+   "question": "What warranty does JuniperEngine 1249 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0034",
+   "question": "What warranty does SolarHub 1258 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0035",
+   "question": "What warranty does AspenNode 1236 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0036",
+   "question": "What warranty does PineRelay 1225 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Task Maple"
+   ],
+   "item_id": "ext3_0037",
+   "question": "In Juniper priority audit 5157, record 1, which task has higher priority?",
+   "reply": "The task Cedar has higher priority."
+  },
+  {
+   "gold_answer": [
+    "Version 1.4.1"
+   ],
+   "item_id": "ext3_0038",
+   "question": "In Cedar semver audit 5152, record 2, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0039",
+   "question": "What warranty does MarbleFilter 1252 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "April 11, 2033"
+   ],
+   "item_id": "ext3_0040",
+   "question": "Give me just the release date for DawnCrate 1243.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0041",
+   "question": "What warranty does IvorySensor 1248 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0042",
+   "question": "In Willow threshold audit 5156, record 1, does the candidate pass with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0043",
+   "question": "What warranty does WillowPanel 1262 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0044",
+   "question": "What warranty does CinderPanel 1242 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Relay Birch"
+   ],
+   "item_id": "ext3_0045",
+   "question": "In Birch latency audit 5154, record 1, which relay is faster with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0046",
+   "question": "What warranty does BerylVault 1237 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Candidate Pine"
+   ],
+   "item_id": "ext3_0047",
+   "question": "In Pine budget audit 5155, record 1, which qualifying candidate should I choose with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0048",
+   "question": "What warranty does ZephyrGauge 1235 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.5.2"
+   ],
+   "item_id": "ext3_0049",
+   "question": "In Cedar semver audit 5152, record 3, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2031-05-05"
+   ],
+   "item_id": "ext3_0050",
+   "question": "In Maple date audit 5153, record 4, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0051",
+   "question": "In Willow threshold audit 5156, record 1, does the candidate pass?",
+   "reply": "Based on the available information, the candidate passes when their measured score is greater than or equal to the stated threshold. The threshold is 76. Therefore,"
+  },
+  {
+   "gold_answer": [
+    "October 23, 2032"
+   ],
+   "item_id": "ext3_0052",
+   "question": "Give me just the release date for XenoModule 1233.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0053",
+   "question": "What warranty does KestrelLink 1250 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "145 GB"
+   ],
+   "item_id": "ext3_0054",
+   "question": "What capacity does VioletTerminal 1231 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext3_0055",
+   "question": "Which wireless protocol does WillowFilter 1232 use?",
+   "reply": "Thread: none."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext3_0056",
+   "question": "What protocol should I configure for EchoJunction 1244?",
+   "reply": "LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0057",
+   "question": "What warranty does ThistleOrb 1259 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0058",
+   "question": "In Aspen capacity audit 5150, record 1, does the resource fit with the unrelated note present?",
+   "reply": "No."
+  },
+  {
+   "gold_answer": [
+    "2031-03-05"
+   ],
+   "item_id": "ext3_0059",
+   "question": "In Maple date audit 5153, record 2, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0060",
+   "question": "What warranty does YarrowUnit 1234 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0061",
+   "question": "What warranty does NimbusModule 1253 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0062",
+   "question": "What warranty does DawnCrate 1243 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext3_0063",
+   "question": "Which wireless protocol does OpalUnit 1254 use?",
+   "reply": "Wi-Fi 1.3."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0064",
+   "question": "What warranty does AspenNode 1236 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0065",
+   "question": "What warranty does QuartzNode 1256 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext3_0066",
+   "question": "What protocol should I configure for EchoJunction 1244?",
+   "reply": "Loose."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext3_0067",
+   "question": "Which wireless protocol does OpalUnit 1254 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0068",
+   "question": "What warranty does EchoJunction 1244 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext3_0069",
+   "question": "Which wireless protocol does ThistleOrb 1259 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0070",
+   "question": "What warranty does GlacierDock 1246 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext3_0071",
+   "question": "Which wireless protocol does UmberBeacon 1260 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0072",
+   "question": "What warranty does SolarSensor 1228 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0073",
+   "question": "What warranty does QuartzNode 1256 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0074",
+   "question": "What warranty does DriftOrb 1239 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "August 8, 2033"
+   ],
+   "item_id": "ext3_0075",
+   "question": "Give me just the release date for KestrelLink 1250.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0076",
+   "question": "What warranty does RiverVault 1257 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0077",
+   "question": "In Willow threshold audit 5156, record 4, does the candidate pass?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Relay Birch"
+   ],
+   "item_id": "ext3_0078",
+   "question": "In Birch latency audit 5154, record 3, which relay is faster?",
+   "reply": "The relay with the smaller latency is Cedar, so the faster relay is Cedar."
+  },
+  {
+   "gold_answer": [
+    "2031-04-05"
+   ],
+   "item_id": "ext3_0079",
+   "question": "In Maple date audit 5153, record 3, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Task Maple"
+   ],
+   "item_id": "ext3_0080",
+   "question": "In Juniper priority audit 5157, record 1, which task has higher priority?",
+   "reply": "The task Cedar has higher priority."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0081",
+   "question": "In Aspen capacity audit 5150, record 1, does the resource fit with the unrelated note present?",
+   "reply": "No."
+  },
+  {
+   "gold_answer": [
+    "January 21, 2031"
+   ],
+   "item_id": "ext3_0082",
+   "question": "Give me just the release date for UmberBeacon 1260.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.4.1"
+   ],
+   "item_id": "ext3_0083",
+   "question": "In Cedar semver audit 5152, record 2, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0084",
+   "question": "What warranty does HarborKit 1247 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.5.2"
+   ],
+   "item_id": "ext3_0085",
+   "question": "In Cedar semver audit 5152, record 3, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0086",
+   "question": "What warranty does PineRelay 1225 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Relay Birch"
+   ],
+   "item_id": "ext3_0087",
+   "question": "In Birch latency audit 5154, record 1, which relay is faster?",
+   "reply": "11 ms."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0088",
+   "question": "What warranty does UmberBeacon 1260 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0089",
+   "question": "What warranty does VioletInstrument 1261 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Relay Birch"
+   ],
+   "item_id": "ext3_0090",
+   "question": "In Birch latency audit 5154, record 1, which relay is faster with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.3.0"
+   ],
+   "item_id": "ext3_0091",
+   "question": "In Cedar semver audit 5152, record 1, which version is newer with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0092",
+   "question": "What warranty does NimbusModule 1253 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "March 8, 2033"
+   ],
+   "item_id": "ext3_0093",
+   "question": "Give me just the release date for BirchInstrument 1241.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0094",
+   "question": "What warranty does WillowFilter 1232 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0095",
+   "question": "What warranty does ThistleEngine 1229 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext3_0096",
+   "question": "What protocol should I configure for WillowPanel 1262?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext3_0097",
+   "question": "What protocol should I configure for WillowPanel 1262?",
+   "reply": "Wi-Fi"
+  },
+  {
+   "gold_answer": [
+    "2031-03-05"
+   ],
+   "item_id": "ext3_0098",
+   "question": "In Maple date audit 5153, record 2, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0099",
+   "question": "What warranty does AmberBeacon 1240 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.6.3"
+   ],
+   "item_id": "ext3_0100",
+   "question": "In Cedar semver audit 5152, record 4, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0101",
+   "question": "In Willow threshold audit 5156, record 2, does the candidate pass?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0102",
+   "question": "What warranty does CinderPanel 1242 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0103",
+   "question": "What warranty does PineGauge 1255 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0104",
+   "question": "What warranty does GlacierDock 1246 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2031-02-05"
+   ],
+   "item_id": "ext3_0105",
+   "question": "In Maple date audit 5153, record 1, which build date is later with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0106",
+   "question": "What warranty does OpalUnit 1254 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.6.3"
+   ],
+   "item_id": "ext3_0107",
+   "question": "In Cedar semver audit 5152, record 4, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0108",
+   "question": "What warranty does KestrelLink 1250 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0109",
+   "question": "In Willow threshold audit 5156, record 1, does the candidate pass?",
+   "reply": "Based on the available information, the candidate passes when their measured score is greater than or equal to the stated threshold. The threshold for the Willow threshold audit 5"
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0110",
+   "question": "What warranty does XenoModule 1233 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0111",
+   "question": "What warranty does SolarHub 1258 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0112",
+   "question": "What warranty does ZephyrGauge 1235 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "October 23, 2032"
+   ],
+   "item_id": "ext3_0113",
+   "question": "Give me just the release date for XenoModule 1233.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0114",
+   "question": "What warranty does MarbleFilter 1252 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0115",
+   "question": "In Willow threshold audit 5156, record 5, does the candidate pass?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2031-02-05"
+   ],
+   "item_id": "ext3_0116",
+   "question": "In Maple date audit 5153, record 1, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Task Maple"
+   ],
+   "item_id": "ext3_0117",
+   "question": "In Juniper priority audit 5157, record 1, which task has higher priority with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0118",
+   "question": "What warranty does XenoModule 1233 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0119",
+   "question": "In Willow threshold audit 5156, record 2, does the candidate pass?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0120",
+   "question": "What warranty does FernRelay 1245 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext3_0121",
+   "question": "Which wireless protocol does FernRelay 1245 use?",
+   "reply": "Wi-Fi 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0122",
+   "question": "What warranty does FernRelay 1245 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "January 21, 2031"
+   ],
+   "item_id": "ext3_0123",
+   "question": "Give me just the release date for UmberBeacon 1260.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0124",
+   "question": "What warranty does BirchInstrument 1241 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Task Maple"
+   ],
+   "item_id": "ext3_0125",
+   "question": "In Juniper priority audit 5157, record 2, which task has higher priority?",
+   "reply": "Task Cedar has higher priority."
+  },
+  {
+   "gold_answer": [
+    "Relay Birch"
+   ],
+   "item_id": "ext3_0126",
+   "question": "In Birch latency audit 5154, record 5, which relay is faster?",
+   "reply": "Birch latency audit 5154, record 5: Relay Cedar has a lower latency of 15 ms."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext3_0127",
+   "question": "What protocol should I configure for NimbusModule 1253?",
+   "reply": "Wi-Fi 3.0."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0128",
+   "question": "What warranty does DriftOrb 1239 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext3_0129",
+   "question": "What protocol should I configure for RiverKit 1227?",
+   "reply": "Wi-Fi."
+  },
+  {
+   "gold_answer": [
+    "Task Maple"
+   ],
+   "item_id": "ext3_0130",
+   "question": "In Juniper priority audit 5157, record 1, which task has higher priority with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0131",
+   "question": "What warranty does YarrowUnit 1234 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext3_0132",
+   "question": "Which wireless protocol does WillowFilter 1232 use?",
+   "reply": "Thread 5.4."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0133",
+   "question": "What warranty does UmberBeacon 1260 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Relay Birch"
+   ],
+   "item_id": "ext3_0134",
+   "question": "In Birch latency audit 5154, record 1, which relay is faster?",
+   "reply": "11 ms."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0135",
+   "question": "In Willow threshold audit 5156, record 5, does the candidate pass?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0136",
+   "question": "What warranty does CobaltHub 1238 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0137",
+   "question": "What warranty does RiverVault 1257 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0138",
+   "question": "What warranty does VioletTerminal 1231 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0139",
+   "question": "What warranty does ThistleOrb 1259 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0140",
+   "question": "What warranty does UmberLink 1230 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext3_0141",
+   "question": "Which wireless protocol does QuartzNode 1256 use?",
+   "reply": "Wi-Fi"
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext3_0142",
+   "question": "Which wireless protocol does UmberBeacon 1260 use?",
+   "reply": "Wi-Fi."
+  },
+  {
+   "gold_answer": [
+    "2 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0143",
+   "question": "What warranty does BirchInstrument 1241 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0144",
+   "question": "What warranty does LumenTerminal 1251 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.7.4"
+   ],
+   "item_id": "ext3_0145",
+   "question": "In Cedar semver audit 5152, record 5, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Task Maple"
+   ],
+   "item_id": "ext3_0146",
+   "question": "In Juniper priority audit 5157, record 5, which task has higher priority?",
+   "reply": "The task with higher priority is Maple."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext3_0147",
+   "question": "In Willow threshold audit 5156, record 1, does the candidate pass with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext3_0148",
+   "question": "What protocol should I configure for RiverKit 1227?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "2031-05-05"
+   ],
+   "item_id": "ext3_0149",
+   "question": "In Maple date audit 5153, record 4, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "April 11, 2033"
+   ],
+   "item_id": "ext3_0150",
+   "question": "Give me just the release date for DawnCrate 1243.",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2031-06-05"
+   ],
+   "item_id": "ext3_0151",
+   "question": "In Maple date audit 5153, record 5, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext3_0152",
+   "question": "What protocol should I configure for NimbusModule 1253?",
+   "reply": "Wi-Fi 3.0."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0153",
+   "question": "What warranty does CobaltHub 1238 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2031-02-05"
+   ],
+   "item_id": "ext3_0154",
+   "question": "In Maple date audit 5153, record 1, which build date is later with the unrelated note present?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "4 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0155",
+   "question": "What warranty does RiverKit 1227 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2031-04-05"
+   ],
+   "item_id": "ext3_0156",
+   "question": "In Maple date audit 5153, record 3, which build date is later?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Version 1.3.0"
+   ],
+   "item_id": "ext3_0157",
+   "question": "In Cedar semver audit 5152, record 1, which version is newer?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext3_0158",
+   "question": "Which wireless protocol does ThistleOrb 1259 use?",
+   "reply": "Wi-Fi 3.0."
+  },
+  {
+   "gold_answer": [
+    "3 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0159",
+   "question": "What warranty does WillowPanel 1262 have?",
+   "reply": "I don't know based on the available information."
+  },
+  {
+   "gold_answer": [
+    "2031-02-05"
+   ],
+   "item_id": "ext3_0160",
+   "question": "In Maple date audit 5153, record 1, which build date is later?",
+   "reply": "I don't know based on the requested answer."
+  },
+  {
+   "gold_answer": [
+    "1 years",
+    "preliminary",
+    "not finalized"
+   ],
+   "item_id": "ext3_0161",
+   "question": "What warranty does EchoJunction 1244 have?",
+   "reply": "I don't know based on the available information."
+  }
+ ],
+ "n": 162
+}

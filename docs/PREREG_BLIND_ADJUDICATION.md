@@ -120,6 +120,55 @@ statement is that the full stratum must be adjudicated.
 This is stated now because it is the most likely way this design fails, and
 discovering it afterwards would look like an excuse.
 
+## 7a. Executing section 7's remedy, 2026-09-05
+
+Round one returned the outcome section 7 anticipated. The primary contrast was
+**+33.33 pp, 7W/0L, p = 0.0156**, both instrument gates passed, and 0 induced
+discordant pairs appeared in the 40 concordant cases — but 0/40 has a
+Clopper-Pearson upper bound of 0.0881, projecting to 25.5 possible induced pairs
+against a primary net of 7. Verdict: **INDETERMINATE**, exactly as written.
+
+Section 7 names the remedy: "the full stratum must be adjudicated". That was then
+done, in two further blocks drawn from the same seeded permutation and disjoint
+by construction, arms R and C only:
+
+| block | cases | replies | new discordant |
+|---|---:|---:|---:|
+| original | 40 all-correct | 120 | 0 |
+| `ext` | 110 all-correct | 220 | 2 |
+| `ext2` | 180 all-correct | 360 | 2 |
+| `ext3` | **81 all-zero** | 162 | 2 |
+
+The `ext3` block is an addition to the design, not part of the original sample,
+and the reason is recorded here rather than discovered later. The first three
+blocks cover only the cases where **all three arms scored 1**. There are 81
+further endpoint-concordant cases where all three scored **0**, and a substring
+endpoint has false negatives — a reply can convey the gold answer in a different
+surface form and score zero. Those 81 are covered by section 7's logic just as
+much as the all-correct ones, and adjudication found **2 real false negatives**
+among them. Leaving them out would have been a hole in the bound.
+
+**Result: all 411 endpoint-concordant cases and all 21 disputed cases are
+adjudicated — the entire 432-case answer stratum. Nothing is extrapolated.** The
+bound is the observed count, 6 induced pairs against a primary net of 7.
+
+Two changes of rule are disclosed, both made before any label in the affected
+block existed:
+
+1. The projection is taken over the **unadjudicated** cases plus the observed
+   count, not over the whole universe. Charging the measured cases their own
+   upper bound double-counts the cases that produced it. This did not change the
+   round-one verdict (25.5 against 29.1).
+2. The concordant universe is 411, not 330, for the reason above.
+
+**Not changed, and deliberately so.** The rule assumes every induced pair goes
+*against* C. All six observed induced pairs go *for* C, so the preregistered rule
+is not merely conservative here, it is conservative in the direction the data
+contradicts. A directional estimate would be a better test. It was not
+substituted, because swapping in a friendlier rule after seeing that the frozen
+one blocks a favourable verdict is precisely the move preregistration exists to
+prevent. The frozen rule was satisfied on its own terms instead.
+
 ## 8. What this does not test
 
 Generality. One model, one corpus, one prompt template. `make_long_rag.py`

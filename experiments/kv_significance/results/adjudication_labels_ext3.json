@@ -1,0 +1,981 @@
+{
+ "labels_returned": 486,
+ "majority": {
+  "ext3_0000": "ABSTAIN",
+  "ext3_0001": "ABSTAIN",
+  "ext3_0002": "ABSTAIN",
+  "ext3_0003": "ABSTAIN",
+  "ext3_0004": "WRONG",
+  "ext3_0005": "WRONG",
+  "ext3_0006": "ABSTAIN",
+  "ext3_0007": "WRONG",
+  "ext3_0008": "ABSTAIN",
+  "ext3_0009": "ABSTAIN",
+  "ext3_0010": "ABSTAIN",
+  "ext3_0011": "ABSTAIN",
+  "ext3_0012": "WRONG",
+  "ext3_0013": "ABSTAIN",
+  "ext3_0014": "ABSTAIN",
+  "ext3_0015": "ABSTAIN",
+  "ext3_0016": "ABSTAIN",
+  "ext3_0017": "ABSTAIN",
+  "ext3_0018": "ABSTAIN",
+  "ext3_0019": "ABSTAIN",
+  "ext3_0020": "CORRECT_CLEAN",
+  "ext3_0021": "ABSTAIN",
+  "ext3_0022": "WRONG",
+  "ext3_0023": "ABSTAIN",
+  "ext3_0024": "ABSTAIN",
+  "ext3_0025": "ABSTAIN",
+  "ext3_0026": "ABSTAIN",
+  "ext3_0027": "ABSTAIN",
+  "ext3_0028": "ABSTAIN",
+  "ext3_0029": "ABSTAIN",
+  "ext3_0030": "ABSTAIN",
+  "ext3_0031": "WRONG",
+  "ext3_0032": "ABSTAIN",
+  "ext3_0033": "ABSTAIN",
+  "ext3_0034": "ABSTAIN",
+  "ext3_0035": "ABSTAIN",
+  "ext3_0036": "ABSTAIN",
+  "ext3_0037": "WRONG",
+  "ext3_0038": "ABSTAIN",
+  "ext3_0039": "ABSTAIN",
+  "ext3_0040": "ABSTAIN",
+  "ext3_0041": "ABSTAIN",
+  "ext3_0042": "ABSTAIN",
+  "ext3_0043": "ABSTAIN",
+  "ext3_0044": "ABSTAIN",
+  "ext3_0045": "ABSTAIN",
+  "ext3_0046": "ABSTAIN",
+  "ext3_0047": "ABSTAIN",
+  "ext3_0048": "ABSTAIN",
+  "ext3_0049": "ABSTAIN",
+  "ext3_0050": "ABSTAIN",
+  "ext3_0051": "WRONG",
+  "ext3_0052": "ABSTAIN",
+  "ext3_0053": "ABSTAIN",
+  "ext3_0054": "ABSTAIN",
+  "ext3_0055": "WRONG",
+  "ext3_0056": "WRONG",
+  "ext3_0057": "ABSTAIN",
+  "ext3_0058": "WRONG",
+  "ext3_0059": "ABSTAIN",
+  "ext3_0060": "ABSTAIN",
+  "ext3_0061": "ABSTAIN",
+  "ext3_0062": "ABSTAIN",
+  "ext3_0063": "WRONG",
+  "ext3_0064": "ABSTAIN",
+  "ext3_0065": "ABSTAIN",
+  "ext3_0066": "WRONG",
+  "ext3_0067": "WRONG",
+  "ext3_0068": "ABSTAIN",
+  "ext3_0069": "WRONG",
+  "ext3_0070": "ABSTAIN",
+  "ext3_0071": "WRONG",
+  "ext3_0072": "ABSTAIN",
+  "ext3_0073": "ABSTAIN",
+  "ext3_0074": "ABSTAIN",
+  "ext3_0075": "ABSTAIN",
+  "ext3_0076": "ABSTAIN",
+  "ext3_0077": "ABSTAIN",
+  "ext3_0078": "WRONG",
+  "ext3_0079": "ABSTAIN",
+  "ext3_0080": "WRONG",
+  "ext3_0081": "WRONG",
+  "ext3_0082": "ABSTAIN",
+  "ext3_0083": "ABSTAIN",
+  "ext3_0084": "ABSTAIN",
+  "ext3_0085": "ABSTAIN",
+  "ext3_0086": "ABSTAIN",
+  "ext3_0087": "WRONG",
+  "ext3_0088": "ABSTAIN",
+  "ext3_0089": "ABSTAIN",
+  "ext3_0090": "ABSTAIN",
+  "ext3_0091": "ABSTAIN",
+  "ext3_0092": "ABSTAIN",
+  "ext3_0093": "ABSTAIN",
+  "ext3_0094": "ABSTAIN",
+  "ext3_0095": "ABSTAIN",
+  "ext3_0096": "WRONG",
+  "ext3_0097": "WRONG",
+  "ext3_0098": "ABSTAIN",
+  "ext3_0099": "ABSTAIN",
+  "ext3_0100": "ABSTAIN",
+  "ext3_0101": "ABSTAIN",
+  "ext3_0102": "ABSTAIN",
+  "ext3_0103": "ABSTAIN",
+  "ext3_0104": "ABSTAIN",
+  "ext3_0105": "ABSTAIN",
+  "ext3_0106": "ABSTAIN",
+  "ext3_0107": "ABSTAIN",
+  "ext3_0108": "ABSTAIN",
+  "ext3_0109": "WRONG",
+  "ext3_0110": "ABSTAIN",
+  "ext3_0111": "ABSTAIN",
+  "ext3_0112": "ABSTAIN",
+  "ext3_0113": "ABSTAIN",
+  "ext3_0114": "ABSTAIN",
+  "ext3_0115": "ABSTAIN",
+  "ext3_0116": "ABSTAIN",
+  "ext3_0117": "ABSTAIN",
+  "ext3_0118": "ABSTAIN",
+  "ext3_0119": "ABSTAIN",
+  "ext3_0120": "ABSTAIN",
+  "ext3_0121": "WRONG",
+  "ext3_0122": "ABSTAIN",
+  "ext3_0123": "ABSTAIN",
+  "ext3_0124": "ABSTAIN",
+  "ext3_0125": "WRONG",
+  "ext3_0126": "WRONG",
+  "ext3_0127": "WRONG",
+  "ext3_0128": "ABSTAIN",
+  "ext3_0129": "WRONG",
+  "ext3_0130": "ABSTAIN",
+  "ext3_0131": "ABSTAIN",
+  "ext3_0132": "WRONG",
+  "ext3_0133": "ABSTAIN",
+  "ext3_0134": "WRONG",
+  "ext3_0135": "ABSTAIN",
+  "ext3_0136": "ABSTAIN",
+  "ext3_0137": "ABSTAIN",
+  "ext3_0138": "ABSTAIN",
+  "ext3_0139": "ABSTAIN",
+  "ext3_0140": "ABSTAIN",
+  "ext3_0141": "WRONG",
+  "ext3_0142": "WRONG",
+  "ext3_0143": "ABSTAIN",
+  "ext3_0144": "ABSTAIN",
+  "ext3_0145": "ABSTAIN",
+  "ext3_0146": "CORRECT_CLEAN",
+  "ext3_0147": "ABSTAIN",
+  "ext3_0148": "WRONG",
+  "ext3_0149": "ABSTAIN",
+  "ext3_0150": "ABSTAIN",
+  "ext3_0151": "ABSTAIN",
+  "ext3_0152": "WRONG",
+  "ext3_0153": "ABSTAIN",
+  "ext3_0154": "ABSTAIN",
+  "ext3_0155": "ABSTAIN",
+  "ext3_0156": "ABSTAIN",
+  "ext3_0157": "ABSTAIN",
+  "ext3_0158": "WRONG",
+  "ext3_0159": "ABSTAIN",
+  "ext3_0160": "ABSTAIN",
+  "ext3_0161": "ABSTAIN"
+ },
+ "raw": {
+  "ext3_0000": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0001": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0002": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0003": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0004": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0005": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0006": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0007": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0008": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0009": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0010": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0011": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0012": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0013": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0014": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0015": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0016": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0017": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0018": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0019": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0020": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "ext3_0021": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0022": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0023": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0024": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0025": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0026": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0027": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0028": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0029": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0030": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0031": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0032": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0033": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0034": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0035": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0036": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0037": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0038": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0039": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0040": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0041": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0042": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0043": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0044": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0045": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0046": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0047": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0048": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0049": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0050": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0051": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0052": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0053": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0054": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0055": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0056": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0057": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0058": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0059": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0060": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0061": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0062": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0063": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0064": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0065": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0066": [
+   "WRONG",
+   "UNINTELLIGIBLE",
+   "WRONG"
+  ],
+  "ext3_0067": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0068": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0069": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0070": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0071": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0072": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0073": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0074": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0075": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0076": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0077": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0078": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0079": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0080": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0081": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0082": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0083": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0084": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0085": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0086": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0087": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0088": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0089": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0090": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0091": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0092": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0093": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0094": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0095": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0096": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0097": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0098": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0099": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0100": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0101": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0102": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0103": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0104": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0105": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0106": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0107": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0108": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0109": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0110": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0111": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0112": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0113": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0114": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0115": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0116": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0117": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0118": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0119": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0120": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0121": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0122": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0123": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0124": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0125": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0126": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0127": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0128": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0129": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0130": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0131": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0132": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0133": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0134": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0135": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0136": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0137": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0138": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0139": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0140": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0141": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0142": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0143": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0144": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0145": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0146": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "ext3_0147": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0148": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0149": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0150": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0151": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0152": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0153": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0154": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0155": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0156": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0157": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0158": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "ext3_0159": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0160": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ],
+  "ext3_0161": [
+   "ABSTAIN",
+   "ABSTAIN",
+   "ABSTAIN"
+  ]
+ },
+ "three_way_splits": 0,
+ "undercovered_items": 0
+}

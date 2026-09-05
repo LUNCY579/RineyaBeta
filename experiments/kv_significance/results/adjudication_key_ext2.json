@@ -1,0 +1,2527 @@
+{
+ "key": {
+  "ext2_0000": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0001": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0002": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0003": {
+   "arm": "R",
+   "case": "v175_fact_240_amberbeacon_1240_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0004": {
+   "arm": "R",
+   "case": "v175_fact_238_cobalthub_1238_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0005": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0006": {
+   "arm": "R",
+   "case": "v175_fact_229_thistleengine_1229_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0007": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0008": {
+   "arm": "R",
+   "case": "v175_fact_229_thistleengine_1229_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0009": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0010": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0011": {
+   "arm": "R",
+   "case": "v175_fact_235_zephyrgauge_1235_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0012": {
+   "arm": "R",
+   "case": "v175_fact_233_xenomodule_1233_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0013": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0014": {
+   "arm": "R",
+   "case": "v175_fact_235_zephyrgauge_1235_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0015": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0016": {
+   "arm": "R",
+   "case": "v175_fact_237_berylvault_1237_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0017": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0018": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0019": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0020": {
+   "arm": "C",
+   "case": "v175_proc_151_temperature_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0021": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0022": {
+   "arm": "R",
+   "case": "v175_fact_226_quartzdock_1226_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0023": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0024": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0025": {
+   "arm": "C",
+   "case": "v175_fact_226_quartzdock_1226_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0026": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0027": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0028": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0029": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0030": {
+   "arm": "R",
+   "case": "v175_fact_227_riverkit_1227_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0031": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0032": {
+   "arm": "C",
+   "case": "v175_fact_228_solarsensor_1228_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0033": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0034": {
+   "arm": "C",
+   "case": "v175_proc_158_capacity_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0035": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0036": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0037": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0038": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0039": {
+   "arm": "C",
+   "case": "v175_proc_151_temperature_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0040": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0041": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0042": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0043": {
+   "arm": "R",
+   "case": "v175_proc_158_capacity_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0044": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0045": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0046": {
+   "arm": "R",
+   "case": "v175_fact_233_xenomodule_1233_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0047": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0048": {
+   "arm": "C",
+   "case": "v175_fact_230_umberlink_1230_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0049": {
+   "arm": "C",
+   "case": "v175_fact_229_thistleengine_1229_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0050": {
+   "arm": "R",
+   "case": "v175_fact_238_cobalthub_1238_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0051": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0052": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0053": {
+   "arm": "R",
+   "case": "v175_fact_251_lumenterminal_1251_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0054": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0055": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0056": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0057": {
+   "arm": "R",
+   "case": "v175_proc_158_capacity_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0058": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0059": {
+   "arm": "R",
+   "case": "v175_fact_240_amberbeacon_1240_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0060": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0061": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0062": {
+   "arm": "R",
+   "case": "v175_fact_238_cobalthub_1238_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0063": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0064": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0065": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0066": {
+   "arm": "R",
+   "case": "v175_fact_227_riverkit_1227_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0067": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0068": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0069": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0070": {
+   "arm": "R",
+   "case": "v175_fact_227_riverkit_1227_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0071": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0072": {
+   "arm": "R",
+   "case": "v175_fact_230_umberlink_1230_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0073": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0074": {
+   "arm": "C",
+   "case": "v175_fact_238_cobalthub_1238_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0075": {
+   "arm": "C",
+   "case": "v175_fact_226_quartzdock_1226_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0076": {
+   "arm": "R",
+   "case": "v175_fact_226_quartzdock_1226_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0077": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0078": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0079": {
+   "arm": "C",
+   "case": "v175_proc_151_temperature_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0080": {
+   "arm": "R",
+   "case": "v175_fact_233_xenomodule_1233_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0081": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0082": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0083": {
+   "arm": "C",
+   "case": "v175_fact_228_solarsensor_1228_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0084": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0085": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0086": {
+   "arm": "R",
+   "case": "v175_fact_227_riverkit_1227_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0087": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0088": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0089": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0090": {
+   "arm": "R",
+   "case": "v175_fact_226_quartzdock_1226_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0091": {
+   "arm": "C",
+   "case": "v175_fact_235_zephyrgauge_1235_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0092": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0093": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0094": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0095": {
+   "arm": "C",
+   "case": "v175_fact_252_marblefilter_1252_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0096": {
+   "arm": "R",
+   "case": "v175_fact_244_echojunction_1244_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0097": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0098": {
+   "arm": "R",
+   "case": "v175_fact_233_xenomodule_1233_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0099": {
+   "arm": "C",
+   "case": "v175_fact_246_glacierdock_1246_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0100": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0101": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0102": {
+   "arm": "R",
+   "case": "v175_proc_156_threshold_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0103": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0104": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0105": {
+   "arm": "C",
+   "case": "v175_fact_226_quartzdock_1226_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0106": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0107": {
+   "arm": "C",
+   "case": "v175_fact_251_lumenterminal_1251_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0108": {
+   "arm": "R",
+   "case": "v175_fact_240_amberbeacon_1240_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0109": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0110": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0111": {
+   "arm": "R",
+   "case": "v175_fact_238_cobalthub_1238_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0112": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0113": {
+   "arm": "R",
+   "case": "v175_fact_252_marblefilter_1252_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0114": {
+   "arm": "R",
+   "case": "v175_fact_251_lumenterminal_1251_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0115": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0116": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0117": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0118": {
+   "arm": "R",
+   "case": "v175_fact_226_quartzdock_1226_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0119": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0120": {
+   "arm": "R",
+   "case": "v175_fact_235_zephyrgauge_1235_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0121": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0122": {
+   "arm": "R",
+   "case": "v175_proc_155_budget_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0123": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0124": {
+   "arm": "R",
+   "case": "v175_fact_226_quartzdock_1226_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0125": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0126": {
+   "arm": "R",
+   "case": "v175_fact_229_thistleengine_1229_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0127": {
+   "arm": "C",
+   "case": "v175_fact_246_glacierdock_1246_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0128": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0129": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0130": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0131": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0132": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0133": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0134": {
+   "arm": "R",
+   "case": "v175_fact_237_berylvault_1237_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0135": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0136": {
+   "arm": "R",
+   "case": "v175_proc_150_capacity_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0137": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0138": {
+   "arm": "C",
+   "case": "v175_fact_244_echojunction_1244_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0139": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0140": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0141": {
+   "arm": "C",
+   "case": "v175_proc_155_budget_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0142": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0143": {
+   "arm": "C",
+   "case": "v175_proc_155_budget_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0144": {
+   "arm": "C",
+   "case": "v175_fact_229_thistleengine_1229_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0145": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0146": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0147": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0148": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0149": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0150": {
+   "arm": "R",
+   "case": "v175_fact_226_quartzdock_1226_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0151": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0152": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0153": {
+   "arm": "C",
+   "case": "v175_fact_238_cobalthub_1238_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0154": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0155": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0156": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0157": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0158": {
+   "arm": "C",
+   "case": "v175_fact_251_lumenterminal_1251_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0159": {
+   "arm": "R",
+   "case": "v175_fact_246_glacierdock_1246_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0160": {
+   "arm": "R",
+   "case": "v175_fact_246_glacierdock_1246_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0161": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0162": {
+   "arm": "C",
+   "case": "v175_fact_229_thistleengine_1229_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0163": {
+   "arm": "R",
+   "case": "v175_proc_151_temperature_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0164": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0165": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0166": {
+   "arm": "C",
+   "case": "v175_fact_246_glacierdock_1246_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0167": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0168": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0169": {
+   "arm": "C",
+   "case": "v175_fact_240_amberbeacon_1240_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0170": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0171": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0172": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0173": {
+   "arm": "R",
+   "case": "v175_fact_251_lumenterminal_1251_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0174": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0175": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0176": {
+   "arm": "C",
+   "case": "v175_fact_226_quartzdock_1226_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0177": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0178": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0179": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0180": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0181": {
+   "arm": "C",
+   "case": "v175_fact_233_xenomodule_1233_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0182": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0183": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0184": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0185": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0186": {
+   "arm": "R",
+   "case": "v175_fact_228_solarsensor_1228_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0187": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0188": {
+   "arm": "R",
+   "case": "v175_fact_246_glacierdock_1246_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0189": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0190": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0191": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0192": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0193": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0194": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0195": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0196": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0197": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0198": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0199": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0200": {
+   "arm": "R",
+   "case": "v175_fact_246_glacierdock_1246_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0201": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0202": {
+   "arm": "R",
+   "case": "v175_fact_246_glacierdock_1246_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0203": {
+   "arm": "C",
+   "case": "v175_fact_233_xenomodule_1233_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0204": {
+   "arm": "C",
+   "case": "v175_fact_235_zephyrgauge_1235_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0205": {
+   "arm": "C",
+   "case": "v175_fact_249_juniperengine_1249_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0206": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0207": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0208": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0209": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0210": {
+   "arm": "C",
+   "case": "v175_fact_233_xenomodule_1233_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0211": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0212": {
+   "arm": "R",
+   "case": "v175_fact_252_marblefilter_1252_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0213": {
+   "arm": "C",
+   "case": "v175_fact_227_riverkit_1227_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0214": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0215": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0216": {
+   "arm": "R",
+   "case": "v175_fact_252_marblefilter_1252_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0217": {
+   "arm": "C",
+   "case": "v175_fact_226_quartzdock_1226_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0218": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0219": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0220": {
+   "arm": "R",
+   "case": "v175_fact_228_solarsensor_1228_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0221": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0222": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0223": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0224": {
+   "arm": "R",
+   "case": "v175_fact_228_solarsensor_1228_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0225": {
+   "arm": "R",
+   "case": "v175_proc_151_temperature_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0226": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0227": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0228": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0229": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0230": {
+   "arm": "C",
+   "case": "v175_fact_225_pinerelay_1225_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0231": {
+   "arm": "C",
+   "case": "v175_fact_252_marblefilter_1252_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0232": {
+   "arm": "R",
+   "case": "v175_fact_249_juniperengine_1249_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0233": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0234": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0235": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0236": {
+   "arm": "R",
+   "case": "v175_fact_225_pinerelay_1225_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0237": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0238": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0239": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0240": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0241": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0242": {
+   "arm": "R",
+   "case": "v175_fact_240_amberbeacon_1240_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0243": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0244": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0245": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0246": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0247": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0248": {
+   "arm": "R",
+   "case": "v175_fact_225_pinerelay_1225_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0249": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0250": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0251": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0252": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0253": {
+   "arm": "C",
+   "case": "v175_fact_233_xenomodule_1233_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0254": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0255": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0256": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0257": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0258": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0259": {
+   "arm": "R",
+   "case": "v175_proc_155_budget_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0260": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0261": {
+   "arm": "C",
+   "case": "v175_proc_156_threshold_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0262": {
+   "arm": "R",
+   "case": "v175_proc_151_temperature_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0263": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0264": {
+   "arm": "C",
+   "case": "v175_fact_238_cobalthub_1238_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0265": {
+   "arm": "C",
+   "case": "v175_fact_237_berylvault_1237_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0266": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0267": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0268": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0269": {
+   "arm": "C",
+   "case": "v175_fact_238_cobalthub_1238_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0270": {
+   "arm": "C",
+   "case": "v175_fact_240_amberbeacon_1240_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0271": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0272": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0273": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0274": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0275": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0276": {
+   "arm": "C",
+   "case": "v175_fact_225_pinerelay_1225_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0277": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0278": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0279": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0280": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0281": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0282": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0283": {
+   "arm": "C",
+   "case": "v175_fact_227_riverkit_1227_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0284": {
+   "arm": "R",
+   "case": "v175_fact_228_solarsensor_1228_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0285": {
+   "arm": "C",
+   "case": "v175_fact_227_riverkit_1227_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0286": {
+   "arm": "C",
+   "case": "v175_fact_229_thistleengine_1229_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0287": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0288": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0289": {
+   "arm": "C",
+   "case": "v175_fact_228_solarsensor_1228_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0290": {
+   "arm": "R",
+   "case": "v175_fact_229_thistleengine_1229_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0291": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0292": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0293": {
+   "arm": "C",
+   "case": "v175_proc_158_capacity_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0294": {
+   "arm": "R",
+   "case": "v175_fact_228_solarsensor_1228_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0295": {
+   "arm": "C",
+   "case": "v175_proc_158_capacity_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0296": {
+   "arm": "R",
+   "case": "v175_fact_229_thistleengine_1229_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0297": {
+   "arm": "C",
+   "case": "v175_fact_252_marblefilter_1252_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0298": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0299": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0300": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0301": {
+   "arm": "C",
+   "case": "v175_proc_151_temperature_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0302": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0303": {
+   "arm": "C",
+   "case": "v175_fact_237_berylvault_1237_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0304": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0305": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0306": {
+   "arm": "C",
+   "case": "v175_fact_227_riverkit_1227_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0307": {
+   "arm": "C",
+   "case": "v175_fact_225_pinerelay_1225_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0308": {
+   "arm": "R",
+   "case": "v175_fact_251_lumenterminal_1251_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0309": {
+   "arm": "C",
+   "case": "v175_fact_246_glacierdock_1246_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0310": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0311": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0312": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0313": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0314": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0315": {
+   "arm": "C",
+   "case": "v175_fact_230_umberlink_1230_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0316": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0317": {
+   "arm": "C",
+   "case": "v175_fact_251_lumenterminal_1251_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0318": {
+   "arm": "C",
+   "case": "v175_fact_229_thistleengine_1229_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0319": {
+   "arm": "C",
+   "case": "v175_proc_155_budget_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0320": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0321": {
+   "arm": "C",
+   "case": "v175_proc_150_capacity_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0322": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0323": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0324": {
+   "arm": "C",
+   "case": "v175_fact_240_amberbeacon_1240_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0325": {
+   "arm": "R",
+   "case": "v175_proc_158_capacity_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0326": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0327": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0328": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0329": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0330": {
+   "arm": "C",
+   "case": "v175_fact_228_solarsensor_1228_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0331": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0332": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0333": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0334": {
+   "arm": "R",
+   "case": "v175_proc_155_budget_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0335": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0336": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0337": {
+   "arm": "C",
+   "case": "v175_fact_227_riverkit_1227_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0338": {
+   "arm": "R",
+   "case": "v175_fact_225_pinerelay_1225_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0339": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0340": {
+   "arm": "C",
+   "case": "v175_fact_240_amberbeacon_1240_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0341": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0342": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0343": {
+   "arm": "C",
+   "case": "v175_fact_235_zephyrgauge_1235_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0344": {
+   "arm": "C",
+   "case": "v175_fact_228_solarsensor_1228_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0345": {
+   "arm": "C",
+   "case": "v175_fact_251_lumenterminal_1251_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0346": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0347": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0348": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0349": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0350": {
+   "arm": "R",
+   "case": "v175_proc_151_temperature_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0351": {
+   "arm": "C",
+   "case": "v175_fact_246_glacierdock_1246_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0352": {
+   "arm": "R",
+   "case": "v175_fact_227_riverkit_1227_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0353": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0354": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0355": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0356": {
+   "arm": "R",
+   "case": "v175_fact_230_umberlink_1230_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0357": {
+   "arm": "C",
+   "case": "v175_fact_226_quartzdock_1226_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0358": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext2_0359": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  }
+ },
+ "n_concordant": 180,
+ "n_disputed": 21,
+ "seed": 20260826
+}

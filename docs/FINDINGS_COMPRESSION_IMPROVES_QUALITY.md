@@ -22,6 +22,15 @@
 > topics giving [+1.38, +5.28]. Case-level independence was a threat and it
 > **died**; see [`cluster_bootstrap.py`](../scripts/design/cluster_bootstrap.py).
 >
+> **Update, 2026-09-05: it now survives blind adjudication too, at a smaller
+> magnitude.** All 432 answer-stratum cases were relabelled by three independent
+> raters who could not see which arm produced which reply, 2,775 labels, 923 of
+> 925 items unanimous. Requiring the answer to be **correct and legible**, not
+> merely to contain the gold substring, the effect is **+2.55 pp, 12W/1L,
+> p = 0.0034**. That is the number this programme should quote; +3.24 pp counted
+> some text that contains the right answer badly. See
+> [`FINDINGS_BLIND_ADJUDICATION.md`](FINDINGS_BLIND_ADJUDICATION.md).
+>
 > **3. Section 4's oracle reading was right for the wrong reason.** "The blind
 > selector is at 99% of the oracle's ceiling" is true — but it was asserted
 > against no floor. With a floor arm now run, selection spans 76 pp

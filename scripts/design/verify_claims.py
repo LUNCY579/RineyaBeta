@@ -56,7 +56,15 @@ DOCS = {
     "improves": ROOT / "docs/FINDINGS_COMPRESSION_IMPROVES_QUALITY.md",
     "floor": ROOT / "docs/FINDINGS_CAPACITY_FLOOR.md",
     "ident": ROOT / "docs/FINDINGS_INSTRUCTION_IDENTIFICATION.md",
+    "adjud": ROOT / "docs/FINDINGS_BLIND_ADJUDICATION.md",
 }
+
+
+def adjud(*path) -> float:
+    d = json.loads((KVS / "blind_adjudication.json").read_text(encoding="utf-8"))
+    for k in path:
+        d = d[k]
+    return float(d)
 
 
 def ident(arm_tag: str, stratum: str) -> float:
@@ -79,12 +87,61 @@ def ident_contrast(label: str, stratum: str, field: str) -> float:
     return float(d["contrasts"][label][stratum][field])
 
 
+def floor_stat(*path) -> float:
+    """A number from the committed capacity-floor analysis.
+
+    FINDINGS_CAPACITY_FLOOR.md was listed in DOCS but had ZERO pinned claims
+    until 2026-09-05, so `verify_claims` only ever checked that the file still
+    existed. That is the document carrying the 196 formula whose arithmetic was
+    wrong, so it is exactly the one that needed pinning.
+    """
+    d = json.loads((KVS / "capacity_floor.json").read_text(encoding="utf-8"))
+    for k in path:
+        d = d[str(k)]
+    return float(d)
+
+
 def abstain_audit(*path) -> float:
     d = json.loads((KVS / "abstain_endpoint_audit.json").read_text(
         encoding="utf-8"))
     for k in path:
         d = d[k]
     return float(d)
+
+
+ARITHMETIC = re.compile(
+    r"\(\s*([0-9][0-9\s\+\-\*/\.]*?)\s*\)\s*/\s*([0-9.]+)\s*=\s*([0-9.]+)")
+
+
+def check_inline_arithmetic(text_by_doc, tol=0.51):
+    """Evaluate every `(a + b + c) / d = e` written in prose.
+
+    verify_claims compares a documented scalar to a JSON scalar. It never
+    evaluated arithmetic stated inline, which is how
+    `(4 + 104 + 63) / 0.85 = 196` survived in a headline formula when the
+    division is 201.18. Tolerance is half a unit so a value rounded to the
+    nearest integer still passes.
+    """
+    bad = []
+    for name, text in sorted(text_by_doc.items()):
+        for m in ARITHMETIC.finditer(text):
+            # A retraction has to be allowed to quote the arithmetic it is
+            # retracting. `(sic)` on the same line marks a formula reproduced as
+            # written rather than asserted, which is the scholarly convention
+            # and keeps the checker from flagging its own correction notes.
+            line_start = text.rfind("\n", 0, m.start()) + 1
+            line_end = text.find("\n", m.end())
+            line = text[line_start:line_end if line_end != -1 else len(text)]
+            if "(sic)" in line:
+                continue
+            expr, denom, stated = m.group(1), m.group(2), m.group(3)
+            try:
+                got = eval(expr, {"__builtins__": {}}, {}) / float(denom)  # noqa: S307
+            except Exception:                                   # noqa: BLE001
+                continue
+            if abs(got - float(stated)) > tol:
+                bad.append((name, m.group(0).strip(), got))
+    return bad
 
 
 def summary(base: Path, tag: str, ds: str = "rag_dev"):
@@ -512,6 +569,43 @@ CLAIMS = [
     ("improves: partial_support gain", 44.74,
      lambda: abstain_audit("by_category", "partial_support", "delta_pp"), 5e-3,
      "+44.74", "improves,ident"),
+
+    # --- FINDINGS_BLIND_ADJUDICATION.md --------------------------------------
+    ("adjud: strict full stratum", 2.55,
+     lambda: adjud("full_answer_stratum", "primary", "delta_pp"), 5e-3,
+     "+2.55 pp", "adjud,improves"),
+    ("adjud: permissive full stratum", 3.47,
+     lambda: adjud("full_answer_stratum", "secondary", "delta_pp"), 5e-3,
+     "+3.47 pp", "adjud"),
+    ("adjud: strict wins", 12.0,
+     lambda: adjud("full_answer_stratum", "primary", "wins"), 0.5, "12/1", "adjud"),
+    ("adjud: contract agreement", 0.9977,
+     lambda: adjud("gates", "g2_contract_agreement"), 5e-4, "99.8%", "adjud"),
+    ("adjud: induced discordant", 6.0,
+     lambda: adjud("conditioning", "induced_discordant"), 0.5,
+     "observed 6", "adjud"),
+
+    # --- FINDINGS_CAPACITY_FLOOR.md, listed in DOCS but never pinned ---------
+    ("floor: predicted tokens", 196.0,
+     lambda: floor_stat("predicted_floor_tokens"), 0.5, "196", "floor"),
+    ("floor: observed knee", 196.0,
+     lambda: floor_stat("observed_floor_tokens"), 0.5, "196", "floor"),
+    ("floor: first budget below", 160.0,
+     lambda: floor_stat("F2", "first_budget_below_floor"), 0.5, "160", "floor"),
+    ("floor: B=512 reduction", 8.3,
+     lambda: floor_stat("budgets", 512, "reduction_x"), 0.05, "8.3×", "floor"),
+    ("floor: B=256 reduction", 16.5,
+     lambda: floor_stat("budgets", 256, "reduction_x"), 0.05, "16.5×", "floor"),
+    ("floor: B=196 reduction", 21.6,
+     lambda: floor_stat("budgets", 196, "reduction_x"), 0.05, "21.6×", "floor"),
+    ("floor: B=160 reduction", 26.4,
+     lambda: floor_stat("budgets", 160, "reduction_x"), 0.05, "26.4×", "floor"),
+    ("floor: B=128 reduction", 33.0,
+     lambda: floor_stat("budgets", 128, "reduction_x"), 0.05, "33.0×", "floor"),
+    ("floor: B=96 reduction", 44.0,
+     lambda: floor_stat("budgets", 96, "reduction_x"), 0.05, "44.0×", "floor"),
+    ("floor: B=256 answer", 0.8056,
+     lambda: floor_stat("budgets", 256, "answer", "arm"), 5e-5, "0.8056", "floor"),
 
     # --- FINDINGS_INSTRUCTION_IDENTIFICATION.md ------------------------------
     ("ident: random floor answer", 0.0486,
@@ -1448,8 +1542,16 @@ def main() -> None:
         print(f"{label:<34}{doc_val:>12.5f}{shown}  {str(in_doc):>7}  "
               f"{'OK' if ok else 'MISMATCH'}")
 
+    arith = check_inline_arithmetic(text)
+    if arith:
+        print()
+        for name, expr, got in arith:
+            print(f"ARITHMETIC MISMATCH in {name}: {expr}  evaluates to {got:.4f}")
     n = len(CLAIMS)
     print(f"\n{n - bad}/{n} documented numbers reproduce from committed data")
+    print(f"{len(arith)} inline formulas in docs/ disagree with their own "
+          f"arithmetic")
+    bad += len(arith)
     if bad:
         print("A mismatch means the prose and the data disagree. Fix whichever is")
         print("wrong -- and if the data is right, state the retraction rather than")

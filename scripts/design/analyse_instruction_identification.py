@@ -58,6 +58,54 @@ def exact_mcnemar(wins, losses):
     return min(1.0, 2 * sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n)
 
 
+def binom_cdf(k, n, p):
+    return sum(math.comb(n, i) * p ** i * (1 - p) ** (n - i) for i in range(k + 1))
+
+
+def clopper_pearson(k, n, alpha=0.05):
+    if n == 0:
+        return (0.0, 1.0)
+    lo, hi = 0.0, 1.0
+    if k > 0:
+        a, b = 0.0, 1.0
+        for _ in range(200):
+            mid = (a + b) / 2
+            if 1 - binom_cdf(k - 1, n, mid) > alpha / 2:
+                b = mid
+            else:
+                a = mid
+        lo = a
+    if k < n:
+        a, b = 0.0, 1.0
+        for _ in range(200):
+            mid = (a + b) / 2
+            if binom_cdf(k, n, mid) < alpha / 2:
+                b = mid
+            else:
+                a = mid
+        hi = b
+    return (lo, hi)
+
+
+def equivalence_bound(wins, losses, n):
+    """95% bound on the paired difference, for reading a NULL honestly.
+
+    A null contrast is not evidence of equivalence. B vs C here is 1W/2L: three
+    discordant pairs, power ceiling 0.25, so its p = 1.00 carries no information
+    whatever. What the data DOES support is a bound. The paired difference is
+    disc_rate * (2 * p_win - 1) and both factors have exact intervals, so the
+    product has a conservative one. Reporting it is the difference between "we
+    found nothing" and "we bounded it", and only the second is a result.
+    """
+    d = wins + losses
+    if n == 0:
+        return None
+    pw = clopper_pearson(wins, d) if d else (0.0, 1.0)
+    dr = clopper_pearson(d, n)
+    return [round(100.0 * dr[1] * (2 * pw[0] - 1), 2),
+            round(100.0 * dr[1] * (2 * pw[1] - 1), 2)]
+
+
 def load(arm):
     path = os.path.join(RESULTS, arm, "results.jsonl")
     if not os.path.exists(path):
@@ -242,20 +290,33 @@ def main():
                   "{0:+.2f} pp ({1}W/{2}L, p={3:.3g}).".format(
                       -r["delta_pp"], r["losses"], r["wins"], r["p"]))
             ceil = out["contrasts"].get("B vs C  ceiling", {}).get("answer")
-            if ceil is not None and ceil["p"] > 0.05:
-                print("  It is nonetheless SATURATED. A perfect oracle with the "
-                      "same protection is indistinguishable from BM25: "
-                      "{0:+.2f} pp, {1}W/{2}L, p={3:.3g}. No better selector can "
-                      "help on this corpus.".format(
-                          ceil["delta_pp"], ceil["wins"], ceil["losses"], ceil["p"]))
-                if "selection_saturation" in out:
-                    print("  (The floor-to-ceiling fraction reads {0:.1%}; it is "
-                          "not meaningfully distinct from 100% because the "
-                          "ceiling contrast is null.)".format(
-                              out["selection_saturation"]))
-            elif ceil is not None:
-                print("  A better selector still has room: oracle vs BM25 is "
-                      "{0:+.2f} pp, p={1:.3g}.".format(ceil["delta_pp"], ceil["p"]))
+            if ceil is not None:
+                eq = equivalence_bound(ceil["wins"], ceil["losses"], ceil["n"])
+                out["ceiling_equivalence_bound_pp"] = eq
+                # The ceiling contrast is 1W/2L: three discordant pairs, power
+                # ceiling 0.25. Its p = 1.00 is not evidence of equivalence and
+                # must never be quoted as if it were. The bound is the evidence.
+                print("  Its ceiling contrast CANNOT reject: {0}W/{1}L is {2} "
+                      "discordant pairs, power ceiling {3:.3g}, so p={4:.3g} "
+                      "carries no information.".format(
+                          ceil["wins"], ceil["losses"],
+                          ceil["wins"] + ceil["losses"], ceil["power_ceiling"],
+                          ceil["p"]))
+                if eq:
+                    print("  What the data DOES support is a bound: a perfect "
+                          "oracle differs from BM25 by no more than "
+                          "[{0:+.2f}, {1:+.2f}] pp (95%).".format(*eq))
+                    span = None
+                    if ARM_A in vals and ARM_B in vals:
+                        span = 100.0 * (vals[ARM_B]["answer"] - vals[ARM_A]["answer"])
+                    if span:
+                        print("  Against a floor-to-ceiling selection range of "
+                              "{0:.2f} pp, that margin is {1:.1%} of the range, "
+                              "so selection is SATURATED to within +/-{2:.1f} pp "
+                              "-- an equivalence claim with a stated margin, not "
+                              "a null.".format(
+                                  span, max(abs(eq[0]), abs(eq[1])) / span,
+                                  max(abs(eq[0]), abs(eq[1]))))
         elif r["p"] > 0.05 and abs(r["delta_pp"]) < 2.0:
             out["verdict"] = "SELECTION IS INERT"
             print("  SELECTION IS INERT on this corpus.")

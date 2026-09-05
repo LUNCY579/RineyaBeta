@@ -53,7 +53,7 @@ the floor, abstention falls faster than answering (−6.0 pp against −2.3 pp),
 what the larger instruction span (100 vs 63) predicts.
 
 > **Correction, 2026-09-04.** This block previously read `104 instructions` and
-> `(4 + 104 + 63) / 0.85 = 196`. That arithmetic is wrong: 171/0.85 is **201.18**.
+> `(4 + 104 + 63) / 0.85 = 196` (sic). That arithmetic is wrong: 171/0.85 is **201.18**.
 > The 196 comes from `|instructions| = 100`, and 104 is a different quantity — the
 > mean *sink span* of the `c11-sinkinstr-B160` arm — which was transcribed into the
 > formula by mistake. The corrected line is arithmetically consistent.
@@ -314,7 +314,8 @@ established, and it was worth one more experiment to find out.
 
 The formula has an `|instructions|` term, and the corpus offers what looks like a free
 test of it: 532 of the 600 prompts carry a 100-token instruction prefix and 68 carry
-136 on average, which should push their floor from 196 to (4 + 136 + 63)/0.85 = 238.
+136 on average, which should push their floor from 196 to (4 + 136 + 63)/0.85 = 238.8,
+so 239 as an integer budget.
 The long-instruction group should therefore break at a *higher* budget.
 
 It does not, and the comparison is worthless rather than negative:

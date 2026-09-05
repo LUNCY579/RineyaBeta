@@ -20,11 +20,20 @@ import sys
 RESULTS = os.path.join("experiments", "kv_significance", "results")
 KEY = os.path.join(RESULTS, "adjudication_key.json")
 LABELS = os.path.join(RESULTS, "adjudication_labels.json")
+# Section 7 top-up: 110 further concordant cases, arms R and C only, disjoint
+# from the first 40 by construction. Merged in for the conditioning bound and
+# for gates 1 and 2; it contains no disputed cases so it cannot touch the
+# primary contrast.
+EXTENSIONS = ("ext", "ext2", "ext3")
 
 CLEAN = "CORRECT_CLEAN"
 DEGRADED = "CORRECT_DEGRADED"
 
-N_ALL_CORRECT = 330          # concordant answer-stratum cases in the full stratum
+# Every answer-stratum case the committed endpoint calls CONCORDANT: 330 where
+# all three arms scored 1, plus 81 where all three scored 0. The all-zero class
+# is not immune -- a substring endpoint has false negatives, and adjudication
+# found 2 of them -- so section 7 covers it as much as the all-correct class.
+N_CONCORDANT_UNIVERSE = 411
 MIN_RATERS = 3
 MIN_MAJORITY_RATE = 0.90
 MIN_CONTRACT_AGREEMENT = 0.90
@@ -94,9 +103,36 @@ def main():
     if keyfile is None or labfile is None:
         print("missing {0} or {1}".format(KEY, LABELS), file=sys.stderr)
         return 1
-    key = keyfile["key"]
-    raw = labfile["raw"]          # item_id -> [label, ...]
-    final = labfile["majority"]   # item_id -> label after majority + tiebreak
+    key = dict(keyfile["key"])
+    raw = dict(labfile["raw"])          # item_id -> [label, ...]
+    final = dict(labfile["majority"])   # item_id -> label after majority + tiebreak
+
+    out_ext = {"blocks": [], "items": 0, "cases": 0}
+    for suffix in EXTENSIONS:
+        keyext = load_json(os.path.join(RESULTS,
+                                        "adjudication_key_{0}.json".format(suffix)))
+        labext = load_json(os.path.join(RESULTS,
+                                        "adjudication_labels_{0}.json".format(suffix)))
+        if not (keyext and labext):
+            continue
+        overlap = set(keyext["key"]) & set(key)
+        if overlap:
+            print("REFUSING: block {0} reuses {1} item ids".format(
+                suffix, len(overlap)), file=sys.stderr)
+            return 1
+        cases_a = {v["case"] for v in key.values() if v["group"] == "concordant"}
+        cases_b = {v["case"] for v in keyext["key"].values()}
+        if cases_a & cases_b:
+            print("REFUSING: block {0} reuses {1} concordant cases".format(
+                suffix, len(cases_a & cases_b)), file=sys.stderr)
+            return 1
+        key.update(keyext["key"])
+        raw.update(labext["raw"])
+        final.update(labext["majority"])
+        out_ext["blocks"].append(suffix)
+        out_ext["items"] += len(keyext["key"])
+        out_ext["cases"] += len(cases_b)
+    out_ext["present"] = bool(out_ext["blocks"])
 
     out = {"gates": {}, "verdict": None}
 
@@ -116,6 +152,12 @@ def main():
     out["gates"]["unanimous"] = len(unanimous)
     out["gates"]["g1_pass"] = (len(with3) == n_items and g1_rate >= MIN_MAJORITY_RATE)
 
+    out["extension"] = out_ext
+    if out_ext["present"]:
+        print("section 7 top-up merged: blocks {0}, {1} items over {2} further "
+              "concordant cases, all disjoint from the first 40".format(
+                  "+".join(out_ext["blocks"]), out_ext["items"], out_ext["cases"]))
+        print()
     print("VALIDITY GATES (prereg section 5)")
     print("  1 adjudication is not noise      {0}/{1} items have {2} raters, "
           "{3} unanimous, majority on {4:.1%}  {5}".format(
@@ -195,28 +237,59 @@ def main():
     # Project onto the cases NOT yet adjudicated. The n_conc already measured
     # contribute their observed count, not their upper bound -- charging them the
     # bound as well would double-count the very cases that produced it.
-    unadjudicated = N_ALL_CORRECT - n_conc
+    unadjudicated = max(0, N_CONCORDANT_UNIVERSE - n_conc)
+    # With the whole concordant universe adjudicated there is nothing left to
+    # extrapolate over, so the bound collapses to the observed count and the
+    # Clopper-Pearson rate is reported for context only.
     projected_hi = hi * unadjudicated + induced
+    net = (prim["wins"] - prim["losses"]) if prim else 0
     out["conditioning"] = {
+        "concordant_universe": N_CONCORDANT_UNIVERSE,
         "concordant_cases_adjudicated": n_conc,
         "induced_discordant": induced,
         "rate_ci95": [lo, hi],
-        "unadjudicated_all_correct": unadjudicated,
+        "unadjudicated_concordant": unadjudicated,
         "projected_induced_upper_bound": round(projected_hi, 2),
-        "primary_net_wins": (prim["wins"] - prim["losses"]) if prim else 0,
+        "primary_net_wins": net,
     }
-    could_flip = projected_hi > abs(out["conditioning"]["primary_net_wins"])
+    could_flip = projected_hi > abs(net)
     out["conditioning"]["could_flip_sign"] = bool(could_flip)
     print()
     print("CONDITIONING BOUND (prereg section 7)")
-    print("  adjudication created {0} new discordant pairs in {1} concordant "
-          "cases; rate 95% CI [{2:.4f}, {3:.4f}]".format(induced, n_conc, lo, hi))
-    print("  upper bound projected onto all {0} all-correct cases: {1:.1f} induced "
-          "pairs vs primary net {2}".format(
-              N_ALL_CORRECT, projected_hi,
-              out["conditioning"]["primary_net_wins"]))
+    print("  adjudication created {0} new discordant pairs in {1} of the {2} "
+          "endpoint-concordant cases; rate 95% CI [{3:.4f}, {4:.4f}]".format(
+              induced, n_conc, N_CONCORDANT_UNIVERSE, lo, hi))
+    if unadjudicated == 0:
+        print("  {0} unadjudicated, so NO PROJECTION IS NEEDED: the bound is the "
+              "observed {1} against a primary net of {2}".format(
+                  unadjudicated, induced, net))
+    else:
+        print("  upper bound over the {0} unadjudicated: {1:.1f} induced pairs "
+              "vs primary net {2}".format(unadjudicated, projected_hi, net))
     print("  {0}".format("COULD FLIP THE SIGN" if could_flip else
                          "cannot flip the sign"))
+
+    # ---- the whole answer stratum, now that every case has a label ----------
+    # The disputed-set contrast conditions on the endpoint under suspicion. With
+    # all 432 answer-stratum cases adjudicated that conditioning is gone, and
+    # this is the unconditional result.
+    everything = {}
+    for item, meta in key.items():
+        if item in final:
+            everything.setdefault(meta["case"], {})[meta["arm"]] = item
+    both = {c: a for c, a in everything.items() if "C" in a and "R" in a}
+    full = contrast(both, strict, "C", "R")
+    full_perm = contrast(both, permissive, "C", "R")
+    out["full_answer_stratum"] = {"primary": full, "secondary": full_perm}
+    print()
+    print("WHOLE ANSWER STRATUM, unconditional ({0} cases with both arms "
+          "adjudicated)".format(full["n"]))
+    print("  primary    CORRECT_CLEAN     {0:+7.2f} pp  {1:2d}W/{2:2d}L  "
+          "p={3:.3g}".format(full["delta_pp"], full["wins"], full["losses"],
+                             full["p"]))
+    print("  secondary  CLEAN+DEGRADED    {0:+7.2f} pp  {1:2d}W/{2:2d}L  "
+          "p={3:.3g}".format(full_perm["delta_pp"], full_perm["wins"],
+                             full_perm["losses"], full_perm["p"]))
 
     # ---- verdict ------------------------------------------------------------
     print()

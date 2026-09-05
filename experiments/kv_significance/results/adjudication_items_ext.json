@@ -1,0 +1,1765 @@
+{
+ "items": [
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0000",
+   "question": "Which protocol does QuartzNode 1256 actually use?",
+   "reply": "BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0001",
+   "question": "Which wireless protocol does ZephyrGauge 1235 use?",
+   "reply": "The wireless protocol used by ZephyrGauge 1235 is Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "142 GB"
+   ],
+   "item_id": "ext_0002",
+   "question": "What is the confirmed capacity of RiverVault 1257?",
+   "reply": "The confirmed capacity of RiverVault 1257 is 142 GB."
+  },
+  {
+   "gold_answer": [
+    "16 GB"
+   ],
+   "item_id": "ext_0003",
+   "question": "What capacity does DriftOrb 1239 have?",
+   "reply": "The numeric capacity of DriftOrb 1239 is 16 GB."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0004",
+   "question": "Which wireless protocol does UmberLink 1230 use?",
+   "reply": "The wireless protocol used by UmberLink 1230 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0005",
+   "question": "Which protocol does ThistleOrb 1259 actually use?",
+   "reply": "Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "8 hours"
+   ],
+   "item_id": "ext_0006",
+   "question": "How long does XenoModule 1233 run?",
+   "reply": "The current runtime of XenoModule 1233 is 8 hours."
+  },
+  {
+   "gold_answer": [
+    "138 GB"
+   ],
+   "item_id": "ext_0007",
+   "question": "What is the confirmed capacity of UmberLink 1230?",
+   "reply": "The confirmed capacity of UmberLink 1230 is 138 GB."
+  },
+  {
+   "gold_answer": [
+    "20 hours"
+   ],
+   "item_id": "ext_0008",
+   "question": "How long does EchoJunction 1244 run?",
+   "reply": "The current runtime of EchoJunction 1244 is 20 hours."
+  },
+  {
+   "gold_answer": [
+    "August 25, 2033"
+   ],
+   "item_id": "ext_0009",
+   "question": "When does LumenTerminal 1251 launch?",
+   "reply": "The launch date for LumenTerminal 1251 is August 25, 2033."
+  },
+  {
+   "gold_answer": [
+    "July 30, 2032"
+   ],
+   "item_id": "ext_0010",
+   "question": "When does SolarSensor 1228 launch?",
+   "reply": "The launch date for SolarSensor 1228 is July 30, 2032."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0011",
+   "question": "Which protocol does WillowFilter 1232 actually use?",
+   "reply": "BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext_0012",
+   "question": "Which protocol does DriftOrb 1239 actually use?",
+   "reply": "LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "April 28, 2033"
+   ],
+   "item_id": "ext_0013",
+   "question": "When does EchoJunction 1244 launch?",
+   "reply": "The launch date for EchoJunction 1244 is April 28, 2033."
+  },
+  {
+   "gold_answer": [
+    "86 GB"
+   ],
+   "item_id": "ext_0014",
+   "question": "What is the confirmed capacity of JuniperEngine 1249?",
+   "reply": "The confirmed capacity of JuniperEngine 1249 is 86 GB."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0015",
+   "question": "Which wireless protocol does CinderPanel 1242 use?",
+   "reply": "The wireless protocol used by CinderPanel 1242 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0016",
+   "question": "Which wireless protocol does CinderPanel 1242 use?",
+   "reply": "The wireless protocol used by CinderPanel 1242 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0017",
+   "question": "Which protocol does VioletTerminal 1231 actually use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "May 15, 2033"
+   ],
+   "item_id": "ext_0018",
+   "question": "When does FernRelay 1245 launch?",
+   "reply": "The launch date for FernRelay 1245 is May 15, 2033."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0019",
+   "question": "What protocol should I configure for MarbleFilter 1252?",
+   "reply": "The wireless protocol used by MarbleFilter 1252 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0020",
+   "question": "Which wireless protocol does GlacierDock 1246 use?",
+   "reply": "The wireless protocol used by GlacierDock 1246 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0021",
+   "question": "Which protocol does GlacierDock 1246 actually use?",
+   "reply": "The wireless protocol used by GlacierDock 1246 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0022",
+   "question": "Which wireless protocol does SolarHub 1258 use?",
+   "reply": "The wireless protocol used by SolarHub 1258 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "18 hours"
+   ],
+   "item_id": "ext_0023",
+   "question": "How long does ZephyrGauge 1235 run?",
+   "reply": "The current runtime of ZephyrGauge 1235 is 18 hours."
+  },
+  {
+   "gold_answer": [
+    "58 GB"
+   ],
+   "item_id": "ext_0024",
+   "question": "What is the confirmed capacity of FernRelay 1245?",
+   "reply": "The confirmed capacity of FernRelay 1245 is 58 GB."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0025",
+   "question": "Which wireless protocol does NimbusModule 1253 use?",
+   "reply": "The wireless protocol used by NimbusModule 1253 is Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0026",
+   "question": "Which protocol does MarbleFilter 1252 actually use?",
+   "reply": "The wireless protocol used by MarbleFilter 1252 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "January 16, 2033"
+   ],
+   "item_id": "ext_0027",
+   "question": "When does CobaltHub 1238 launch?",
+   "reply": "The launch date for CobaltHub 1238 is January 16, 2033."
+  },
+  {
+   "gold_answer": [
+    "124 GB"
+   ],
+   "item_id": "ext_0028",
+   "question": "What capacity does SolarSensor 1228 have?",
+   "reply": "The numeric capacity of SolarSensor 1228 is 124 GB."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0029",
+   "question": "What protocol should I configure for DawnCrate 1243?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0030",
+   "question": "What protocol should I configure for IvorySensor 1248?",
+   "reply": "The wireless protocol used by IvorySensor 1248 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "9 hours"
+   ],
+   "item_id": "ext_0031",
+   "question": "What is the current runtime of ThistleOrb 1259?",
+   "reply": "The current runtime of ThistleOrb 1259 is 9 hours."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0032",
+   "question": "Which protocol does PineRelay 1225 actually use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0033",
+   "question": "In Aspen capacity audit 5158, record 3, does the resource fit?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0034",
+   "question": "Which protocol does BerylVault 1237 actually use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "12 hours"
+   ],
+   "item_id": "ext_0035",
+   "question": "How long does LumenTerminal 1251 run?",
+   "reply": "The current runtime of LumenTerminal 1251 is 12 hours."
+  },
+  {
+   "gold_answer": [
+    "January 16, 2033"
+   ],
+   "item_id": "ext_0036",
+   "question": "Give me just the release date for CobaltHub 1238.",
+   "reply": "The release date for CobaltHub 1238 is January 16, 2033."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0037",
+   "question": "Which protocol does CobaltHub 1238 actually use?",
+   "reply": "The wireless protocol used by CobaltHub 1238 is BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "February 7, 2031"
+   ],
+   "item_id": "ext_0038",
+   "question": "When does VioletInstrument 1261 launch?",
+   "reply": "The launch date for VioletInstrument 1261 is February 7, 2031."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0039",
+   "question": "Which protocol does BerylVault 1237 actually use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "117 GB"
+   ],
+   "item_id": "ext_0040",
+   "question": "What capacity does RiverKit 1227 have?",
+   "reply": "The numeric capacity of RiverKit 1227 is 117 GB."
+  },
+  {
+   "gold_answer": [
+    "32 hours"
+   ],
+   "item_id": "ext_0041",
+   "question": "How long does PineGauge 1255 run?",
+   "reply": "The current runtime of PineGauge 1255 is 32 hours."
+  },
+  {
+   "gold_answer": [
+    "December 30, 2032"
+   ],
+   "item_id": "ext_0042",
+   "question": "Give me just the release date for BerylVault 1237.",
+   "reply": "The release date for BerylVault 1237 is December 30, 2032."
+  },
+  {
+   "gold_answer": [
+    "December 5, 2033"
+   ],
+   "item_id": "ext_0043",
+   "question": "Give me just the release date for RiverVault 1257.",
+   "reply": "The release date for RiverVault 1257 is December 5, 2033."
+  },
+  {
+   "gold_answer": [
+    "October 23, 2032"
+   ],
+   "item_id": "ext_0044",
+   "question": "When does XenoModule 1233 launch?",
+   "reply": "The launch date for XenoModule 1233 is October 23, 2032."
+  },
+  {
+   "gold_answer": [
+    "8 hours"
+   ],
+   "item_id": "ext_0045",
+   "question": "How long does XenoModule 1233 run?",
+   "reply": "The current runtime of XenoModule 1233 is 8 hours."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext_0046",
+   "question": "What protocol should I configure for DriftOrb 1239?",
+   "reply": "The wireless protocol used by DriftOrb 1239 is LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "32 hours"
+   ],
+   "item_id": "ext_0047",
+   "question": "How long does PineGauge 1255 run?",
+   "reply": "The current runtime of PineGauge 1255 is 32 hours."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0048",
+   "question": "Which protocol does WillowFilter 1232 actually use?",
+   "reply": "BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "November 18, 2033"
+   ],
+   "item_id": "ext_0049",
+   "question": "Give me just the release date for QuartzNode 1256.",
+   "reply": "The release date for QuartzNode 1256 is November 18, 2033."
+  },
+  {
+   "gold_answer": [
+    "May 15, 2033"
+   ],
+   "item_id": "ext_0050",
+   "question": "When does FernRelay 1245 launch?",
+   "reply": "The launch date for FernRelay 1245 is May 15, 2033."
+  },
+  {
+   "gold_answer": [
+    "December 5, 2033"
+   ],
+   "item_id": "ext_0051",
+   "question": "Give me just the release date for RiverVault 1257.",
+   "reply": "The release date for RiverVault 1257 is December 5, 2033."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext_0052",
+   "question": "Which wireless protocol does DriftOrb 1239 use?",
+   "reply": "The wireless protocol used by DriftOrb 1239 is LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "December 30, 2032"
+   ],
+   "item_id": "ext_0053",
+   "question": "Give me just the release date for BerylVault 1237.",
+   "reply": "The release date for BerylVault 1237 is December 30, 2032."
+  },
+  {
+   "gold_answer": [
+    "April 28, 2033"
+   ],
+   "item_id": "ext_0054",
+   "question": "Give me just the release date for EchoJunction 1244.",
+   "reply": "The launch date for EchoJunction 1244 is April 28, 2033."
+  },
+  {
+   "gold_answer": [
+    "58 GB"
+   ],
+   "item_id": "ext_0055",
+   "question": "What is the confirmed capacity of FernRelay 1245?",
+   "reply": "The confirmed capacity of FernRelay 1245 is 58 GB."
+  },
+  {
+   "gold_answer": [
+    "11 hours"
+   ],
+   "item_id": "ext_0056",
+   "question": "How long does PineRelay 1225 run?",
+   "reply": "The current runtime of PineRelay 1225 is 11 hours."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext_0057",
+   "question": "Which wireless protocol does RiverVault 1257 use?",
+   "reply": "LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "44 GB"
+   ],
+   "item_id": "ext_0058",
+   "question": "What capacity does DawnCrate 1243 have?",
+   "reply": "The capacity of DawnCrate 1243 is 44 GB."
+  },
+  {
+   "gold_answer": [
+    "Candidate Pine"
+   ],
+   "item_id": "ext_0059",
+   "question": "In Pine budget audit 5155, record 1, which qualifying candidate should I choose?",
+   "reply": "Candidate Pine."
+  },
+  {
+   "gold_answer": [
+    "40 hours"
+   ],
+   "item_id": "ext_0060",
+   "question": "What is the current runtime of IvorySensor 1248?",
+   "reply": "The current runtime of IvorySensor 1248 is 40 hours."
+  },
+  {
+   "gold_answer": [
+    "5 hours"
+   ],
+   "item_id": "ext_0061",
+   "question": "How long does BirchInstrument 1241 run?",
+   "reply": "The current runtime of BIRCHINSTRUMENT 1241 is 5 hours."
+  },
+  {
+   "gold_answer": [
+    "51 GB"
+   ],
+   "item_id": "ext_0062",
+   "question": "What is the confirmed capacity of EchoJunction 1244?",
+   "reply": "The confirmed capacity of EchoJunction 1244 is 51 GB."
+  },
+  {
+   "gold_answer": [
+    "10 hours"
+   ],
+   "item_id": "ext_0063",
+   "question": "How long does CinderPanel 1242 run?",
+   "reply": "The current runtime of CinderPanel 1242 is 10 hours."
+  },
+  {
+   "gold_answer": [
+    "36 hours"
+   ],
+   "item_id": "ext_0064",
+   "question": "What is the current runtime of UmberLink 1230?",
+   "reply": "The current runtime of UmberLink 1230 is 36 hours."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0065",
+   "question": "Which protocol does GlacierDock 1246 actually use?",
+   "reply": "The wireless protocol used by GlacierDock 1246 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "23 GB"
+   ],
+   "item_id": "ext_0066",
+   "question": "What is the confirmed capacity of AmberBeacon 1240?",
+   "reply": "The confirmed capacity of AmberBeacon 1240 is 23 GB."
+  },
+  {
+   "gold_answer": [
+    "37 GB"
+   ],
+   "item_id": "ext_0067",
+   "question": "What is the confirmed capacity of CinderPanel 1242?",
+   "reply": "The confirmed capacity of CinderPanel 1242 is 37 GB."
+  },
+  {
+   "gold_answer": [
+    "35 hours"
+   ],
+   "item_id": "ext_0068",
+   "question": "What is the current runtime of HarborKit 1247?",
+   "reply": "The current runtime of HarborKit 1247 is 35 hours."
+  },
+  {
+   "gold_answer": [
+    "5 hours"
+   ],
+   "item_id": "ext_0069",
+   "question": "What is the current runtime of BirchInstrument 1241?",
+   "reply": "The current runtime of BirchInstrument 1241 is 5 hours."
+  },
+  {
+   "gold_answer": [
+    "27 hours"
+   ],
+   "item_id": "ext_0070",
+   "question": "How long does OpalUnit 1254 run?",
+   "reply": "The current runtime of OpalUnit 1254 is 27 hours."
+  },
+  {
+   "gold_answer": [
+    "June 18, 2033"
+   ],
+   "item_id": "ext_0071",
+   "question": "When does HarborKit 1247 launch?",
+   "reply": "The launch date for HarborKit 1247 is June 18, 2033."
+  },
+  {
+   "gold_answer": [
+    "30 GB"
+   ],
+   "item_id": "ext_0072",
+   "question": "What capacity does BirchInstrument 1241 have?",
+   "reply": "The numeric capacity of BirchInstrument 1241 is 30 GB."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0073",
+   "question": "Which wireless protocol does SolarHub 1258 use?",
+   "reply": "The wireless protocol used by SolarHub 1258 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "February 19, 2033"
+   ],
+   "item_id": "ext_0074",
+   "question": "Give me just the release date for AmberBeacon 1240.",
+   "reply": "The release date for AmberBeacon 1240 is February 19, 2033."
+  },
+  {
+   "gold_answer": [
+    "December 5, 2033"
+   ],
+   "item_id": "ext_0075",
+   "question": "When does RiverVault 1257 launch?",
+   "reply": "The launch date for RiverVault 1257 is December 5, 2033."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0076",
+   "question": "In Aspen capacity audit 5150, record 4, does the resource fit?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "20 hours"
+   ],
+   "item_id": "ext_0077",
+   "question": "How long does EchoJunction 1244 run?",
+   "reply": "The current runtime of EchoJunction 1244 is 20 hours."
+  },
+  {
+   "gold_answer": [
+    "February 2, 2033"
+   ],
+   "item_id": "ext_0078",
+   "question": "When does DriftOrb 1239 launch?",
+   "reply": "The launch date for DriftOrb 1239 is February 2, 2033."
+  },
+  {
+   "gold_answer": [
+    "April 28, 2033"
+   ],
+   "item_id": "ext_0079",
+   "question": "When does EchoJunction 1244 launch?",
+   "reply": "The launch date for EchoJunction 1244 is April 28, 2033."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0080",
+   "question": "What protocol should I configure for CinderPanel 1242?",
+   "reply": "The wireless protocol used by CinderPanel 1242 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0081",
+   "question": "Which protocol does SolarHub 1258 actually use?",
+   "reply": "The wireless protocol used by SolarHub 1258 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "November 18, 2033"
+   ],
+   "item_id": "ext_0082",
+   "question": "Give me just the release date for QuartzNode 1256.",
+   "reply": "The release date for QuartzNode 1256 is November 18, 2033."
+  },
+  {
+   "gold_answer": [
+    "156 GB"
+   ],
+   "item_id": "ext_0083",
+   "question": "What capacity does ThistleOrb 1259 have?",
+   "reply": "The numeric capacity of ThistleOrb 1259 is 156 GB."
+  },
+  {
+   "gold_answer": [
+    "45 hours"
+   ],
+   "item_id": "ext_0084",
+   "question": "What is the current runtime of JuniperEngine 1249?",
+   "reply": "The current runtime of JuniperEngine 1249 is 45 hours."
+  },
+  {
+   "gold_answer": [
+    "110 GB"
+   ],
+   "item_id": "ext_0085",
+   "question": "What is the confirmed capacity of QuartzDock 1226?",
+   "reply": "The confirmed capacity of QuartzDock 1226 is 110 GB."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0086",
+   "question": "What protocol should I configure for IvorySensor 1248?",
+   "reply": "The wireless protocol used by IvorySensor 1248 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "128 GB"
+   ],
+   "item_id": "ext_0087",
+   "question": "What is the confirmed capacity of PineGauge 1255?",
+   "reply": "The confirmed capacity of PineGauge 1255 is 128 GB."
+  },
+  {
+   "gold_answer": [
+    "72 GB"
+   ],
+   "item_id": "ext_0088",
+   "question": "What capacity does HarborKit 1247 have?",
+   "reply": "The numeric capacity of HarborKit 1247 is 72 GB."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0089",
+   "question": "In Rowan temperature audit 5151, record 5, is the measurement within range?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "20 hours"
+   ],
+   "item_id": "ext_0090",
+   "question": "What is the current runtime of EchoJunction 1244?",
+   "reply": "The current runtime of EchoJunction 1244 is 20 hours."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0091",
+   "question": "Which protocol does MarbleFilter 1252 actually use?",
+   "reply": "The wireless protocol used by MarbleFilter 1252 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "30 GB"
+   ],
+   "item_id": "ext_0092",
+   "question": "What capacity does BirchInstrument 1241 have?",
+   "reply": "The numeric capacity of BirchInstrument 1241 is 30 GB."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0093",
+   "question": "What protocol should I configure for OpalUnit 1254?",
+   "reply": "The wireless protocol used by OpalUnit 1254 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "110 GB"
+   ],
+   "item_id": "ext_0094",
+   "question": "What is the confirmed capacity of QuartzDock 1226?",
+   "reply": "The confirmed capacity of QuartzDock 1226 is 110 GB."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0095",
+   "question": "Which wireless protocol does PineGauge 1255 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0096",
+   "question": "Which protocol does VioletInstrument 1261 actually use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0097",
+   "question": "Which wireless protocol does KestrelLink 1250 use?",
+   "reply": "The wireless protocol used by KestrelLink 1250 is BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "86 GB"
+   ],
+   "item_id": "ext_0098",
+   "question": "What is the confirmed capacity of JuniperEngine 1249?",
+   "reply": "The confirmed capacity of JuniperEngine 1249 is 86 GB."
+  },
+  {
+   "gold_answer": [
+    "135 GB"
+   ],
+   "item_id": "ext_0099",
+   "question": "What capacity does QuartzNode 1256 have?",
+   "reply": "The numeric capacity of QuartzNode 1256 is 135 GB."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0100",
+   "question": "Which protocol does BirchInstrument 1241 actually use?",
+   "reply": "Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0101",
+   "question": "Which wireless protocol does UmberLink 1230 use?",
+   "reply": "The wireless protocol used by UmberLink 1230 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "18 hours"
+   ],
+   "item_id": "ext_0102",
+   "question": "How long does ZephyrGauge 1235 run?",
+   "reply": "The current runtime of ZephyrGauge 1235 is 18 hours."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0103",
+   "question": "What protocol should I configure for MarbleFilter 1252?",
+   "reply": "The wireless protocol used by MarbleFilter 1252 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "June 9, 2032"
+   ],
+   "item_id": "ext_0104",
+   "question": "When does PineRelay 1225 launch?",
+   "reply": "The launch date for PineRelay 1225 is June 9, 2032."
+  },
+  {
+   "gold_answer": [
+    "11 hours"
+   ],
+   "item_id": "ext_0105",
+   "question": "How long does PineRelay 1225 run?",
+   "reply": "The current runtime of PineRelay 1225 is 11 hours."
+  },
+  {
+   "gold_answer": [
+    "September 19, 2032"
+   ],
+   "item_id": "ext_0106",
+   "question": "When does VioletTerminal 1231 launch?",
+   "reply": "The launch date for VioletTerminal 1231 is September 19, 2032."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0107",
+   "question": "What protocol should I configure for UmberBeacon 1260?",
+   "reply": "Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0108",
+   "question": "What protocol should I configure for DawnCrate 1243?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "72 GB"
+   ],
+   "item_id": "ext_0109",
+   "question": "What is the confirmed capacity of HarborKit 1247?",
+   "reply": "The confirmed capacity of HarborKit 1247 is 72 GB."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0110",
+   "question": "What protocol should I configure for CinderPanel 1242?",
+   "reply": "The wireless protocol used by CinderPanel 1242 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "40 hours"
+   ],
+   "item_id": "ext_0111",
+   "question": "What is the current runtime of IvorySensor 1248?",
+   "reply": "The current runtime of IvorySensor 1248 is 40 hours."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0112",
+   "question": "Which protocol does ThistleOrb 1259 actually use?",
+   "reply": "Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0113",
+   "question": "What protocol should I configure for OpalUnit 1254?",
+   "reply": "The wireless protocol used by OpalUnit 1254 is Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0114",
+   "question": "In Aspen capacity audit 5150, record 4, does the resource fit?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0115",
+   "question": "Which wireless protocol does KestrelLink 1250 use?",
+   "reply": "The wireless protocol used by KestrelLink 1250 is BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0116",
+   "question": "What protocol should I configure for BerylVault 1237?",
+   "reply": "The wireless protocol used by BerylVault 1237 is Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext_0117",
+   "question": "Which wireless protocol does RiverVault 1257 use?",
+   "reply": "LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0118",
+   "question": "Which protocol does BirchInstrument 1241 actually use?",
+   "reply": "Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0119",
+   "question": "Which protocol does OpalUnit 1254 actually use?",
+   "reply": "Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Candidate Pine"
+   ],
+   "item_id": "ext_0120",
+   "question": "In Pine budget audit 5155, record 1, which qualifying candidate should I choose?",
+   "reply": "Candidate Pine."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0121",
+   "question": "In Rowan temperature audit 5151, record 2, is the measurement within range?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "114 GB"
+   ],
+   "item_id": "ext_0122",
+   "question": "What is the confirmed capacity of NimbusModule 1253?",
+   "reply": "The confirmed capacity of NimbusModule 1253 is 114 GB."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0123",
+   "question": "What protocol should I configure for VioletInstrument 1261?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "October 23, 2032"
+   ],
+   "item_id": "ext_0124",
+   "question": "When does XenoModule 1233 launch?",
+   "reply": "The launch date for XenoModule 1233 is October 23, 2032."
+  },
+  {
+   "gold_answer": [
+    "April 28, 2033"
+   ],
+   "item_id": "ext_0125",
+   "question": "Give me just the release date for EchoJunction 1244.",
+   "reply": "The release date for EchoJunction 1244 is April 28, 2033."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0126",
+   "question": "Which wireless protocol does BirchInstrument 1241 use?",
+   "reply": "The wireless protocol used by BIRCHINSTRUMENT 1241 is Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0127",
+   "question": "Which protocol does UmberBeacon 1260 actually use?",
+   "reply": "Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0128",
+   "question": "What protocol should I configure for YarrowUnit 1234?",
+   "reply": "The wireless protocol used by YarrowUnit 1234 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "July 22, 2033"
+   ],
+   "item_id": "ext_0129",
+   "question": "When does JuniperEngine 1249 launch?",
+   "reply": "The launch date for JuniperEngine 1249 is July 22, 2033."
+  },
+  {
+   "gold_answer": [
+    "170 GB"
+   ],
+   "item_id": "ext_0130",
+   "question": "What capacity does VioletInstrument 1261 have?",
+   "reply": "The numeric capacity of VioletInstrument 1261 is 170 GB."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0131",
+   "question": "In Aspen capacity audit 5150, record 5, does the resource fit?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "July 30, 2032"
+   ],
+   "item_id": "ext_0132",
+   "question": "When does SolarSensor 1228 launch?",
+   "reply": "The launch date for SolarSensor 1228 is July 30, 2032."
+  },
+  {
+   "gold_answer": [
+    "23 GB"
+   ],
+   "item_id": "ext_0133",
+   "question": "What is the confirmed capacity of AmberBeacon 1240?",
+   "reply": "The confirmed capacity of AmberBeacon 1240 is 23 GB."
+  },
+  {
+   "gold_answer": [
+    "124 GB"
+   ],
+   "item_id": "ext_0134",
+   "question": "What capacity does SolarSensor 1228 have?",
+   "reply": "The numeric capacity of SolarSensor 1228 is 124 GB."
+  },
+  {
+   "gold_answer": [
+    "93 GB"
+   ],
+   "item_id": "ext_0135",
+   "question": "What capacity does KestrelLink 1250 have?",
+   "reply": "The numeric capacity of KestrelLink 1250 is 93 GB."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0136",
+   "question": "Which wireless protocol does MarbleFilter 1252 use?",
+   "reply": "The wireless protocol used by MarbleFilter 1252 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0137",
+   "question": "In Aspen capacity audit 5158, record 3, does the resource fit?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0138",
+   "question": "Which protocol does UmberLink 1230 actually use?",
+   "reply": "Thread 1.3"
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0139",
+   "question": "In Aspen capacity audit 5150, record 5, does the resource fit?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0140",
+   "question": "What protocol should I configure for UmberBeacon 1260?",
+   "reply": "Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "December 5, 2033"
+   ],
+   "item_id": "ext_0141",
+   "question": "When does RiverVault 1257 launch?",
+   "reply": "The launch date for RiverVault 1257 is December 5, 2033."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0142",
+   "question": "Which protocol does UmberBeacon 1260 actually use?",
+   "reply": "Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0143",
+   "question": "What protocol should I configure for BerylVault 1237?",
+   "reply": "The wireless protocol used by BerylVault 1237 is Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "15 hours"
+   ],
+   "item_id": "ext_0144",
+   "question": "What is the current runtime of DawnCrate 1243?",
+   "reply": "The current runtime of DawnCrate 1243 is 15 hours."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0145",
+   "question": "Which wireless protocol does PineGauge 1255 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "170 GB"
+   ],
+   "item_id": "ext_0146",
+   "question": "What capacity does VioletInstrument 1261 have?",
+   "reply": "The numeric capacity of VioletInstrument 1261 is 170 GB."
+  },
+  {
+   "gold_answer": [
+    "15 hours"
+   ],
+   "item_id": "ext_0147",
+   "question": "What is the current runtime of DawnCrate 1243?",
+   "reply": "The current runtime of DawnCrate 1243 is 15 hours."
+  },
+  {
+   "gold_answer": [
+    "93 GB"
+   ],
+   "item_id": "ext_0148",
+   "question": "What capacity does KestrelLink 1250 have?",
+   "reply": "The numeric capacity of KestrelLink 1250 is 93 GB."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0149",
+   "question": "What protocol should I configure for VioletInstrument 1261?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0150",
+   "question": "In Rowan temperature audit 5151, record 2, is the measurement within range?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "51 GB"
+   ],
+   "item_id": "ext_0151",
+   "question": "What is the confirmed capacity of EchoJunction 1244?",
+   "reply": "The confirmed capacity of EchoJunction 1244 is 51 GB."
+  },
+  {
+   "gold_answer": [
+    "November 1, 2033"
+   ],
+   "item_id": "ext_0152",
+   "question": "When does PineGauge 1255 launch?",
+   "reply": "The launch date for PineGauge 1255 is November 1, 2033."
+  },
+  {
+   "gold_answer": [
+    "138 GB"
+   ],
+   "item_id": "ext_0153",
+   "question": "What is the confirmed capacity of UmberLink 1230?",
+   "reply": "The confirmed capacity of UmberLink 1230 is 138 GB."
+  },
+  {
+   "gold_answer": [
+    "36 hours"
+   ],
+   "item_id": "ext_0154",
+   "question": "What is the current runtime of UmberLink 1230?",
+   "reply": "The current runtime of UmberLink 1230 is 36 hours."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0155",
+   "question": "Which wireless protocol does VioletInstrument 1261 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0156",
+   "question": "Which protocol does WillowPanel 1262 actually use?",
+   "reply": "BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0157",
+   "question": "What protocol should I configure for SolarHub 1258?",
+   "reply": "The wireless protocol used by SolarHub 1258 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "45 hours"
+   ],
+   "item_id": "ext_0158",
+   "question": "What is the current runtime of JuniperEngine 1249?",
+   "reply": "The current runtime of JuniperEngine 1249 is 45 hours."
+  },
+  {
+   "gold_answer": [
+    "117 GB"
+   ],
+   "item_id": "ext_0159",
+   "question": "What capacity does RiverKit 1227 have?",
+   "reply": "The numeric capacity of RiverKit 1227 is 117 GB."
+  },
+  {
+   "gold_answer": [
+    "86 GB"
+   ],
+   "item_id": "ext_0160",
+   "question": "What capacity does JuniperEngine 1249 have?",
+   "reply": "The numeric capacity of JuniperEngine 1249 is 86 GB."
+  },
+  {
+   "gold_answer": [
+    "January 16, 2033"
+   ],
+   "item_id": "ext_0161",
+   "question": "When does CobaltHub 1238 launch?",
+   "reply": "The launch date for CobaltHub 1238 is January 16, 2033."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0162",
+   "question": "What protocol should I configure for AmberBeacon 1240?",
+   "reply": "The wireless protocol used by AmberBeacon 1240 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "72 GB"
+   ],
+   "item_id": "ext_0163",
+   "question": "What is the confirmed capacity of HarborKit 1247?",
+   "reply": "The confirmed capacity of HarborKit 1247 is 72 GB."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext_0164",
+   "question": "Which protocol does DriftOrb 1239 actually use?",
+   "reply": "LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0165",
+   "question": "Which wireless protocol does WillowPanel 1262 use?",
+   "reply": "The wireless protocol used by WillowPanel 1262 is BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "July 22, 2033"
+   ],
+   "item_id": "ext_0166",
+   "question": "When does JuniperEngine 1249 launch?",
+   "reply": "The launch date for JuniperEngine 1249 is July 22, 2033."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0167",
+   "question": "Which wireless protocol does NimbusModule 1253 use?",
+   "reply": "The wireless protocol used by NimbusModule 1253 is Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext_0168",
+   "question": "What protocol should I configure for DriftOrb 1239?",
+   "reply": "The wireless protocol used by DriftOrb 1239 is LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "156 GB"
+   ],
+   "item_id": "ext_0169",
+   "question": "What capacity does ThistleOrb 1259 have?",
+   "reply": "The numeric capacity of ThistleOrb 1259 is 156 GB."
+  },
+  {
+   "gold_answer": [
+    "February 7, 2031"
+   ],
+   "item_id": "ext_0170",
+   "question": "When does VioletInstrument 1261 launch?",
+   "reply": "The launch date for VioletInstrument 1261 is February 7, 2031."
+  },
+  {
+   "gold_answer": [
+    "5 hours"
+   ],
+   "item_id": "ext_0171",
+   "question": "How long does BirchInstrument 1241 run?",
+   "reply": "The current runtime of BirchInstrument 1241 is 5 hours."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0172",
+   "question": "Which wireless protocol does MarbleFilter 1252 use?",
+   "reply": "The wireless protocol used by MarbleFilter 1252 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "January 16, 2033"
+   ],
+   "item_id": "ext_0173",
+   "question": "Give me just the release date for CobaltHub 1238.",
+   "reply": "The release date for CobaltHub 1238 is January 16, 2033."
+  },
+  {
+   "gold_answer": [
+    "February 2, 2033"
+   ],
+   "item_id": "ext_0174",
+   "question": "When does DriftOrb 1239 launch?",
+   "reply": "The launch date for DriftOrb 1239 is February 2, 2033."
+  },
+  {
+   "gold_answer": [
+    "September 11, 2033"
+   ],
+   "item_id": "ext_0175",
+   "question": "When does MarbleFilter 1252 launch?",
+   "reply": "The launch date for MarbleFilter 1252 is September 11, 2033."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0176",
+   "question": "Which protocol does CobaltHub 1238 actually use?",
+   "reply": "The wireless protocol used by CobaltHub 1238 is BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0177",
+   "question": "What protocol should I configure for SolarHub 1258?",
+   "reply": "The protocol for SolarHub 1258 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "12 hours"
+   ],
+   "item_id": "ext_0178",
+   "question": "How long does LumenTerminal 1251 run?",
+   "reply": "The current runtime of LumenTerminal 1251 is 12 hours."
+  },
+  {
+   "gold_answer": [
+    "27 hours"
+   ],
+   "item_id": "ext_0179",
+   "question": "How long does OpalUnit 1254 run?",
+   "reply": "The current runtime of OpalUnit 1254 is 27 hours."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0180",
+   "question": "In Aspen capacity audit 5150, record 3, does the resource fit?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "142 GB"
+   ],
+   "item_id": "ext_0181",
+   "question": "What is the confirmed capacity of RiverVault 1257?",
+   "reply": "The confirmed capacity of RiverVault 1257 is 142 GB."
+  },
+  {
+   "gold_answer": [
+    "86 GB"
+   ],
+   "item_id": "ext_0182",
+   "question": "What capacity does JuniperEngine 1249 have?",
+   "reply": "The numeric capacity of JuniperEngine 1249 is 86 GB."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0183",
+   "question": "What protocol should I configure for YarrowUnit 1234?",
+   "reply": "The wireless protocol used by YarrowUnit 1234 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "16 GB"
+   ],
+   "item_id": "ext_0184",
+   "question": "What capacity does DriftOrb 1239 have?",
+   "reply": "The numeric capacity of DriftOrb 1239 is 16 GB."
+  },
+  {
+   "gold_answer": [
+    "August 25, 2033"
+   ],
+   "item_id": "ext_0185",
+   "question": "When does LumenTerminal 1251 launch?",
+   "reply": "The launch date for LumenTerminal 1251 is August 25, 2033."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0186",
+   "question": "Which wireless protocol does WillowPanel 1262 use?",
+   "reply": "The wireless protocol used by WillowPanel 1262 is BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "10 hours"
+   ],
+   "item_id": "ext_0187",
+   "question": "How long does CinderPanel 1242 run?",
+   "reply": "The current runtime of CinderPanel 1242 is 10 hours."
+  },
+  {
+   "gold_answer": [
+    "114 GB"
+   ],
+   "item_id": "ext_0188",
+   "question": "What is the confirmed capacity of NimbusModule 1253?",
+   "reply": "The numeric capacity of NimbusModule 1253 is 114 GB."
+  },
+  {
+   "gold_answer": [
+    "128 GB"
+   ],
+   "item_id": "ext_0189",
+   "question": "What is the confirmed capacity of PineGauge 1255?",
+   "reply": "The confirmed capacity of PineGauge 1255 is 128 GB."
+  },
+  {
+   "gold_answer": [
+    "135 GB"
+   ],
+   "item_id": "ext_0190",
+   "question": "What capacity does QuartzNode 1256 have?",
+   "reply": "The numeric capacity of QuartzNode 1256 is 135 GB."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0191",
+   "question": "In Aspen capacity audit 5150, record 3, does the resource fit?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0192",
+   "question": "Which protocol does WillowPanel 1262 actually use?",
+   "reply": "BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0193",
+   "question": "Which wireless protocol does VioletInstrument 1261 use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0194",
+   "question": "Which wireless protocol does GlacierDock 1246 use?",
+   "reply": "The wireless protocol used by GlacierDock 1246 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "February 19, 2033"
+   ],
+   "item_id": "ext_0195",
+   "question": "Give me just the release date for AmberBeacon 1240.",
+   "reply": "The release date for AmberBeacon 1240 is February 19, 2033."
+  },
+  {
+   "gold_answer": [
+    "BLE 5.4"
+   ],
+   "item_id": "ext_0196",
+   "question": "Which protocol does QuartzNode 1256 actually use?",
+   "reply": "BLE 5.4."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0197",
+   "question": "Which protocol does SolarHub 1258 actually use?",
+   "reply": "The wireless protocol used by SolarHub 1258 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "June 9, 2032"
+   ],
+   "item_id": "ext_0198",
+   "question": "When does PineRelay 1225 launch?",
+   "reply": "The launch date for PineRelay 1225 is June 9, 2032."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0199",
+   "question": "Which protocol does VioletInstrument 1261 actually use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "Yes"
+   ],
+   "item_id": "ext_0200",
+   "question": "In Rowan temperature audit 5151, record 5, is the measurement within range?",
+   "reply": "Yes."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0201",
+   "question": "Which protocol does OpalUnit 1254 actually use?",
+   "reply": "Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0202",
+   "question": "Which wireless protocol does BirchInstrument 1241 use?",
+   "reply": "The wireless protocol used by BirchInstrument 1241 is Zigbee 3.0."
+  },
+  {
+   "gold_answer": [
+    "June 18, 2033"
+   ],
+   "item_id": "ext_0203",
+   "question": "When does HarborKit 1247 launch?",
+   "reply": "The launch date for HarborKit 1247 is June 18, 2033."
+  },
+  {
+   "gold_answer": [
+    "9 hours"
+   ],
+   "item_id": "ext_0204",
+   "question": "What is the current runtime of ThistleOrb 1259?",
+   "reply": "The current runtime of ThistleOrb 1259 is 9 hours."
+  },
+  {
+   "gold_answer": [
+    "LoRaWAN 1.0.4"
+   ],
+   "item_id": "ext_0205",
+   "question": "Which wireless protocol does DriftOrb 1239 use?",
+   "reply": "The wireless protocol used by DriftOrb 1239 is LoRaWAN 1.0.4."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0206",
+   "question": "Which protocol does PineRelay 1225 actually use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "5 hours"
+   ],
+   "item_id": "ext_0207",
+   "question": "What is the current runtime of BirchInstrument 1241?",
+   "reply": "The current runtime of BirchInstrument 1241 is 5 hours."
+  },
+  {
+   "gold_answer": [
+    "November 1, 2033"
+   ],
+   "item_id": "ext_0208",
+   "question": "When does PineGauge 1255 launch?",
+   "reply": "The launch date for PineGauge 1255 is November 1, 2033."
+  },
+  {
+   "gold_answer": [
+    "72 GB"
+   ],
+   "item_id": "ext_0209",
+   "question": "What capacity does HarborKit 1247 have?",
+   "reply": "The capacity of HarborKit 1247 is 72 GB."
+  },
+  {
+   "gold_answer": [
+    "September 11, 2033"
+   ],
+   "item_id": "ext_0210",
+   "question": "When does MarbleFilter 1252 launch?",
+   "reply": "The launch date for MarbleFilter 1252 is September 11, 2033."
+  },
+  {
+   "gold_answer": [
+    "37 GB"
+   ],
+   "item_id": "ext_0211",
+   "question": "What is the confirmed capacity of CinderPanel 1242?",
+   "reply": "The confirmed capacity of CinderPanel 1242 is 37 GB."
+  },
+  {
+   "gold_answer": [
+    "September 19, 2032"
+   ],
+   "item_id": "ext_0212",
+   "question": "When does VioletTerminal 1231 launch?",
+   "reply": "The launch date for VioletTerminal 1231 is September 19, 2032."
+  },
+  {
+   "gold_answer": [
+    "35 hours"
+   ],
+   "item_id": "ext_0213",
+   "question": "What is the current runtime of HarborKit 1247?",
+   "reply": "The current runtime of HarborKit 1247 is 35 hours."
+  },
+  {
+   "gold_answer": [
+    "44 GB"
+   ],
+   "item_id": "ext_0214",
+   "question": "What capacity does DawnCrate 1243 have?",
+   "reply": "The numeric capacity of DawnCrate 1243 is 44 GB."
+  },
+  {
+   "gold_answer": [
+    "Wi-Fi 7"
+   ],
+   "item_id": "ext_0215",
+   "question": "Which protocol does VioletTerminal 1231 actually use?",
+   "reply": "Wi-Fi 7."
+  },
+  {
+   "gold_answer": [
+    "Thread 1.3"
+   ],
+   "item_id": "ext_0216",
+   "question": "Which protocol does UmberLink 1230 actually use?",
+   "reply": "Thread 1.3."
+  },
+  {
+   "gold_answer": [
+    "20 hours"
+   ],
+   "item_id": "ext_0217",
+   "question": "What is the current runtime of EchoJunction 1244?",
+   "reply": "The current runtime of EchoJunction 1244 is 20 hours."
+  },
+  {
+   "gold_answer": [
+    "Matter 1.4"
+   ],
+   "item_id": "ext_0218",
+   "question": "What protocol should I configure for AmberBeacon 1240?",
+   "reply": "The wireless protocol used for AmberBeacon 1240 is Matter 1.4."
+  },
+  {
+   "gold_answer": [
+    "Zigbee 3.0"
+   ],
+   "item_id": "ext_0219",
+   "question": "Which wireless protocol does ZephyrGauge 1235 use?",
+   "reply": "The wireless protocol used by ZephyrGauge 1235 is Zigbee 3.0."
+  }
+ ],
+ "n": 220
+}

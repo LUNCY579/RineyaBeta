@@ -1,0 +1,1141 @@
+{
+ "key": {
+  "ext3_0000": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0001": {
+   "arm": "R",
+   "case": "v175_fact_228_solarsensor_1228_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0002": {
+   "arm": "R",
+   "case": "v175_fact_226_quartzdock_1226_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0003": {
+   "arm": "R",
+   "case": "v175_proc_156_threshold_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0004": {
+   "arm": "R",
+   "case": "v175_proc_154_latency_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0005": {
+   "arm": "R",
+   "case": "v175_proc_154_latency_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0006": {
+   "arm": "R",
+   "case": "v175_fact_249_juniperengine_1249_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0007": {
+   "arm": "C",
+   "case": "v175_proc_157_priority_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0008": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0009": {
+   "arm": "R",
+   "case": "v175_fact_229_thistleengine_1229_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0010": {
+   "arm": "C",
+   "case": "v175_fact_230_umberlink_1230_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0011": {
+   "arm": "R",
+   "case": "v175_proc_152_semver_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0012": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0013": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0014": {
+   "arm": "R",
+   "case": "v175_proc_152_semver_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0015": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0016": {
+   "arm": "R",
+   "case": "v175_fact_227_riverkit_1227_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0017": {
+   "arm": "R",
+   "case": "v175_fact_251_lumenterminal_1251_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0018": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0019": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0020": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0021": {
+   "arm": "R",
+   "case": "v175_fact_240_amberbeacon_1240_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0022": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0023": {
+   "arm": "R",
+   "case": "v175_fact_237_berylvault_1237_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0024": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0025": {
+   "arm": "R",
+   "case": "v175_proc_152_semver_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0026": {
+   "arm": "R",
+   "case": "v175_proc_153_date_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0027": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0028": {
+   "arm": "R",
+   "case": "v175_proc_155_budget_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0029": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0030": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0031": {
+   "arm": "R",
+   "case": "v175_proc_157_priority_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0032": {
+   "arm": "C",
+   "case": "v175_fact_226_quartzdock_1226_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0033": {
+   "arm": "C",
+   "case": "v175_fact_249_juniperengine_1249_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0034": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0035": {
+   "arm": "C",
+   "case": "v175_fact_236_aspennode_1236_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0036": {
+   "arm": "R",
+   "case": "v175_fact_225_pinerelay_1225_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0037": {
+   "arm": "C",
+   "case": "v175_proc_157_priority_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0038": {
+   "arm": "R",
+   "case": "v175_proc_152_semver_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0039": {
+   "arm": "C",
+   "case": "v175_fact_252_marblefilter_1252_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0040": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0041": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0042": {
+   "arm": "R",
+   "case": "v175_proc_156_threshold_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0043": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0044": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0045": {
+   "arm": "C",
+   "case": "v175_proc_154_latency_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0046": {
+   "arm": "C",
+   "case": "v175_fact_237_berylvault_1237_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0047": {
+   "arm": "C",
+   "case": "v175_proc_155_budget_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0048": {
+   "arm": "R",
+   "case": "v175_fact_235_zephyrgauge_1235_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0049": {
+   "arm": "R",
+   "case": "v175_proc_152_semver_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0050": {
+   "arm": "R",
+   "case": "v175_proc_153_date_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0051": {
+   "arm": "C",
+   "case": "v175_proc_156_threshold_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0052": {
+   "arm": "R",
+   "case": "v175_fact_233_xenomodule_1233_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0053": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0054": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0055": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0056": {
+   "arm": "R",
+   "case": "v175_fact_244_echojunction_1244_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0057": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0058": {
+   "arm": "R",
+   "case": "v175_proc_150_capacity_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0059": {
+   "arm": "C",
+   "case": "v175_proc_153_date_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0060": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0061": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0062": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0063": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0064": {
+   "arm": "R",
+   "case": "v175_fact_236_aspennode_1236_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0065": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0066": {
+   "arm": "C",
+   "case": "v175_fact_244_echojunction_1244_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0067": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0068": {
+   "arm": "R",
+   "case": "v175_fact_244_echojunction_1244_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0069": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0070": {
+   "arm": "R",
+   "case": "v175_fact_246_glacierdock_1246_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0071": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0072": {
+   "arm": "C",
+   "case": "v175_fact_228_solarsensor_1228_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0073": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0074": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0075": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0076": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0077": {
+   "arm": "C",
+   "case": "v175_proc_156_threshold_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0078": {
+   "arm": "C",
+   "case": "v175_proc_154_latency_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0079": {
+   "arm": "R",
+   "case": "v175_proc_153_date_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0080": {
+   "arm": "R",
+   "case": "v175_proc_157_priority_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0081": {
+   "arm": "C",
+   "case": "v175_proc_150_capacity_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0082": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0083": {
+   "arm": "C",
+   "case": "v175_proc_152_semver_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0084": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0085": {
+   "arm": "C",
+   "case": "v175_proc_152_semver_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0086": {
+   "arm": "C",
+   "case": "v175_fact_225_pinerelay_1225_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0087": {
+   "arm": "R",
+   "case": "v175_proc_154_latency_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0088": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0089": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0090": {
+   "arm": "R",
+   "case": "v175_proc_154_latency_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0091": {
+   "arm": "C",
+   "case": "v175_proc_152_semver_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0092": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0093": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0094": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0095": {
+   "arm": "C",
+   "case": "v175_fact_229_thistleengine_1229_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0096": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0097": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0098": {
+   "arm": "R",
+   "case": "v175_proc_153_date_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0099": {
+   "arm": "C",
+   "case": "v175_fact_240_amberbeacon_1240_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0100": {
+   "arm": "R",
+   "case": "v175_proc_152_semver_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0101": {
+   "arm": "C",
+   "case": "v175_proc_156_threshold_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0102": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0103": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0104": {
+   "arm": "C",
+   "case": "v175_fact_246_glacierdock_1246_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0105": {
+   "arm": "C",
+   "case": "v175_proc_153_date_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0106": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0107": {
+   "arm": "C",
+   "case": "v175_proc_152_semver_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0108": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0109": {
+   "arm": "R",
+   "case": "v175_proc_156_threshold_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0110": {
+   "arm": "C",
+   "case": "v175_fact_233_xenomodule_1233_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0111": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0112": {
+   "arm": "C",
+   "case": "v175_fact_235_zephyrgauge_1235_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0113": {
+   "arm": "C",
+   "case": "v175_fact_233_xenomodule_1233_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0114": {
+   "arm": "R",
+   "case": "v175_fact_252_marblefilter_1252_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0115": {
+   "arm": "R",
+   "case": "v175_proc_156_threshold_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0116": {
+   "arm": "R",
+   "case": "v175_proc_153_date_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0117": {
+   "arm": "R",
+   "case": "v175_proc_157_priority_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0118": {
+   "arm": "R",
+   "case": "v175_fact_233_xenomodule_1233_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0119": {
+   "arm": "R",
+   "case": "v175_proc_156_threshold_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0120": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0121": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0122": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0123": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0124": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0125": {
+   "arm": "R",
+   "case": "v175_proc_157_priority_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0126": {
+   "arm": "C",
+   "case": "v175_proc_154_latency_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0127": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0128": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0129": {
+   "arm": "C",
+   "case": "v175_fact_227_riverkit_1227_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0130": {
+   "arm": "C",
+   "case": "v175_proc_157_priority_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0131": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0132": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0133": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0134": {
+   "arm": "C",
+   "case": "v175_proc_154_latency_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0135": {
+   "arm": "C",
+   "case": "v175_proc_156_threshold_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0136": {
+   "arm": "R",
+   "case": "v175_fact_238_cobalthub_1238_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0137": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0138": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0139": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0140": {
+   "arm": "R",
+   "case": "v175_fact_230_umberlink_1230_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0141": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0142": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0143": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0144": {
+   "arm": "C",
+   "case": "v175_fact_251_lumenterminal_1251_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0145": {
+   "arm": "C",
+   "case": "v175_proc_152_semver_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0146": {
+   "arm": "C",
+   "case": "v175_proc_157_priority_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0147": {
+   "arm": "C",
+   "case": "v175_proc_156_threshold_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0148": {
+   "arm": "R",
+   "case": "v175_fact_227_riverkit_1227_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0149": {
+   "arm": "C",
+   "case": "v175_proc_153_date_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0150": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0151": {
+   "arm": "C",
+   "case": "v175_proc_153_date_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0152": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0153": {
+   "arm": "C",
+   "case": "v175_fact_238_cobalthub_1238_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0154": {
+   "arm": "R",
+   "case": "v175_proc_153_date_distractor__L4096_d0.5",
+   "category": "procedure_with_distractor",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0155": {
+   "arm": "C",
+   "case": "v175_fact_227_riverkit_1227_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0156": {
+   "arm": "C",
+   "case": "v175_proc_153_date_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0157": {
+   "arm": "C",
+   "case": "v175_proc_152_semver_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0158": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0159": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0160": {
+   "arm": "C",
+   "case": "v175_proc_153_date_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  },
+  "ext3_0161": {
+   "arm": "C",
+   "case": "v175_fact_244_echojunction_1244_10_warranty_tentative__L4096_d0.5",
+   "category": "qualified_answer",
+   "committed_endpoint": 0,
+   "group": "concordant"
+  }
+ },
+ "n_concordant": 81,
+ "n_disputed": 21,
+ "seed": 20260826
+}

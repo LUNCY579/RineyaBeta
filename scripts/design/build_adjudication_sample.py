@@ -23,6 +23,16 @@ HARD = 0.999
 SEED = 20260826
 N_CONCORDANT = 40
 
+# Section 7 remedy, 2026-09-05. The first round returned 0 induced discordant
+# pairs in 40 concordant cases, but 0/40 has a Clopper-Pearson upper bound of
+# 0.0881, which projects to 25.5 possible induced pairs over the 290
+# unadjudicated cases against a primary net of 7. 113 concordant cases with 0
+# induced would bring the projection under 7. --extend draws the NEXT block from
+# the same seeded permutation, so it is disjoint from the first 40 by
+# construction, and emits only the two arms the primary contrast uses.
+N_CONCORDANT_EXTENDED = 150
+EXTENSION_ARMS = ("R", "C")
+
 ARMS = {
     "R": "c7-off-n600__rag_long4k",
     "C": "c8-docbm25sys-k0.05-n600__rag_long4k",
@@ -94,7 +104,26 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--items", default=os.path.join(RESULTS, "adjudication_items.json"))
     ap.add_argument("--key", default=os.path.join(RESULTS, "adjudication_key.json"))
+    ap.add_argument("--extend", action="store_true",
+                    help="build a section 7 top-up: concordant cases from the "
+                         "same permutation, arms R and C only")
+    ap.add_argument("--from", dest="lo", type=int, default=N_CONCORDANT)
+    ap.add_argument("--to", dest="hi", type=int, default=N_CONCORDANT_EXTENDED)
+    ap.add_argument("--suffix", default="ext")
+    ap.add_argument("--allzero", action="store_true",
+                    help="emit the endpoint-concordant cases where EVERY arm "
+                         "scored 0. A substring endpoint has false negatives "
+                         "(gold 'Wi-Fi 7' against a reply saying 'WiFi7'), so "
+                         "these are not guaranteed concordant under adjudication "
+                         "and section 7 covers them too.")
     args = ap.parse_args()
+    if args.allzero:
+        args.extend = True
+    if args.extend:
+        args.items = os.path.join(RESULTS,
+                                  "adjudication_items_{0}.json".format(args.suffix))
+        args.key = os.path.join(RESULTS,
+                                "adjudication_key_{0}.json".format(args.suffix))
 
     data = dataset()
     arms = {k: load(v) for k, v in ARMS.items()}
@@ -108,12 +137,26 @@ def main():
                          if all(hard(arms[k][i]) == 1 for k in arms))
 
     rng = Rng(SEED)
-    concordant = sorted(rng.shuffled(all_correct)[:N_CONCORDANT])
+    permuted = rng.shuffled(all_correct)
+    if args.allzero:
+        allzero = sorted(i for i in answer
+                         if all(hard(arms[k][i]) == 0 for k in arms))
+        groups = (("concordant", allzero),)
+        arm_keys = EXTENSION_ARMS
+        concordant = allzero
+    elif args.extend:
+        concordant = sorted(permuted[args.lo:args.hi])
+        groups = (("concordant", concordant),)
+        arm_keys = EXTENSION_ARMS
+    else:
+        concordant = sorted(permuted[:N_CONCORDANT])
+        groups = (("disputed", disputed), ("concordant", concordant))
+        arm_keys = ("R", "C", "N")
 
     rows = []
-    for group, cases in (("disputed", disputed), ("concordant", concordant)):
+    for group, cases in groups:
         for case_id in cases:
-            for arm_key in ("R", "C", "N"):
+            for arm_key in arm_keys:
                 res = arms[arm_key][case_id]
                 rows.append({
                     "case": case_id,
@@ -126,11 +169,11 @@ def main():
                     "committed_endpoint": hard(res),
                 })
 
-    order = Rng(SEED + 1).shuffled(range(len(rows)))
+    order = Rng(SEED + (2 if args.extend else 1)).shuffled(range(len(rows)))
     items, key = [], {}
     for slot, src in enumerate(order):
         r = rows[src]
-        item_id = "adj_{0:04d}".format(slot)
+        item_id = "{0}_{1:04d}".format(args.suffix if args.extend else "adj", slot)
         items.append({
             "item_id": item_id,
             "question": r["question"],
@@ -148,9 +191,10 @@ def main():
         with open(path, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, indent=1, sort_keys=True)
 
-    print("disputed cases   {0}".format(len(disputed)))
-    print("concordant cases {0} (of {1} all-correct)".format(len(concordant),
-                                                             len(all_correct)))
+    print("disputed cases   {0}".format(0 if args.extend else len(disputed)))
+    print("concordant cases {0} (of {1} all-correct){2}".format(
+        len(concordant), len(all_correct),
+        "  [section 7 top-up, disjoint from the first 40]" if args.extend else ""))
     print("replies to adjudicate {0}".format(len(items)))
     leak = [i for i in items if any(w in json.dumps(i)
                                     for w in ("c7-off", "c8-doc", "c9-sys", "arm"))]

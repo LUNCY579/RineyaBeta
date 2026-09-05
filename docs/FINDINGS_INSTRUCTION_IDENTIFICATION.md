@@ -58,9 +58,25 @@ Answer stratum: **−75.46 pp, 0W/326L, p = 1.5e−98.**
 Selection matters enormously. The verdict is **SELECTION CONTRIBUTES**.
 
 **B vs C — how much room is left above BM25?**
-Answer stratum: **−0.23 pp, 1W/2L, p = 1.00.**
-None. A perfect retrieval oracle with the same protection is indistinguishable
-from a blind BM25 index. The verdict is **SATURATED**.
+Answer stratum: **−0.23 pp, 1W/2L**, and the honest reading of that needs care.
+
+> **CORRECTION, 2026-09-05.** This entry first read "p = 1.00 … indistinguishable
+> … the verdict is SATURATED". That was the very error
+> [`audit_power_ceiling.py`](../scripts/design/audit_power_ceiling.py) was written
+> to catch, committed by its own author. 1W/2L is **three discordant pairs**, so
+> the power ceiling is `2 × 0.5³ = 0.25`: this cell could never have returned
+> p < 0.05 and its p = 1.00 is not evidence of equivalence. It is no evidence.
+
+What the data *does* support is a **bound**. The paired difference is
+`discordance rate × (2·p_win − 1)`, and both factors have exact Clopper-Pearson
+intervals, so their product has a conservative one:
+
+**a perfect oracle differs from BM25 by no more than [−1.98, +1.64] pp (95%).**
+
+Against a floor-to-ceiling selection range of **75.23 pp**, that margin is **2.6%
+of the range**. So the claim is: **selection is saturated to within ±2.0 pp** —
+an equivalence claim with a stated margin, which is a result, rather than a null,
+which is not.
 
 These two together are the finding. Selection spans 76 pp between a random draw
 and an oracle; BM25 already sits at the top of that span. The earlier claim in

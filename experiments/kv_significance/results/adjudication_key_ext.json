@@ -1,0 +1,1547 @@
+{
+ "key": {
+  "ext_0000": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0001": {
+   "arm": "R",
+   "case": "v175_fact_235_zephyrgauge_1235_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0002": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0003": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0004": {
+   "arm": "R",
+   "case": "v175_fact_230_umberlink_1230_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0005": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0006": {
+   "arm": "R",
+   "case": "v175_fact_233_xenomodule_1233_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0007": {
+   "arm": "R",
+   "case": "v175_fact_230_umberlink_1230_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0008": {
+   "arm": "R",
+   "case": "v175_fact_244_echojunction_1244_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0009": {
+   "arm": "R",
+   "case": "v175_fact_251_lumenterminal_1251_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0010": {
+   "arm": "C",
+   "case": "v175_fact_228_solarsensor_1228_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0011": {
+   "arm": "R",
+   "case": "v175_fact_232_willowfilter_1232_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0012": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0013": {
+   "arm": "R",
+   "case": "v175_fact_244_echojunction_1244_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0014": {
+   "arm": "R",
+   "case": "v175_fact_249_juniperengine_1249_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0015": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0016": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0017": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0018": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0019": {
+   "arm": "R",
+   "case": "v175_fact_252_marblefilter_1252_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0020": {
+   "arm": "R",
+   "case": "v175_fact_246_glacierdock_1246_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0021": {
+   "arm": "R",
+   "case": "v175_fact_246_glacierdock_1246_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0022": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0023": {
+   "arm": "R",
+   "case": "v175_fact_235_zephyrgauge_1235_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0024": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0025": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0026": {
+   "arm": "R",
+   "case": "v175_fact_252_marblefilter_1252_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0027": {
+   "arm": "R",
+   "case": "v175_fact_238_cobalthub_1238_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0028": {
+   "arm": "R",
+   "case": "v175_fact_228_solarsensor_1228_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0029": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0030": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0031": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0032": {
+   "arm": "R",
+   "case": "v175_fact_225_pinerelay_1225_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0033": {
+   "arm": "R",
+   "case": "v175_proc_158_capacity_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0034": {
+   "arm": "R",
+   "case": "v175_fact_237_berylvault_1237_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0035": {
+   "arm": "R",
+   "case": "v175_fact_251_lumenterminal_1251_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0036": {
+   "arm": "R",
+   "case": "v175_fact_238_cobalthub_1238_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0037": {
+   "arm": "R",
+   "case": "v175_fact_238_cobalthub_1238_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0038": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0039": {
+   "arm": "C",
+   "case": "v175_fact_237_berylvault_1237_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0040": {
+   "arm": "R",
+   "case": "v175_fact_227_riverkit_1227_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0041": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0042": {
+   "arm": "R",
+   "case": "v175_fact_237_berylvault_1237_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0043": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0044": {
+   "arm": "C",
+   "case": "v175_fact_233_xenomodule_1233_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0045": {
+   "arm": "C",
+   "case": "v175_fact_233_xenomodule_1233_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0046": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0047": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0048": {
+   "arm": "C",
+   "case": "v175_fact_232_willowfilter_1232_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0049": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0050": {
+   "arm": "R",
+   "case": "v175_fact_245_fernrelay_1245_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0051": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0052": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0053": {
+   "arm": "C",
+   "case": "v175_fact_237_berylvault_1237_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0054": {
+   "arm": "R",
+   "case": "v175_fact_244_echojunction_1244_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0055": {
+   "arm": "C",
+   "case": "v175_fact_245_fernrelay_1245_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0056": {
+   "arm": "R",
+   "case": "v175_fact_225_pinerelay_1225_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0057": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0058": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0059": {
+   "arm": "C",
+   "case": "v175_proc_155_budget_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0060": {
+   "arm": "R",
+   "case": "v175_fact_248_ivorysensor_1248_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0061": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0062": {
+   "arm": "R",
+   "case": "v175_fact_244_echojunction_1244_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0063": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0064": {
+   "arm": "R",
+   "case": "v175_fact_230_umberlink_1230_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0065": {
+   "arm": "C",
+   "case": "v175_fact_246_glacierdock_1246_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0066": {
+   "arm": "R",
+   "case": "v175_fact_240_amberbeacon_1240_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0067": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0068": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0069": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0070": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0071": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0072": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0073": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0074": {
+   "arm": "R",
+   "case": "v175_fact_240_amberbeacon_1240_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0075": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0076": {
+   "arm": "C",
+   "case": "v175_proc_150_capacity_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0077": {
+   "arm": "C",
+   "case": "v175_fact_244_echojunction_1244_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0078": {
+   "arm": "R",
+   "case": "v175_fact_239_driftorb_1239_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0079": {
+   "arm": "C",
+   "case": "v175_fact_244_echojunction_1244_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0080": {
+   "arm": "R",
+   "case": "v175_fact_242_cinderpanel_1242_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0081": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0082": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0083": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0084": {
+   "arm": "R",
+   "case": "v175_fact_249_juniperengine_1249_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0085": {
+   "arm": "C",
+   "case": "v175_fact_226_quartzdock_1226_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0086": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0087": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0088": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0089": {
+   "arm": "C",
+   "case": "v175_proc_151_temperature_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0090": {
+   "arm": "R",
+   "case": "v175_fact_244_echojunction_1244_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0091": {
+   "arm": "C",
+   "case": "v175_fact_252_marblefilter_1252_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0092": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0093": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0094": {
+   "arm": "R",
+   "case": "v175_fact_226_quartzdock_1226_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0095": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0096": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0097": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0098": {
+   "arm": "C",
+   "case": "v175_fact_249_juniperengine_1249_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0099": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0100": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0101": {
+   "arm": "C",
+   "case": "v175_fact_230_umberlink_1230_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0102": {
+   "arm": "C",
+   "case": "v175_fact_235_zephyrgauge_1235_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0103": {
+   "arm": "C",
+   "case": "v175_fact_252_marblefilter_1252_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0104": {
+   "arm": "R",
+   "case": "v175_fact_225_pinerelay_1225_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0105": {
+   "arm": "C",
+   "case": "v175_fact_225_pinerelay_1225_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0106": {
+   "arm": "R",
+   "case": "v175_fact_231_violetterminal_1231_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0107": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0108": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0109": {
+   "arm": "R",
+   "case": "v175_fact_247_harborkit_1247_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0110": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0111": {
+   "arm": "C",
+   "case": "v175_fact_248_ivorysensor_1248_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0112": {
+   "arm": "R",
+   "case": "v175_fact_259_thistleorb_1259_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0113": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0114": {
+   "arm": "R",
+   "case": "v175_proc_150_capacity_answer_4__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0115": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0116": {
+   "arm": "R",
+   "case": "v175_fact_237_berylvault_1237_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0117": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0118": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0119": {
+   "arm": "R",
+   "case": "v175_fact_254_opalunit_1254_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0120": {
+   "arm": "R",
+   "case": "v175_proc_155_budget_answer_1__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0121": {
+   "arm": "R",
+   "case": "v175_proc_151_temperature_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0122": {
+   "arm": "R",
+   "case": "v175_fact_253_nimbusmodule_1253_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0123": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0124": {
+   "arm": "R",
+   "case": "v175_fact_233_xenomodule_1233_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0125": {
+   "arm": "C",
+   "case": "v175_fact_244_echojunction_1244_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0126": {
+   "arm": "R",
+   "case": "v175_fact_241_birchinstrument_1241_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0127": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0128": {
+   "arm": "R",
+   "case": "v175_fact_234_yarrowunit_1234_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0129": {
+   "arm": "C",
+   "case": "v175_fact_249_juniperengine_1249_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0130": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0131": {
+   "arm": "R",
+   "case": "v175_proc_150_capacity_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0132": {
+   "arm": "R",
+   "case": "v175_fact_228_solarsensor_1228_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0133": {
+   "arm": "C",
+   "case": "v175_fact_240_amberbeacon_1240_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0134": {
+   "arm": "C",
+   "case": "v175_fact_228_solarsensor_1228_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0135": {
+   "arm": "C",
+   "case": "v175_fact_250_kestrellink_1250_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0136": {
+   "arm": "R",
+   "case": "v175_fact_252_marblefilter_1252_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0137": {
+   "arm": "C",
+   "case": "v175_proc_158_capacity_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0138": {
+   "arm": "C",
+   "case": "v175_fact_230_umberlink_1230_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0139": {
+   "arm": "C",
+   "case": "v175_proc_150_capacity_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0140": {
+   "arm": "C",
+   "case": "v175_fact_260_umberbeacon_1260_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0141": {
+   "arm": "R",
+   "case": "v175_fact_257_rivervault_1257_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0142": {
+   "arm": "R",
+   "case": "v175_fact_260_umberbeacon_1260_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0143": {
+   "arm": "C",
+   "case": "v175_fact_237_berylvault_1237_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0144": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0145": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0146": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0147": {
+   "arm": "C",
+   "case": "v175_fact_243_dawncrate_1243_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0148": {
+   "arm": "R",
+   "case": "v175_fact_250_kestrellink_1250_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0149": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0150": {
+   "arm": "C",
+   "case": "v175_proc_151_temperature_answer_2__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0151": {
+   "arm": "C",
+   "case": "v175_fact_244_echojunction_1244_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0152": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0153": {
+   "arm": "C",
+   "case": "v175_fact_230_umberlink_1230_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0154": {
+   "arm": "C",
+   "case": "v175_fact_230_umberlink_1230_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0155": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0156": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0157": {
+   "arm": "R",
+   "case": "v175_fact_258_solarhub_1258_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0158": {
+   "arm": "C",
+   "case": "v175_fact_249_juniperengine_1249_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0159": {
+   "arm": "C",
+   "case": "v175_fact_227_riverkit_1227_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0160": {
+   "arm": "C",
+   "case": "v175_fact_249_juniperengine_1249_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0161": {
+   "arm": "C",
+   "case": "v175_fact_238_cobalthub_1238_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0162": {
+   "arm": "R",
+   "case": "v175_fact_240_amberbeacon_1240_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0163": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0164": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0165": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0166": {
+   "arm": "R",
+   "case": "v175_fact_249_juniperengine_1249_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0167": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0168": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0169": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0170": {
+   "arm": "R",
+   "case": "v175_fact_261_violetinstrument_1261_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0171": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0172": {
+   "arm": "C",
+   "case": "v175_fact_252_marblefilter_1252_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0173": {
+   "arm": "C",
+   "case": "v175_fact_238_cobalthub_1238_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0174": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0175": {
+   "arm": "C",
+   "case": "v175_fact_252_marblefilter_1252_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0176": {
+   "arm": "C",
+   "case": "v175_fact_238_cobalthub_1238_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0177": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0178": {
+   "arm": "C",
+   "case": "v175_fact_251_lumenterminal_1251_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0179": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0180": {
+   "arm": "R",
+   "case": "v175_proc_150_capacity_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0181": {
+   "arm": "C",
+   "case": "v175_fact_257_rivervault_1257_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0182": {
+   "arm": "R",
+   "case": "v175_fact_249_juniperengine_1249_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0183": {
+   "arm": "C",
+   "case": "v175_fact_234_yarrowunit_1234_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0184": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0185": {
+   "arm": "C",
+   "case": "v175_fact_251_lumenterminal_1251_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0186": {
+   "arm": "C",
+   "case": "v175_fact_262_willowpanel_1262_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0187": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_03_runtime_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0188": {
+   "arm": "C",
+   "case": "v175_fact_253_nimbusmodule_1253_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0189": {
+   "arm": "C",
+   "case": "v175_fact_255_pinegauge_1255_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0190": {
+   "arm": "R",
+   "case": "v175_fact_256_quartznode_1256_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0191": {
+   "arm": "C",
+   "case": "v175_proc_150_capacity_answer_3__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0192": {
+   "arm": "R",
+   "case": "v175_fact_262_willowpanel_1262_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0193": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0194": {
+   "arm": "C",
+   "case": "v175_fact_246_glacierdock_1246_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0195": {
+   "arm": "C",
+   "case": "v175_fact_240_amberbeacon_1240_05_launch_paraphrase__L4096_d0.5",
+   "category": "supported_paraphrase",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0196": {
+   "arm": "C",
+   "case": "v175_fact_256_quartznode_1256_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0197": {
+   "arm": "C",
+   "case": "v175_fact_258_solarhub_1258_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0198": {
+   "arm": "C",
+   "case": "v175_fact_225_pinerelay_1225_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0199": {
+   "arm": "C",
+   "case": "v175_fact_261_violetinstrument_1261_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0200": {
+   "arm": "R",
+   "case": "v175_proc_151_temperature_answer_5__L4096_d0.5",
+   "category": "procedure_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0201": {
+   "arm": "C",
+   "case": "v175_fact_254_opalunit_1254_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0202": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0203": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0204": {
+   "arm": "C",
+   "case": "v175_fact_259_thistleorb_1259_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0205": {
+   "arm": "C",
+   "case": "v175_fact_239_driftorb_1239_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0206": {
+   "arm": "C",
+   "case": "v175_fact_225_pinerelay_1225_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0207": {
+   "arm": "C",
+   "case": "v175_fact_241_birchinstrument_1241_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0208": {
+   "arm": "R",
+   "case": "v175_fact_255_pinegauge_1255_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0209": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0210": {
+   "arm": "R",
+   "case": "v175_fact_252_marblefilter_1252_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0211": {
+   "arm": "C",
+   "case": "v175_fact_242_cinderpanel_1242_06_capacity_corroborated__L4096_d0.5",
+   "category": "multi_fact_supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0212": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_01_launch_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0213": {
+   "arm": "C",
+   "case": "v175_fact_247_harborkit_1247_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0214": {
+   "arm": "R",
+   "case": "v175_fact_243_dawncrate_1243_02_capacity_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0215": {
+   "arm": "C",
+   "case": "v175_fact_231_violetterminal_1231_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0216": {
+   "arm": "R",
+   "case": "v175_fact_230_umberlink_1230_09_protocol_injection__L4096_d0.5",
+   "category": "prompt_injection",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0217": {
+   "arm": "C",
+   "case": "v175_fact_244_echojunction_1244_08_runtime_stale_current__L4096_d0.5",
+   "category": "stale_evidence",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0218": {
+   "arm": "C",
+   "case": "v175_fact_240_amberbeacon_1240_07_protocol_with_distractor__L4096_d0.5",
+   "category": "supported_with_distractor",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  },
+  "ext_0219": {
+   "arm": "C",
+   "case": "v175_fact_235_zephyrgauge_1235_04_protocol_direct__L4096_d0.5",
+   "category": "supported",
+   "committed_endpoint": 1,
+   "group": "concordant"
+  }
+ },
+ "n_concordant": 110,
+ "n_disputed": 21,
+ "seed": 20260826
+}

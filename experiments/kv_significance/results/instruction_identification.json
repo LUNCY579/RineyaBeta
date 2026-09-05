@@ -1,4 +1,8 @@
 {
+ "ceiling_equivalence_bound_pp": [
+  -1.98,
+  1.64
+ ],
  "contrasts": {
   "A vs C  identification": {
    "abstain": {
