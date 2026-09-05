@@ -176,6 +176,15 @@ of tokens and the prompt is not, the achievable compression ratio grows with
 context length.** 16.5× at 4K where quality *rises* by +5.3 pp; **65× at 16K** with
 no significant loss. The same selector, the same budget in tokens.
 
+> **CORRECTION, 2026-09-04.** "65× at 16K with no significant loss" is withdrawn.
+> The 16K cell has 4 discordant pairs and could not have produced a significant
+> result whatever the data did; see the correction under §5 below. The ratio
+> arithmetic stands, the cost claim attached to it does not.
+>
+> Also note the B = 512 argument in the paragraph above rests on **0/2
+> discordant** — two discordant pairs, smallest attainable p 0.50. It cannot
+> distinguish "the floor did not move by 4×" from "this cell measured nothing".
+
 ### The length series, one budget
 
 Holding **B = 256 fixed** and varying only the context length:
@@ -189,6 +198,50 @@ Holding **B = 256 fixed** and varying only the context length:
 Same selector, same 256-token budget. The reduction ratio grows 8× across the
 series while the measured cost stays flat at about −2 pp and never reaches
 significance. At the shortest length it is not a cost at all but a gain.
+
+> **CORRECTION, 2026-09-04. Withdraw the sentence above.** "Never reaches
+> significance" describes cells that **could not have reached significance**,
+> and the phrase reads as evidence of absence when it is absence of evidence.
+>
+> An exact McNemar test on *n* discordant pairs cannot return a p below
+> `2 × 0.5ⁿ`, so **six** discordant pairs is the minimum for p < 0.05 whatever
+> the data does. The 16K cell has **4** discordant pairs — its smallest
+> attainable p is **0.125**. The 16K B = 512 cell has 2, ceiling **0.50**. Those
+> two cells were arithmetically incapable of the verdict this table reports.
+> Across the repo, 17 of 123 same-checkpoint pairings share that defect; see
+> [`audit_power_ceiling.py`](../scripts/design/audit_power_ceiling.py).
+>
+> Sizing against the 4K cell as the alternative hypothesis (p_win 0.944,
+> discordance 0.060) requires 9 discordant pairs, hence **150 paired cases** for
+> 80% power. **16K ran 100 and 32K ran 50.** `scripts/design/power_analysis.py`
+> exists and was never pointed at this series, in a programme whose standing
+> rule is to check endpoint power before a sweep.
+>
+> **The series also hides a sign reversal, not a flat cost.** The three rows use
+> different item sets, so they are not comparable as written. Restricted to the
+> **100 base ids common to the 4K and 16K corpora**, the same items give
+>
+> | length | same 100 items | W/L |
+> |---|---:|---:|
+> | 4K | **+4.00 pp** | 4/0 |
+> | 16K | **−2.00 pp** | 1/3 |
+>
+> so the effect changes sign between lengths on matched items. "Flat at about
+> −2 pp" is a description of a table whose rows are not paired.
+>
+> **What survives.** The *ratio* arithmetic (16.5× / 65× / 129× at a fixed
+> 256-token budget) is untouched — it follows from the budget and the prompt
+> length and needs no test. What is withdrawn is every inference about the
+> **cost** of that ratio at 16K and 32K. The honest statement is: at 4K the
+> effect is positive and significant; at 16K and 32K **the experiment has not
+> been run at adequate n**, and the point estimates are negative.
+>
+> A further hazard on the 16K row alone: its reference `long16k-off` has a
+> pre-schema manifest with no `model` key, so its provenance is unverified. The
+> 4K and 32K pre-schema references are byte-identical to their new-schema
+> counterparts (0 discordant pairs), so only 16K carries this. The other 16K
+> reference in the repo, `long16k-off-baya-ad`, is a **different checkpoint**
+> entirely and must never be substituted for it.
 
 The 32K cell is a probe, not a result: n = 50 with 38 answer cases and 7 discordant
 pairs has almost no power, and the uncompressed model never abstains at that length
