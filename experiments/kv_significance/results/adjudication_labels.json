@@ -1,0 +1,1107 @@
+{
+ "labels_returned": 549,
+ "majority": {
+  "adj_0000": "CORRECT_DEGRADED",
+  "adj_0001": "CORRECT_CLEAN",
+  "adj_0002": "CORRECT_CLEAN",
+  "adj_0003": "CORRECT_CLEAN",
+  "adj_0004": "WRONG",
+  "adj_0005": "CORRECT_CLEAN",
+  "adj_0006": "CORRECT_CLEAN",
+  "adj_0007": "CORRECT_CLEAN",
+  "adj_0008": "CORRECT_CLEAN",
+  "adj_0009": "CORRECT_CLEAN",
+  "adj_0010": "WRONG",
+  "adj_0011": "CORRECT_DEGRADED",
+  "adj_0012": "WRONG",
+  "adj_0013": "CORRECT_CLEAN",
+  "adj_0014": "CORRECT_CLEAN",
+  "adj_0015": "CORRECT_CLEAN",
+  "adj_0016": "CORRECT_CLEAN",
+  "adj_0017": "CORRECT_CLEAN",
+  "adj_0018": "WRONG",
+  "adj_0019": "CORRECT_CLEAN",
+  "adj_0020": "CORRECT_CLEAN",
+  "adj_0021": "WRONG",
+  "adj_0022": "CORRECT_CLEAN",
+  "adj_0023": "CORRECT_CLEAN",
+  "adj_0024": "CORRECT_DEGRADED",
+  "adj_0025": "CORRECT_CLEAN",
+  "adj_0026": "CORRECT_CLEAN",
+  "adj_0027": "CORRECT_CLEAN",
+  "adj_0028": "CORRECT_DEGRADED",
+  "adj_0029": "CORRECT_CLEAN",
+  "adj_0030": "CORRECT_DEGRADED",
+  "adj_0031": "WRONG",
+  "adj_0032": "CORRECT_CLEAN",
+  "adj_0033": "CORRECT_CLEAN",
+  "adj_0034": "CORRECT_DEGRADED",
+  "adj_0035": "CORRECT_CLEAN",
+  "adj_0036": "CORRECT_CLEAN",
+  "adj_0037": "CORRECT_DEGRADED",
+  "adj_0038": "WRONG",
+  "adj_0039": "WRONG",
+  "adj_0040": "CORRECT_DEGRADED",
+  "adj_0041": "CORRECT_CLEAN",
+  "adj_0042": "CORRECT_CLEAN",
+  "adj_0043": "CORRECT_CLEAN",
+  "adj_0044": "WRONG",
+  "adj_0045": "CORRECT_CLEAN",
+  "adj_0046": "CORRECT_CLEAN",
+  "adj_0047": "CORRECT_CLEAN",
+  "adj_0048": "CORRECT_DEGRADED",
+  "adj_0049": "CORRECT_CLEAN",
+  "adj_0050": "CORRECT_CLEAN",
+  "adj_0051": "CORRECT_CLEAN",
+  "adj_0052": "CORRECT_CLEAN",
+  "adj_0053": "CORRECT_CLEAN",
+  "adj_0054": "CORRECT_CLEAN",
+  "adj_0055": "WRONG",
+  "adj_0056": "CORRECT_CLEAN",
+  "adj_0057": "CORRECT_CLEAN",
+  "adj_0058": "WRONG",
+  "adj_0059": "CORRECT_CLEAN",
+  "adj_0060": "CORRECT_CLEAN",
+  "adj_0061": "CORRECT_CLEAN",
+  "adj_0062": "CORRECT_CLEAN",
+  "adj_0063": "CORRECT_CLEAN",
+  "adj_0064": "CORRECT_CLEAN",
+  "adj_0065": "CORRECT_DEGRADED",
+  "adj_0066": "CORRECT_CLEAN",
+  "adj_0067": "CORRECT_CLEAN",
+  "adj_0068": "WRONG",
+  "adj_0069": "CORRECT_DEGRADED",
+  "adj_0070": "CORRECT_CLEAN",
+  "adj_0071": "CORRECT_CLEAN",
+  "adj_0072": "CORRECT_CLEAN",
+  "adj_0073": "CORRECT_CLEAN",
+  "adj_0074": "CORRECT_CLEAN",
+  "adj_0075": "CORRECT_CLEAN",
+  "adj_0076": "CORRECT_CLEAN",
+  "adj_0077": "WRONG",
+  "adj_0078": "CORRECT_CLEAN",
+  "adj_0079": "CORRECT_CLEAN",
+  "adj_0080": "WRONG",
+  "adj_0081": "CORRECT_CLEAN",
+  "adj_0082": "CORRECT_CLEAN",
+  "adj_0083": "CORRECT_CLEAN",
+  "adj_0084": "CORRECT_DEGRADED",
+  "adj_0085": "CORRECT_CLEAN",
+  "adj_0086": "CORRECT_CLEAN",
+  "adj_0087": "CORRECT_CLEAN",
+  "adj_0088": "CORRECT_CLEAN",
+  "adj_0089": "CORRECT_CLEAN",
+  "adj_0090": "CORRECT_CLEAN",
+  "adj_0091": "CORRECT_CLEAN",
+  "adj_0092": "CORRECT_CLEAN",
+  "adj_0093": "WRONG",
+  "adj_0094": "CORRECT_CLEAN",
+  "adj_0095": "CORRECT_CLEAN",
+  "adj_0096": "CORRECT_CLEAN",
+  "adj_0097": "CORRECT_CLEAN",
+  "adj_0098": "CORRECT_CLEAN",
+  "adj_0099": "CORRECT_CLEAN",
+  "adj_0100": "CORRECT_CLEAN",
+  "adj_0101": "CORRECT_CLEAN",
+  "adj_0102": "CORRECT_CLEAN",
+  "adj_0103": "CORRECT_CLEAN",
+  "adj_0104": "CORRECT_CLEAN",
+  "adj_0105": "CORRECT_CLEAN",
+  "adj_0106": "CORRECT_DEGRADED",
+  "adj_0107": "CORRECT_CLEAN",
+  "adj_0108": "CORRECT_CLEAN",
+  "adj_0109": "CORRECT_CLEAN",
+  "adj_0110": "CORRECT_CLEAN",
+  "adj_0111": "CORRECT_CLEAN",
+  "adj_0112": "CORRECT_CLEAN",
+  "adj_0113": "CORRECT_CLEAN",
+  "adj_0114": "CORRECT_CLEAN",
+  "adj_0115": "CORRECT_CLEAN",
+  "adj_0116": "CORRECT_CLEAN",
+  "adj_0117": "CORRECT_CLEAN",
+  "adj_0118": "CORRECT_CLEAN",
+  "adj_0119": "CORRECT_CLEAN",
+  "adj_0120": "CORRECT_CLEAN",
+  "adj_0121": "CORRECT_DEGRADED",
+  "adj_0122": "CORRECT_CLEAN",
+  "adj_0123": "WRONG",
+  "adj_0124": "CORRECT_CLEAN",
+  "adj_0125": "CORRECT_CLEAN",
+  "adj_0126": "CORRECT_DEGRADED",
+  "adj_0127": "CORRECT_DEGRADED",
+  "adj_0128": "CORRECT_CLEAN",
+  "adj_0129": "CORRECT_CLEAN",
+  "adj_0130": "CORRECT_CLEAN",
+  "adj_0131": "WRONG",
+  "adj_0132": "CORRECT_CLEAN",
+  "adj_0133": "CORRECT_DEGRADED",
+  "adj_0134": "CORRECT_CLEAN",
+  "adj_0135": "CORRECT_CLEAN",
+  "adj_0136": "CORRECT_CLEAN",
+  "adj_0137": "CORRECT_CLEAN",
+  "adj_0138": "CORRECT_CLEAN",
+  "adj_0139": "CORRECT_CLEAN",
+  "adj_0140": "CORRECT_CLEAN",
+  "adj_0141": "CORRECT_CLEAN",
+  "adj_0142": "CORRECT_CLEAN",
+  "adj_0143": "CORRECT_CLEAN",
+  "adj_0144": "CORRECT_CLEAN",
+  "adj_0145": "CORRECT_DEGRADED",
+  "adj_0146": "CORRECT_CLEAN",
+  "adj_0147": "CORRECT_CLEAN",
+  "adj_0148": "CORRECT_DEGRADED",
+  "adj_0149": "WRONG",
+  "adj_0150": "WRONG",
+  "adj_0151": "CORRECT_CLEAN",
+  "adj_0152": "CORRECT_CLEAN",
+  "adj_0153": "CORRECT_CLEAN",
+  "adj_0154": "CORRECT_CLEAN",
+  "adj_0155": "CORRECT_CLEAN",
+  "adj_0156": "CORRECT_CLEAN",
+  "adj_0157": "CORRECT_DEGRADED",
+  "adj_0158": "WRONG",
+  "adj_0159": "CORRECT_CLEAN",
+  "adj_0160": "CORRECT_CLEAN",
+  "adj_0161": "CORRECT_CLEAN",
+  "adj_0162": "CORRECT_CLEAN",
+  "adj_0163": "CORRECT_CLEAN",
+  "adj_0164": "CORRECT_CLEAN",
+  "adj_0165": "CORRECT_DEGRADED",
+  "adj_0166": "CORRECT_CLEAN",
+  "adj_0167": "CORRECT_CLEAN",
+  "adj_0168": "CORRECT_CLEAN",
+  "adj_0169": "CORRECT_CLEAN",
+  "adj_0170": "CORRECT_CLEAN",
+  "adj_0171": "CORRECT_CLEAN",
+  "adj_0172": "CORRECT_CLEAN",
+  "adj_0173": "CORRECT_CLEAN",
+  "adj_0174": "UNINTELLIGIBLE",
+  "adj_0175": "CORRECT_CLEAN",
+  "adj_0176": "CORRECT_CLEAN",
+  "adj_0177": "WRONG",
+  "adj_0178": "CORRECT_CLEAN",
+  "adj_0179": "CORRECT_CLEAN",
+  "adj_0180": "CORRECT_CLEAN",
+  "adj_0181": "CORRECT_CLEAN",
+  "adj_0182": "CORRECT_CLEAN"
+ },
+ "raw": {
+  "adj_0000": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0001": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0002": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0003": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0004": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0005": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0006": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0007": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0008": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0009": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0010": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0011": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0012": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0013": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0014": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0015": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0016": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0017": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0018": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0019": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0020": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0021": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0022": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0023": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0024": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0025": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0026": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0027": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0028": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0029": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0030": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0031": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0032": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0033": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0034": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0035": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0036": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0037": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0038": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0039": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0040": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0041": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0042": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0043": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0044": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0045": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0046": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0047": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0048": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0049": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0050": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0051": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0052": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0053": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0054": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0055": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0056": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0057": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0058": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0059": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0060": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0061": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0062": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0063": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0064": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0065": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0066": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0067": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0068": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0069": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0070": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0071": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0072": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0073": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0074": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0075": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0076": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0077": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0078": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0079": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0080": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0081": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0082": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0083": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0084": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0085": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0086": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0087": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0088": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0089": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0090": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0091": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0092": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0093": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0094": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0095": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0096": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0097": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0098": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0099": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0100": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0101": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0102": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0103": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0104": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0105": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0106": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0107": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0108": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0109": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0110": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0111": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0112": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0113": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0114": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0115": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0116": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0117": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0118": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0119": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0120": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0121": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0122": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0123": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0124": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0125": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0126": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0127": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0128": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0129": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0130": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0131": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0132": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0133": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0134": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0135": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0136": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0137": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0138": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0139": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0140": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0141": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0142": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0143": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0144": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0145": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0146": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0147": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0148": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0149": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0150": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0151": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0152": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0153": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0154": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0155": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0156": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0157": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0158": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0159": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0160": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0161": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0162": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0163": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0164": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0165": [
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED",
+   "CORRECT_DEGRADED"
+  ],
+  "adj_0166": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0167": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0168": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0169": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0170": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0171": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0172": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0173": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0174": [
+   "UNINTELLIGIBLE",
+   "UNINTELLIGIBLE",
+   "UNINTELLIGIBLE"
+  ],
+  "adj_0175": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0176": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0177": [
+   "WRONG",
+   "WRONG",
+   "WRONG"
+  ],
+  "adj_0178": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0179": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0180": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0181": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ],
+  "adj_0182": [
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN",
+   "CORRECT_CLEAN"
+  ]
+ },
+ "three_way_splits": 0,
+ "undercovered_items": 0
+}

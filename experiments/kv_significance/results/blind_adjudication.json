@@ -1,0 +1,81 @@
+{
+ "conditioning": {
+  "concordant_cases_adjudicated": 40,
+  "could_flip_sign": true,
+  "induced_discordant": 0,
+  "primary_net_wins": 7,
+  "projected_induced_upper_bound": 25.55,
+  "rate_ci95": [
+   0.0,
+   0.088097
+  ],
+  "unadjudicated_all_correct": 290
+ },
+ "disputed": {
+  "primary  CORRECT_CLEAN": {
+   "C vs N": {
+    "delta_pp": -4.7619,
+    "losses": 2,
+    "n": 21,
+    "p": 1.0,
+    "power_ceiling": 0.25,
+    "wins": 1
+   },
+   "C vs R": {
+    "delta_pp": 33.3333,
+    "losses": 0,
+    "n": 21,
+    "p": 0.015625,
+    "power_ceiling": 0.015625,
+    "wins": 7
+   },
+   "N vs R": {
+    "delta_pp": 38.0952,
+    "losses": 1,
+    "n": 21,
+    "p": 0.0214844,
+    "power_ceiling": 0.00195312,
+    "wins": 9
+   }
+  },
+  "secondary  CLEAN+DEGRADED": {
+   "C vs N": {
+    "delta_pp": 4.7619,
+    "losses": 2,
+    "n": 21,
+    "p": 1.0,
+    "power_ceiling": 0.0625,
+    "wins": 3
+   },
+   "C vs R": {
+    "delta_pp": 71.4286,
+    "losses": 0,
+    "n": 21,
+    "p": 6.10352e-05,
+    "power_ceiling": 6.10352e-05,
+    "wins": 15
+   },
+   "N vs R": {
+    "delta_pp": 66.6667,
+    "losses": 2,
+    "n": 21,
+    "p": 0.00131226,
+    "power_ceiling": 7.62939e-06,
+    "wins": 16
+   }
+  }
+ },
+ "gates": {
+  "g1_majority_rate": 1.0,
+  "g1_pass": true,
+  "g2_contract_agreement": 1.0,
+  "g2_pass": true,
+  "g3_discordant": 7,
+  "g3_pass": true,
+  "items_decided": 183,
+  "items_total": 183,
+  "items_with_3_raters": 183,
+  "unanimous": 182
+ },
+ "verdict": "INDETERMINATE -- conditioning bound could flip the sign"
+}
