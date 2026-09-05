@@ -172,5 +172,5 @@ prevent. The frozen rule was satisfied on its own terms instead.
 ## 8. What this does not test
 
 Generality. One model, one corpus, one prompt template. `make_long_rag.py`
-excludes same-topic distractors, so BM25 ranks the gold record first in 530/530
+excludes same-topic distractors, so BM25 ranks the gold record first in 496/530
 answerable cases; nothing here speaks to a corpus where retrieval is hard.

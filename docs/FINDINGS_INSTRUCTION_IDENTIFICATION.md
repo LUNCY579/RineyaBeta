@@ -103,12 +103,40 @@ and the correction in `FINDINGS_COMPRESSION_IMPROVES_QUALITY.md`). Any pooled
 figure in this programme sums a real answer-stratum effect with an artifactual
 abstain-stratum one, and the two have opposite relationships to the truth.
 
-**Bounded by construction.** `make_long_rag.py` excludes same-topic distractors,
-so BM25 ranks the gold record first in 530/530 answerable cases. "Selection is
-saturated" is therefore a statement about **this corpus**, where retrieval is easy
-by design. It does not follow that BM25 saturates selection on a corpus whose
-distractors share the gold record's topic, and the cheapest next experiment is a
-corpus that does not exclude them.
+**Why saturation happens, measured 2026-09-05.** An earlier version of this
+section asserted that BM25 ranks the gold record first in "530/530" answerable
+cases and concluded the retrieval problem was degenerate. **That figure was
+wrong.** It came from a review agent's own reimplementation of BM25, not from
+`doc_bm25_weights`, the function the experiments actually ran. Measured with the
+committed selector ([`measure_retrieval_difficulty.py`](../scripts/design/measure_retrieval_difficulty.py)):
+
+| corpus | n | gold@1 | gold@3 | mean rank | worst |
+|---|---:|---:|---:|---:|---:|
+| default, same-topic excluded | 432 | 0.9630 | 0.9931 | 1.067 | 7 |
+| variant, same-topic permitted | 432 | 0.9583 | 0.9931 | 1.072 | 7 |
+
+Tie-breaking accounts for zero cases, so these are exact.
+
+BM25 is therefore **not** a perfect retriever — it misses the top slot on 3.7% of
+cases. Saturation has a better explanation than degeneracy, and the numbers give
+it: at `keep_frac` 0.05 on a ~4,200-token prompt the selector keeps roughly 210
+tokens, about **three** 63-token records. The statistic that governs whether the
+gold record survives eviction is therefore **gold@3 = 0.9931**, not gold@1. A
+perfect oracle adds nothing because the gold record is already inside the kept
+set in 99.3% of cases.
+
+That is a sharper claim than "the corpus is easy", and it makes a falsifiable
+prediction: **at budgets tight enough to keep fewer than three records, BM25
+should start losing to the oracle.** That is the experiment worth running, and it
+is cheap — the arms already exist at B = 128 and B = 96.
+
+**The same-topic variant does not work, and is recorded so nobody retries it.**
+Permitting same-topic distractors (`make_long_rag.py --same-topic-distractors`)
+moves gold@1 by **0.47 pp** and gold@3 by nothing. The distractor pool spans 63
+topics and a target's own topic contributes only a few of the ~65 blocks in a
+prompt, so the BM25 landscape barely changes. Making retrieval genuinely hard on
+this corpus family needs distractors selected for **lexical similarity to the
+question** — hard-negative mining — not merely same topic.
 
 ## 5. Cost
 

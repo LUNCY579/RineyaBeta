@@ -96,7 +96,8 @@ an answer from a fragment containing one.
 
 It does not touch generality. One model, one corpus, one prompt template.
 `make_long_rag.py` excludes same-topic distractors, so BM25 ranks the gold record
-first in 530/530 answerable cases; nothing here speaks to a corpus where retrieval
+first in 496 of 530 answerable cases (gold@1 = 0.9358); nothing here speaks to a
+corpus where retrieval
 is hard. It also says nothing about the abstain stratum, which remains a
 canned-string indicator and whose gain remains withdrawn — see
 [`FINDINGS_COMPRESSION_IMPROVES_QUALITY.md`](FINDINGS_COMPRESSION_IMPROVES_QUALITY.md).

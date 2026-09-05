@@ -1,0 +1,27 @@
+{
+ "corpora": {
+  "artifacts\\eval_sets\\rag_long4k_d0.5.jsonl": {
+   "gold_at_1": 0.963,
+   "gold_at_1_count": 416,
+   "gold_at_3": 0.9931,
+   "label": "default (same-topic EXCLUDED)",
+   "mean_rank": 1.067,
+   "measurable_cases": 432,
+   "median_rank": 1,
+   "worst_rank": 7
+  },
+  "artifacts\\eval_sets\\rag_long4k_same_d0.5.jsonl": {
+   "gold_at_1": 0.9583,
+   "gold_at_1_count": 414,
+   "gold_at_3": 0.9931,
+   "label": "variant (same-topic PERMITTED)",
+   "mean_rank": 1.072,
+   "measurable_cases": 432,
+   "median_rank": 1,
+   "worst_rank": 7
+  }
+ },
+ "gold_at_1_drop": 0.0047,
+ "limit": 600,
+ "model": "artifacts/rineya-core-en32k-28L"
+}

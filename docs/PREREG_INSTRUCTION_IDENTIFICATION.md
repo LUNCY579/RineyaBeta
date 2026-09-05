@@ -162,7 +162,7 @@ partial data that is nonetheless deleted rather than analysed, per section 6.
   corpus family.
 - Whether it holds on a corpus whose distractors share the gold record's topic.
   `make_long_rag.py` excludes same-topic distractors by construction, so BM25
-  ranks the gold record first in 530/530 answerable cases and this cell cannot
+  ranks the gold record first in 496 of 530 answerable cases and this cell cannot
   distinguish "selection is inert" from "selection is saturated".
   That confound is real and is **not** repaired here; it is why an inert result
   must be written as inert *on this corpus*.

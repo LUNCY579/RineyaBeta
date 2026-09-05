@@ -85,6 +85,13 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--model", default="artifacts/rineya-core-en32k-28L")
     ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--same-topic-distractors", action="store_true",
+                    help="permit distractors from the target's own topic. The "
+                         "default corpus excludes them, which makes document "
+                         "BM25 rank the gold record first in 530/530 answerable "
+                         "cases -- retrieval is easy BY CONSTRUCTION, and every "
+                         "saturation result is conditional on that. Contamination "
+                         "and prompt-injection gates still apply.")
     args = ap.parse_args()
 
     from transformers import AutoTokenizer
@@ -125,7 +132,20 @@ def main() -> None:
             base = len(tok(rec["messages"][1]["content"])["input_ids"])
             need = max(0, args.tokens - base)
 
-            cand = [p for p in pool if p[0] != rec.get("topic_id")]
+            # DEFAULT: same-topic documents are excluded, for the reason in the
+            # module docstring. --same-topic-distractors permits them, which
+            # makes retrieval genuinely hard rather than trivially easy: on the
+            # default corpus document-BM25 ranks the gold record FIRST in 530 of
+            # 530 answerable cases, so every "a trivial selector suffices" and
+            # "selection is saturated" result in this programme is conditional
+            # on this line. The contamination gate below still rejects any
+            # distractor containing the reference answer, so the question stays
+            # answerable; what changes is that the haystack now contains prose
+            # about the same entity.
+            if args.same_topic_distractors:
+                cand = list(pool)
+            else:
+                cand = [p for p in pool if p[0] != rec.get("topic_id")]
             rng.shuffle(cand)
             chosen, got = [], 0
             for topic, body, ntok in cand:
