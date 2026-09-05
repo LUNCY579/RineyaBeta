@@ -1542,6 +1542,20 @@ def main() -> None:
         print(f"{label:<34}{doc_val:>12.5f}{shown}  {str(in_doc):>7}  "
               f"{'OK' if ok else 'MISMATCH'}")
 
+    # Coverage: a document listed in DOCS but carrying no pinned claim is only
+    # protected against deletion. FINDINGS_CAPACITY_FLOOR.md sat in that state
+    # while a wrong division survived in its headline formula, and the 270/270
+    # pass rate said nothing about it, because the pass rate averages over a
+    # document set whose per-document coverage included zeroes.
+    pinned = set()
+    for _lbl, _v, _fn, _tol, _needle, which in CLAIMS:
+        pinned.update(which.split(","))
+    uncovered = sorted(d for d in DOCS if d not in pinned)
+    if uncovered:
+        print()
+        for d in uncovered:
+            print(f"NO PINNED CLAIM guards {DOCS[d].name} (tag {d!r})")
+
     arith = check_inline_arithmetic(text)
     if arith:
         print()
