@@ -1,0 +1,30 @@
+test_actual_q_width_not_hidden_size_shortcut (experiments.hybrid_attention_v1.tests.test_study.AccountingTests.test_actual_q_width_not_hidden_size_shortcut) ... ok
+test_early_eos_and_counter_corruption (experiments.hybrid_attention_v1.tests.test_study.AccountingTests.test_early_eos_and_counter_corruption) ... ok
+test_invalid_workloads_fail_closed (experiments.hybrid_attention_v1.tests.test_study.AccountingTests.test_invalid_workloads_fail_closed) ... ok
+test_last_predicted_token_is_not_forwarded (experiments.hybrid_attention_v1.tests.test_study.AccountingTests.test_last_predicted_token_is_not_forwarded) ... ok
+test_rectangles_against_executed_attention (experiments.hybrid_attention_v1.tests.test_study.AccountingTests.test_rectangles_against_executed_attention) ... ok
+test_runtime_generations_and_resident_storage_match_planner (experiments.hybrid_attention_v1.tests.test_study.AccountingTests.test_runtime_generations_and_resident_storage_match_planner) ... ok
+test_visible_pairs_against_independent_dense_masks (experiments.hybrid_attention_v1.tests.test_study.AccountingTests.test_visible_pairs_against_independent_dense_masks) ... ok
+test_cap_hit_is_not_labeled_compute_matched (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_cap_hit_is_not_labeled_compute_matched) ... ok
+test_compute_match_uses_whole_updates_and_reports_remainder (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_compute_match_uses_whole_updates_and_reports_remainder) ... ok
+test_current_qualification_includes_distinct_topologies (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_current_qualification_includes_distinct_topologies) ... ok
+test_invalid_cli_budgets_and_closed_stages (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_invalid_cli_budgets_and_closed_stages) ... ok
+test_invalid_costs_and_attention_only_unit_rejected (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_invalid_costs_and_attention_only_unit_rejected) ... ok
+test_missing_weights_produce_failed_non_authorizing_receipt (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_missing_weights_produce_failed_non_authorizing_receipt) ... ok
+test_new_controls_and_unchanged_checkpoint_are_required (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_new_controls_and_unchanged_checkpoint_are_required) ... ok
+test_nonfinite_qualification_failures_remain_serializable (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_nonfinite_qualification_failures_remain_serializable) ... ok
+test_plan_is_bounded_and_does_not_authorize (experiments.hybrid_attention_v1.tests.test_study.BudgetAndGuardTests.test_plan_is_bounded_and_does_not_authorize) ... ok
+test_contrast_direction_and_membership (experiments.hybrid_attention_v1.tests.test_study.ContrastTests.test_contrast_direction_and_membership) ... ok
+test_empty_subset_is_unmeasured_not_zero (experiments.hybrid_attention_v1.tests.test_study.ContrastTests.test_empty_subset_is_unmeasured_not_zero) ... ok
+test_strict_and_trimmed_endpoints_stay_separate (experiments.hybrid_attention_v1.tests.test_study.ContrastTests.test_strict_and_trimmed_endpoints_stay_separate) ... ok
+test_all_local_is_explicitly_not_compute_matched (experiments.hybrid_attention_v1.tests.test_study.ControlTests.test_all_local_is_explicitly_not_compute_matched) ... ok
+test_equal_cache_and_modeled_work_for_placement_and_sinks (experiments.hybrid_attention_v1.tests.test_study.ControlTests.test_equal_cache_and_modeled_work_for_placement_and_sinks) ... ok
+test_frontloaded_same_global_count_at_all_fixture_depths (experiments.hybrid_attention_v1.tests.test_study.ControlTests.test_frontloaded_same_global_count_at_all_fixture_depths) ... ok
+test_gate_projection_overhead_is_not_hidden (experiments.hybrid_attention_v1.tests.test_study.ControlTests.test_gate_projection_overhead_is_not_hidden) ... ok
+test_shape_lock_is_not_family_wide (experiments.hybrid_attention_v1.tests.test_study.ControlTests.test_shape_lock_is_not_family_wide) ... ok
+test_topologies_and_stable_original_arms (experiments.hybrid_attention_v1.tests.test_study.ControlTests.test_topologies_and_stable_original_arms) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 3.325s
+
+OK

@@ -1,0 +1,93 @@
+{
+  "changed_files": {
+    "COMPATIBILITY_CONTRACT.md": {
+      "bytes": 15578,
+      "git_blob_sha": "e9d5724a2564f06d77e18a209d280300681b5ac3",
+      "sha256": "26b918328e29f99f2eeb643ae14f05bfcdfe8901bf99ffd7b8962b907c7f21a4"
+    },
+    "README.md": {
+      "bytes": 7920,
+      "git_blob_sha": "a9b223f15637ee634292a9e0060a3b8dcdbd4124",
+      "sha256": "211488686eb3b21f622bd1251ea08a2b19e68c9eda51a867ebb5c15c82118f95"
+    },
+    "attention.py": {
+      "bytes": 7711,
+      "git_blob_sha": "99939ea9fd8215e39bfbcd1acfea6212b01fd489",
+      "sha256": "66526a68fc864284840a19bc582341fd801901b37656177b5ecbba43e6752a06"
+    },
+    "config.py": {
+      "bytes": 3338,
+      "git_blob_sha": "a8965030b8be0b5288c8ec40411f38c5fde8a28a",
+      "sha256": "a90d68ff25c98b5c319bc8322fc76d2547cceacf81fa63c2eefbfeb6a3d7756a"
+    },
+    "protocol.json": {
+      "bytes": 8183,
+      "git_blob_sha": "cf9f5c12699a2ccadedc16b50ad1f1f507341d56",
+      "sha256": "e84e06b59d5c3e0983f8ef1d8141f842f2fe2a3adc1fced846614dc5125a706a"
+    },
+    "run.py": {
+      "bytes": 12256,
+      "git_blob_sha": "e506c558785fd8cf446fbf4a2a607667f4563cef",
+      "sha256": "73ee1954e1f05616b23ac8af8081fb7dbc42476939d68adb0da6f1d23dd90ce6"
+    },
+    "study.py": {
+      "bytes": 10905,
+      "git_blob_sha": "59af97ec22a9d0e40c2cc6a561c2636af960719e",
+      "sha256": "38962ee1ce2fadf2021bb6e74b086e2a421d07737bf1170b11f31097f70939a6"
+    },
+    "tests/test_study.py": {
+      "bytes": 13867,
+      "git_blob_sha": "59ec754fbbb1f44a8f6c8c2e7bd06be7a0ee99ab",
+      "sha256": "2f7990b089c6ee2e97f46b6b9dd8fe72df7265235200529800fc9fda7f34b375"
+    }
+  },
+  "command": "python -m unittest experiments.hybrid_attention_v1.tests.test_study -v",
+  "cuda_measurements_performed": false,
+  "environment": {
+    "cuda_available": false,
+    "device": "cpu",
+    "packages": {
+      "safetensors": "0.7.0",
+      "tokenizers": null,
+      "torch": "2.10.0+cpu",
+      "transformers": null
+    },
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "torch_threads": 1
+  },
+  "errors": [],
+  "failures": [],
+  "full_repository_suite_executed_locally": false,
+  "inherited_commit": "6770e67b471f4821004175d5d39a228f079b28f1",
+  "licenses_sealed_evaluation": false,
+  "licenses_training": false,
+  "limitations": [
+    "Local materialization contained only changed sources and the pinned imported dependencies; package initializers were inert local import stubs.",
+    "The inherited test_core.py and verify.py were not executed locally. No full-tree code_identity or full-suite pass is asserted.",
+    "Native-HF full-suite CI is independent; this receipt does not report its conclusion.",
+    "Random tiny fixtures test mechanics, not real R2 compatibility or model quality.",
+    "Test-suite elapsed time is not a model-performance measurement."
+  ],
+  "native_hf_integration_executed_locally": false,
+  "passed": true,
+  "quality_improvement_established": false,
+  "real_rineya_checkpoint_loaded": false,
+  "receipt_sha256": "35f9693db5e8cf38730336c5b4950a78e76aeb99f4b003bce8810a39cee084ab",
+  "recorded_utc": "2026-09-08T21:18:24.442385+00:00",
+  "remote_changed_blob_hashes_verified": true,
+  "schema_version": 1,
+  "skipped": [],
+  "stage": "bounded_study_local_subset_infrastructure_tests",
+  "test_log_sha256": "2386d87e3b7bd9c6b752d745195dab3878f64dbdc1f75acff0ebd62f500552dd",
+  "tested_commit": "6cc101ac90aec570ecc9e4fd8a004fe8f3c46e26",
+  "tests_passed": 25,
+  "tests_run": 25,
+  "timing_causal": false,
+  "unchanged_imported_dependency_blobs": {
+    "diagnostics.py": "540eb7b2874fd1daa4e778dee8ef480206326553",
+    "provenance.py": "2dbe56122a5d38b7d1cc4c03b2a9ff9d8656ad6c",
+    "runtime.py": "ffcf90a05cb55e8a34fed3717e169812b3b9f848",
+    "tests/fixture.py": "69ac7263d82475aa45ccc220a79792e206b2d3d9"
+  }
+}
