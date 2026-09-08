@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "experiment": "HLGA-1",
+  "branch": "research/hybrid-local-global-attention-v1",
+  "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+  "status": "cpu_fixture_qualified_real_model_unrun",
+  "target_checkpoint": "artifacts/rineya-core-en32k-28L",
+  "target_identity": "R2, Qwen3-derived, 28 layers, hidden 1024, 16 Q / 8 KV, head_dim 128, vocabulary 32768; exact weight hash required locally",
+  "historical_dependency": "experiments/attention_shape/README.md and src/variants.py; existing SWA negatives remain valid for their tested setup",
+  "primary_question": "Can periodic local/global attention preserve R2 capability while reducing resident KV and avoiding prior sink-eviction and dense-mask failures?",
+  "secondary_question": "After separate approved training, does identity-centered head gating recover quality beyond matched all-global gate training?",
+  "invariants": [
+    "Original checkpoint files, QK-Norm, MLP, RoPE, head dimensions, vocabulary and output head remain unchanged",
+    "One sequence, unpadded, no packing or beam search; original context limit only",
+    "Global layers at 3,7,11,15,19,23,27 for 28L; final layer explicitly global at other depths",
+    "Window is total local token budget including current token and any persistent sinks",
+    "Sink512 means four initial tokens plus 508 recent tokens, not 512 plus four",
+    "Absolute position identities survive KV eviction; no renumbering",
+    "2*sigmoid(W*x), W=0, is identity with a live first-order gradient",
+    "No zero-alpha AND zero-W tanh parameterization: that would kill both gradients",
+    "Native implementation is parity oracle; every research arm uses the same explicit backend",
+    "No runtime/context/speed claim from arithmetic or logical tensor shapes alone"
+  ],
+  "arms": {
+    "A0_global": "matched-backend full attention, frozen",
+    "A1_local1024": "period-4 local/global, window1024, no sinks or gate",
+    "A2_local512": "period-4 local/global, window512, no sinks or gate",
+    "A3_sink512": "A2 with 4 sink slots inside the same 512-slot budget",
+    "A4_global_gate": "A0 plus identity-initialized head gate; all-global training control later",
+    "A5_local512_gate": "A2 plus identity-initialized head gate",
+    "A6_sink512_gate": "A3 plus identity-initialized head gate",
+    "A7_sink1024": "A1 with 4 sink slots inside the same 1024-slot budget"
+  },
+  "stages": {
+    "P0": "CPU fixture tests: dense oracle, causal masks, real storage, gates, gradients, reset and guards",
+    "P1": "Local checkpoint inventory; no remote downloads, no arbitrary model substitution",
+    "P2": "Native-vs-global logits/argmax parity, full-vs-stream equivalence, compact resident cache, gate identity",
+    "P3": "Only after matching P2 receipt: new open synthetic raw-completion diagnostics; no model promotion",
+    "P4": "CLOSED: reviewed training data/license/provenance, matched gate controls, seeds and budgets must be registered first",
+    "P5": "CLOSED: broader preservation/held-out confirmation and controlled hardware benchmark require separate registration"
+  },
+  "qualification": {
+    "dtype": "float32",
+    "atol": 2e-05,
+    "rtol": 2e-05,
+    "argmax_identical_required": true,
+    "random_token_seed": 17,
+    "mechanical_sequence_length": 17,
+    "mechanical_window": 8,
+    "mechanical_sinks": 2,
+    "chunk_boundaries": [
+      0,
+      7,
+      8,
+      17
+    ],
+    "note": "Tiny windows test mechanics; they do not qualify quality at 512/1024 or long-context throughput"
+  },
+  "diagnostics": {
+    "split": "new_open_synthetic_dev",
+    "prompt_protocol": "raw completion, not chat template; precise token lengths, no truncation",
+    "lengths": [
+      511,
+      512,
+      513,
+      1023,
+      1024,
+      1025
+    ],
+    "depths": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "families": [
+      "retrieval",
+      "two_hop",
+      "absent",
+      "conflict"
+    ],
+    "seed": 17,
+    "cases": 72,
+    "decoding": "greedy, max_new_tokens24, no extra repetition/abstention bias; stop at checkpoint EOS",
+    "metrics": [
+      "strict_exact",
+      "trimmed_exact",
+      "answerable_accuracy",
+      "false_abstention_rate",
+      "unanswerable_abstention_rate",
+      "empty_rate",
+      "budget_exhaustion_rate",
+      "max_token_repeat"
+    ],
+    "comparison": "paired by case ID and prompt hash; exact McNemar is descriptive and unadjusted, not confirmatory",
+    "gate_identity": "A0=A4, A2=A5 and A3=A6 token-for-token before training; any difference invalidates the diagnostic",
+    "timing": "descriptive only; fixed arm order, no isolation proof, no causal speed claim"
+  },
+  "future_training_requirements": [
+    "Human-reviewed dataset source/license/derivation declaration and exact content hashes",
+    "Train/dev separation and duplicate/near-duplicate audit; no legacy sealed assets",
+    "Same data membership/order, supervised tokens, steps, optimizer and decoding in matched arms",
+    "Frozen backbone and gate-only parameter allowlist; all-global trained gate control",
+    "At least three registered seeds; checkpoint selection on DEV only",
+    "Independent confirmation plan with prespecified effect size, noninferiority margins and multiplicity handling",
+    "Training remains unavailable in this CLI until those requirements are implemented and reviewed"
+  ],
+  "deferred": [
+    "KV-head merging",
+    "dual/partial RoPE",
+    "GeGLU replacement",
+    "head_dim256",
+    "recurrence",
+    "importance-selected global placements",
+    "native fused sparse kernels",
+    "1M context",
+    "GGUF/llama.cpp/MLX export"
+  ],
+  "licenses_training": false,
+  "licenses_sealed_evaluation": false,
+  "established_quality_improvement": false
+}

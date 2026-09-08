@@ -1,0 +1,171 @@
+"""Explicit Qwen3 decoder traversal; no global patches or source-weight surgery.
+
+The native full-attention forward remains the independent implementation oracle.
+A successful structural check alone does NOT qualify a checkpoint/runtime pair.
+"""
+import torch
+from torch import nn
+from .attention import CompactKV, blocked_attention
+from .config import Spec
+
+
+class HeadGate(nn.Module):
+    def __init__(self, hidden_size, heads, *, device=None, dtype=None):
+        super().__init__()
+        self.proj = nn.Linear(hidden_size, heads, bias=False, device=device, dtype=dtype)
+        nn.init.zeros_(self.proj.weight)
+
+    def forward(self, normalized_hidden, attention_output):
+        factor = 2 * torch.sigmoid(self.proj(normalized_hidden).float())
+        return attention_output * factor.to(attention_output.dtype).transpose(1, 2).unsqueeze(-1)
+
+
+def validate_model(model, spec):
+    c = model.config
+    if getattr(c, "model_type", None) != "qwen3":
+        raise ValueError("Only a Qwen3 backbone is supported in v1")
+    if getattr(c, "quantization_config", None) or getattr(model, "is_quantized", False):
+        raise ValueError("Quantized/PEFT/custom runtimes require separate qualification")
+    if (getattr(c, "rope_scaling", None) is not None
+            or getattr(c, "use_sliding_window", False)
+            or getattr(c, "attention_dropout", 0) != 0):
+        raise ValueError("v1 requires original unscaled RoPE, full attention and zero dropout")
+    if any(t != "full_attention" for t in (getattr(c, "layer_types", None) or [])):
+        raise ValueError("Source checkpoint already has non-global layer types")
+    if any(m._forward_hooks or m._forward_pre_hooks for m in model.modules()):
+        raise ValueError("Existing forward hooks could be bypassed; refusing this backbone")
+    body = model.model
+    if len(body.layers) != spec.layers or c.num_hidden_layers != spec.layers:
+        raise ValueError("Layer count does not match the checkpoint")
+    h, kv, d, width = c.num_attention_heads, c.num_key_value_heads, c.head_dim, c.hidden_size
+    if h % kv or d % 2:
+        raise ValueError("Invalid GQA or rotary dimensions")
+    for layer in body.layers:
+        a = layer.self_attn
+        for name, out in (("q_proj", h*d), ("k_proj", kv*d), ("v_proj", kv*d)):
+            m = getattr(a, name)
+            if not isinstance(m, nn.Linear) or tuple(m.weight.shape) != (out, width):
+                raise ValueError(f"Unsupported {name} shape/module")
+        if tuple(a.o_proj.weight.shape) != (width, h*d):
+            raise ValueError("Unsupported output projection")
+        for name in ("q_norm", "k_norm"):
+            if tuple(getattr(a, name).weight.shape) != (d,):
+                raise ValueError("QK-Norm must remain intact")
+        for name in ("input_layernorm", "post_attention_layernorm", "mlp"):
+            if not hasattr(layer, name):
+                raise ValueError(f"Missing Qwen3 component: {name}")
+    if not hasattr(body, "rotary_emb") or not hasattr(body, "norm"):
+        raise ValueError("Missing original rotary embedding or output norm")
+
+
+class HybridRuntime(nn.Module):
+    def __init__(self, model, spec: Spec):
+        super().__init__()
+        validate_model(model, spec)
+        self.backbone, self.spec = model, spec
+        c = model.config
+        w = model.model.embed_tokens.weight
+        self.gates = nn.ModuleList([
+            HeadGate(c.hidden_size, c.num_attention_heads, device=w.device, dtype=w.dtype)
+            for _ in range(spec.layers)
+        ] if spec.gate else [])
+        self.reset()
+
+    def reset(self):
+        self.cache = [CompactKV(self.spec.local_window(i),
+                               self.spec.sinks if self.spec.local_window(i) is not None else 0)
+                      for i in range(self.spec.layers)]
+        self.position = 0
+        self.stats = {}
+
+    def forward(self, input_ids, *, use_cache=False, last_only=False):
+        if input_ids.ndim != 2 or input_ids.shape[0] != 1 or input_ids.shape[1] < 1:
+            raise ValueError("v1 accepts one nonempty, unpadded sequence; batch/packing are unsupported")
+        if input_ids.dtype != torch.long:
+            raise ValueError("input_ids must be int64")
+        if use_cache and (torch.is_grad_enabled() or self.backbone.training):
+            raise RuntimeError("Streaming requires eval mode and disabled autograd")
+        c = self.backbone.config
+        n = input_ids.shape[1]
+        start = self.position if use_cache else 0
+        if start + n > c.max_position_embeddings:
+            raise ValueError("No context extension is authorized by this runtime")
+        pos = torch.arange(start, start+n, device=input_ids.device)
+        body = self.backbone.model
+        x = body.embed_tokens(input_ids)
+        cos, sin = body.rotary_emb(x, pos.unsqueeze(0))
+        cos, sin = cos.unsqueeze(1), sin.unsqueeze(1)
+        if cos.shape[-1] != c.head_dim or sin.shape != cos.shape:
+            raise ValueError("Partial/dual RoPE is deferred; source must use full rotary dimensions")
+        h, kv, d = c.num_attention_heads, c.num_key_value_heads, c.head_dim
+
+        def rotate(t):
+            a, b = t.chunk(2, dim=-1)
+            return t*cos + torch.cat((-b, a), dim=-1)*sin
+
+        # On any failed streaming forward, clear partially updated layer caches.
+        try:
+            for i, layer in enumerate(body.layers):
+                z = layer.input_layernorm(x)
+                a = layer.self_attn
+                q = a.q_norm(a.q_proj(z).view(1, n, h, d)).transpose(1, 2)
+                k = a.k_norm(a.k_proj(z).view(1, n, kv, d)).transpose(1, 2)
+                v = a.v_proj(z).view(1, n, kv, d).transpose(1, 2)
+                q, k = rotate(q), rotate(k)
+                keys, values, kp = self.cache[i].merge(k, v, pos) if use_cache else (k, v, pos)
+                window = self.spec.local_window(i)
+                out = blocked_attention(
+                    q, keys, values, pos, kp, window=window,
+                    sinks=self.spec.sinks if window is not None else 0,
+                    block_size=self.spec.block_size, backend=self.spec.backend,
+                    scale=getattr(a, "scaling", d**-0.5), stats=self.stats,
+                )
+                if self.spec.gate:
+                    out = self.gates[i](z, out)
+                x = x + a.o_proj(out.transpose(1, 2).reshape(1, n, h*d))
+                x = x + layer.mlp(layer.post_attention_layernorm(x))
+                if use_cache:
+                    self.cache[i].retain(keys, values, kp)
+            x = body.norm(x)
+            logits = self.backbone.lm_head(x[:, -1:] if last_only else x)
+            if use_cache:
+                self.position += n
+            return logits
+        except Exception:
+            if use_cache:
+                self.reset()
+            raise
+
+    @torch.inference_mode()
+    def generate(self, input_ids, *, max_new_tokens=24, eos_token_ids=(), chunk_size=128):
+        if (input_ids.ndim != 2 or input_ids.shape[0] != 1 or input_ids.shape[1] < 1
+                or input_ids.dtype != torch.long):
+            raise ValueError("Generation requires one nonempty unpadded int64 sequence")
+        if max_new_tokens < 1 or chunk_size < 1:
+            raise ValueError("Generation and chunk budgets must be positive")
+        if self.backbone.training:
+            raise RuntimeError("Call backbone.eval() first")
+        if input_ids.shape[-1] + max_new_tokens > self.backbone.config.max_position_embeddings:
+            raise ValueError("Prompt plus generation budget exceeds original context limit")
+        self.reset()
+        generated, stopped = [], False
+        try:
+            for start in range(0, input_ids.shape[-1], chunk_size):
+                logits = self(input_ids[:, start:start+chunk_size], use_cache=True, last_only=True)
+            for step in range(max_new_tokens):
+                token = int(logits[0, -1].argmax())
+                generated.append(token)
+                if token in eos_token_ids:
+                    stopped = True
+                    break
+                if step + 1 < max_new_tokens:
+                    next_id = torch.tensor([[token]], device=input_ids.device, dtype=torch.long)
+                    logits = self(next_id, use_cache=True, last_only=True)
+            return {
+                "token_ids": generated, "stopped_eos": stopped,
+                "budget_exhausted": not stopped and len(generated) == max_new_tokens,
+                "cache": [x.metrics() for x in self.cache], "attention_stats": dict(self.stats),
+            }
+        finally:
+            # Return only metrics, never live tensors retaining full allocations.
+            self.reset()
