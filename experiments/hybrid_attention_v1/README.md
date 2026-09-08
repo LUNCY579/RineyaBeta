@@ -1,201 +1,135 @@
-# HLGA-1: Rineya hybrid local/global attention
+# HLGA-1: bounded Rineya local/global attention compatibility
 
 **Branch:** `research/hybrid-local-global-attention-v1`  
-**Base:** `3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
-**Status:** CPU fixture-qualified; real Rineya checkpoint qualification and model
-quality are **unmeasured**. See [the evidence review](reports/IMPLEMENTATION_REVIEW.md)
-and [machine-readable local receipt](reports/cpu_qualification.json).
+**Canonical audit:** `3532c7bc8dbdd48ef8801ba6080cb80b0e90379a`  
+**Revision 2:** extends the existing implementation at `6770e67b471f4821004175d5d39a228f079b28f1`.
 
-## Research question and prior evidence
+**Infrastructure is not a model result.** Real R2 compatibility, quality, training
+benefit, long-context reach and speed are unmeasured in this increment. Historical
+[CPU evidence](reports/IMPLEMENTATION_REVIEW.md) and [native CI evidence](reports/CI_REVIEW.md)
+remain valid for their recorded code, not authorization for this revision.
 
-Can a Qwen3-derived Rineya backbone tolerate periodic local attention while
-reducing **resident** KV storage, and do persistent initial tokens prevent the
-sink-eviction failure observed by this repository's earlier experiment?
-A later, separately controlled training question asks whether small head gates
-repair damage beyond what the same training gives an all-global gate control.
+Read the [current bounded compatibility contract](COMPATIBILITY_CONTRACT.md) and
+[machine-readable protocol](protocol.json). The new `study.py` planner reports
+analytical work and operational bounds; it does not train or benchmark a model.
 
-Read [the old attention-shape experiment](../attention_shape/README.md) first.
-Its catalogue already included every-fourth-layer global attention. Its measured
-negative results include a window-boundary quality cliff, dense-mask prefill
-cost, and apparent logical cache savings that did not immediately free the backing
-allocation. Those results are not retracted here. An external model trained from
-scratch with hybrid attention is motivation, not evidence that a retrofit works.
+## Question and target
 
-The new contribution is an **executable controlled re-test**: matched backends,
-exact window accounting, sink-preserving controls, compact storage, absolute
-positions, bounded-query-block masks, and independently tested head gating.
+Can a frozen Qwen3-derived R2 checkpoint tolerate periodic local attention with
+compact resident KV storage? **A3 versus A0 is the primary frozen comparison.**
+Spark's 3-local/1-global design motivates the topology; its benchmark table does
+not isolate architecture from pretraining or post-training. This is not a Spark
+training reproduction or a claim that its performance transfers to Rineya.
 
-## Initial target and invariant architecture
+The primary location is `artifacts/rineya-core-en32k-28L`: 28 layers, width 1024,
+16 Q / 8 KV heads, head dimension 128, intermediate width 3072, vocabulary 32768.
+The committed config has maximum positions 40960 and RoPE theta 1e6. Actual local
+weight/tokenizer hashes are required. Shape compatibility does not establish
+weight lineage or family-wide empirical support; the remote config alone is not
+a real checkpoint qualification.
 
-The target is R2 at `artifacts/rineya-core-en32k-28L`: 28 layers, width 1024,
-16 query heads / 8 KV heads, head dimension 128, intermediate width 3072,
-vocabulary 32768. Read the checkpoint's own config and hash its real weights.
-The remote folder contains configuration/tokenizer assets but no tracked model
-weights; a checkout alone therefore cannot run real-model qualification.
+Keep QKV/O, QK-Norm, RMSNorm, SwiGLU, RoPE, embeddings, output head and tokenizer.
+Batch-one unpadded native Qwen3, FP32 and local safetensors are the initial scope.
+No quantization, packing, hooks, recurrence, KV-head surgery, context extension,
+new kernel, remote-code loading or model export is introduced.
 
-The runtime retains the original QKV/output projections, QK-Norm, RMSNorm,
-SwiGLU, RoPE, embedding and output head. It does not copy Spark dimensions,
-change the tokenizer, merge heads, extend the context limit, or patch global
-Transformers functions. It traverses existing Qwen3 modules explicitly; the
-unchanged native forward remains an independent parity oracle.
+## Registered arms
 
-A gate is applied per query head **after attention and before output projection**:
-
-```
-out[h] *= 2 * sigmoid(W(normalized_hidden)[h]); W starts at zero
-```
-
-It is exactly identity at initialization and has a nonzero first-order gradient.
-The 28-layer R2 gate adds 458,752 parameters. The alternative parameterization
-`1 + alpha*tanh(W*x)` must NOT initialize both alpha and W to zero: that would
-kill both gradients. No trained gate is included or claimed in this branch.
-
-## Registered ablations
-
-| Arm | Attention | Total local budget | Persistent sinks | Head gate |
+| Arm | Attention | Total local budget | Prefix sinks | Identity gate |
 |---|---|---:|---:|---|
-| A0_global | All global, matched backend | — | — | No |
-| A1_local1024 | 3 local / 1 global | 1024 | 0 | No |
-| A2_local512 | 3 local / 1 global | 512 | 0 | No |
-| A3_sink512 | Same periodic placement | 512 | 4 | No |
-| A4_global_gate | All global | — | — | Identity initially |
-| A5_local512_gate | Same as A2 | 512 | 0 | Identity initially |
-| A6_sink512_gate | Same as A3 | 512 | 4 | Identity initially |
-| A7_sink1024 | Same periodic placement | 1024 | 4 | No |
+| A0_global | All-global, matched research backend | — | 0 | No |
+| A1_local1024 | Periodic 3-local/1-global | 1024 | 0 | No |
+| A2_local512 | Periodic | 512 | 0 | No |
+| A3_sink512 | Periodic; primary treatment | 512 | 4 | No |
+| A4_global_gate | All-global training control, untrained now | — | 0 | Yes |
+| A5_local512_gate | Periodic | 512 | 0 | Yes |
+| A6_sink512_gate | Periodic | 512 | 4 | Yes |
+| A7_sink1024 | Periodic | 1024 | 4 | No |
+| A8_all_local512 | All layers local; resource-unmatched mechanism control | 512 | 0 | No |
+| A9_frontloaded512 | Same global count, changed placement | 512 | 0 | No |
 
-At 28 layers the global indices are `3,7,11,15,19,23,27` (zero-based). Other
-depths explicitly keep the final layer global, so non-multiples of four are not
-exact Spark replications. They require their own real-checkpoint qualification.
+R2 periodic globals: `3,7,11,15,19,23,27`. A9: `0,1,2,3,4,5,27`.
+Non-multiple-of-four fixtures preserve final-global placement except A8, which
+has no globals. W512 includes the current token and sinks: four initial plus
+508 recent positions, not 512 plus four. All positions remain absolute.
 
-**A 512 budget includes the current token and sinks.** A3/A6 retain four initial
-tokens plus 508 recent tokens, with no duplicate positions. Keeping four sinks
-in addition to 512 recent tokens would silently change the matched-budget test.
-A0=A4, A2=A5 and A3=A6 must generate identical token IDs before gate training.
+A gate is `2*sigmoid(W*x)` after attention and before the output projection,
+with W=0. It is exactly identity with a live gradient and adds 458,752 parameters
+on R2. A0=A4, A2=A5 and A3=A6 token-for-token before training or the diagnostic
+fails. Gate training remains unavailable.
 
-## Memory and attention implementation
+## Implemented protections
 
-`CompactKV` retains fresh compact allocations using index selection, not trailing
-views into a full prefill buffer. Eviction occurs only after every query in the
-current chunk has attended. Original token positions survive eviction; RoPE
-positions never restart at zero or use the number of retained keys.
+`CompactKV` retains independent compact storage, not a slice backed by the whole
+prefill. `blocked_attention` gathers each query block's relevant key union and
+uses one joint softmax for sink/recent keys. Global attention remains quadratic;
+this is a correctness-oriented PyTorch path, not an optimized sparse kernel.
+Read the [historical attention-shape negatives](../attention_shape/README.md):
+logical cache savings, resident memory, peak memory and prefill speed are not
+interchangeable. Those results are not retracted by this branch.
 
-`blocked_attention` computes exact attention on each query block's relevant key
-union. Pure-window and sink variants use one joint softmax, not independently
-normalized attention streams. Explicit GQA expansion is identical across arms.
-A small dense oracle is used only in tests.
+Revision 2 adds all-local and equal-count placement controls, direct strict/trimmed
+contrasts, and accounting for actual query-head dimensions, masked score
+rectangles, QKV/O/MLP/LM-head/gate matrix work and resident KV. Every actual DEV
+case is checked against its generated-length accounting. Shape counters are not
+a device profiler. Same output caps do not make EOS-stopped runs compute-matched.
 
-This is a correctness-oriented PyTorch implementation, not FlashAttention or a
-native sparse kernel. Global layers still require quadratic attention work.
-Full non-streamed local execution also scans position metadata for each block;
-do not infer a strict end-to-end O(NW) runtime guarantee from its attention shape.
-Inference chunking bounds local transient history; it does not eliminate the
-persistent global cache or full model activations. Training autograd retains
-additional state. Resident KV bytes, allocated/reserved GPU peaks, masks, and
-end-to-end memory are different measurements.
+The diagnostic is bounded to 10 arms, 72 open synthetic prompts, 24 output tokens,
+block size at most 128 and a CUDA allocator cap at most 6144 MiB. The six prompt
+lengths are 511/512/513 and 1023/1024/1025, across three depths and four task
+families. It is a readout/window-boundary diagnostic, not broad reasoning or an
+independent preservation benchmark. Low all-global accuracy or UNKNOWN loops
+make the endpoint inconclusive, not a hybrid success. All DEV timing is non-causal.
 
-## Run from the repository root
-
-Use the intended environment explicitly. The historical Windows GPU environment
-is `.venv/Scripts/python.exe`; the examples below use `python` for portability.
-Never interpret a CPU fallback as a GPU measurement. The committed local receipt
-records Python 3.13.5 and torch 2.10.0+cpu; Transformers is absent there. Native
-integration is a separately required test on a host with Transformers installed.
-This is not a claim of compatibility with every repository environment.
+## Commands
 
 ```bash
-# Read-only: show the frozen experiment plan.
 python -m experiments.hybrid_attention_v1.run plan
-
-# No weights or datasets: CPU tests plus a synthetic R2-shaped storage probe.
-# Use a NEW run-id each time. --require-hf forbids the optional integration skip.
-python -m experiments.hybrid_attention_v1.verify --run-id cpu-check-001
-python -m experiments.hybrid_attention_v1.verify --run-id native-check-001 --require-hf
-
-# Requires the actual local R2 safetensors and tokenizer assets.
-python -m experiments.hybrid_attention_v1.run audit --run-id r2-audit-001
-python -m experiments.hybrid_attention_v1.run qualify --run-id r2-qualify-001
-
-# Only a passing REAL checkpoint receipt with matching code/assets/environment
-# and backend/block size permits these newly generated open diagnostics.
-python -m experiments.hybrid_attention_v1.run diagnose --run-id r2-dev-001 \
-  --receipt experiments/hybrid_attention_v1/runs/r2-qualify-001/receipt.json
+python -m experiments.hybrid_attention_v1.study
+python -m unittest experiments.hybrid_attention_v1.tests.test_study -v
+python -m experiments.hybrid_attention_v1.verify --run-id hlga-v2-native-001 --require-hf
+python -m experiments.hybrid_attention_v1.run audit --run-id hlga-v2-r2-audit-001
+python -m experiments.hybrid_attention_v1.run qualify --run-id hlga-v2-r2-qualify-001
+python -m experiments.hybrid_attention_v1.run diagnose --run-id hlga-v2-r2-dev-001 \
+  --receipt experiments/hybrid_attention_v1/runs/hlga-v2-r2-qualify-001/receipt.json
 ```
 
-A custom **local** checkpoint directory can be supplied with `--model PATH`.
-`trust_remote_code=False`, local-only loading and safetensors are required; missing
-weights, unresolved LFS pointers and unsupported modules fail closed. Source
-assets are hashed before and after execution. No Hub download is initiated.
-Do not substitute random weights just to obtain a passing real-model receipt.
+Use a new run ID. `--model PATH` must name actual local primary-shape weights;
+missing weights or unresolved LFS pointers fail. P2 requires seven checks on the
+current code/assets/environment/backend/block size, including both new topology
+controls and an unchanged-checkpoint receipt. Neither old receipts nor random
+fixtures authorize real-model diagnosis. No remote model download is initiated.
 
-For CUDA, use `--device cuda --backend sdpa --cap-mib 6144` consistently in both
-qualification and diagnosis; set `CUBLAS_WORKSPACE_CONFIG=:4096:8` before process
-start when required by deterministic CUDA operations. This path has not run in
-the local receipt. The cap must be below currently free device memory; FP32
-qualification is deliberate. A BF16 or other backend change needs a separate
-registered tolerance/qualification, not a relabeled FP32 result.
+For CUDA use consistent `--device cuda --backend sdpa --block-size 128 --cap-mib
+6144` options in qualification and diagnosis, with an appropriate lower cap when
+necessary and deterministic CUDA prerequisites configured before launch. CPU
+fallback is forbidden. FP32 qualification does not qualify BF16 automatically.
+The default CPU path may be expensive for real R2; it is not a resource guarantee.
 
-`--max-cases` allows a bounded initial diagnostic (1–72); it does not confer
-statistical validity. Output goes only to new `runs/<run-id>` directories.
-Existing receipts cannot be overwritten. Generated runs are ignored by Git;
-copy deliberately reviewed small evidence to `reports/` before committing it.
+`train` and `sealed` explicitly refuse. Future gate training requires reviewed
+data source/license/derivation and hashes, duplicate/split audits, an optimizer
+registration, identical gate allowlists, three seeds and separate token-matched
+and compute-matched budgets. The contract defines those planning bounds without
+opening training. Historical and external sealed suites remain untouched.
 
-## Endpoint, isolation and evidence levels
-
-The open DEV generator creates 72 raw-completion prompts: lengths
-511/512/513 and 1023/1024/1025, three evidence depths, and retrieval, two-hop,
-absent and conflicting-evidence tasks. This is a boundary/readout diagnostic,
-not the historical chat/RAG score, a realistic long-document benchmark, or
-independent confirmation. The simple two-hop fixture does not establish broad
-multi-step reasoning. Prompts are token-length exact and never truncated.
-
-Report strict and whitespace-trimmed exact match separately; do not strip
-`code`/`vault` prefixes after seeing results. Whole `UNKNOWN` is an abstention,
-not repeated `UNKNOWN` until the generation budget expires. Reports separate
-answerable accuracy, false abstention, proper abstention, empty outputs,
-repetition, and budget exhaustion by family/length/depth. Paired comparisons
-bind IDs and prompt hashes. Descriptive McNemar values are unadjusted and these
-synthetic examples are correlated: they are not a significance claim.
-
-All timing in the diagnostic is marked **non-causal**. Fixed arm ordering,
-shared devices, Python overhead and absent hardware isolation prevent a speed
-claim. No clock/thermal/contention qualification has been run.
-
-The implemented stages are fixture tests, asset audit, real-checkpoint mechanical
-qualification, and receipt-gated open diagnostics. `train` and `sealed` are
-explicitly unavailable. There is **no production training runner or model export**
-in v1. A future training increment must first register reviewed data provenance,
-license/derivation and hashes, duplicate/split audit, fixed optimization budgets,
-all-global trained-gate controls, at least three seeds, and independent evaluation
-criteria. Passing unit tests cannot license that increment or change another
-branch's approvals. No existing corpora, sealed answer keys or frozen suites
-are opened by the new CLI.
-
-Supported first implementation: native unquantized Qwen3, FP32 qualification,
-batch one, unpadded sequences, no packing/beams, original unscaled full RoPE,
-no preexisting forward hooks. GGUF/llama.cpp/MLX, PEFT/quantized models, dual RoPE,
-KV-head surgery, fused sparse kernels, and importance-selected global placement
-are deferred. Shape-generic support is not family-wide checkpoint validation.
-
-## Source map
+## Source and evidence map
 
 | File | Responsibility |
 |---|---|
-| `config.py` | Immutable policies, eight arms, exact cache-budget arithmetic |
-| `attention.py` | Causal masks, dense oracle, bounded-block attention, compact storage |
-| `runtime.py` | Reversible explicit Qwen3 traversal and centered head gates |
-| `provenance.py` | Checkpoint/code/environment hashes, immutable output and receipt guards |
-| `diagnostics.py` | New open boundary probes and separate readout/abstention metrics |
-| `run.py` | Audit, native parity qualification and receipt-gated diagnostics |
-| `verify.py`, `tests/` | Executed CPU qualification; optional native HF random-model test |
-| `protocol.json` | Hypotheses, arms, gates, closed stages and deferred work |
+| `config.py` | Ten stable arms, topology and exact cache budget |
+| `attention.py`, `runtime.py` | Explicit attention, compact cache, traversal and gates |
+| `study.py` | Target lock, work planner, direct contrasts, receipt and execution guards, future budget arithmetic |
+| `provenance.py`, `run.py` | Local hashes, immutable receipts and gated CLI |
+| `diagnostics.py` | Existing deterministic open DEV and separate readout metrics |
+| `tests/`, `verify.py` | Infrastructure tests; full native-HF integration in CI |
+| `protocol.json`, `COMPATIBILITY_CONTRACT.md` | Current registration, closed gates and interpretation boundaries |
 
-## External references and attribution
+Preserve reviewed receipts in separate evidence-only commits; do not turn passing
+CI into a model-performance headline. No shared trainer, model asset, corpus,
+canonical audit, main branch or other research branch is modified by this study.
 
-Architecture inspiration: [Spark-X2.5-4B model card](https://huggingface.co/XHToken/Spark-X2.5-4B),
-[configuration](https://huggingface.co/XHToken/Spark-X2.5-4B/blob/ea14618d20e76b5b093d3ee20a5b9d733bb12410/config.json),
-and [released implementation](https://huggingface.co/XHToken/Spark-X2.5-4B/blob/ea14618d20e76b5b093d3ee20a5b9d733bb12410/modeling_spark.py).
-The source model repository declares Apache-2.0. No Spark weights or source files
-are vendored, and no blanket dataset-license inference is made from that license.
-This branch is an independently written Rineya-specific experiment, not Spark
-training reproduction. The source benchmark table does not isolate architecture
-from pretraining, data or post-training.
+External architecture source: https://huggingface.co/XHToken/Spark-X2.5-4B .
+The inherited source pointers for configuration and implementation remain pinned
+to `ea14618d20e76b5b093d3ee20a5b9d733bb12410` in that model repository. No source
+files or weights are vendored and no dataset-license claim follows from the
+model repository's Apache-2.0 declaration.

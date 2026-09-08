@@ -91,6 +91,10 @@ def blocked_attention(q, k, v, qp, kp, *, window=None, sinks=0,
             v.index_select(2, idx), mask, backend, scale,
         ))
         if stats is not None:
+            # Shape-derived counters add no tensor reduction/device synchronization.
+            elements = q.shape[0] * q.shape[1] * mask.numel()
+            stats["issued_score_elements"] = stats.get("issued_score_elements", 0) + elements
+            stats["attention_matmul_flops"] = stats.get("attention_matmul_flops", 0) + 4 * q.shape[-1] * elements
             stats["calls"] = stats.get("calls", 0) + 1
             stats["max_mask_elements"] = max(stats.get("max_mask_elements", 0), mask.numel())
             stats["max_key_tokens"] = max(stats.get("max_key_tokens", 0), len(p))

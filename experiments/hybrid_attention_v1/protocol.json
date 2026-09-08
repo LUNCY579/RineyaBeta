@@ -1,43 +1,53 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "experiment": "HLGA-1",
   "branch": "research/hybrid-local-global-attention-v1",
   "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
-  "status": "cpu_fixture_qualified_real_model_unrun",
+  "extends_implementation_commit": "6770e67b471f4821004175d5d39a228f079b28f1",
+  "status": "infrastructure_extended_current_code_qualification_required",
+  "study_contract": "COMPATIBILITY_CONTRACT.md",
+  "analytical_planner": "python -m experiments.hybrid_attention_v1.study",
+  "prior_receipts": "Historical code-specific evidence only; not authorization for this revision",
   "target_checkpoint": "artifacts/rineya-core-en32k-28L",
-  "target_identity": "R2, Qwen3-derived, 28 layers, hidden 1024, 16 Q / 8 KV, head_dim 128, vocabulary 32768; exact weight hash required locally",
+  "target_identity": "R2 shape locked: 28L, hidden1024, 16Q/8KV, head_dim128, MLP3072, vocab32768; exact local weight/tokenizer hashes required; shape is not weight-lineage proof",
   "historical_dependency": "experiments/attention_shape/README.md and src/variants.py; existing SWA negatives remain valid for their tested setup",
-  "primary_question": "Can periodic local/global attention preserve R2 capability while reducing resident KV and avoiding prior sink-eviction and dense-mask failures?",
-  "secondary_question": "After separate approved training, does identity-centered head gating recover quality beyond matched all-global gate training?",
+  "primary_question": "Can frozen R2 accept a periodic local/global retrofit with sink preservation, without mistaking mask correctness or cache arithmetic for model quality?",
+  "primary_contrast": {
+    "reference": "A0_global",
+    "treatment": "A3_sink512"
+  },
+  "secondary_question": "After separate reviewed training, do local/sink gates repair damage beyond identical all-global gate training?",
   "invariants": [
-    "Original checkpoint files, QK-Norm, MLP, RoPE, head dimensions, vocabulary and output head remain unchanged",
-    "One sequence, unpadded, no packing or beam search; original context limit only",
-    "Global layers at 3,7,11,15,19,23,27 for 28L; final layer explicitly global at other depths",
-    "Window is total local token budget including current token and any persistent sinks",
-    "Sink512 means four initial tokens plus 508 recent tokens, not 512 plus four",
-    "Absolute position identities survive KV eviction; no renumbering",
-    "2*sigmoid(W*x), W=0, is identity with a live first-order gradient",
-    "No zero-alpha AND zero-W tanh parameterization: that would kill both gradients",
-    "Native implementation is parity oracle; every research arm uses the same explicit backend",
-    "No runtime/context/speed claim from arithmetic or logical tensor shapes alone"
+    "Keep QKV/O, QK-Norm, RMSNorm, SwiGLU, full unscaled RoPE, tokenizer, embeddings and output head unchanged",
+    "No weight edits, downloaded models, context extension, kernel switching or inference parameter changes",
+    "Batch one; unpadded; no packing, beams, quantization, hooks, PEFT, GGUF or export",
+    "Periodic global indices 3,7,11,15,19,23,27; frontloaded control 0,1,2,3,4,5,27",
+    "512 slots include current token and any 4 prefix sinks; sinks replace recent slots",
+    "Keep absolute positions across eviction; compact storage rather than views",
+    "Gates are 2*sigmoid(W*x), W=0; exactly identity with live gradient; no gate training now",
+    "Native eager full attention is the independent parity oracle; research arms share one backend/block size",
+    "Identical prefill prompts/output caps are not identical actual FLOPs when EOS lengths differ",
+    "No runtime or quality claim from topology, unit tests, logical cache or FLOP arithmetic alone"
   ],
   "arms": {
-    "A0_global": "matched-backend full attention, frozen",
-    "A1_local1024": "period-4 local/global, window1024, no sinks or gate",
-    "A2_local512": "period-4 local/global, window512, no sinks or gate",
-    "A3_sink512": "A2 with 4 sink slots inside the same 512-slot budget",
-    "A4_global_gate": "A0 plus identity-initialized head gate; all-global training control later",
-    "A5_local512_gate": "A2 plus identity-initialized head gate",
-    "A6_sink512_gate": "A3 plus identity-initialized head gate",
-    "A7_sink1024": "A1 with 4 sink slots inside the same 1024-slot budget"
+    "A0_global": "all-global frozen matched research backend; native forward remains independent oracle",
+    "A1_local1024": "periodic 3local/1global, W1024, no sinks/gates; secondary budget control",
+    "A2_local512": "periodic 3local/1global, W512, no sinks/gates; pure-window damage control",
+    "A3_sink512": "A2 with four initial slots inside W512; prespecified primary treatment",
+    "A4_global_gate": "A0 + identity gate; future trained-capacity control",
+    "A5_local512_gate": "A2 + same identity gate",
+    "A6_sink512_gate": "A3 + same identity gate",
+    "A7_sink1024": "A1 with four initial slots inside W1024; secondary sink control",
+    "A8_all_local512": "all layers W512; no globals, sinks or gates; NOT compute-matched to A2",
+    "A9_frontloaded512": "same number of globals and final-global layer as A2, earlier global placements; equal modeled work/cache/parameters"
   },
   "stages": {
-    "P0": "CPU fixture tests: dense oracle, causal masks, real storage, gates, gradients, reset and guards",
-    "P1": "Local checkpoint inventory; no remote downloads, no arbitrary model substitution",
-    "P2": "Native-vs-global logits/argmax parity, full-vs-stream equivalence, compact resident cache, gate identity",
-    "P3": "Only after matching P2 receipt: new open synthetic raw-completion diagnostics; no model promotion",
-    "P4": "CLOSED: reviewed training data/license/provenance, matched gate controls, seeds and budgets must be registered first",
-    "P5": "CLOSED: broader preservation/held-out confirmation and controlled hardware benchmark require separate registration"
+    "P0": "CPU fixture and separately required native HF random-model integration; neither proves R2 quality",
+    "P1": "Local R2 asset inventory and exact weight/tokenizer/config hashes; no remote download or corpus scan",
+    "P2": "Native/global parity, full/stream equivalence, compact storage, identity gate, all-local and frontloaded controls; current code/env/backend receipts only",
+    "P3": "Receipt-gated open boundary diagnostics; max 10 arms x 72 prompts x 24 generated tokens; per-case workload and storage validation; never promotion",
+    "P4": "CLOSED: reviewed data/license/lineage/dedup and fixed optimizer/seed/checkpoint rules plus separately registered token- and compute-matched training",
+    "P5": "CLOSED: independent preservation/quality confirmation and isolated hardware benchmarking need separate preregistration"
   },
   "qualification": {
     "dtype": "float32",
@@ -54,11 +64,11 @@
       8,
       17
     ],
-    "note": "Tiny windows test mechanics; they do not qualify quality at 512/1024 or long-context throughput"
+    "note": "Tiny mechanical windows do not measure 512/1024 quality or long-context throughput"
   },
   "diagnostics": {
     "split": "new_open_synthetic_dev",
-    "prompt_protocol": "raw completion, not chat template; precise token lengths, no truncation",
+    "prompt_protocol": "raw completion, exact token lengths, no truncation or changed parser",
     "lengths": [
       511,
       512,
@@ -80,7 +90,12 @@
     ],
     "seed": 17,
     "cases": 72,
-    "decoding": "greedy, max_new_tokens24, no extra repetition/abstention bias; stop at checkpoint EOS",
+    "decoding": "greedy, max_new_tokens24, original EOS; no repetition/abstention bias",
+    "max_arms": 10,
+    "max_generations": 720,
+    "max_emitted_tokens": 17280,
+    "max_block_size": 128,
+    "max_allocator_mib": 6144,
     "metrics": [
       "strict_exact",
       "trimmed_exact",
@@ -91,18 +106,46 @@
       "budget_exhaustion_rate",
       "max_token_repeat"
     ],
-    "comparison": "paired by case ID and prompt hash; exact McNemar is descriptive and unadjusted, not confirmatory",
-    "gate_identity": "A0=A4, A2=A5 and A3=A6 token-for-token before training; any difference invalidates the diagnostic",
-    "timing": "descriptive only; fixed arm order, no isolation proof, no causal speed claim"
+    "comparison": "Paired by ID/prompt/answer; named reference-treatment contrasts, strict/trimmed and answerability subsets; correlated DEV and unadjusted McNemar never confirmatory",
+    "gate_identity": "A0=A4, A2=A5, A3=A6 token-for-token before training or reject diagnostic",
+    "execution_guard": "Compare observed score-rectangle elements, attention-matmul work and each layer resident KV with planner using actual generated length",
+    "timing": "Descriptive only; fixed arm order, no isolation proof, no causal speed claim"
+  },
+  "compute_matching": {
+    "frozen": "Hold checkpoint/data/order/precision/backend/chunking/decoder fixed; report visible pairs, issued rectangles, full modeled matmuls and actual EOS length separately",
+    "future_token_matched": {
+      "arms": [
+        "A4_global_gate",
+        "A5_local512_gate",
+        "A6_sink512_gate"
+      ],
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "updates": 64,
+      "microbatch": 1,
+      "gradient_accumulation": 8,
+      "sequence_tokens": 1024,
+      "tokens_per_seed": 524288
+    },
+    "future_compute_matched": {
+      "reference": "A4_global_gate 64 updates",
+      "candidate_update_cap": 128,
+      "max_unspent_fraction": 0.02,
+      "cost_source": "Profiled whole optimizer-update FLOPs or separately isolated update seconds; never attention-only FLOP ratios or 3x-forward heuristic",
+      "residual_policy": "Floor whole updates, report unspent budget/cap hits; label not matched if residual exceeds 2%; no padding with fake work"
+    },
+    "training_authorized": false
   },
   "future_training_requirements": [
-    "Human-reviewed dataset source/license/derivation declaration and exact content hashes",
-    "Train/dev separation and duplicate/near-duplicate audit; no legacy sealed assets",
-    "Same data membership/order, supervised tokens, steps, optimizer and decoding in matched arms",
-    "Frozen backbone and gate-only parameter allowlist; all-global trained gate control",
-    "At least three registered seeds; checkpoint selection on DEV only",
-    "Independent confirmation plan with prespecified effect size, noninferiority margins and multiplicity handling",
-    "Training remains unavailable in this CLI until those requirements are implemented and reviewed"
+    "Human-reviewed source/license/derivation declaration; exact content hashes; train/dev and duplicate/near-duplicate audits; no legacy sealed assets",
+    "Frozen backbone, gate-only allowlist and exact same trainable count across A4/A5/A6",
+    "Fix optimizer, LR, data membership/order, loss mask, supervision tokens and checkpoint selection before any pilot training",
+    "Token-matched and compute-matched ledgers answer distinct questions; more tokens under equal compute must not be called a same-data effect",
+    "At least three seeds; no checkpoint shopping; gate repair requires interaction versus all-global gate training",
+    "Independent sample-size/power plan, fixed noninferiority margins and multiplicity handling before confirmation"
   ],
   "deferred": [
     "KV-head merging",
@@ -110,7 +153,7 @@
     "GeGLU replacement",
     "head_dim256",
     "recurrence",
-    "importance-selected global placements",
+    "importance-selected placement",
     "native fused sparse kernels",
     "1M context",
     "GGUF/llama.cpp/MLX export"
