@@ -1,0 +1,115 @@
+{
+  "before_after_fixture_checks": {
+    "diagnostic_cases_checked": 72,
+    "existing_case_fields_unchanged": true,
+    "fixture_only": true,
+    "generation_comparisons": 40,
+    "generation_tokens_cache_counters_unchanged": true,
+    "new_fields": [
+      "evidence_kind",
+      "evidence_span",
+      "evidence_to_question_gap",
+      "question_span"
+    ],
+    "quality_improvement_established": false,
+    "real_checkpoint_loaded": false
+  },
+  "command": "python -m unittest experiments.hybrid_attention_v1.tests.test_matching experiments.hybrid_attention_v1.tests.test_hardening -v",
+  "environment": {
+    "cuda_runtime": null,
+    "device": "cpu",
+    "device_name": "",
+    "dtype": "float32",
+    "packages": {
+      "safetensors": "0.7.0",
+      "tokenizers": null,
+      "torch": "2.10.0+cpu",
+      "transformers": null
+    },
+    "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "torch_threads": 1
+  },
+  "errors": [],
+  "failures": [],
+  "full_native_suite_run_locally": false,
+  "licenses_sealed_evaluation": false,
+  "licenses_training": false,
+  "limitations": [
+    "Selected byte-verified source snapshot, not a complete local Git checkout.",
+    "Only the 38 new tests ran locally; native Transformers integration requires the separate CI receipt.",
+    "Tiny random Qwen3-shaped fixtures and mock metadata are not Rineya quality evidence.",
+    "No GPU timing, real model quality run, training or sealed suite was executed."
+  ],
+  "passed": true,
+  "published_file_manifest": {
+    "HARDENING.md": {
+      "bytes": 8371,
+      "git_blob_sha": "723f4678ff65add6a195b28c5628097f9c6fcfee",
+      "sha256": "6dfaa0f7af99f37e2624d54bb407f9774160ad0b2781702ec67d646de0733a02"
+    },
+    "diagnostics.py": {
+      "bytes": 6132,
+      "git_blob_sha": "9f5642c390f517cefbf8b5e023dc28b9ef47be8a",
+      "sha256": "fbb29a713620f949e4bf048e485c5e2beadb8356543d72c0457b5859cb03831f"
+    },
+    "matching.py": {
+      "bytes": 12431,
+      "git_blob_sha": "d421c134ad848166b687d6c924110a4a217215b1",
+      "sha256": "7f2f5f6963030248d0b012294f4274333f75237aa4e801316b4ef0cb4aae73fe"
+    },
+    "provenance.py": {
+      "bytes": 6722,
+      "git_blob_sha": "dbf86444a024b6774dc6be019027966e7b607af5",
+      "sha256": "dbf0da2be237d7208918c651546315bea295b94c7d0beebf66dfc051e135f507"
+    },
+    "run.py": {
+      "bytes": 12865,
+      "git_blob_sha": "ac969025d3f7b9c4cdce5dae0b56f5047b74dbcc",
+      "sha256": "3e09cbb2f79b8b0b26427cdce2f3ae9078656f1aab71b1620f79648ffd053877"
+    },
+    "runtime.py": {
+      "bytes": 10013,
+      "git_blob_sha": "a725a0f705961c68a6ea844bfc3d48bbf9c65260",
+      "sha256": "ddae1e050322e2086bcc033a60fc098a35d9247f87b9d38387bb1bb0169a7024"
+    },
+    "tests/test_hardening.py": {
+      "bytes": 13472,
+      "git_blob_sha": "85444d8f0cf2465217d540c3ca81e68574e844d0",
+      "sha256": "dc6cffad8f1a0e6bf4827dfa92cfb300b4034d72bdc6d8ed29dac286e2755349"
+    },
+    "tests/test_matching.py": {
+      "bytes": 10697,
+      "git_blob_sha": "22d7a04c64d7b25f7a85a381328e47e1ddcb2238",
+      "sha256": "36c17a5bba133e7d5b5b3c0677fd4c67edd8c531e7ddc1760d0a6c6334bad860"
+    },
+    "verify.py": {
+      "bytes": 4067,
+      "git_blob_sha": "8dd545f4d1d804be972b87c400e730a0a5d1d444",
+      "sha256": "26bd24e8d026dbcb0d46a14e88bedbdd3a545d66cd2f97c17809b21f3fbda7ce"
+    }
+  },
+  "quality_improvement_established": false,
+  "real_rineya_checkpoint_loaded": false,
+  "receipt_sha256": "608107bab991a01b05559040c8e18cd5756688b561d269d406b79e61807f8929",
+  "reviewed_parent": "f36425368b098d41fc4802503ba1f43f372050da",
+  "schema_version": 1,
+  "skipped": [],
+  "source_commit": "5c77c64fea4ba4f0ceaff8a2b894a8944d300da2",
+  "stage": "local_new_test_subset_not_full_native_qualification",
+  "test_log_sha256": "38fa4191fee6d1ca7a1ddb89d99707e573578d7b53b081237629d0b80b18f3a2",
+  "tests_passed": 38,
+  "tests_run": 38,
+  "timing_causal": false,
+  "upstream_failure_reproduction": {
+    "cached_position_after_failure": 12,
+    "fixture_only": true,
+    "invalid_append_exception": "ValueError",
+    "nonfinite_generation_raised": false,
+    "nonfinite_generation_returned_tokens": [
+      0,
+      0
+    ],
+    "upstream_head": "f36425368b098d41fc4802503ba1f43f372050da"
+  }
+}
