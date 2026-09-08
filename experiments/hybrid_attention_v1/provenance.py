@@ -11,7 +11,7 @@ BASE_COMMIT = "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a"
 
 
 def digest(value):
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
 
 
 def file_hash(path):
@@ -24,7 +24,7 @@ def file_hash(path):
 
 def code_identity():
     files = sorted(ROOT.glob("*.py")) + sorted((ROOT / "tests").glob("*.py"))
-    files += [ROOT / "protocol.json"]
+    files += [ROOT / "protocol.json"] + sorted(ROOT.glob("*.md"))
     return digest({str(p.relative_to(ROOT)): file_hash(p) for p in files})
 
 
@@ -110,7 +110,8 @@ def require_receipt(receipt, inventory, env, backend, block_size):
         "licenses_training": False, "licenses_sealed_evaluation": False,
     }
     for name, value in expected.items():
-        if name not in receipt or receipt[name] != value:
+        if (name not in receipt or type(receipt[name]) is not type(value)
+                or receipt[name] != value):
             raise ValueError(f"Receipt mismatch/missing field: {name}")
     required = ("native_global", "global_stream", "gate_identity", "local_stream", "sink_stream")
     checks = receipt.get("checks", {})
@@ -120,3 +121,34 @@ def require_receipt(receipt, inventory, env, backend, block_size):
     payload = {k: v for k, v in receipt.items() if k != "receipt_sha256"}
     if receipt.get("receipt_sha256") != digest(payload):
         raise ValueError("Receipt integrity mismatch")
+
+
+def artifact_inventory(directory):
+    """Bind this run's JSON outputs, excluding the final receipt (no hash cycle).
+
+    Reports remain provisional unless the final receipt passed. These hashes
+    detect accidental edits; they are not a signature or proof of measurement.
+    """
+    root = Path(directory)
+    if root.is_symlink() or not root.is_dir():
+        raise ValueError("Run output directory must be a real directory")
+    result = {}
+    for path in sorted(root.glob("*.json")):
+        if path.name == "receipt.json":
+            continue
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("Run artifact must be a regular non-symlink file")
+        result[path.name] = {"sha256": file_hash(path), "bytes": path.stat().st_size}
+    return result
+
+
+def require_artifacts(receipt, directory):
+    declared = receipt.get("artifacts")
+    if (type(declared) is not dict or not declared
+            or digest(declared) != digest(artifact_inventory(directory))):
+        raise ValueError("Missing, edited or unexpected run artifacts")
+
+
+def require_unchanged_code(expected):
+    if expected != code_identity():
+        raise RuntimeError("Experiment source/protocol changed during the run")

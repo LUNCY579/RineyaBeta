@@ -40,6 +40,12 @@ def shape_probe():
             "layer_cache_metrics": [c.metrics() for c in caches]}
 
 
+def qualification_passed(result, native, require_hf):
+    # Installing Transformers is insufficient if integration was skipped.
+    return bool(result.testsRun > 0 and result.wasSuccessful()
+                and (not require_hf or (native and not result.skipped)))
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run-id", required=True)
@@ -47,16 +53,17 @@ def main(argv=None):
     args = p.parse_args(argv)
     out = new_run(args.run_id)
     torch.set_num_threads(1)
+    identity_before = code_identity()
     suite = unittest.defaultTestLoader.discover(str(ROOT / "tests"), top_level_dir=str(ROOT.parents[1]))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     native = importlib.util.find_spec("transformers") is not None
     receipt = {"stage": "cpu_fixture_qualification", "base_commit": BASE_COMMIT,
-               "passed": result.wasSuccessful() and (native or not args.require_hf),
+               "passed": qualification_passed(result, native, args.require_hf),
                "tests_run": result.testsRun, "tests_passed": result.testsRun-len(result.skipped)-len(result.failures)-len(result.errors),
                "skipped": [{"test": t.id(), "reason": reason} for t, reason in result.skipped],
                "failures": [{"test": t.id(), "traceback": tb} for t, tb in result.failures],
                "errors": [{"test": t.id(), "traceback": tb} for t, tb in result.errors],
-               "environment": environment(), "code_identity": code_identity(),
+               "environment": environment(), "code_identity": identity_before,
                "real_rineya_checkpoint_loaded": False, "native_hf_available": native,
                "licenses_training": False, "licenses_sealed_evaluation": False,
                "quality_improvement_established": False, "timing_causal": False}
@@ -64,6 +71,8 @@ def main(argv=None):
         receipt["shape_probe"] = shape_probe()
     except Exception as exc:
         receipt.update(passed=False, shape_probe_error=str(exc))
+    receipt["source_unchanged"] = code_identity() == identity_before
+    receipt["passed"] &= receipt["source_unchanged"]
     receipt["receipt_sha256"] = digest(receipt)
     write_json(out / "receipt.json", receipt)
     print(json.dumps(receipt, indent=2))

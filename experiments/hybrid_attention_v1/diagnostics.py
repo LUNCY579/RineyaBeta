@@ -46,6 +46,12 @@ def make_cases(tokenizer, lengths=(511, 512, 513, 1023, 1024, 1025), seed=17):
                 seen.add(sha)
                 cases.append({"id": f"dev-{len(cases):04d}", "family": family,
                               "depth": depth, "tokens": length, "input_ids": ids,
+                              # depth is a filler-insertion fraction, not absolute depth.
+                              # Spans are zero-based, end-exclusive; prompts are unchanged.
+                              "evidence_span": [len(prefix)+at, len(prefix)+at+len(core)],
+                              "question_span": [length-len(tail), length],
+                              "evidence_to_question_gap": extra-at,
+                              "evidence_kind": "distractor" if family == "absent" else "support_or_conflict",
                               "answer": answer, "answerable": answer != "UNKNOWN",
                               "prompt_sha256": sha, "seed": seed,
                               "split": "open_synthetic_dev"})

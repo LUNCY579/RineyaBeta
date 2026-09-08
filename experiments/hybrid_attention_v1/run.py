@@ -2,6 +2,7 @@
 import argparse
 from dataclasses import replace
 import json
+import math
 import sys
 import time
 from pathlib import Path
@@ -9,7 +10,8 @@ import torch
 from .config import ARMS, arm_spec
 from .diagnostics import make_cases, paired_result, score, summarize
 from .provenance import (ROOT, BASE_COMMIT, checkpoint_inventory, code_identity, digest,
-                         environment, new_run, require_receipt, write_json)
+                         environment, new_run, require_receipt, write_json,
+                         artifact_inventory, require_artifacts, require_unchanged_code)
 from .runtime import HybridRuntime
 from .study import (VERSION, MAX_BLOCK_SIZE, MAX_CASES, MAX_NEW_TOKENS,
                     assert_target_config, contrast_report, inference_workload,
@@ -33,7 +35,11 @@ def compare_logits(a, b):
         # Keep failed receipts JSON-serializable rather than losing NaN/Inf failures.
         return {"passed": False, "max_abs_error": None, "argmax_identical": False,
                 "error": "shape mismatch or nonfinite logits"}
-    error = float((a-b).abs().max())
+    # Finite FP32 operands can overflow a FP32 subtraction. Keep the diagnostic
+    # magnitude representable and never lose a failed receipt to JSON Infinity.
+    error = float((a.to(torch.float64)-b.to(torch.float64)).abs().max())
+    if not math.isfinite(error):
+        error = None
     equal = bool(torch.equal(a.argmax(-1), b.argmax(-1)))
     return {"passed": bool(torch.allclose(a, b, atol=2e-5, rtol=2e-5) and equal),
             "max_abs_error": error, "argmax_identical": equal}
@@ -105,7 +111,7 @@ def main(argv=None):
     receipt = {"stage": args.stage, "passed": False, "base_commit": BASE_COMMIT,
                "study_version": VERSION,
                "licenses_training": False, "licenses_sealed_evaluation": False,
-               "timing_causal": False}
+               "timing_causal": False, "quality_improvement_established": False}
     try:
         torch.set_num_threads(args.threads)
         torch.manual_seed(17)
@@ -135,6 +141,7 @@ def main(argv=None):
                 prior = json.loads(args.receipt.read_text(encoding="utf-8"))
                 require_receipt(prior, inventory, env, args.backend, args.block_size)
                 require_study_receipt(prior)
+                require_artifacts(prior, args.receipt.parent)
             model, tokenizer = load_local(args.model, args.device)
             if args.stage == "qualify":
                 checks = qualify(model, args.backend, args.block_size)
@@ -201,6 +208,9 @@ def main(argv=None):
         if checkpoint_inventory(args.model)["id"] != inventory["id"]:
             raise RuntimeError("Source checkpoint assets changed during the run")
         receipt["checkpoint_unchanged"] = True
+        require_unchanged_code(receipt["code_identity"])
+        receipt["source_unchanged"] = True
+        receipt["artifacts"] = artifact_inventory(out)
     except Exception as exc:
         receipt.update(passed=False, error_type=type(exc).__name__, error=str(exc))
     receipt["receipt_sha256"] = digest(receipt)

@@ -79,6 +79,16 @@ class HybridRuntime(nn.Module):
         self.stats = {}
 
     def forward(self, input_ids, *, use_cache=False, last_only=False):
+        # Validation, embeddings and RoPE can fail before the decoder loop too.
+        # Never leave a partially consumed request available for a later append.
+        try:
+            return self._forward_impl(input_ids, use_cache=use_cache, last_only=last_only)
+        except Exception:
+            if use_cache:
+                self.reset()
+            raise
+
+    def _forward_impl(self, input_ids, *, use_cache=False, last_only=False):
         if input_ids.ndim != 2 or input_ids.shape[0] != 1 or input_ids.shape[1] < 1:
             raise ValueError("v1 accepts one nonempty, unpadded sequence; batch/packing are unsupported")
         if input_ids.dtype != torch.long:
@@ -129,6 +139,10 @@ class HybridRuntime(nn.Module):
             x = body.norm(x)
             logits = self.backbone.lm_head(x[:, -1:] if last_only else x)
             if use_cache:
+                # Check every prefill chunk as well as decode, before argmax can
+                # silently turn NaN/Inf into an apparently valid generated token.
+                if not bool(torch.isfinite(logits).all()):
+                    raise RuntimeError("Nonfinite streaming logits; generation invalid")
                 self.position += n
             return logits
         except Exception:
@@ -138,18 +152,25 @@ class HybridRuntime(nn.Module):
 
     @torch.inference_mode()
     def generate(self, input_ids, *, max_new_tokens=24, eos_token_ids=(), chunk_size=128):
-        if (input_ids.ndim != 2 or input_ids.shape[0] != 1 or input_ids.shape[1] < 1
-                or input_ids.dtype != torch.long):
-            raise ValueError("Generation requires one nonempty unpadded int64 sequence")
-        if max_new_tokens < 1 or chunk_size < 1:
-            raise ValueError("Generation and chunk budgets must be positive")
-        if self.backbone.training:
-            raise RuntimeError("Call backbone.eval() first")
-        if input_ids.shape[-1] + max_new_tokens > self.backbone.config.max_position_embeddings:
-            raise ValueError("Prompt plus generation budget exceeds original context limit")
+        # Reset before validation, including when a caller abandons cached forward.
         self.reset()
         generated, stopped = [], False
         try:
+            if (not isinstance(input_ids, torch.Tensor) or input_ids.ndim != 2
+                    or input_ids.shape[0] != 1 or input_ids.shape[1] < 1
+                    or input_ids.dtype != torch.long):
+                raise ValueError("Generation requires one nonempty unpadded int64 sequence")
+            if (type(max_new_tokens) is not int or type(chunk_size) is not int
+                    or max_new_tokens < 1 or chunk_size < 1):
+                raise ValueError("Generation and chunk budgets must be positive integers")
+            if not isinstance(eos_token_ids, (tuple, list)) or any(
+                    type(t) is not int or not 0 <= t < self.backbone.config.vocab_size
+                    for t in eos_token_ids):
+                raise ValueError("EOS must contain in-vocabulary integer token IDs")
+            if self.backbone.training:
+                raise RuntimeError("Call backbone.eval() first")
+            if input_ids.shape[-1] + max_new_tokens > self.backbone.config.max_position_embeddings:
+                raise ValueError("Prompt plus generation budget exceeds original context limit")
             for start in range(0, input_ids.shape[-1], chunk_size):
                 logits = self(input_ids[:, start:start+chunk_size], use_cache=True, last_only=True)
             for step in range(max_new_tokens):
