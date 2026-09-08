@@ -1,0 +1,47 @@
+name: HLGA-1 CPU and native Qwen3 integration
+on:
+  push:
+    branches: [research/hybrid-local-global-attention-v1]
+    paths:
+      - experiments/hybrid_attention_v1/**
+      - .github/workflows/hybrid-attention-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hlga1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  cpu-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          lfs: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11'
+      - name: Install isolated CPU test dependencies
+        run: |
+          python -m pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install transformers==4.57.1
+          python -m pip freeze > hlga1-environment.txt
+      - name: Require native HF random-model integration; never load Rineya weights
+        run: python -m experiments.hybrid_attention_v1.verify --run-id ci-native --require-hf
+      - name: Preserve qualification receipt and environment, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: hlga1-cpu-native-${{ github.sha }}
+          path: |
+            experiments/hybrid_attention_v1/runs/ci-native/receipt.json
+            hlga1-environment.txt
+          retention-days: 30
+          if-no-files-found: warn
