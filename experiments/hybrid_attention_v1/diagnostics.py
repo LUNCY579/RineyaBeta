@@ -1,8 +1,15 @@
-"""New, open synthetic DEV only. No external dataset/answer-key loading API."""
+"""New, open synthetic DEV only. No external dataset/answer-key loading API.
+
+Reporting deliberately separates registered endpoints from diagnostic-only metadata.
+The latter exists to make failures attributable without changing prompts or answers.
+"""
 from collections import Counter, defaultdict
 import math
 import random
 from .provenance import digest
+
+
+DIAGNOSTIC_SCHEMA_VERSION = 2
 
 
 def make_cases(tokenizer, lengths=(511, 512, 513, 1023, 1024, 1025), seed=17):
@@ -46,8 +53,6 @@ def make_cases(tokenizer, lengths=(511, 512, 513, 1023, 1024, 1025), seed=17):
                 seen.add(sha)
                 cases.append({"id": f"dev-{len(cases):04d}", "family": family,
                               "depth": depth, "tokens": length, "input_ids": ids,
-                              # depth is a filler-insertion fraction, not absolute depth.
-                              # Spans are zero-based, end-exclusive; prompts are unchanged.
                               "evidence_span": [len(prefix)+at, len(prefix)+at+len(core)],
                               "question_span": [length-len(tail), length],
                               "evidence_to_question_gap": extra-at,
@@ -59,39 +64,80 @@ def make_cases(tokenizer, lengths=(511, 512, 513, 1023, 1024, 1025), seed=17):
 
 
 def score(case, text, generation):
-    # Never silently strip an answer prefix, case-fold, or collapse UNKNOWN loops.
     trimmed = text.strip()
     counts = Counter(generation["token_ids"])
+    if generation["stopped_eos"]:
+        termination = "eos"
+    elif generation["budget_exhausted"]:
+        termination = "budget"
+    else:
+        termination = "other"
     return {
+        "diagnostic_schema_version": DIAGNOSTIC_SCHEMA_VERSION,
         "id": case["id"], "family": case["family"], "depth": case["depth"],
         "tokens": case["tokens"], "answerable": case["answerable"],
         "prompt_sha256": case["prompt_sha256"], "answer": case["answer"],
+        "evidence_span": case["evidence_span"], "question_span": case["question_span"],
+        "evidence_to_question_gap": case["evidence_to_question_gap"],
+        "evidence_kind": case["evidence_kind"],
         "text": text, "strict_exact": text == case["answer"],
         "trimmed_exact": trimmed == case["answer"], "abstained": trimmed == "UNKNOWN",
         "empty": not trimmed, "generated_tokens": len(generation["token_ids"]),
+        "unique_generated_tokens": len(counts),
         "max_token_repeat": max(counts.values(), default=0),
         "stopped_eos": generation["stopped_eos"],
         "budget_exhausted": generation["budget_exhausted"],
+        "termination": termination,
+    }
+
+
+def _cell(rows):
+    n = len(rows)
+    a = [r for r in rows if r["answerable"]]
+    u = [r for r in rows if not r["answerable"]]
+    rate = lambda key, data: sum(bool(r[key]) for r in data) / len(data) if data else None
+    mean = lambda key: sum(r[key] for r in rows) / n if n else None
+    repeats = [r["max_token_repeat"] for r in rows]
+    return {
+        "n": n,
+        "strict_exact": rate("strict_exact", rows),
+        "trimmed_exact": rate("trimmed_exact", rows),
+        "answerable_accuracy": rate("trimmed_exact", a),
+        "false_abstention_rate": rate("abstained", a),
+        "unanswerable_abstention_rate": rate("abstained", u),
+        "budget_exhaustion_rate": rate("budget_exhausted", rows),
+        "empty_rate": rate("empty", rows),
+        "stopped_eos_rate": rate("stopped_eos", rows),
+        "generated_tokens_mean": mean("generated_tokens"),
+        "max_token_repeat_mean": (sum(repeats) / n if n else None),
+        "max_token_repeat_max": (max(repeats) if repeats else None),
     }
 
 
 def summarize(rows):
-    def cell(rs):
-        n = len(rs)
-        a = [r for r in rs if r["answerable"]]
-        u = [r for r in rs if not r["answerable"]]
-        rate = lambda key, data: sum(r[key] for r in data) / len(data) if data else None
-        return {"n": n, "strict_exact": rate("strict_exact", rs),
-                "trimmed_exact": rate("trimmed_exact", rs),
-                "answerable_accuracy": rate("trimmed_exact", a),
-                "false_abstention_rate": rate("abstained", a),
-                "unanswerable_abstention_rate": rate("abstained", u),
-                "budget_exhaustion_rate": rate("budget_exhausted", rs),
-                "empty_rate": rate("empty", rs)}
     groups = defaultdict(list)
+    families = defaultdict(list)
+    lengths = defaultdict(list)
+    depths = defaultdict(list)
+    answerability = defaultdict(list)
     for row in rows:
         groups[f'{row["family"]}|N={row["tokens"]}|depth={row["depth"]}'].append(row)
-    return {"overall": cell(rows), "cells": {k: cell(v) for k, v in sorted(groups.items())}}
+        families[row["family"]].append(row)
+        lengths[str(row["tokens"])].append(row)
+        depths[str(row["depth"])].append(row)
+        answerability["answerable" if row["answerable"] else "unanswerable"].append(row)
+    return {
+        "diagnostic_schema_version": DIAGNOSTIC_SCHEMA_VERSION,
+        "overall": _cell(rows),
+        "margins": {
+            "by_family": {k: _cell(v) for k, v in sorted(families.items())},
+            "by_length": {k: _cell(v) for k, v in sorted(lengths.items(), key=lambda x: int(x[0]))},
+            "by_depth": {k: _cell(v) for k, v in sorted(depths.items(), key=lambda x: float(x[0]))},
+            "by_answerability": {k: _cell(v) for k, v in sorted(answerability.items())},
+        },
+        "cells": {k: _cell(v) for k, v in sorted(groups.items())},
+        "interpretation": "Margins and termination/repetition fields are diagnostic-only; registered contrasts remain authoritative and P3 remains exploratory open DEV.",
+    }
 
 
 def paired_result(base, variant):
