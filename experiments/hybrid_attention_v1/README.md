@@ -78,8 +78,15 @@ The diagnostic is bounded to 10 arms, 72 open synthetic prompts, 24 output token
 block size at most 128 and a CUDA allocator cap at most 6144 MiB. The six prompt
 lengths are 511/512/513 and 1023/1024/1025, across three depths and four task
 families. It is a readout/window-boundary diagnostic, not broad reasoning or an
-independent preservation benchmark. Low all-global accuracy or UNKNOWN loops
-make the endpoint inconclusive, not a hybrid success. All DEV timing is non-causal.
+independent preservation benchmark. Low all-global accuracy or UNKNOWN loops make
+the endpoint inconclusive, not a hybrid success. All DEV timing is non-causal.
+
+Diagnostic schema v2 preserves every original exact cell while also reporting
+margins by family, length, evidence depth and answerability. Each arm row carries
+immutable evidence/question spans plus termination and repetition metadata so a
+single arm artifact is easier to debug. These fields are diagnostic-only and do
+not change the registered contrasts or promotion boundary. See
+[the diagnostic debugging guide](reports/DIAGNOSTIC_DEBUGGING.md).
 
 ## Commands
 
@@ -87,6 +94,7 @@ make the endpoint inconclusive, not a hybrid success. All DEV timing is non-caus
 python -m experiments.hybrid_attention_v1.run plan
 python -m experiments.hybrid_attention_v1.study
 python -m unittest experiments.hybrid_attention_v1.tests.test_study -v
+python -m unittest experiments.hybrid_attention_v1.tests.test_diagnostic_reporting -v
 python -m experiments.hybrid_attention_v1.verify --run-id hlga-v2-native-001 --require-hf
 python -m experiments.hybrid_attention_v1.run audit --run-id hlga-v2-r2-audit-001
 python -m experiments.hybrid_attention_v1.run qualify --run-id hlga-v2-r2-qualify-001
@@ -120,7 +128,8 @@ opening training. Historical and external sealed suites remain untouched.
 | `attention.py`, `runtime.py` | Explicit attention, compact cache, traversal and gates |
 | `study.py` | Target lock, work planner, direct contrasts, receipt and execution guards, future budget arithmetic |
 | `provenance.py`, `run.py` | Local hashes, immutable receipts and gated CLI |
-| `diagnostics.py` | Existing deterministic open DEV and separate readout metrics |
+| `diagnostics.py` | Deterministic open DEV, schema-versioned debugging metadata and separate readout metrics |
+| `reports/DIAGNOSTIC_DEBUGGING.md` | Failure triage and interpretation boundaries; does not open any stage |
 | `tests/`, `verify.py` | Infrastructure tests; full native-HF integration in CI |
 | `protocol.json`, `COMPATIBILITY_CONTRACT.md` | Current registration, closed gates and interpretation boundaries |
 
