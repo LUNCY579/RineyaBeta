@@ -152,6 +152,12 @@ class CompactKV:
     def retain(self, k, v, positions):
         if torch.is_grad_enabled():
             raise RuntimeError("Cache retention is inference-only")
+        # Without this a caller that passes the pre-merge K/V alongside the
+        # merged positions evicts against the wrong token count and silently
+        # keeps rows whose absolute positions are off by the chunk length.
+        if (k.ndim != 4 or v.shape != k.shape or positions.ndim != 1
+                or len(positions) != k.shape[2]):
+            raise ValueError("Retained K/V and positions must describe the same tokens")
         keep = torch.ones_like(positions, dtype=torch.bool)
         if self.window is not None:
             keep = ((positions < self.sinks)

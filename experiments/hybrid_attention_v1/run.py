@@ -1,5 +1,6 @@
 """CLI: plan -> audit -> qualify -> open diagnostic. Training/sealed stages stay closed."""
 import argparse
+from collections import defaultdict
 import os
 from dataclasses import replace
 import json
@@ -35,6 +36,65 @@ def load_local(path, device):
         raise ValueError(f"Registered precision is float32; loaded parameters are {dtypes}")
     tokenizer = AutoTokenizer.from_pretrained(str(path), local_files_only=True, trust_remote_code=False)
     return model, tokenizer
+
+
+def declared_eos_ids(path, config, vocab_size):
+    """The checkpoint's DECLARED stop set, not just config.eos_token_id.
+
+    P3 prompts are raw completions, so <|endoftext|> is this backbone's natural
+    terminator, and generation_config.json declares it while config.json does
+    not. Reading only config would leave a correctly terminated generation
+    running to the 24-token cap and then score it as both wrong and
+    budget-exhausted -- which is the statistic the contract uses to decide the
+    endpoint is readout-limited. Only the stop set is taken from
+    generation_config; decoding stays the registered greedy argmax.
+    """
+    ids = set()
+    for value in (getattr(config, "eos_token_id", None), _generation_config_eos(path)):
+        if value is None:
+            continue
+        for token in ((value,) if isinstance(value, int) else tuple(value)):
+            if isinstance(token, bool) or type(token) is not int or not 0 <= token < vocab_size:
+                raise ValueError(f"Declared EOS id {token!r} is not an in-vocabulary integer")
+            ids.add(token)
+    if not ids:
+        raise ValueError("Checkpoint declares no EOS token; refusing an unbounded diagnostic")
+    return tuple(sorted(ids))
+
+
+def _generation_config_eos(path):
+    source = Path(path) / "generation_config.json"
+    if not source.is_file() or source.is_symlink():
+        return None
+    return json.loads(source.read_text(encoding="utf-8")).get("eos_token_id")
+
+
+def stratified_cases(cases, limit):
+    """make_cases() emits length-major order, so a bare prefix of 36 keeps only
+    511/512/513 -- exactly the cases where a 512-wide window never evicts the
+    evidence, and therefore exactly the subset that cannot show window damage.
+    Interleave the strata so any truncation stays balanced. The full registered
+    72 keep their registered order untouched.
+    """
+    if limit >= len(cases):
+        return cases
+
+    def interleave(groups):
+        order = []
+        while any(groups):
+            for group in groups:
+                if group:
+                    order.append(group.pop(0))
+        return order
+
+    # Length is the load-bearing stratum -- it decides whether the window can
+    # evict the evidence at all -- so lengths cycle outermost and depths within
+    # them. Any prefix then holds every length to within one case.
+    nested = defaultdict(lambda: defaultdict(list))
+    for case in cases:
+        nested[case["tokens"]][case["depth"]].append(case)
+    return interleave([interleave([nested[n][d] for d in sorted(nested[n])])
+                       for n in sorted(nested)])[:limit]
 
 
 def compare_logits(a, b):
@@ -162,8 +222,8 @@ def main(argv=None):
             or not 1 <= args.max_cases <= MAX_CASES or not 1 <= args.cap_mib <= 6144):
         p.error("Invalid thread/block/case/memory budget; block<=128, cases<=72, cap<=6144 MiB")
     out = new_run(args.run_id)
-    receipt = {"stage": args.stage, "passed": False, "base_commit": BASE_COMMIT,
-               "study_version": VERSION,
+    receipt = {"stage": args.stage, "run_id": args.run_id, "passed": False,
+               "base_commit": BASE_COMMIT, "study_version": VERSION,
                "licenses_training": False, "licenses_sealed_evaluation": False,
                "timing_causal": False, "quality_improvement_established": False}
     try:
@@ -197,6 +257,15 @@ def main(argv=None):
                 require_receipt(prior, inventory, env, args.backend, args.block_size)
                 require_study_receipt(prior)
                 require_artifacts(prior, args.receipt.parent)
+                # Without this a diagnostic receipt names no source: every
+                # passing qualification for this checkpoint/code pair looks
+                # equally like the one that actually authorized the run.
+                receipt["authorizing_receipt"] = {
+                    "run_id": prior.get("run_id"), "path": str(args.receipt),
+                    "receipt_sha256": prior["receipt_sha256"],
+                    "checkpoint_id": prior["checkpoint_id"],
+                    "code_identity": prior["code_identity"],
+                }
             model, tokenizer = load_local(args.model, args.device)
             receipt["model_fingerprint"] = model_fingerprint(model)
             if args.stage == "qualify":
@@ -204,7 +273,7 @@ def main(argv=None):
                 receipt.update(stage="real_model_qualification", checks=checks,
                                passed=all(v["passed"] for v in checks.values()))
             else:
-                cases = make_cases(tokenizer)[:args.max_cases]
+                cases = stratified_cases(make_cases(tokenizer), args.max_cases)
                 write_json(out / "open_dev_cases.json", cases)
                 specs = {name: arm_spec(name, model.config.num_hidden_layers,
                          backend=args.backend, block_size=args.block_size) for name in ARMS}
@@ -216,8 +285,8 @@ def main(argv=None):
                     "max_emitted_tokens": len(cases)*len(ARMS)*MAX_NEW_TOKENS,
                     "actual_eos_stopped_work_is_not_compute_matched": True})
                 all_rows, summaries = {}, {}
-                eos = model.config.eos_token_id
-                eos = () if eos is None else (eos,) if isinstance(eos, int) else tuple(eos)
+                eos = declared_eos_ids(args.model, model.config, model.config.vocab_size)
+                receipt["eos_token_ids"] = list(eos)
                 for name in ARMS:
                     rt = HybridRuntime(model, specs[name])
                     rows, cache_metrics = [], []

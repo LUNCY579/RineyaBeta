@@ -1,4 +1,5 @@
 """Regression/negative-path fixtures only. No Rineya weights or evaluation data."""
+from collections import Counter
 import copy
 from dataclasses import replace
 import io
@@ -15,8 +16,8 @@ from ..config import ARMS, Spec, arm_spec
 from ..diagnostics import make_cases
 from ..provenance import (artifact_inventory, require_artifacts, code_identity,
                           digest, environment, require_receipt, require_unchanged_code)
-from ..run import (main as run_main, qualify, compare_logits,
-                   require_deterministic_cublas)
+from ..run import (main as run_main, qualify, compare_logits, declared_eos_ids,
+                   require_deterministic_cublas, stratified_cases)
 from ..runtime import (HybridRuntime, model_fingerprint, rope_is_unscaled,
                        rope_theta as rope_theta_of)
 from ..study import validate_execution
@@ -45,11 +46,19 @@ class RuntimeHardeningTests(unittest.TestCase):
                    torch.zeros(1, 2048, dtype=torch.long)]
         for ids in invalid:
             with self.subTest(shape=tuple(ids.shape)), torch.inference_mode():
+                self.rt.reset()  # explicit start of a new request
                 self.rt(self.ids, use_cache=True)
                 self.assertEqual(self.rt.position, 17)
                 with self.assertRaises((ValueError, IndexError)):
                     self.rt(ids, use_cache=True)
                 self.assert_reset()
+                # The cache is clear, but a caller that catches the error and
+                # retries the chunk must say so explicitly: an implicit retry
+                # would silently restart absolute positions at zero and return
+                # a plausible, wrong continuation.
+                with self.assertRaisesRegex(RuntimeError, "aborted"):
+                    self.rt(self.ids, use_cache=True)
+                self.rt(self.ids)  # an uncached forward stays available
 
     def test_rotary_error_resets_cache(self):
         with torch.inference_mode():
@@ -284,6 +293,79 @@ class DiagnosticMetadataTests(unittest.TestCase):
                 self.assertGreater(start, 0)  # Instructions precede evidence.
             if case["family"] == "absent":
                 self.assertEqual(case["evidence_kind"], "distractor")
+
+
+class DiagnosticDecodingTests(unittest.TestCase):
+    """The R2 checkpoint declares eos_token_id 32744 in config.json but
+    [32744, 32742] in generation_config.json, and 32742 is <|endoftext|> --
+    the natural terminator for the raw-completion prompts P3 uses."""
+
+    def _checkpoint(self, root, generation_eos):
+        if generation_eos is not None:
+            (root / "generation_config.json").write_text(
+                json.dumps({"eos_token_id": generation_eos}), encoding="utf-8")
+
+    def test_declared_set_unions_config_and_generation_config(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            self._checkpoint(root, [32744, 32742])
+            cfg = SimpleNamespace(eos_token_id=32744)
+            self.assertEqual(declared_eos_ids(root, cfg, 32768), (32742, 32744))
+
+    def test_config_only_checkpoint_still_works(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            self.assertEqual(
+                declared_eos_ids(root, SimpleNamespace(eos_token_id=[7, 3]), 97), (3, 7))
+
+    def test_out_of_vocabulary_or_nonintegral_ids_are_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            for generation_eos, vocab in (([97], 97), ([-1], 97), ([True], 97), (["3"], 97)):
+                with self.subTest(eos=generation_eos):
+                    self._checkpoint(root, generation_eos)
+                    with self.assertRaises(ValueError):
+                        declared_eos_ids(root, SimpleNamespace(eos_token_id=3), vocab)
+
+    def test_a_checkpoint_declaring_no_eos_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            with self.assertRaises(ValueError):
+                declared_eos_ids(Path(d), SimpleNamespace(eos_token_id=None), 97)
+
+
+class CaseTruncationTests(unittest.TestCase):
+    def setUp(self):
+        self.cases = make_cases(CharacterTokenizer())
+
+    def test_full_budget_keeps_the_registered_order(self):
+        for limit in (len(self.cases), len(self.cases) + 10):
+            self.assertEqual(stratified_cases(self.cases, limit), self.cases)
+
+    def test_a_bare_prefix_would_have_kept_only_short_prompts(self):
+        # The defect this guards: make_cases is length-major, so cases[:36]
+        # is exactly 511/512/513 -- the lengths where a 512-wide window never
+        # evicts the evidence, i.e. the subset that cannot show window damage.
+        self.assertEqual({c["tokens"] for c in self.cases[:36]}, {511, 512, 513})
+
+    def test_truncation_stays_balanced_across_every_length(self):
+        every = {c["tokens"] for c in self.cases}
+        for limit in (6, 12, 18, 24, 36, 48, 54, 71):
+            with self.subTest(limit=limit):
+                kept = stratified_cases(self.cases, limit)
+                self.assertEqual(len(kept), limit)
+                self.assertEqual(len({c["id"] for c in kept}), limit)
+                self.assertEqual({c["tokens"] for c in kept}, every)
+                counts = Counter(c["tokens"] for c in kept)
+                self.assertLessEqual(max(counts.values()) - min(counts.values()), 1)
+
+    def test_truncation_also_spans_depths_once_each_length_can_afford_it(self):
+        # Length cycles outermost, so a limit below one case per (length, depth)
+        # cell cannot cover depths; from 18 up it can and must.
+        for limit in (18, 36, 54):
+            with self.subTest(limit=limit):
+                counts = Counter(c["depth"] for c in stratified_cases(self.cases, limit))
+                self.assertEqual(set(counts), {0.0, 0.5, 1.0})
+                self.assertLessEqual(max(counts.values()) - min(counts.values()), 1)
 
 
 class DeterministicCublasTests(unittest.TestCase):

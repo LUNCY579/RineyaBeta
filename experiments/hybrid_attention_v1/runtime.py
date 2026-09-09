@@ -153,6 +153,17 @@ class HybridRuntime(nn.Module):
                       for i in range(self.spec.layers)]
         self.position = 0
         self.stats = {}
+        self.aborted = False
+
+    def _abort(self):
+        """Clear the cache AND refuse further cached use until reset() is called.
+
+        reset() alone puts self.position back to 0, so a caller that catches a
+        streaming error and retries the same chunk would silently restart
+        absolute positions at zero and get a plausible but wrong continuation.
+        """
+        self.reset()
+        self.aborted = True
 
     def forward(self, input_ids, *, use_cache=False, last_only=False):
         # Validation, embeddings and RoPE can fail before the decoder loop too.
@@ -161,10 +172,12 @@ class HybridRuntime(nn.Module):
             return self._forward_impl(input_ids, use_cache=use_cache, last_only=last_only)
         except Exception:
             if use_cache:
-                self.reset()
+                self._abort()
             raise
 
     def _forward_impl(self, input_ids, *, use_cache=False, last_only=False):
+        if use_cache and self.aborted:
+            raise RuntimeError("Cached stream was aborted; call reset() before reusing this runtime")
         if input_ids.ndim != 2 or input_ids.shape[0] != 1 or input_ids.shape[1] < 1:
             raise ValueError("v1 accepts one nonempty, unpadded sequence; batch/packing are unsupported")
         if input_ids.dtype != torch.long:
@@ -224,7 +237,7 @@ class HybridRuntime(nn.Module):
             return logits
         except Exception:
             if use_cache:
-                self.reset()
+                self._abort()
             raise
 
     @torch.inference_mode()

@@ -120,3 +120,12 @@ context-extension or long-context quality claim is licensed by this commit.
 This evidence-only addition is under `reports/`; no executable or root-contract
 bytes change, so the tested source fingerprint remains applicable. Historical
 receipts and negative results remain intact.
+
+> **SUPERSEDED (2026-09-09).** The sentence above was true when written but is
+> no longer: commits after it rewrote `runtime.py`, `run.py`, `attention.py`,
+> `diagnostics.py` and the tests, so this report's source fingerprint does NOT
+> describe current code and its receipts cannot gate anything. Every receipt
+> preserved before that point also carries
+> `real_rineya_checkpoint_loaded: false`. See
+> `AGENT_REAL_MODEL_QUALIFICATION.md` for the first real-R2 qualification and
+> the current code identity.

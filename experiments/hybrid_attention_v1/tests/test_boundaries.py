@@ -128,6 +128,32 @@ class ScheduleEquivalenceTests(unittest.TestCase):
         self.assertEqual(len(following), window)  # yet it still sees a full window
 
 
+class CachePreconditionTests(unittest.TestCase):
+    def test_retain_refuses_positions_that_do_not_match_the_tensors(self):
+        # The realistic slip is passing the PRE-merge K/V with the POST-merge
+        # positions: eviction would then measure against the wrong token count
+        # and keep rows whose absolute positions are off by the chunk length.
+        cache = CompactKV(8, 2)
+        k = torch.zeros(1, 1, 4, 2)
+        positions = torch.arange(4)
+        with torch.inference_mode():
+            cache.retain(k, k, positions)  # matched: accepted
+            for bad_k, bad_pos in ((k, torch.arange(5)), (k, torch.arange(3)),
+                                   (torch.zeros(1, 1, 6, 2), positions)):
+                with self.subTest(keys=bad_k.shape[2], positions=len(bad_pos)):
+                    with self.assertRaises(ValueError):
+                        cache.retain(bad_k, bad_k, bad_pos)
+
+    def test_merge_still_requires_a_contiguous_append(self):
+        cache = CompactKV(8, 0)
+        k = torch.zeros(1, 1, 4, 2)
+        with torch.inference_mode():
+            cache.retain(*cache.merge(k, k, torch.arange(4)))
+            self.assertEqual(cache.seen, 4)
+            with self.assertRaises(ValueError):
+                cache.merge(k, k, torch.arange(4))  # replays positions 0..3
+
+
 class RegisteredTopologyTests(unittest.TestCase):
     """Pin the topology the protocol registers, so no refactor can drift it."""
 
