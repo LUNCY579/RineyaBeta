@@ -7,6 +7,7 @@ from fractions import Fraction
 import json
 import math
 from .config import ARMS, arm_spec
+from .diagnostics import DIAGNOSTIC_LENGTHS
 
 VERSION = 2
 # protocol.json qualification.criterion_version. v1 judged P2 by an absolute
@@ -208,7 +209,7 @@ def plan():
         spec = arm_spec(name, TARGET["num_hidden_layers"])
         rows[name] = {"spec": spec.to_dict(), "fixed_24_token_envelope": {
             str(n): inference_workload(spec, TARGET, n, MAX_NEW_TOKENS)
-            for n in (511, 512, 513, 1023, 1024, 1025)}}
+            for n in DIAGNOSTIC_LENGTHS}}
     return {"study_version": VERSION, "primary_target_shape": TARGET,
             "primary_contrast": CONTRASTS[0], "max_cases_per_arm": MAX_CASES,
             "max_arms": len(ARMS), "max_generations": MAX_CASES * len(ARMS),

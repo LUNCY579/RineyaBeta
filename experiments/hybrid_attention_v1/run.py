@@ -71,11 +71,10 @@ def _generation_config_eos(path):
 
 
 def stratified_cases(cases, limit):
-    """make_cases() emits length-major order, so a bare prefix of 36 keeps only
-    511/512/513 -- exactly the cases where a 512-wide window never evicts the
-    evidence, and therefore exactly the subset that cannot show window damage.
-    Interleave the strata so any truncation stays balanced. The full registered
-    72 keep their registered order untouched.
+    """make_cases() emits length-major order, so a bare prefix keeps only the
+    shortest prompts -- exactly the cases where the window evicts least, and so
+    the subset least able to show window damage. Interleave the strata so any
+    truncation stays balanced. The full registered 72 keep their order.
     """
     if limit >= len(cases):
         return cases

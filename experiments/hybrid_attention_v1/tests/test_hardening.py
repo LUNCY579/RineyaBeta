@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import torch
 from ..config import ARMS, Spec, arm_spec
-from ..diagnostics import make_cases
+from ..diagnostics import DIAGNOSTIC_LENGTHS, make_cases
 from ..provenance import (artifact_inventory, require_artifacts, code_identity,
                           digest, environment, require_receipt, require_unchanged_code)
 from ..run import (DRIFT_MULTIPLE, apply_criterion, compare_logits, declared_eos_ids,
@@ -422,10 +422,12 @@ class CaseTruncationTests(unittest.TestCase):
             self.assertEqual(stratified_cases(self.cases, limit), self.cases)
 
     def test_a_bare_prefix_would_have_kept_only_short_prompts(self):
-        # The defect this guards: make_cases is length-major, so cases[:36]
-        # is exactly 511/512/513 -- the lengths where a 512-wide window never
-        # evicts the evidence, i.e. the subset that cannot show window damage.
-        self.assertEqual({c["tokens"] for c in self.cases[:36]}, {511, 512, 513})
+        # The defect this guards: make_cases is length-major, so a bare prefix
+        # keeps only the shortest lengths -- the ones where the window evicts
+        # least, i.e. the subset least able to show window damage.
+        half = {c["tokens"] for c in self.cases[:36]}
+        self.assertEqual(half, set(DIAGNOSTIC_LENGTHS[:3]))
+        self.assertLess(max(half), min(DIAGNOSTIC_LENGTHS[3:]))
 
     def test_truncation_stays_balanced_across_every_length(self):
         every = {c["tokens"] for c in self.cases}

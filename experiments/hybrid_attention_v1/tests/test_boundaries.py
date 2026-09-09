@@ -14,6 +14,9 @@ from unittest.mock import patch
 import torch
 from ..attention import CompactKV, allowed_mask, blocked_attention
 from ..config import ARMS, arm_spec
+from ..diagnostics import (CASE_SET_VERSION, DIAGNOSTIC_LENGTHS,
+                           SUPERSEDED_LENGTHS_V1, make_cases)
+from .fixture import CharacterTokenizer
 
 torch.set_num_threads(1)
 
@@ -207,6 +210,53 @@ class CachePreconditionTests(unittest.TestCase):
             self.assertEqual(cache.seen, 4)
             with self.assertRaises(ValueError):
                 cache.merge(k, k, torch.arange(4))  # replays positions 0..3
+
+
+class RegisteredCaseSetTests(unittest.TestCase):
+    """Case-set v1 was mechanically incapable of moving two of the ten arms: no
+    length in it could put the evidence outside a 1024-wide window. Pin the
+    property that makes the diagnostic able to measure anything at all."""
+
+    MAX_NEW_TOKENS = 24
+
+    def setUp(self):
+        self.cases = make_cases(CharacterTokenizer())
+
+    def evidence_outside(self, case, window, sinks, position):
+        start, end = case["evidence_span"]
+        return not (end - 1 >= position - (window - sinks) + 1 or start < sinks)
+
+    def test_shape_and_budget_unchanged(self):
+        self.assertEqual(len(self.cases), 72)
+        self.assertEqual(len(DIAGNOSTIC_LENGTHS), 6)
+        self.assertEqual({c["tokens"] for c in self.cases}, set(DIAGNOSTIC_LENGTHS))
+        self.assertEqual(len({c["prompt_sha256"] for c in self.cases}), 72)
+        self.assertTrue(all(len(c["input_ids"]) == c["tokens"] for c in self.cases))
+        self.assertTrue(all(c["case_set_version"] == CASE_SET_VERSION for c in self.cases))
+
+    def test_both_registered_windows_can_lose_and_keep_the_evidence(self):
+        for window in (512, 1024):
+            for sinks in (0, 4):
+                with self.subTest(window=window, sinks=sinks):
+                    out = [c for c in self.cases
+                           if self.evidence_outside(c, window, sinks,
+                                                    c["tokens"] - 1 + self.MAX_NEW_TOKENS)]
+                    self.assertGreater(len(out), 0, "no case can show window damage")
+                    self.assertLess(len(out), len(self.cases), "no within-set control")
+
+    def test_the_superseded_lengths_could_not_move_a_1024_window(self):
+        # Records WHY the set was re-registered, so the reason cannot be lost.
+        old = make_cases(CharacterTokenizer(), lengths=SUPERSEDED_LENGTHS_V1)
+        outside = [c for c in old
+                   if self.evidence_outside(c, 1024, 4, c["tokens"] - 1 + self.MAX_NEW_TOKENS)]
+        self.assertEqual(outside, [])
+
+    def test_shortest_length_is_an_all_visible_control(self):
+        shortest = min(DIAGNOSTIC_LENGTHS)
+        for case in (c for c in self.cases if c["tokens"] == shortest):
+            for window in (512, 1024):
+                self.assertFalse(self.evidence_outside(
+                    case, window, 4, case["tokens"] - 1 + self.MAX_NEW_TOKENS))
 
 
 class RegisteredTopologyTests(unittest.TestCase):

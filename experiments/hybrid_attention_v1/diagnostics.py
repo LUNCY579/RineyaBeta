@@ -10,9 +10,18 @@ from .provenance import digest
 
 
 DIAGNOSTIC_SCHEMA_VERSION = 2
+# Case-set v2, registered 2026-09-09. v1 was (511, 512, 513, 1023, 1024, 1025):
+# measured against the window rule, NONE of its 72 cases could put the answer
+# outside a 1024-wide window, so A1_local1024 and A7_sink1024 were incapable of
+# showing a window effect, and only 12-24 of 72 could show a 512-wide one.
+# These lengths straddle the eviction threshold of BOTH registered windows and
+# keep 512 as an all-visible control. Still 6 x 4 families x 3 depths = 72.
+CASE_SET_VERSION = 2
+DIAGNOSTIC_LENGTHS = (512, 1024, 1280, 1536, 1792, 2048)
+SUPERSEDED_LENGTHS_V1 = (511, 512, 513, 1023, 1024, 1025)
 
 
-def make_cases(tokenizer, lengths=(511, 512, 513, 1023, 1024, 1025), seed=17):
+def make_cases(tokenizer, lengths=DIAGNOSTIC_LENGTHS, seed=17):
     rng = random.Random(seed)
     encode = lambda s: tokenizer.encode(s, add_special_tokens=False)
     prefix = encode("Read the records. Return only the requested value. "
@@ -59,6 +68,7 @@ def make_cases(tokenizer, lengths=(511, 512, 513, 1023, 1024, 1025), seed=17):
                               "evidence_kind": "distractor" if family == "absent" else "support_or_conflict",
                               "answer": answer, "answerable": answer != "UNKNOWN",
                               "prompt_sha256": sha, "seed": seed,
+                              "case_set_version": CASE_SET_VERSION,
                               "split": "open_synthetic_dev"})
     return cases
 

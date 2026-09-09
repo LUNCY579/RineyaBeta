@@ -4,7 +4,7 @@
   "branch": "research/hybrid-local-global-attention-v1",
   "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
   "extends_implementation_commit": "6770e67b471f4821004175d5d39a228f079b28f1",
-  "status": "p1_established_p2_amended_criterion_rerun_required",
+  "status": "p2_qualified_under_criterion_v2_p3_open",
   "study_contract": "COMPATIBILITY_CONTRACT.md",
   "analytical_planner": "python -m experiments.hybrid_attention_v1.study",
   "prior_receipts": "Historical code-specific evidence only; not authorization for this revision",
@@ -87,12 +87,12 @@
     "split": "new_open_synthetic_dev",
     "prompt_protocol": "raw completion, exact token lengths, no truncation or changed parser",
     "lengths": [
-      511,
       512,
-      513,
-      1023,
       1024,
-      1025
+      1280,
+      1536,
+      1792,
+      2048
     ],
     "depths": [
       0.0,
@@ -126,7 +126,21 @@
     "comparison": "Paired by ID/prompt/answer; named reference-treatment contrasts, strict/trimmed and answerability subsets; correlated DEV and unadjusted McNemar never confirmatory",
     "gate_identity": "A0=A4, A2=A5, A3=A6 token-for-token before training or reject diagnostic",
     "execution_guard": "Compare observed score-rectangle elements, attention-matmul work and each layer resident KV with planner using actual generated length",
-    "timing": "Descriptive only; fixed arm order, no isolation proof, no causal speed claim"
+    "timing": "Descriptive only; fixed arm order, no isolation proof, no causal speed claim",
+    "case_set_version": 2,
+    "superseded_lengths_v1": {
+      "lengths": [
+        511,
+        512,
+        513,
+        1023,
+        1024,
+        1025
+      ],
+      "why": "measured against the window rule, 0 of 72 cases could put the answer outside a 1024-wide window, so A1_local1024 and A7_sink1024 could not exhibit a window effect at all; only 12 of 72 at question-read (24 of 72 by end of generation) could do so for a 512-wide window",
+      "registered_before_any_p3_run": true
+    },
+    "length_rationale": "these straddle the eviction threshold of BOTH registered windows; 512 remains an all-visible control; still 6 lengths x 4 families x 3 depths = 72 cases, within every registered budget"
   },
   "compute_matching": {
     "frozen": "Hold checkpoint/data/order/precision/backend/chunking/decoder fixed; report visible pairs, issued rectangles, full modeled matmuls and actual EOS length separately",

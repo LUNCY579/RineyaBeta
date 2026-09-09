@@ -15,7 +15,7 @@ from typing import Any, Mapping
 
 from .config import ARMS, arm_spec
 from .provenance import digest
-from .study import (CONTRASTS as FROZEN_CONTRASTS, TARGET, SEEDS, MAX_CASES,
+from .study import (CONTRASTS as FROZEN_CONTRASTS, DIAGNOSTIC_LENGTHS, TARGET, SEEDS, MAX_CASES,
                     MAX_BLOCK_SIZE, MAX_NEW_TOKENS, assert_target_config, plan,
                     _positive_int as positive_int)
 
@@ -76,7 +76,7 @@ def audit_pair(left: Mapping[str, Any], right: Mapping[str, Any], *, contrast: s
     if left["backend"] not in ("math", "sdpa"):
         raise ValueError("Unregistered backend")
     if (left["max_new_tokens"] != MAX_NEW_TOKENS
-            or left["context_length"] not in (511, 512, 513, 1023, 1024, 1025)
+            or left["context_length"] not in DIAGNOSTIC_LENGTHS
             or not 1 <= left["block_size"] <= MAX_BLOCK_SIZE
             or not 1 <= left["evaluation_cases"] <= MAX_CASES):
         raise ValueError("Unregistered diagnostic budget")

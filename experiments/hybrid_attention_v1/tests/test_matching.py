@@ -15,7 +15,7 @@ from ..study import TARGET, CONTRASTS as STUDY_CONTRASTS, plan
 def record(arm, trained=False):
     r = {key: "fixture-identity-not-a-real-receipt" for key in COMMON_IDS}
     r.update(arm=arm, backend="math", dtype="float32", quantization="none",
-             context_length=1025, batch_size=1, block_size=128, prefill_chunk_size=128,
+             context_length=2048, batch_size=1, block_size=128, prefill_chunk_size=128,
              evaluation_cases=72, max_new_tokens=24, packing=False, unpadded=True,
              target_config=dict(TARGET), spec=arm_spec(arm, 28).to_dict(),
              source_receipt_id="fixture-receipt-not-authenticated",
