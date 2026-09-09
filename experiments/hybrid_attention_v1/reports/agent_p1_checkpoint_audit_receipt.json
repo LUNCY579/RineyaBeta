@@ -1,0 +1,38 @@
+{
+  "artifacts": {
+    "checkpoint_inventory.json": {
+      "bytes": 1916,
+      "sha256": "d966c25eded2bf22ec9fbf08a66c08958040f4ebc4a5dfa16c39650bb3891660"
+    }
+  },
+  "backend": "math",
+  "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+  "block_size": 128,
+  "checkpoint_id": "409eb848c56983377c5d9d975b1deffdbfced992aaee35b349a1a36ffadb6fab",
+  "checkpoint_unchanged": true,
+  "code_identity": "a60874bfb6ba64a3651b064a7dbccffbb8632fefb1b9c5e79adcf0ef2f695e77",
+  "environment": {
+    "cuda_runtime": "12.4",
+    "device": "cpu",
+    "device_name": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "dtype": "float32",
+    "packages": {
+      "safetensors": "0.8.0",
+      "tokenizers": "0.22.2",
+      "torch": "2.6.0+cu124",
+      "transformers": "5.14.1"
+    },
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "torch_threads": 1
+  },
+  "licenses_sealed_evaluation": false,
+  "licenses_training": false,
+  "passed": true,
+  "quality_improvement_established": false,
+  "receipt_sha256": "e26076709aa626f411caa9a3b77bce1a0644186fdb7b768cd56b1f797d93750f",
+  "source_unchanged": true,
+  "stage": "local_checkpoint_audit",
+  "study_version": 2,
+  "timing_causal": false
+}

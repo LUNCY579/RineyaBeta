@@ -1,0 +1,249 @@
+{
+  "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+  "code_identity": "a60874bfb6ba64a3651b064a7dbccffbb8632fefb1b9c5e79adcf0ef2f695e77",
+  "environment": {
+    "cuda_runtime": "12.4",
+    "device": "cpu",
+    "device_name": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "dtype": "float32",
+    "packages": {
+      "safetensors": "0.8.0",
+      "tokenizers": "0.22.2",
+      "torch": "2.6.0+cu124",
+      "transformers": "5.14.1"
+    },
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "torch_threads": 1
+  },
+  "errors": [],
+  "failures": [],
+  "licenses_sealed_evaluation": false,
+  "licenses_training": false,
+  "native_hf_available": true,
+  "passed": true,
+  "quality_improvement_established": false,
+  "real_rineya_checkpoint_loaded": false,
+  "receipt_sha256": "a924d3ad72a92c45a784f15084a59ecebdb68c8111438f446cd0856effe49e36",
+  "shape_probe": {
+    "analytical_all_global_kv_bytes": 235110400,
+    "attention_stats": {
+      "attention_matmul_flops": 4026531840,
+      "calls": 9,
+      "issued_score_elements": 7864320,
+      "max_key_tokens": 639,
+      "max_mask_elements": 81792
+    },
+    "dtype": "float32",
+    "evidence": "synthetic tensors with R2 dimensions; NOT a Rineya forward",
+    "expected_kv_bytes": 146857984,
+    "layer_cache_metrics": [
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 8396800,
+        "position_bytes": 8200,
+        "resident_kv_bytes": 8396800,
+        "retained_tokens": 1025,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 8396800,
+        "position_bytes": 8200,
+        "resident_kv_bytes": 8396800,
+        "retained_tokens": 1025,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 8396800,
+        "position_bytes": 8200,
+        "resident_kv_bytes": 8396800,
+        "retained_tokens": 1025,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 8396800,
+        "position_bytes": 8200,
+        "resident_kv_bytes": 8396800,
+        "retained_tokens": 1025,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 8396800,
+        "position_bytes": 8200,
+        "resident_kv_bytes": 8396800,
+        "retained_tokens": 1025,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 8396800,
+        "position_bytes": 8200,
+        "resident_kv_bytes": 8396800,
+        "retained_tokens": 1025,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 4194304,
+        "position_bytes": 4096,
+        "resident_kv_bytes": 4194304,
+        "retained_tokens": 512,
+        "seen_tokens": 1025
+      },
+      {
+        "logical_kv_bytes": 8396800,
+        "position_bytes": 8200,
+        "resident_kv_bytes": 8396800,
+        "retained_tokens": 1025,
+        "seen_tokens": 1025
+      }
+    ],
+    "layers": 28,
+    "measured_resident_kv_bytes": 146857984,
+    "peak_process_memory_measured": false,
+    "tokens": 1025
+  },
+  "skipped": [],
+  "source_unchanged": true,
+  "stage": "cpu_fixture_qualification",
+  "tests_passed": 103,
+  "tests_run": 103,
+  "timing_causal": false
+}

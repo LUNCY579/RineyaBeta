@@ -1,0 +1,910 @@
+{
+  "artifacts": {
+    "checkpoint_inventory.json": {
+      "bytes": 1916,
+      "sha256": "d966c25eded2bf22ec9fbf08a66c08958040f4ebc4a5dfa16c39650bb3891660"
+    }
+  },
+  "backend": "sdpa",
+  "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+  "block_size": 128,
+  "checkpoint_id": "409eb848c56983377c5d9d975b1deffdbfced992aaee35b349a1a36ffadb6fab",
+  "checkpoint_unchanged": true,
+  "checks": {
+    "all_local_stream": {
+      "argmax_identical": true,
+      "attended_positions_identical": true,
+      "cache": [
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        }
+      ],
+      "compact_storage": true,
+      "first_divergent_layer": null,
+      "max_abs_error": 9.679794311523438e-05,
+      "passed": false
+    },
+    "frontloaded_stream": {
+      "argmax_identical": true,
+      "attended_positions_identical": true,
+      "cache": [
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        }
+      ],
+      "compact_storage": true,
+      "first_divergent_layer": null,
+      "max_abs_error": 0.00011157989501953125,
+      "passed": false
+    },
+    "gate_identity": {
+      "argmax_identical": true,
+      "max_abs_error": 0.0,
+      "passed": true
+    },
+    "global_stream": {
+      "argmax_identical": true,
+      "attended_positions_identical": true,
+      "first_divergent_layer": null,
+      "max_abs_error": 3.147125244140625e-05,
+      "passed": true
+    },
+    "local_stream": {
+      "argmax_identical": true,
+      "attended_positions_identical": true,
+      "cache": [
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        }
+      ],
+      "compact_storage": true,
+      "first_divergent_layer": null,
+      "max_abs_error": 6.4849853515625e-05,
+      "passed": false
+    },
+    "native_global": {
+      "argmax_identical": true,
+      "max_abs_error": 2.765655517578125e-05,
+      "passed": false
+    },
+    "sink_stream": {
+      "argmax_identical": true,
+      "attended_positions_identical": true,
+      "cache": [
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 65536,
+          "position_bytes": 64,
+          "resident_kv_bytes": 65536,
+          "retained_tokens": 8,
+          "seen_tokens": 17
+        },
+        {
+          "logical_kv_bytes": 139264,
+          "position_bytes": 136,
+          "resident_kv_bytes": 139264,
+          "retained_tokens": 17,
+          "seen_tokens": 17
+        }
+      ],
+      "compact_storage": true,
+      "first_divergent_layer": null,
+      "max_abs_error": 3.147125244140625e-05,
+      "passed": true
+    }
+  },
+  "code_identity": "eb2dd6c5b1ffd56da868d977d99dd233ec0e83bcc98344fe3a7dcdd30806b8ea",
+  "cuda_preflight": {
+    "allocator_cap_mib": 6144,
+    "free_bytes": 7411335168,
+    "total_bytes": 8585216000
+  },
+  "environment": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_runtime": "12.4",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "dtype": "float32",
+    "packages": {
+      "safetensors": "0.8.0",
+      "tokenizers": "0.22.2",
+      "torch": "2.6.0+cu124",
+      "transformers": "5.14.1"
+    },
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "torch_threads": 1
+  },
+  "licenses_sealed_evaluation": false,
+  "licenses_training": false,
+  "model_fingerprint": {
+    "attention_scaling": [
+      0.08838834764831845
+    ],
+    "attn_implementation": "eager",
+    "class": "Qwen3ForCausalLM",
+    "distinct_parameter_count": 474021888,
+    "head_dim": 128,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "layers": 28,
+    "max_position_embeddings": 40960,
+    "model_type": "qwen3",
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "parameter_dtypes": [
+      "torch.float32"
+    ],
+    "rope_theta_effective": 1000000,
+    "rope_unscaled": true,
+    "tied_output_embedding": true,
+    "vocab_size": 32768
+  },
+  "passed": false,
+  "quality_improvement_established": false,
+  "receipt_sha256": "e2eb1c239567debb203d32f9e51313e23aeeb4446c77525bb6eefce3c341591e",
+  "source_unchanged": true,
+  "stage": "real_model_qualification",
+  "study_version": 2,
+  "timing_causal": false
+}
