@@ -3,6 +3,7 @@ import copy
 from dataclasses import replace
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -13,8 +14,9 @@ import torch
 from ..config import ARMS, Spec, arm_spec
 from ..diagnostics import make_cases
 from ..provenance import (artifact_inventory, require_artifacts, code_identity,
-                          digest, require_receipt, require_unchanged_code)
-from ..run import main as run_main, qualify, compare_logits
+                          digest, environment, require_receipt, require_unchanged_code)
+from ..run import (main as run_main, qualify, compare_logits,
+                   require_deterministic_cublas)
 from ..runtime import (HybridRuntime, model_fingerprint, rope_is_unscaled,
                        rope_theta as rope_theta_of)
 from ..study import validate_execution
@@ -282,6 +284,34 @@ class DiagnosticMetadataTests(unittest.TestCase):
                 self.assertGreater(start, 0)  # Instructions precede evidence.
             if case["family"] == "absent":
                 self.assertEqual(case["evidence_kind"], "distractor")
+
+
+class DeterministicCublasTests(unittest.TestCase):
+    """Without this the entire --device cuda path raises before loading a model,
+    which is why no CUDA receipt has ever been produced for this experiment."""
+
+    def test_unset_config_is_populated(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("CUBLAS_WORKSPACE_CONFIG", None)
+            self.assertEqual(require_deterministic_cublas(), ":4096:8")
+            self.assertEqual(os.environ["CUBLAS_WORKSPACE_CONFIG"], ":4096:8")
+
+    def test_both_deterministic_configs_are_preserved(self):
+        for value in (":4096:8", ":16:8"):
+            with self.subTest(value=value), patch.dict(
+                    os.environ, {"CUBLAS_WORKSPACE_CONFIG": value}):
+                self.assertEqual(require_deterministic_cublas(), value)
+
+    def test_nondeterministic_config_is_refused(self):
+        for value in ("", ":0:0", "garbage"):
+            with self.subTest(value=value), patch.dict(
+                    os.environ, {"CUBLAS_WORKSPACE_CONFIG": value}):
+                with self.assertRaises(RuntimeError):
+                    require_deterministic_cublas()
+
+    def test_environment_records_the_setting(self):
+        with patch.dict(os.environ, {"CUBLAS_WORKSPACE_CONFIG": ":16:8"}):
+            self.assertEqual(environment()["cublas_workspace_config"], ":16:8")
 
 
 class RopeCompatibilityTests(unittest.TestCase):

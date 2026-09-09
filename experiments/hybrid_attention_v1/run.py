@@ -1,5 +1,6 @@
 """CLI: plan -> audit -> qualify -> open diagnostic. Training/sealed stages stay closed."""
 import argparse
+import os
 from dataclasses import replace
 import json
 import math
@@ -53,6 +54,21 @@ def compare_logits(a, b):
 
 # Registered mechanical chunk boundaries (protocol.json qualification block).
 CHUNKS = ((0, 7), (7, 8), (8, 17))
+# torch.use_deterministic_algorithms(True) refuses every CuBLAS GEMM on CUDA
+# >= 10.2 unless a workspace config is set before the handle is created, so
+# without this the whole --device cuda path raises before touching the model.
+DETERMINISTIC_CUBLAS = (":4096:8", ":16:8")
+
+
+def require_deterministic_cublas():
+    current = os.environ.get("CUBLAS_WORKSPACE_CONFIG")
+    if current is None:
+        os.environ["CUBLAS_WORKSPACE_CONFIG"] = DETERMINISTIC_CUBLAS[0]
+    elif current not in DETERMINISTIC_CUBLAS:
+        raise RuntimeError(
+            f"CUBLAS_WORKSPACE_CONFIG={current!r} defeats deterministic CuBLAS; "
+            f"unset it or use one of {DETERMINISTIC_CUBLAS}")
+    return os.environ["CUBLAS_WORKSPACE_CONFIG"]
 
 
 @torch.inference_mode()
@@ -151,6 +167,7 @@ def main(argv=None):
                "licenses_training": False, "licenses_sealed_evaluation": False,
                "timing_causal": False, "quality_improvement_established": False}
     try:
+        require_deterministic_cublas()
         torch.set_num_threads(args.threads)
         torch.manual_seed(17)
         torch.use_deterministic_algorithms(True)

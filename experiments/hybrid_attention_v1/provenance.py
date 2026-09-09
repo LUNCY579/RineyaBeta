@@ -2,6 +2,7 @@
 import hashlib
 import importlib.metadata
 import json
+import os
 import platform
 import re
 from pathlib import Path
@@ -38,6 +39,7 @@ def environment(device="cpu"):
             versions[name] = None
     return {"python": platform.python_version(), "platform": platform.platform(),
             "packages": versions, "device": device, "dtype": "float32",
+            "cublas_workspace_config": os.environ.get("CUBLAS_WORKSPACE_CONFIG"),
             "torch_threads": torch.get_num_threads(),
             "cuda_runtime": torch.version.cuda,
             "device_name": torch.cuda.get_device_name(0) if device == "cuda" else platform.processor()}
