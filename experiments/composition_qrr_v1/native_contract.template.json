@@ -1,0 +1,22 @@
+{
+  "schema": "qrr.native-contract/1",
+  "status": "REVIEW_REQUIRED",
+  "reviewed_by": null,
+  "target": "R2",
+  "prompt_protocol": "raw_completion",
+  "source_identity": null,
+  "assets": null,
+  "runtime": {
+    "class": "Qwen3ForCausalLM",
+    "backend": "eager",
+    "device": "cuda:0",
+    "dtype": "bfloat16",
+    "torch": null,
+    "transformers": null,
+    "python": null,
+    "cuda_runtime": null,
+    "cuda_device_name": null
+  },
+  "limits": {"prompt_tokens": 4096, "new_tokens": 24, "cases": 96},
+  "eos_token_ids": [32744]
+}

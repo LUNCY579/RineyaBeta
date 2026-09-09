@@ -1,0 +1,71 @@
+{
+  "schema": "qrr.programme/1",
+  "programme": "composition-qrr-v1",
+  "branch": "research/composition-qrr-v1",
+  "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+  "status": "IMPLEMENTATION_WITH_CPU_FIXTURE_VALIDATION",
+  "authority_note": "User authorized a new RineyaBeta branch and cloud code changes. This does not populate absent model identities, budgets or efficacy evidence.",
+  "primary_target": "R2; artifacts/rineya-core-en32k-28L; exact local weights still required",
+  "secondary_target": "Supa-A1.1; future separate loader and qualification, not implemented by relabeling R2",
+  "stages": {
+    "E00": "Source pins and strict inventory implementation; real asset inventory unrun",
+    "E01": "R2 frozen runtime qualification and open-DEV runner implemented, native unrun; foreign matrix deferred",
+    "E02": "World-first bank, independent oracle, direct/evidence/binding ladder implemented; model extraction and transfer deferred",
+    "E03": "CLOSED: training-only microfit needs explicit approved budget and native trainable-path qualification",
+    "E04": "CLOSED: conventional operator-learning screen requires E03 and data/objective/seed contract",
+    "E05": "QRR-1 tensor prototype and matched MLP implemented; native integration, training and efficacy unrun",
+    "E06": "HLGA remains on its separate unmodified branch and contract",
+    "E07_E09": "Deferred: indexer, native scaling, distillation and deployment"
+  },
+  "bank": {
+    "split": "open_dev",
+    "default_worlds": 8,
+    "max_worlds": 64,
+    "operators": ["lookup", "next", "next2", "count_red", "count_blue", "missing"],
+    "renderers": ["table", "prose"],
+    "cases_per_world": 12,
+    "arms": ["direct", "oracle_evidence", "oracle_binding"],
+    "max_padding_lines": 128,
+    "gold_to_prompt": false,
+    "held_out_generalization_established": false
+  },
+  "native_bounds": {
+    "max_prompt_tokens": 4096,
+    "max_new_tokens": 24,
+    "max_cases": 768,
+    "max_generations": 2304,
+    "checkpoint_writes": false,
+    "remote_downloads": false,
+    "trust_remote_code": false,
+    "precision": "Explicit reviewed realization; never silently inherited from Supa or HLGA",
+    "cache_qualification": "3 probes x 4 forced mechanical steps; full/cached allclose and exact argmax; dtype-specific prespecified tolerance",
+    "timings": "Descriptive fixed-order only; no causal speed claims"
+  },
+  "qrr": {
+    "hidden": 1024,
+    "rank": 64,
+    "reads": [1, 2, 4],
+    "tied_parameters": 282624,
+    "matched_mlp_width": 138,
+    "matched_mlp_parameters": 282624,
+    "untied_two_read_control": true,
+    "initialization": "Zero output matrix only; first backward opens output, controller gradient checked after explicit perturbation",
+    "causality": "Visible AND key_position <= query_position; upstream hidden states must already be causal",
+    "integration": "Explicit logit-residual seam only; not an HF generate/cache hook",
+    "compute_matched": false,
+    "native_qualified": false
+  },
+  "confirmation": {
+    "status": "UNREGISTERED",
+    "primary_contrast": null,
+    "sample_size": null,
+    "training_token_budget": null,
+    "minimum_effect_pp_proposed": 5.0,
+    "preservation_margin_pp_proposed": 2.0,
+    "seeds_proposed": 3,
+    "proposals_are_authority": false
+  },
+  "licenses_training": false,
+  "licenses_sealed_evaluation": false,
+  "established_quality_improvement": false
+}
