@@ -41,7 +41,7 @@ jobs:
             if [ -d "experiments/$name/tests" ]; then tests+=("experiments/$name/tests"); fi
           done
           python -m compileall -q experiments/official_family_v1
-          python -m pytest -c /dev/null -q "${tests[@]}" --junitxml=family-tests.xml 2>&1 | tee family-tests.log
+          python -m pytest -c /dev/null --import-mode=importlib -q "${tests[@]}" --junitxml=family-tests.xml 2>&1 | tee family-tests.log
           python - <<'PY'
           import json, pathlib, xml.etree.ElementTree as ET
           root = ET.parse('family-tests.xml').getroot()
