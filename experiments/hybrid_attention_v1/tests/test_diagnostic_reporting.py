@@ -129,3 +129,53 @@ class ReadoutV2Tests(unittest.TestCase):
         self.assertEqual(cell["terminated_rate"], 0.5)
         self.assertEqual(cell["answerable_accuracy"], 1.0)
         self.assertEqual(cell["answerable_accuracy_trimmed"], 0.5)
+
+
+class StopTokenContentTests(unittest.TestCase):
+    """A newline stop token can carry CONTENT. Dropping the whole token turns
+    'UNKNOWN.' into 'UNKNOWN' and scores a wrong answer correct -- and it does
+    so at different rates per arm, so it would bias the contrasts. Caught by
+    comparing readout v1 and v2 first lines: A0 matched 72/72 but A1 only
+    26/72, every mismatch of this exact shape."""
+
+    def _case(self, answer="UNKNOWN"):
+        return {"id": "dev-0018", "family": "absent", "depth": 0.0, "tokens": 512,
+                "answerable": False, "prompt_sha256": "x", "answer": answer,
+                "evidence_span": [20, 30], "question_span": [500, 512],
+                "evidence_to_question_gap": 470, "evidence_kind": "distractor"}
+
+    def _readout(self, token_texts, stop_kind):
+        """Reproduce run.py's trimming rule over decoded token pieces."""
+        pieces = list(token_texts)
+        if stop_kind == "eos":
+            pieces = pieces[:-1]
+        return "".join(pieces)
+
+    def test_content_bearing_stop_token_is_kept(self):
+        # Model emitted 'UNKNOWN' then the single token '.\n'.
+        text = self._readout([" UNKNOWN", ".\n"], "stop_sequence")
+        row = score(self._case(), text,
+                    {"token_ids": [1, 2], "stopped_eos": True, "budget_exhausted": False,
+                     "stop_token_id": 280, "stop_kind": "stop_sequence"})
+        self.assertEqual(row["first_line"], "UNKNOWN.")
+        self.assertFalse(row["first_content_exact"])  # 'UNKNOWN.' != 'UNKNOWN'
+        self.assertFalse(row["trimmed_exact"])
+        self.assertFalse(row["abstained"])
+
+    def test_pure_special_stop_token_is_dropped(self):
+        text = self._readout([" UNKNOWN", "<|im_end|>"], "eos")
+        row = score(self._case(), text,
+                    {"token_ids": [1, 2], "stopped_eos": True, "budget_exhausted": False,
+                     "stop_token_id": 32744, "stop_kind": "eos"})
+        self.assertEqual(row["first_line"], "UNKNOWN")
+        self.assertTrue(row["first_content_exact"])
+        self.assertTrue(row["abstained"])
+
+    def test_a_bare_newline_stop_leaves_the_answer_intact(self):
+        text = self._readout([" 64285", "\n"], "stop_sequence")
+        row = score(self._case("64285"), text,
+                    {"token_ids": [1, 2], "stopped_eos": True, "budget_exhausted": False,
+                     "stop_token_id": 198, "stop_kind": "stop_sequence"})
+        self.assertEqual(row["first_line"], "64285")
+        self.assertTrue(row["first_content_exact"])
+        self.assertTrue(row["trimmed_exact"])

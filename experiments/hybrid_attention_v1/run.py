@@ -370,7 +370,14 @@ def main(argv=None):
                         gen["stop_kind"] = ("eos" if gen["stop_token_id"] in eos
                                             else "stop_sequence") if gen["stopped_eos"] else None
                         work = validate_execution(rt.spec, model.config, case, gen)
-                        text_ids = gen["token_ids"][:-1] if gen["stopped_eos"] else gen["token_ids"]
+                        # Drop the stop token ONLY when it is a pure special
+                        # token. A newline stop may be a token like ".\n" that
+                        # carries content, and discarding it would silently turn
+                        # "UNKNOWN." into "UNKNOWN" -- scoring a wrong answer as
+                        # correct, and doing so at different rates per arm.
+                        text_ids = gen["token_ids"]
+                        if gen["stop_kind"] == "eos":
+                            text_ids = text_ids[:-1]
                         text = tokenizer.decode(text_ids, skip_special_tokens=False,
                                                 clean_up_tokenization_spaces=False)
                         row = score(case, text, gen)
