@@ -63,8 +63,11 @@ self-declaration, not an independent attestation.
 
 ## P2 -- mechanical qualification: FAILED, and the instrument is why
 
-Four runs on one code identity `eb2dd6c5b1ff`, all
-`checkpoint_unchanged: true`, `source_unchanged: true`. `max_abs_error`,
+Four runs on the single final code identity `b908c5106b1b`, all
+`checkpoint_unchanged: true`, `source_unchanged: true`. (An earlier matrix at
+`eb2dd6c5b1ff`, before the audit fixes, produced numerically identical
+figures, so the result reproduces across the intervening changes.)
+`max_abs_error`,
 P = passed / F = failed against the registered `atol = rtol = 2e-05`:
 
 | check | cpu/math | cpu/sdpa | cuda/math | cuda/sdpa |
