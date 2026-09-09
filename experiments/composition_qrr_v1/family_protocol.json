@@ -1,0 +1,18 @@
+{
+  "schema": "rineya.qrr-family-protocol/1",
+  "experiment": "composition_qrr_official_family_v1",
+  "branch": "research/composition-qrr-official-family-v1",
+  "parent_commit": "690dcf27ee48512369fc2f3ca02603dee06ddfba",
+  "profiles": ["supa-1.7.0", "nimbus-1.6.0", "halo-1.2.0"],
+  "recommended_first_profile": "supa-1.7.0",
+  "prompt_protocol": "raw_completion",
+  "limits": {"prompt_tokens": 4096, "new_tokens": 24, "cases": 768},
+  "dtype": "float32",
+  "backend": "eager",
+  "stage_order": ["prepare", "human review", "qualify", "diagnose"],
+  "evidence_transfer_from_R2": false,
+  "licenses_training": false,
+  "qrr_native_qualified": false,
+  "sealed_evaluation_authorized": false,
+  "quality_claim_authorized": false
+}
