@@ -1,0 +1,133 @@
+{
+  "artifacts": {
+    "A0_global.json": {
+      "bytes": 635573,
+      "sha256": "f123113b704e3b95931172124bd67ff0de5a72503d732cdd6e3f322ad663041e"
+    },
+    "A1_local1024.json": {
+      "bytes": 631957,
+      "sha256": "b290595aaa949740003cf9e5976553dac378c60922fa5faf6f464ea62c0f048b"
+    },
+    "A2_local512.json": {
+      "bytes": 631113,
+      "sha256": "25a4688f7c8a864ccfbc5c6fbca4e18fcfc4edf39ca224c8f37869888cdc6ce4"
+    },
+    "A3_sink512.json": {
+      "bytes": 629860,
+      "sha256": "da2de6291a5f3a92006b9411723a4a1729a694671b273867432c525799ef5b08"
+    },
+    "A4_global_gate.json": {
+      "bytes": 636724,
+      "sha256": "afce40c066db78bc1ad9fb9ecdb3823170de4b65e21c73197805b98df91654d7"
+    },
+    "A5_local512_gate.json": {
+      "bytes": 632264,
+      "sha256": "612c4b039b001e8e88e9bb7d2b130a415b495d177b29f63d51a1e3387bb97e6a"
+    },
+    "A6_sink512_gate.json": {
+      "bytes": 631010,
+      "sha256": "4a2f1e6a1b6d311b974b257b63c9275d9a071303fcea83014ffeb4effb501fd5"
+    },
+    "A7_sink1024.json": {
+      "bytes": 630504,
+      "sha256": "ba807e4a96747281f6f6ecc6405e353744b8264959d2bcfae80e36716171c347"
+    },
+    "A8_all_local512.json": {
+      "bytes": 629911,
+      "sha256": "dcc60c3c6f82f33b7dbb426d1bcf03536647d17ee0102547e9e6bddbbe892089"
+    },
+    "A9_frontloaded512.json": {
+      "bytes": 632088,
+      "sha256": "ab742c9f42aed0d20ea1a8ff84e1ba70cccb1750ecf39962e42aca07609f286c"
+    },
+    "checkpoint_inventory.json": {
+      "bytes": 1916,
+      "sha256": "d966c25eded2bf22ec9fbf08a66c08958040f4ebc4a5dfa16c39650bb3891660"
+    },
+    "open_dev_cases.json": {
+      "bytes": 1281311,
+      "sha256": "893971b1b8036511b942c032f89979bc7a0921e80eb2da141e73396eca9ca3ac"
+    },
+    "summary.json": {
+      "bytes": 468441,
+      "sha256": "9e3e9a2dc5b2e44409afca69f24b815f3ba56ab71a47592171085a53b9340df5"
+    },
+    "workload_envelope.json": {
+      "bytes": 52409,
+      "sha256": "f60ab6c092fcc79cf120857142f8340eac9f433fe16e20c5786b71592aa748bd"
+    }
+  },
+  "authorizing_receipt": {
+    "checkpoint_id": "409eb848c56983377c5d9d975b1deffdbfced992aaee35b349a1a36ffadb6fab",
+    "code_identity": "0718c7a1c0198c1460bf4f70f0946a21c8fb2e1b11b787068b7acb3d4114562e",
+    "path": "experiments\\hybrid_attention_v1\\runs\\hlga-p2-gate-20260909-cuda-math\\receipt.json",
+    "receipt_sha256": "04c9bd5452fc4b095a1678d3cff6b541416156cf985114b93ca449f4d7cd657e",
+    "run_id": "hlga-p2-gate-20260909-cuda-math"
+  },
+  "backend": "math",
+  "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+  "block_size": 128,
+  "checkpoint_id": "409eb848c56983377c5d9d975b1deffdbfced992aaee35b349a1a36ffadb6fab",
+  "checkpoint_unchanged": true,
+  "code_identity": "0718c7a1c0198c1460bf4f70f0946a21c8fb2e1b11b787068b7acb3d4114562e",
+  "cuda_preflight": {
+    "allocator_cap_mib": 6144,
+    "free_bytes": 7411335168,
+    "total_bytes": 8585216000
+  },
+  "diagnostic_id": "7fce6dc35b9ca06de1114b34b0f475ebc193047878be66813683b7740b7e1d65",
+  "environment": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_runtime": "12.4",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "dtype": "float32",
+    "packages": {
+      "safetensors": "0.8.0",
+      "tokenizers": "0.22.2",
+      "torch": "2.6.0+cu124",
+      "transformers": "5.14.1"
+    },
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "torch_threads": 1
+  },
+  "eos_token_ids": [
+    32742,
+    32744
+  ],
+  "licenses_sealed_evaluation": false,
+  "licenses_training": false,
+  "model_fingerprint": {
+    "attention_scaling": [
+      0.08838834764831845
+    ],
+    "attn_implementation": "eager",
+    "class": "Qwen3ForCausalLM",
+    "distinct_parameter_count": 474021888,
+    "head_dim": 128,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "layers": 28,
+    "max_position_embeddings": 40960,
+    "model_type": "qwen3",
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "parameter_dtypes": [
+      "torch.float32"
+    ],
+    "rope_theta_effective": 1000000,
+    "rope_unscaled": true,
+    "tied_output_embedding": true,
+    "vocab_size": 32768
+  },
+  "n_cases": 72,
+  "passed": true,
+  "quality_improvement_established": false,
+  "receipt_sha256": "ebec8ec61d474487cc78b2fe7be04845a4805fa8023cad8b7ba41021b83a8a64",
+  "run_id": "hlga-p3-20260909-cuda-math",
+  "source_unchanged": true,
+  "stage": "open_synthetic_diagnostic",
+  "study_version": 2,
+  "timing_causal": false
+}
