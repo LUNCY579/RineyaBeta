@@ -1,0 +1,120 @@
+{
+  "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+  "branch": "research/composition-qrr-v1",
+  "cloud_byte_verification": {
+    "exact_match": true,
+    "full_local_repository_clone": false,
+    "github_created_root_tree": "80c97b6987fe35b689798822fe921aecef8bbd83",
+    "inherited_file_changes": 0,
+    "local_added_files": 18,
+    "method": "Reconstructed Git blob/tree hashes from tested local bytes plus verified immutable base tree entries",
+    "reconstructed_root_tree": "80c97b6987fe35b689798822fe921aecef8bbd83"
+  },
+  "compileall": {
+    "command": "python -m compileall -q experiments/composition_qrr_v1",
+    "exit_code": 0
+  },
+  "coverage": [
+    "Independent list and map/successor oracles across 200 worlds",
+    "World identity preserved across length/position variants; counterfactual answers differ",
+    "Gold excluded from prompts; oracle arms explicitly labeled",
+    "Formatting and abstention separated from semantic correctness",
+    "Future/padding evidence exclusion, masked NaNs, batch and request isolation",
+    "Zero-output identity and first-step output-gradient liveness",
+    "Controller gradient liveness after explicit output perturbation",
+    "Matched tied-read initialization and exact parameter counts",
+    "Toy full/cached parity and intentionally broken-cache rejection",
+    "Later-token bias divergence rejects invalid saved-prefix reuse",
+    "Changing snapshots, LFS pointers, symlinks, invalid JSON and overwrites rejected"
+  ],
+  "environment": {
+    "cuda_available": false,
+    "python": "3.13.5",
+    "torch": "2.10.0+cpu",
+    "transformers_installed": false
+  },
+  "established_quality_improvement": false,
+  "evidence_class": "CPU_SOFTWARE_AND_TENSOR_FIXTURES_ONLY",
+  "instrument_stress_check": {
+    "audit": {
+      "cases": 768,
+      "limitations": "Two renderers; no held-out language or structural generalization claim",
+      "oracle_agreement": true,
+      "passed": true,
+      "split": "open_dev",
+      "worlds": 64
+    },
+    "build_command": "python -m experiments.composition_qrr_v1 build-bank --worlds 64 --seed 43 --out NEW_PATH.json",
+    "cases_sha256": "a50099088e7d8173740907da922b6501fc6ee40c62d7803c31e5567d30a94ac1",
+    "llm_generations": 0,
+    "meaning": "Generator/oracle validation, not model accuracy"
+  },
+  "licenses_sealed_evaluation": false,
+  "licenses_training": false,
+  "native_qrr_integration": "NOT_IMPLEMENTED_BEYOND_EXPLICIT_LOGIT_RESIDUAL_SEAM",
+  "negative_cli_checks": {
+    "unregistered_training_command_exit_code": 2,
+    "unreviewed_native_contract_created_receipt": false,
+    "unreviewed_native_contract_exit_code": 2,
+    "unreviewed_native_contract_output": "BLOCKED: A separately reviewed frozen-only native contract is required"
+  },
+  "next_required_action": "Independently inventory/review actual R2 assets and runtime; qualify frozen full/cached behavior before the open-DEV ladder. Native QRR qualification and training are separate later stages.",
+  "observed_at_utc": "2026-09-09T04:48:05.422845+00:00",
+  "optimizer_steps": 0,
+  "parameter_audit": {
+    "arms": [
+      {
+        "arm": "qrr_1_tied",
+        "native_qualified": false,
+        "parameters": 282624,
+        "reads": 1
+      },
+      {
+        "arm": "qrr_2_tied",
+        "native_qualified": false,
+        "parameters": 282624,
+        "reads": 2
+      },
+      {
+        "arm": "qrr_4_tied",
+        "native_qualified": false,
+        "parameters": 282624,
+        "reads": 4
+      },
+      {
+        "arm": "qrr_2_untied",
+        "native_qualified": false,
+        "parameters": 303104,
+        "reads": 2
+      },
+      {
+        "arm": "matched_mlp",
+        "exact_parameter_match": true,
+        "extra_inactive_padding_parameters": 0,
+        "native_qualified": false,
+        "parameters": 282624
+      }
+    ],
+    "compute_matched": false,
+    "evidence_class": "TENSOR_PROTOTYPE_ONLY",
+    "latency_measured": false,
+    "warning": "Equal stored parameters do not imply equal training or inference work"
+  },
+  "pretrained_model_assets_present": false,
+  "qrr_installed_in_pretrained_model": false,
+  "real_r2_qualification": "UNRUN",
+  "schema": "qrr.cpu-receipt/1",
+  "sealed_evaluation_reads": 0,
+  "source_commit": "d89bf29cde6d9a0a3d42badd0ced145f694ac6b7",
+  "source_identity": "8a300e72bf8a04f5b37980397475212a15579f41bd6718a4ce38dbcc60dea7f4",
+  "source_tree": "80c97b6987fe35b689798822fe921aecef8bbd83",
+  "unit_tests": {
+    "command": "python -m unittest discover -s experiments/composition_qrr_v1/tests -v",
+    "errors": 0,
+    "exit_code": 0,
+    "failures": 0,
+    "log": "TEST_LOG.txt",
+    "scope": "Only the new isolated programme; not the full repository regression suite",
+    "tests_run": 65
+  }
+}
