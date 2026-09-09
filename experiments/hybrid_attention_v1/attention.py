@@ -70,7 +70,14 @@ def dense_oracle(q, k, v, qp, kp, *, window=None, sinks=0, scale=None):
 
 
 def blocked_attention(q, k, v, qp, kp, *, window=None, sinks=0,
-                      block_size=128, backend="math", scale=None, stats=None):
+                      block_size=128, backend="math", scale=None, stats=None, trace=None):
+    """`trace`, when a list, collects (query position, attended key positions).
+
+    Chunked prefill and a single full forward necessarily issue different-width
+    matmuls, so their logits differ by a few ulps and no absolute tolerance can
+    separate that from a real cache or mask fault. The trace compares the two
+    schedules EXACTLY, on absolute positions, with no tolerance at all.
+    """
     _validate(q, k, v, qp, kp)
     if type(block_size) is not int or block_size < 1:
         raise ValueError("block_size must be positive")
@@ -90,6 +97,10 @@ def blocked_attention(q, k, v, qp, kp, *, window=None, sinks=0,
             q[:, :, start:start + block_size], k.index_select(2, idx),
             v.index_select(2, idx), mask, backend, scale,
         ))
+        if trace is not None:
+            keys = p.tolist()
+            for row, query in enumerate(pos.tolist()):
+                trace.append((query, tuple(key for key, on in zip(keys, mask[row].tolist()) if on)))
         if stats is not None:
             # Shape-derived counters add no tensor reduction/device synchronization.
             elements = q.shape[0] * q.shape[1] * mask.numel()

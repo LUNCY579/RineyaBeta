@@ -134,7 +134,18 @@ class HybridRuntime(nn.Module):
             HeadGate(c.hidden_size, c.num_attention_heads, device=w.device, dtype=w.dtype)
             for _ in range(spec.layers)
         ] if spec.gate else [])
+        # Tracing survives reset(): the two schedules under comparison each call
+        # reset(), and the trace is what distinguishes them.
+        self.trace = None
         self.reset()
+
+    def start_trace(self):
+        """Record the exact key positions each query attends to, per layer."""
+        self.trace = [[] for _ in range(self.spec.layers)]
+        return self.trace
+
+    def stop_trace(self):
+        self.trace = None
 
     def reset(self):
         self.cache = [CompactKV(self.spec.local_window(i),
@@ -194,6 +205,7 @@ class HybridRuntime(nn.Module):
                     sinks=self.spec.sinks if window is not None else 0,
                     block_size=self.spec.block_size, backend=self.spec.backend,
                     scale=getattr(a, "scaling", d**-0.5), stats=self.stats,
+                    trace=None if self.trace is None else self.trace[i],
                 )
                 if self.spec.gate:
                     out = self.gates[i](z, out)

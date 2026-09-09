@@ -51,6 +51,10 @@ def compare_logits(a, b):
             "max_abs_error": error, "argmax_identical": equal}
 
 
+# Registered mechanical chunk boundaries (protocol.json qualification block).
+CHUNKS = ((0, 7), (7, 8), (8, 17))
+
+
 @torch.inference_mode()
 def qualify(model, backend, block_size):
     c = model.config
@@ -64,12 +68,40 @@ def qualify(model, backend, block_size):
 
     def streamed(rt):
         rt.reset()
-        out = [rt(ids[:, lo:hi], use_cache=True) for lo, hi in ((0, 7), (7, 8), (8, 17))]
+        out = [rt(ids[:, lo:hi], use_cache=True) for lo, hi in CHUNKS]
         resident = [x.metrics() for x in rt.cache]
         rt.reset()
         return torch.cat(out, dim=1), resident
 
-    checks["global_stream"] = compare_logits(base, streamed(runtime)[0])
+    def attended(rt, stream):
+        rt.start_trace()
+        rt.reset()
+        if stream:
+            for lo, hi in CHUNKS:
+                rt(ids[:, lo:hi], use_cache=True)
+        else:
+            rt(ids)
+        trace = [sorted(layer) for layer in rt.trace]
+        rt.stop_trace()
+        rt.reset()
+        return trace
+
+    def bind_schedule_identity(check, rt):
+        """Chunked and full prefill issue different-width matmuls, so their
+        logits differ by a few ulps at 28 layers and an absolute tolerance
+        cannot separate that from a real cache fault. Compare the attended
+        absolute key positions per layer instead: exact, no tolerance.
+        Strictly additive -- this can only ever withhold a pass."""
+        full, stream = attended(rt, False), attended(rt, True)
+        identical = full == stream
+        check["attended_positions_identical"] = identical
+        check["first_divergent_layer"] = next(
+            (i for i, (a, b) in enumerate(zip(full, stream)) if a != b), None)
+        check["passed"] = bool(check["passed"] and identical)
+        return check
+
+    checks["global_stream"] = bind_schedule_identity(
+        compare_logits(base, streamed(runtime)[0]), runtime)
     checks["gate_identity"] = compare_logits(base, HybridRuntime(model, replace(spec, gate=True))(ids))
     controls = (("local_stream", "A2_local512", 0), ("sink_stream", "A3_sink512", 2),
                 ("all_local_stream", "A8_all_local512", 0),
@@ -86,7 +118,7 @@ def qualify(model, backend, block_size):
                       for i, m in enumerate(metrics))
         check["passed"] &= compact
         check["compact_storage"] = compact
-        checks[name] = check
+        checks[name] = bind_schedule_identity(check, local)
     return checks
 
 
