@@ -8,8 +8,9 @@ Branch `agent/hlga-continuation-20260908`, continued from
 instrument. P3 was not opened.** The mechanism qualified on every exact
 criterion; the failure is in the qualification instrument, not the retrofit.
 
-Final code identity `b908c5106b1b15e6a81c39637ad0378ee69156638199230db3690a58ef41bae4`;
-all preserved receipts below were produced at that identity.
+Final commit `22a670e`, code identity
+`1f8373e6ba1dc62c9107ee50...` (full value in each receipt). Every preserved
+receipt below was produced at that identity, on a clean working tree.
 
 Environment: Python 3.11.15, torch 2.6.0+cu124, transformers 5.14.1,
 safetensors 0.8.0, tokenizers 0.22.2, Windows 11 (10.0.26200),
@@ -63,11 +64,11 @@ self-declaration, not an independent attestation.
 
 ## P2 -- mechanical qualification: FAILED, and the instrument is why
 
-Four runs on the single final code identity `b908c5106b1b`, all
-`checkpoint_unchanged: true`, `source_unchanged: true`. (An earlier matrix at
-`eb2dd6c5b1ff`, before the audit fixes, produced numerically identical
-figures, so the result reproduces across the intervening changes.)
-`max_abs_error`,
+Four runs on the single final code identity `1f8373e6ba1d`, all
+`checkpoint_unchanged: true`, `source_unchanged: true`. The matrix was
+regenerated three times across the intervening fixes -- at `eb2dd6c5b1ff`,
+`b908c5106b1b` and finally `1f8373e6ba1d` -- and produced numerically
+identical figures every time. `max_abs_error`,
 P = passed / F = failed against the registered `atol = rtol = 2e-05`:
 
 | check | cpu/math | cpu/sdpa | cuda/math | cuda/sdpa |
@@ -204,7 +205,7 @@ K/V they evict; an abort state so a caught-and-retried streaming chunk cannot
 silently restart absolute positions at zero; `run_id` on every receipt; and a
 diagnostic receipt field naming the qualification receipt that authorized it.
 
-Suite: **127/127 pass**, 0 skipped.
+Suite: **127/127 pass**, 0 skipped, 0 failures, 0 errors.
 
 ---
 

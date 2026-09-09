@@ -853,7 +853,7 @@
       "passed": true
     }
   },
-  "code_identity": "b908c5106b1b15e6a81c39637ad0378ee69156638199230db3690a58ef41bae4",
+  "code_identity": "1f8373e6ba1dc62c9107ee5002093255c412ae545153a978ae36d57f224e3016",
   "cuda_preflight": {
     "allocator_cap_mib": 6144,
     "free_bytes": 7411335168,
@@ -902,8 +902,8 @@
   },
   "passed": false,
   "quality_improvement_established": false,
-  "receipt_sha256": "bba8a014c6fe85ec7b1bc895a1c63ed9900d17ae03eaaf73e469ce403395e387",
-  "run_id": "hlga-agent-20260909-p2-cuda-sdpa",
+  "receipt_sha256": "5f7b69ddca2e1885a7d5f6c82b176da316165aa53368cfbb5adaa9a0bf9117c5",
+  "run_id": "hlga-final-20260909-p2-cuda-sdpa",
   "source_unchanged": true,
   "stage": "real_model_qualification",
   "study_version": 2,

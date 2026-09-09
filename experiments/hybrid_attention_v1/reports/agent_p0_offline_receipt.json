@@ -1,6 +1,6 @@
 {
   "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
-  "code_identity": "b908c5106b1b15e6a81c39637ad0378ee69156638199230db3690a58ef41bae4",
+  "code_identity": "1f8373e6ba1dc62c9107ee5002093255c412ae545153a978ae36d57f224e3016",
   "environment": {
     "cublas_workspace_config": ":4096:8",
     "cuda_runtime": "12.4",
@@ -25,7 +25,7 @@
   "passed": true,
   "quality_improvement_established": false,
   "real_rineya_checkpoint_loaded": false,
-  "receipt_sha256": "6f05408eb52660128b5f2f2c4b740a76b1e1815d511cafb46d9081dbbefca51b",
+  "receipt_sha256": "a7335d6869c3e5226de26113b41f2cb2efcdc4f78e4cd998423dcc697fcb6506",
   "shape_probe": {
     "analytical_all_global_kv_bytes": 235110400,
     "attention_stats": {
@@ -244,7 +244,7 @@
   "skipped": [],
   "source_unchanged": true,
   "stage": "cpu_fixture_qualification",
-  "tests_passed": 126,
-  "tests_run": 126,
+  "tests_passed": 127,
+  "tests_run": 127,
   "timing_causal": false
 }
