@@ -12,7 +12,7 @@ from .diagnostics import make_cases, paired_result, score, summarize
 from .provenance import (ROOT, BASE_COMMIT, checkpoint_inventory, code_identity, digest,
                          environment, new_run, require_receipt, write_json,
                          artifact_inventory, require_artifacts, require_unchanged_code)
-from .runtime import HybridRuntime
+from .runtime import HybridRuntime, model_fingerprint
 from .study import (VERSION, MAX_BLOCK_SIZE, MAX_CASES, MAX_NEW_TOKENS,
                     assert_target_config, contrast_report, inference_workload,
                     require_study_receipt, validate_execution)
@@ -26,6 +26,12 @@ def load_local(path, device):
     ).to(device).eval()
     if model.__class__.__name__ != "Qwen3ForCausalLM":
         raise ValueError("Checkpoint must load through the native Qwen3ForCausalLM implementation")
+    # The dtype keyword has been renamed across Transformers majors. Never trust
+    # the request: verify the materialized precision, so a silently ignored
+    # argument cannot downgrade a registered float32 run to checkpoint dtype.
+    dtypes = {p.dtype for p in model.parameters()}
+    if dtypes != {torch.float32}:
+        raise ValueError(f"Registered precision is float32; loaded parameters are {dtypes}")
     tokenizer = AutoTokenizer.from_pretrained(str(path), local_files_only=True, trust_remote_code=False)
     return model, tokenizer
 
@@ -143,6 +149,7 @@ def main(argv=None):
                 require_study_receipt(prior)
                 require_artifacts(prior, args.receipt.parent)
             model, tokenizer = load_local(args.model, args.device)
+            receipt["model_fingerprint"] = model_fingerprint(model)
             if args.stage == "qualify":
                 checks = qualify(model, args.backend, args.block_size)
                 receipt.update(stage="real_model_qualification", checks=checks,

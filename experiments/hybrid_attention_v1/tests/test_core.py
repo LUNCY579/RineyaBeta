@@ -273,8 +273,17 @@ class EvidenceTests(unittest.TestCase):
 
     def test_scoring_separates_format_abstention_and_loops(self):
         c = {"id": "x", "family": "retrieval", "depth": 0.5, "tokens": 512,
-             "answerable": True, "prompt_sha256": "x", "answer": "12345"}
+             "answerable": True, "prompt_sha256": "x", "answer": "12345",
+             "evidence_span": [100, 120], "question_span": [500, 512],
+             "evidence_to_question_gap": 380, "evidence_kind": "support_or_conflict"}
         g = {"token_ids": [7]*24, "stopped_eos": False, "budget_exhausted": True}
+        # A case that predates the attribution schema must fail closed, not
+        # silently produce an unstratifiable row.
+        for dropped in ("evidence_span", "question_span", "evidence_kind",
+                        "evidence_to_question_gap"):
+            stale = {k: v for k, v in c.items() if k != dropped}
+            with self.subTest(dropped=dropped), self.assertRaises(ValueError):
+                score(stale, " 12345\n", g)
         row = score(c, " 12345\n", g)
         self.assertFalse(row["strict_exact"])
         self.assertTrue(row["trimmed_exact"])

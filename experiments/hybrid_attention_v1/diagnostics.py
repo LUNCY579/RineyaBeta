@@ -63,7 +63,20 @@ def make_cases(tokenizer, lengths=(511, 512, 513, 1023, 1024, 1025), seed=17):
     return cases
 
 
+# Attribution metadata is mandatory: a row without it cannot be stratified by
+# boundary, depth or evidence kind, which is the whole point of schema v2.
+REQUIRED_CASE_FIELDS = (
+    "id", "family", "depth", "tokens", "answerable", "prompt_sha256", "answer",
+    "evidence_span", "question_span", "evidence_to_question_gap", "evidence_kind",
+)
+
+
 def score(case, text, generation):
+    missing = [name for name in REQUIRED_CASE_FIELDS if name not in case]
+    if missing:
+        raise ValueError(
+            f"Case lacks diagnostic schema v{DIAGNOSTIC_SCHEMA_VERSION} fields {missing}; "
+            "scoring a case without attribution metadata is refused")
     trimmed = text.strip()
     counts = Counter(generation["token_ids"])
     if generation["stopped_eos"]:

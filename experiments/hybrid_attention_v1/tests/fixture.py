@@ -40,8 +40,9 @@ class TinyQwen(nn.Module):
         super().__init__()
         self.config = SimpleNamespace(model_type="qwen3", num_hidden_layers=layers,
             num_attention_heads=4, num_key_value_heads=2, head_dim=8,
-            hidden_size=32, vocab_size=97, max_position_embeddings=2048,
-            rope_scaling=None, use_sliding_window=False, attention_dropout=0.0)
+            hidden_size=32, intermediate_size=64, vocab_size=97, max_position_embeddings=2048,
+            rope_scaling=None, use_sliding_window=False, attention_dropout=0.0,
+            rope_theta=10000)  # declare the base Rotary actually uses
         body = nn.Module()
         body.embed_tokens = nn.Embedding(97, 32)
         body.rotary_emb = Rotary(8)

@@ -15,7 +15,8 @@ from ..diagnostics import make_cases
 from ..provenance import (artifact_inventory, require_artifacts, code_identity,
                           digest, require_receipt, require_unchanged_code)
 from ..run import main as run_main, qualify, compare_logits
-from ..runtime import HybridRuntime
+from ..runtime import (HybridRuntime, model_fingerprint, rope_is_unscaled,
+                       rope_theta as rope_theta_of)
 from ..study import validate_execution
 from ..verify import qualification_passed
 from .fixture import TinyQwen, CharacterTokenizer
@@ -171,11 +172,24 @@ class ProvenanceHardeningTests(unittest.TestCase):
                 require_artifacts({}, root)
 
     def test_symlink_artifact_refused(self):
+        # Windows refuses symlink creation without SeCreateSymbolicLinkPrivilege
+        # (WinError 1314). Skipping would silently drop the guard from the receipt,
+        # so fall back to making exactly this path report as a link instead.
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             target = root / "source.txt"
             target.write_text("{}")
-            (root / "artifact.json").symlink_to(target)
+            link = root / "artifact.json"
+            try:
+                link.symlink_to(target)
+            except (OSError, NotImplementedError):
+                link.write_text("{}")
+                real = Path.is_symlink
+                with patch.object(Path, "is_symlink",
+                                  lambda self: self == link or real(self)):
+                    with self.assertRaises(ValueError):
+                        artifact_inventory(root)
+                return
             with self.assertRaises(ValueError):
                 artifact_inventory(root)
 
@@ -268,6 +282,71 @@ class DiagnosticMetadataTests(unittest.TestCase):
                 self.assertGreater(start, 0)  # Instructions precede evidence.
             if case["family"] == "absent":
                 self.assertEqual(case["evidence_kind"], "distractor")
+
+
+class RopeCompatibilityTests(unittest.TestCase):
+    """Transformers 4.x recorded no scaling as None; >=5 records an explicit
+    {"rope_type": "default"} descriptor and moves rope_theta off the config
+    root. Both denote the SAME unscaled RoPE, and a bare None-test rejected an
+    unmodified R2 checkpoint outright."""
+
+    def _model(self, **overrides):
+        model = TinyQwen(4)
+        for name, value in overrides.items():
+            setattr(model.config, name, value)
+        return model
+
+    def test_both_unscaled_encodings_are_accepted(self):
+        for scaling, theta in ((None, 10000),
+                               ({"rope_type": "default", "rope_theta": 10000}, None),
+                               ({"rope_type": "default"}, 10000),
+                               ({"type": "default", "rope_theta": 10000}, 10000)):
+            with self.subTest(rope_scaling=scaling):
+                model = self._model(rope_scaling=scaling, rope_theta=theta)
+                self.assertTrue(rope_is_unscaled(model.config))
+                self.assertEqual(rope_theta_of(model.config), 10000)
+                HybridRuntime(model, arm_spec("A0_global", 4))
+
+    def test_scaled_rope_is_still_refused(self):
+        for scaling in ({"rope_type": "linear", "factor": 2.0},
+                        {"rope_type": "dynamic", "factor": 4.0},
+                        {"rope_type": "yarn", "factor": 2.0, "beta_fast": 32},
+                        {"rope_type": "llama3", "factor": 8.0},
+                        {"type": "longrope"},
+                        {"rope_type": "default", "factor": 2.0},
+                        {"rope_type": "default", "original_max_position_embeddings": 4096},
+                        {}, "default", 1.0):
+            with self.subTest(rope_scaling=scaling):
+                self.assertFalse(rope_is_unscaled(self._model(rope_scaling=scaling).config))
+                with self.assertRaises(ValueError):
+                    HybridRuntime(self._model(rope_scaling=scaling, rope_theta=10000),
+                                  arm_spec("A0_global", 4))
+
+    def test_absent_or_conflicting_theta_fails_closed(self):
+        for scaling, theta in ((None, None),
+                               ({"rope_type": "default"}, None),
+                               ({"rope_type": "default", "rope_theta": 500000}, 10000),
+                               (None, "10000"),
+                               (None, True)):
+            with self.subTest(rope_scaling=scaling, rope_theta=theta):
+                model = self._model(rope_scaling=scaling, rope_theta=theta)
+                self.assertIsNone(rope_theta_of(model.config))
+                with self.assertRaises(ValueError):
+                    HybridRuntime(model, arm_spec("A0_global", 4))
+
+    def test_fingerprint_binds_loaded_module_not_only_config(self):
+        model = TinyQwen(4)
+        fingerprint = model_fingerprint(model)
+        self.assertEqual(fingerprint["layers"], 4)
+        self.assertEqual(fingerprint["rope_theta_effective"], 10000)
+        self.assertTrue(fingerprint["rope_unscaled"])
+        self.assertEqual(fingerprint["parameter_dtypes"], ["torch.float32"])
+        self.assertEqual(fingerprint["attention_scaling"], [8**-0.5])
+        self.assertFalse(fingerprint["tied_output_embedding"])
+        json.dumps(fingerprint, allow_nan=False)  # must survive receipt writing
+        # A fingerprint that ignored the live module would not move here.
+        model.model.layers = model.model.layers[:2]
+        self.assertEqual(model_fingerprint(model)["layers"], 2)
 
 
 if __name__ == "__main__":
