@@ -1,0 +1,15 @@
+{
+  "schema": "rineya.query-family-protocol/1",
+  "experiment": "query_refinement_official_family_v1",
+  "branch": "research/query-refinement-official-family-v1",
+  "parent_commit": "e5794507c4e4236068b3124ce6efe61ed8dc9e56",
+  "base_protocol": "protocol.json",
+  "profiles": ["supa-1.7.0", "nimbus-1.6.0", "halo-1.2.0"],
+  "recommended_first_profile": "supa-1.7.0",
+  "prompt_protocol": "raw_completion",
+  "stage_order": ["qualify", "smoke", "dev"],
+  "evidence_transfer_from_R2": false,
+  "sealed_evaluation_authorized": false,
+  "quality_claim_authorized": false,
+  "note": "Inherit interventions and bounded budgets, not R2 target identity or evidence. Raw-completion results are not comparable to prior chat-template Showcase scores."
+}
