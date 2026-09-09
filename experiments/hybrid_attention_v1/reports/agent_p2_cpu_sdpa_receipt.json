@@ -853,7 +853,7 @@
       "passed": true
     }
   },
-  "code_identity": "eb2dd6c5b1ffd56da868d977d99dd233ec0e83bcc98344fe3a7dcdd30806b8ea",
+  "code_identity": "b908c5106b1b15e6a81c39637ad0378ee69156638199230db3690a58ef41bae4",
   "environment": {
     "cublas_workspace_config": ":4096:8",
     "cuda_runtime": "12.4",
@@ -897,7 +897,8 @@
   },
   "passed": false,
   "quality_improvement_established": false,
-  "receipt_sha256": "b0c250914df80065aa78811e08a028d431de98ae906053c0a5f52ddbd76ce971",
+  "receipt_sha256": "d715e908cde80ae8f6d2c4ddea915ead98c024b1de2a37fc3d47326b66f8f31e",
+  "run_id": "hlga-agent-20260909-p2-cpu-sdpa",
   "source_unchanged": true,
   "stage": "real_model_qualification",
   "study_version": 2,

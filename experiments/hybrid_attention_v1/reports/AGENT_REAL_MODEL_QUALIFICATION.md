@@ -8,6 +8,9 @@ Branch `agent/hlga-continuation-20260908`, continued from
 instrument. P3 was not opened.** The mechanism qualified on every exact
 criterion; the failure is in the qualification instrument, not the retrofit.
 
+Final code identity `b908c5106b1b15e6a81c39637ad0378ee69156638199230db3690a58ef41bae4`;
+all preserved receipts below were produced at that identity.
+
 Environment: Python 3.11.15, torch 2.6.0+cu124, transformers 5.14.1,
 safetensors 0.8.0, tokenizers 0.22.2, Windows 11 (10.0.26200),
 AMD Ryzen, NVIDIA GeForce RTX 4070 Laptop GPU (8187 MiB),
@@ -124,6 +127,28 @@ implementation.** Every prior receipt on this branch carries
 registered instrument met the real 28-layer model, which is why the
 mis-calibration had not surfaced.
 
+### The exact check has real power (negative control)
+
+An exact check that never fails would be worthless, so three plausible
+eviction bugs were injected into the real checkpoint (200 tokens, window 16)
+and measured against the same `A0_global` noise floor:
+
+| arm | injected fault | max_abs_error | ratio to A0 | argmax identical | positions identical |
+|---|---|---:|---:|---|---|
+| A2 | *none* | 1.576e-04 | 7.3 | yes | **yes** |
+| A2 | retain two slots short | 3.68 | 170,040 | no | no |
+| A2 | positions renumbered by 1 | 7.89 | 364,635 | no | no |
+| A3 | *none* | 2.098e-05 | 1.0 | yes | **yes** |
+| A3 | retain two slots short | 1.69 | 78,162 | **yes** | no |
+| A3 | sinks dropped on eviction | 27.2 | 1,258,638 | no | no |
+| A3 | positions renumbered by 1 | — | — | merge's contiguity guard raised | |
+
+Attended-position identity caught **every** injected fault. Argmax identity
+did not: `retain two slots short` on A3 shifts the logits by 1.69 absolute --
+78,000x the noise floor -- while leaving argmax untouched, so a criterion
+resting on argmax would have passed a genuinely broken cache. This is now a
+standing test (`tests/test_boundaries.py::InstrumentPowerTests`).
+
 The threshold was **not** changed. The registered comparison stands exactly as
 written and the receipts record `passed: false`. What was added is strictly
 additive: an exact, tolerance-free comparison of attended absolute key
@@ -151,12 +176,32 @@ withhold a pass.
    registered CUDA constraints had never been exercised.
 3. **Qualification had no tolerance-free equivalence check**, so a rounding
    difference and a genuine cache fault were indistinguishable.
+4. **The diagnostic took its EOS stop set from `config.eos_token_id` alone**
+   (32744, `<|im_end|>`) while the checkpoint's `generation_config.json`
+   declares `[32744, 32742]`, and 32742 is `<|endoftext|>` -- the natural
+   terminator for the raw-completion prompts P3 uses. A correctly answered,
+   cleanly terminated case would have run to the 24-token cap and scored
+   `trimmed_exact=False` AND `budget_exhausted=True`, depressing every
+   correctness endpoint while inflating the statistic the contract uses to
+   declare an endpoint readout-limited. Found by adversarial audit.
+5. **`--max-cases` truncated an unstratified prefix.** `make_cases` is
+   length-major, so `--max-cases 36` kept only 511/512/513 -- precisely the
+   lengths where a 512-wide window never evicts the evidence. A reduced run
+   would have looked reassuring by construction. Also found by audit.
+
+Neither 4 nor 5 touches the P1/P2 evidence above: both live on the diagnose
+path, which was never run.
 
 Added: `model_fingerprint()` binding the loaded module into receipts; a
 load-time assertion that parameters really are float32; `tests/test_boundaries.py`
 covering 511/512/513 and 1023/1024/1025 against real 512- and 1024-wide
 windows plus an exhaustive small grid, and pinning the registered topology.
-Suite: **116/116 pass**, 0 skipped.
+Also added, from the audit: a `retain` precondition binding positions to the
+K/V they evict; an abort state so a caught-and-retried streaming chunk cannot
+silently restart absolute positions at zero; `run_id` on every receipt; and a
+diagnostic receipt field naming the qualification receipt that authorized it.
+
+Suite: **127/127 pass**, 0 skipped.
 
 ---
 

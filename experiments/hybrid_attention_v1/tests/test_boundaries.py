@@ -9,6 +9,8 @@ blocked_attention/CompactKV rather than re-deriving the rule (a re-derivation
 would agree with a bug in the same way the implementation does).
 """
 import unittest
+from unittest.mock import patch
+
 import torch
 from ..attention import CompactKV, allowed_mask, blocked_attention
 from ..config import ARMS, arm_spec
@@ -126,6 +128,59 @@ class ScheduleEquivalenceTests(unittest.TestCase):
         following = ideal_schedule(n + 1, window, sinks)[n]  # what query n may reach
         self.assertNotIn(resident[0], following)
         self.assertEqual(len(following), window)  # yet it still sees a full window
+
+
+def _faulty_retain(kind):
+    """Plausible eviction bugs, written the way they would really be written."""
+    def retain(self, k, v, positions):
+        window, sinks, shift = self.window, self.sinks, 0
+        if window is not None:
+            if kind == "retain_two_short":
+                window -= 2
+            elif kind == "drop_sinks":
+                sinks = 0
+            elif kind == "renumber":
+                shift = 1
+        keep = torch.ones_like(positions, dtype=torch.bool)
+        if window is not None:
+            keep = ((positions < sinks)
+                    | (positions >= positions[-1] - (window - sinks) + 1))
+        idx = keep.nonzero(as_tuple=True)[0]
+        self.k = k.detach().index_select(2, idx)
+        self.v = v.detach().index_select(2, idx)
+        self.positions = positions.index_select(0, idx) - shift
+        self.seen = int(positions[-1]) + 1
+    return retain
+
+
+class InstrumentPowerTests(unittest.TestCase):
+    """A check that cannot fail proves nothing. Inject the eviction faults the
+    schedule comparison exists to catch, and confirm it catches every one.
+
+    Measured on the real 28-layer checkpoint, these faults move the logits by
+    1.7 to 27.2 absolute -- 8e4 to 1e6 times the arithmetic noise floor -- yet
+    `retain_two_short` still leaves argmax IDENTICAL, so argmax agreement alone
+    would have passed it. The position comparison is what actually catches it.
+    """
+
+    def test_schedule_comparison_catches_injected_eviction_faults(self):
+        n, window, sinks, block = 200, 16, 4, 32
+        chunks = prefill_then_decode(n, block, 4)
+        ideal = ideal_schedule(n, window, sinks)
+        clean, _ = streaming_schedule(n, window, sinks, block, chunks)
+        self.assertEqual(clean, ideal)  # the unperturbed run must agree exactly
+        caught = 0
+        for kind in ("retain_two_short", "drop_sinks", "renumber"):
+            with self.subTest(fault=kind):
+                with patch.object(CompactKV, "retain", _faulty_retain(kind)):
+                    try:
+                        trace, _ = streaming_schedule(n, window, sinks, block, chunks)
+                    except ValueError:
+                        caught += 1  # merge's contiguity guard fired first
+                        continue
+                    self.assertNotEqual(trace, ideal)
+                    caught += 1
+        self.assertEqual(caught, 3)
 
 
 class CachePreconditionTests(unittest.TestCase):
