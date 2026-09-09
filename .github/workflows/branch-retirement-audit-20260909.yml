@@ -1,0 +1,36 @@
+name: Finalize retirement audit 2026-09-09
+on:
+  push:
+    branches: [maintenance/branch-retirement-audit-20260909]
+    paths:
+      - .github/workflows/branch-retirement-audit-20260909.yml
+      - maintenance/branch_retirement_20260909/finalize_audit.py
+permissions:
+  contents: read
+jobs:
+  persist-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          lfs: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: branch-retirement-report
+          run-id: 34398608386
+          path: audit-input
+          github-token: ${{ github.token }}
+      - name: Preserve the verified report and audit tags before deleting only this temporary branch
+        run: python maintenance/branch_retirement_20260909/finalize_audit.py
+      - name: Preserve finalization outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: audit-finalization-result
+          path: audit-finalization-result.json
+          if-no-files-found: warn
+          retention-days: 90
