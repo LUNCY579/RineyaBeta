@@ -1,0 +1,210 @@
+{
+  "schema": "rineya.branch-retirement/1",
+  "status": "complete",
+  "repository": "LUNCY579/RineyaBeta",
+  "run_url": "https://github.com/LUNCY579/RineyaBeta/actions/runs/34398608386",
+  "maintenance_commit": "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac",
+  "gates": {
+    "query": {
+      "schema": "rineya.retirement-mechanical-gate/1",
+      "kind": "query",
+      "tested_commit": "5500e875c5fa80c8e00b831702a020e57cc1145d",
+      "expected_commit": "5500e875c5fa80c8e00b831702a020e57cc1145d",
+      "source_clean": true,
+      "workflow_sha": "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac",
+      "run_id": "34398608386",
+      "exit_code": 0,
+      "passed": true,
+      "pretrained_model_executed": false,
+      "licenses_training": false,
+      "quality_claim_authorized": false,
+      "tests": 150,
+      "passed_tests": 148,
+      "skipped": 2,
+      "required_native_tests_passed": [
+        "test_native_missing_parameter_is_not_accepted",
+        "test_native_safe_roundtrip_and_tied_head",
+        "test_query_native_integration_on_its_branch"
+      ],
+      "source_receipt_sha256": "c26fb5572d507cc2d20be4f61277dd6305c93c5c217a67aa751bbb85780baa4d"
+    },
+    "composition": {
+      "schema": "rineya.retirement-mechanical-gate/1",
+      "kind": "composition",
+      "tested_commit": "5785ef1af91359547da62136a7326e23b9183b57",
+      "expected_commit": "5785ef1af91359547da62136a7326e23b9183b57",
+      "source_clean": true,
+      "workflow_sha": "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac",
+      "run_id": "34398608386",
+      "exit_code": 0,
+      "passed": true,
+      "pretrained_model_executed": false,
+      "licenses_training": false,
+      "quality_claim_authorized": false,
+      "tests": 147,
+      "passed_tests": 145,
+      "skipped": 2,
+      "required_native_tests_passed": [
+        "test_frozen_native_integration_on_its_branch",
+        "test_native_missing_parameter_is_not_accepted",
+        "test_native_safe_roundtrip_and_tied_head"
+      ],
+      "source_receipt_sha256": "7fdf70d508905d73354b0fe990603bd3f5b485b9053b1acfab6fa8439b945ae1"
+    },
+    "hybrid": {
+      "schema": "rineya.retirement-mechanical-gate/1",
+      "kind": "hybrid",
+      "tested_commit": "2b1131ea5b94d7ffe29225c15a51b74060bbb42c",
+      "expected_commit": "2b1131ea5b94d7ffe29225c15a51b74060bbb42c",
+      "source_clean": true,
+      "workflow_sha": "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac",
+      "run_id": "34398608386",
+      "exit_code": 0,
+      "passed": true,
+      "pretrained_model_executed": false,
+      "licenses_training": false,
+      "quality_claim_authorized": false,
+      "tests": 138,
+      "passed_tests": 138,
+      "skipped": 0,
+      "source_receipt_sha256": "55ffc28a85d0d7d0515a85a9382f4a81192d0fd6b5e7ef4086722780e2d07aa3"
+    }
+  },
+  "before": {
+    "refs/heads/agent/hlga-continuation-20260908": "2b1131ea5b94d7ffe29225c15a51b74060bbb42c",
+    "refs/heads/main": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+    "refs/heads/maintenance/branch-retirement-20260909": "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac",
+    "refs/heads/research/composition-qrr-official-family-v1": "ffb0e4be250b684aada0bd4e82bb7a8a51fa0635",
+    "refs/heads/research/composition-qrr-v1": "690dcf27ee48512369fc2f3ca02603dee06ddfba",
+    "refs/heads/research/cornerstone2-v1": "1cc2d8e2f53d937ae74641b3851b1f80b05518cd",
+    "refs/heads/research/hybrid-local-global-attention-v1": "a196318ec75cacccc8ac9ec446e4c4b6a29c2802",
+    "refs/heads/research/query-refinement-attention-v1": "e5794507c4e4236068b3124ce6efe61ed8dc9e56",
+    "refs/heads/research/query-refinement-official-family-v1": "5500e875c5fa80c8e00b831702a020e57cc1145d",
+    "refs/tags/retired/audit/sgqr-csgqr-dual": "875075920d742150ba05658a9e2390a226ccac85",
+    "refs/tags/retired/audit/sgqr-csgqr-dual^{}": "4106ee7d40faf5734d0b895a3854415b3360249a",
+    "refs/tags/retired/exp/geometric-significance": "e0236672832dbb07d8712e7981ff7ed2b8bcedba",
+    "refs/tags/retired/exp/geometric-significance^{}": "31f529c2f5e5b2d18ed9a403767694437c681f18",
+    "refs/tags/retired/exp/stabilizer-matrix": "16ead2e0bddc4de44594575995f46ed6e43cf0c2",
+    "refs/tags/retired/exp/stabilizer-matrix^{}": "2df0664199f19b6ef1b88f4a676d7730fcc87846",
+    "refs/tags/retired/research/catastrophic-removal-core-v1": "b7e09b9c7a5506e8c36b1aca41abf299f92b3380",
+    "refs/tags/retired/research/catastrophic-removal-core-v1^{}": "b6b5a578de7e106e4ef1109f0b8bab1048de3f73",
+    "refs/tags/retired/research/cross-architecture-graft-v1": "b3ce0626214b52c45c65313cd96b4b69de6beed5",
+    "refs/tags/retired/research/cross-architecture-graft-v1^{}": "79cb08979c81c75d7c21858af8f0ab48a403b594",
+    "refs/tags/retired/research/csgqr-quantized-remnant": "a3eeceb8d580b6ccac448229fd64b765b486fe48",
+    "refs/tags/retired/research/csgqr-quantized-remnant^{}": "dc977dd120a2a1b39cd47a41ec99eb5e75016c78",
+    "refs/tags/retired/research/depth-aligned-semantic-transitions-v1": "49d94a3e0a67f17eeb2c7c5854914d1f37525b4c",
+    "refs/tags/retired/research/depth-aligned-semantic-transitions-v1^{}": "729ce337b44310964763751d532cf51c9ca29748",
+    "refs/tags/retired/research/pre-deletion-recovery-routing-v0.3": "3b13e7b19482767970a76a54b4915cfb2fd12676",
+    "refs/tags/retired/research/pre-deletion-recovery-routing-v0.3^{}": "1556b4c74bacb30602290a71a30a7971ba355db5",
+    "refs/tags/retired/research/rge-peft-v1": "f1605459271692ee6f1500669c5dca5289116add",
+    "refs/tags/retired/research/rge-peft-v1^{}": "5005561160b8c6231907edb1b79d40c2aeabfa2d",
+    "refs/tags/retired/research/sgqr-core-quantized-remnant": "c58d5d8d7ddf3f0ce3badcc0414277446e156508",
+    "refs/tags/retired/research/sgqr-core-quantized-remnant^{}": "fc800b89e1532a4f1cfbd93dcdc51410698f2a6e",
+    "refs/tags/retired/research/sgqr-v2-remnant-recovery": "ce336e5658fcb346adb6b72e4596d94ae80f21ef",
+    "refs/tags/retired/research/sgqr-v2-remnant-recovery^{}": "0a331597c33c2c5aca06b163eae9eee41e9feb8c"
+  },
+  "changes": [
+    [
+      "refs/heads/research/query-refinement-attention-v1",
+      "e5794507c4e4236068b3124ce6efe61ed8dc9e56",
+      null
+    ],
+    [
+      "refs/heads/research/composition-qrr-official-family-v1",
+      "ffb0e4be250b684aada0bd4e82bb7a8a51fa0635",
+      "5785ef1af91359547da62136a7326e23b9183b57"
+    ],
+    [
+      "refs/heads/research/composition-qrr-v1",
+      "690dcf27ee48512369fc2f3ca02603dee06ddfba",
+      null
+    ],
+    [
+      "refs/heads/research/hybrid-local-global-attention-v1",
+      "a196318ec75cacccc8ac9ec446e4c4b6a29c2802",
+      "2b1131ea5b94d7ffe29225c15a51b74060bbb42c"
+    ],
+    [
+      "refs/heads/agent/hlga-continuation-20260908",
+      "2b1131ea5b94d7ffe29225c15a51b74060bbb42c",
+      null
+    ],
+    [
+      "refs/heads/maintenance/branch-retirement-20260909",
+      "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac",
+      null
+    ]
+  ],
+  "archive_targets": {
+    "retired/research/query-refinement-attention-v1": "e5794507c4e4236068b3124ce6efe61ed8dc9e56",
+    "retired/research/composition-qrr-v1": "690dcf27ee48512369fc2f3ca02603dee06ddfba",
+    "retired/research/hybrid-local-global-attention-v1-before-20260909-consolidation": "a196318ec75cacccc8ac9ec446e4c4b6a29c2802",
+    "retired/agent/hlga-continuation-20260908": "2b1131ea5b94d7ffe29225c15a51b74060bbb42c",
+    "retired/maintenance/branch-retirement-20260909": "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac"
+  },
+  "training_authorized": false,
+  "quality_claim_authorized": false,
+  "note": "Branch organization and mechanical checks only. Hybrid protocol amendments and historical evidence are preserved, not newly approved. No pretrained execution.",
+  "archive_objects": {
+    "retired/research/query-refinement-attention-v1": [
+      "2bc974e2a03cef3c33f4b9104a185b3b9daeadd0",
+      "e5794507c4e4236068b3124ce6efe61ed8dc9e56"
+    ],
+    "retired/research/composition-qrr-v1": [
+      "befdfe801602e9e74661fc68f92a3c76e7f45e4c",
+      "690dcf27ee48512369fc2f3ca02603dee06ddfba"
+    ],
+    "retired/research/hybrid-local-global-attention-v1-before-20260909-consolidation": [
+      "9ffa63e441c6036aa0b1a8f45f32cc12ec32f477",
+      "a196318ec75cacccc8ac9ec446e4c4b6a29c2802"
+    ],
+    "retired/agent/hlga-continuation-20260908": [
+      "5d5bced11bd83c85cb71c119e23dc5631453d456",
+      "2b1131ea5b94d7ffe29225c15a51b74060bbb42c"
+    ],
+    "retired/maintenance/branch-retirement-20260909": [
+      "b5d3a22a4b83eb753322ec875b57f8597cf033a3",
+      "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac"
+    ]
+  },
+  "after": {
+    "refs/heads/main": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
+    "refs/heads/research/composition-qrr-official-family-v1": "5785ef1af91359547da62136a7326e23b9183b57",
+    "refs/heads/research/cornerstone2-v1": "1cc2d8e2f53d937ae74641b3851b1f80b05518cd",
+    "refs/heads/research/hybrid-local-global-attention-v1": "2b1131ea5b94d7ffe29225c15a51b74060bbb42c",
+    "refs/heads/research/query-refinement-official-family-v1": "5500e875c5fa80c8e00b831702a020e57cc1145d",
+    "refs/tags/retired/agent/hlga-continuation-20260908": "5d5bced11bd83c85cb71c119e23dc5631453d456",
+    "refs/tags/retired/agent/hlga-continuation-20260908^{}": "2b1131ea5b94d7ffe29225c15a51b74060bbb42c",
+    "refs/tags/retired/audit/sgqr-csgqr-dual": "875075920d742150ba05658a9e2390a226ccac85",
+    "refs/tags/retired/audit/sgqr-csgqr-dual^{}": "4106ee7d40faf5734d0b895a3854415b3360249a",
+    "refs/tags/retired/exp/geometric-significance": "e0236672832dbb07d8712e7981ff7ed2b8bcedba",
+    "refs/tags/retired/exp/geometric-significance^{}": "31f529c2f5e5b2d18ed9a403767694437c681f18",
+    "refs/tags/retired/exp/stabilizer-matrix": "16ead2e0bddc4de44594575995f46ed6e43cf0c2",
+    "refs/tags/retired/exp/stabilizer-matrix^{}": "2df0664199f19b6ef1b88f4a676d7730fcc87846",
+    "refs/tags/retired/maintenance/branch-retirement-20260909": "b5d3a22a4b83eb753322ec875b57f8597cf033a3",
+    "refs/tags/retired/maintenance/branch-retirement-20260909^{}": "86a6a36dbd3d9bf329d3ef0426ef27bf74fa74ac",
+    "refs/tags/retired/research/catastrophic-removal-core-v1": "b7e09b9c7a5506e8c36b1aca41abf299f92b3380",
+    "refs/tags/retired/research/catastrophic-removal-core-v1^{}": "b6b5a578de7e106e4ef1109f0b8bab1048de3f73",
+    "refs/tags/retired/research/composition-qrr-v1": "befdfe801602e9e74661fc68f92a3c76e7f45e4c",
+    "refs/tags/retired/research/composition-qrr-v1^{}": "690dcf27ee48512369fc2f3ca02603dee06ddfba",
+    "refs/tags/retired/research/cross-architecture-graft-v1": "b3ce0626214b52c45c65313cd96b4b69de6beed5",
+    "refs/tags/retired/research/cross-architecture-graft-v1^{}": "79cb08979c81c75d7c21858af8f0ab48a403b594",
+    "refs/tags/retired/research/csgqr-quantized-remnant": "a3eeceb8d580b6ccac448229fd64b765b486fe48",
+    "refs/tags/retired/research/csgqr-quantized-remnant^{}": "dc977dd120a2a1b39cd47a41ec99eb5e75016c78",
+    "refs/tags/retired/research/depth-aligned-semantic-transitions-v1": "49d94a3e0a67f17eeb2c7c5854914d1f37525b4c",
+    "refs/tags/retired/research/depth-aligned-semantic-transitions-v1^{}": "729ce337b44310964763751d532cf51c9ca29748",
+    "refs/tags/retired/research/hybrid-local-global-attention-v1-before-20260909-consolidation": "9ffa63e441c6036aa0b1a8f45f32cc12ec32f477",
+    "refs/tags/retired/research/hybrid-local-global-attention-v1-before-20260909-consolidation^{}": "a196318ec75cacccc8ac9ec446e4c4b6a29c2802",
+    "refs/tags/retired/research/pre-deletion-recovery-routing-v0.3": "3b13e7b19482767970a76a54b4915cfb2fd12676",
+    "refs/tags/retired/research/pre-deletion-recovery-routing-v0.3^{}": "1556b4c74bacb30602290a71a30a7971ba355db5",
+    "refs/tags/retired/research/query-refinement-attention-v1": "2bc974e2a03cef3c33f4b9104a185b3b9daeadd0",
+    "refs/tags/retired/research/query-refinement-attention-v1^{}": "e5794507c4e4236068b3124ce6efe61ed8dc9e56",
+    "refs/tags/retired/research/rge-peft-v1": "f1605459271692ee6f1500669c5dca5289116add",
+    "refs/tags/retired/research/rge-peft-v1^{}": "5005561160b8c6231907edb1b79d40c2aeabfa2d",
+    "refs/tags/retired/research/sgqr-core-quantized-remnant": "c58d5d8d7ddf3f0ce3badcc0414277446e156508",
+    "refs/tags/retired/research/sgqr-core-quantized-remnant^{}": "fc800b89e1532a4f1cfbd93dcdc51410698f2a6e",
+    "refs/tags/retired/research/sgqr-v2-remnant-recovery": "ce336e5658fcb346adb6b72e4596d94ae80f21ef",
+    "refs/tags/retired/research/sgqr-v2-remnant-recovery^{}": "0a331597c33c2c5aca06b163eae9eee41e9feb8c"
+  },
+  "live_branch_count": 5
+}
