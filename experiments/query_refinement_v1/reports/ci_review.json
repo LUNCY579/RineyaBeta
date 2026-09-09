@@ -1,0 +1,17 @@
+{
+  "completed_at": "2026-09-09T05:10:52Z",
+  "job_conclusion": "success",
+  "job_id": 102345609815,
+  "log_url": "https://github.com/LUNCY579/RineyaBeta/actions/runs/34313773815/job/102345609815",
+  "native_receipt_provenance": "Transcribed from JSON printed by the successful native-qualification CI step; source file SHA256 values matched locally.",
+  "pytest_seconds": 3.54,
+  "quality_claim_authorized": false,
+  "raw_results_artifact_id": 10089328675,
+  "raw_results_artifact_zip_sha256": "4cefbcffb28d37e77d140c6da4da8e6328b50d051adc74041db235d85b53baf3",
+  "real_r2_executed": false,
+  "tested_commit": "064b9dc01de4b38caedcf101395fba83629dca00",
+  "tests_collected": 68,
+  "tests_passed": 68,
+  "tests_skipped": 0,
+  "workflow_run_id": 34313773815
+}

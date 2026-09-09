@@ -1,0 +1,42 @@
+{
+  "checks": {
+    "adapter/cache_max_error": 8.940696716308594e-08,
+    "adapter/native_zero_max_error": 0.0,
+    "adapter/trainable_parameters": 100,
+    "baseline/cache_max_error": 1.1920928955078125e-07,
+    "baseline/native_zero_max_error": 0.0,
+    "feedback/cache_max_error": 1.1920928955078125e-07,
+    "feedback/native_zero_max_error": 0.0,
+    "feedback/trainable_parameters": 100,
+    "independent/cache_max_error": 1.1920928955078125e-07,
+    "independent/native_zero_max_error": 0.0,
+    "independent/trainable_parameters": 100
+  },
+  "commit": "064b9dc01de4b38caedcf101395fba83629dca00",
+  "environment": {
+    "cuda": null,
+    "device": "cpu",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.11.16",
+    "threads": 1,
+    "torch": "2.10.0+cpu",
+    "transformers": "4.57.1"
+  },
+  "licenses_sealed_evaluation": false,
+  "licenses_training": false,
+  "quality_claim_authorized": false,
+  "real_r2_executed": false,
+  "source_files": {
+    "__init__.py": "dca7d5a14c13eb9d1e664b3166ca4370dc3fc37c61f28ad5f1ad1f6cf1ccdf26",
+    "core.py": "85fd4bb0131570e384764c12b8ec8a15215ceb65f67293ca65e24469e383b8dd",
+    "data.py": "aad47fd40876a1c7c9b4f99275394695c63ac5fd6aad454c3586b3b1f696a1d7",
+    "pipeline.py": "81b7defbb0b7545b80aa1ce919d3a671fff209b1b8bf9eb325c8489eba11ee60",
+    "protocol.json": "ed891c3c9dce9d3591d4b59f36b8a03b6e0a83cefae4c704355b711c45a59430",
+    "requirements.txt": "7aea077d7b27ae951c36c8b3584393153ec2bee1f42cf9fda492f74736625e70",
+    "runtime.py": "20ca5919597461680d02c5f17ee90dba5df5240cc924a0f9d77b21b67a380475",
+    "tests/__init__.py": "3e346adc3e1177a03aae7b0a6dda45360ae7e6c155e63bb4565bf0941f481c0e",
+    "tests/fixture.py": "9d7ecb1cdfee85b68bf005255f5f5f97257e72abc8d4f5a8dca7111cd5b2f69a",
+    "tests/test_all.py": "e2b0fac3024a8fa6f4a809f17fb919e5595d1422f4d302a9d75904cb4e043370"
+  },
+  "stage": "P1_native_random_weights"
+}
