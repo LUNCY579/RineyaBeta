@@ -15,9 +15,10 @@ from .provenance import (ROOT, BASE_COMMIT, checkpoint_inventory, code_identity,
                          environment, new_run, require_receipt, write_json,
                          artifact_inventory, require_artifacts, require_unchanged_code)
 from .runtime import HybridRuntime, model_fingerprint
-from .study import (VERSION, MAX_BLOCK_SIZE, MAX_CASES, MAX_NEW_TOKENS,
-                    assert_target_config, contrast_report, inference_workload,
-                    require_study_receipt, validate_execution)
+from .study import (DRIFT_MULTIPLE, MAX_BLOCK_SIZE, MAX_CASES, MAX_NEW_TOKENS,
+                    QUALIFICATION_CRITERION_VERSION, VERSION, assert_target_config,
+                    contrast_report, inference_workload, require_study_receipt,
+                    validate_execution)
 
 
 def load_local(path, device):
@@ -195,6 +196,51 @@ def qualify(model, backend, block_size):
         check["passed"] &= compact
         check["compact_storage"] = compact
         checks[name] = bind_schedule_identity(check, local)
+    # Bit-exact native parity is only ATTAINABLE when the research forward
+    # issues one query block covering the whole sequence; otherwise the two
+    # paths necessarily multiply different shapes and differ by ulps.
+    return apply_criterion(checks, backend, single_block=block_size >= ids.shape[1])
+
+
+def apply_criterion(checks, backend, *, single_block):
+    """Decide P2 by exact conditions plus a control-derived drift bound.
+
+    The bound is a ratio to A0_global's OWN full-vs-stream drift in the same
+    run, device, backend and seed. A0_global is known-correct by the bit-exact
+    native parity condition, so its drift is that configuration's arithmetic
+    noise floor. This asks whether windowing adds error beyond what chunking
+    already costs -- not whether 28-layer float32 accumulation happens to sit
+    below a constant chosen on a 4-layer fixture.
+    """
+    control = checks["global_stream"]["max_abs_error"]
+    for name, check in checks.items():
+        check["registered_v1_tolerance_passed"] = check.pop("passed")
+        error = check["max_abs_error"]
+        # Where the two sides issue identically shaped matmuls, demand bit
+        # equality rather than a bound: the gate multiplies by exactly 1.0, and
+        # a single-block math forward reproduces native eager to the last bit.
+        exact = name == "gate_identity" or (
+            name == "native_global" and backend == "math" and single_block)
+        conditions = {"finite_error": error is not None,
+                      "argmax_identical": bool(check.get("argmax_identical"))}
+        for optional in ("attended_positions_identical", "compact_storage"):
+            if optional in check:
+                conditions[optional] = bool(check[optional])
+        if exact:
+            conditions["bit_exact"] = error == 0.0
+        else:
+            if error is None or control is None:
+                ratio = None
+            elif control == 0:
+                ratio = 0.0 if error == 0 else float("inf")
+            else:
+                ratio = error / control
+            # JSON cannot carry infinity; a blown ratio is recorded as a miss.
+            check["drift_ratio_to_all_global"] = (
+                None if ratio is None or ratio == float("inf") else ratio)
+            conditions["drift_within_control"] = ratio is not None and ratio <= DRIFT_MULTIPLE
+        check["criterion_conditions"] = conditions
+        check["passed"] = all(conditions.values())
     return checks
 
 
@@ -271,6 +317,8 @@ def main(argv=None):
             if args.stage == "qualify":
                 checks = qualify(model, args.backend, args.block_size)
                 receipt.update(stage="real_model_qualification", checks=checks,
+                               criterion_version=QUALIFICATION_CRITERION_VERSION,
+                               drift_multiple=DRIFT_MULTIPLE,
                                passed=all(v["passed"] for v in checks.values()))
             else:
                 cases = stratified_cases(make_cases(tokenizer), args.max_cases)

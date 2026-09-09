@@ -13,9 +13,10 @@ from ..config import ARMS, Spec, arm_spec
 from ..provenance import digest
 from ..run import compare_logits, main, qualify
 from ..runtime import HybridRuntime
-from ..study import (CONTRASTS, TARGET, VERSION, assert_target_config, causal_pairs,
-                     contrast_report, inference_workload, matched_update_budget,
-                     plan, require_study_receipt, validate_execution)
+from ..study import (CONTRASTS, QUALIFICATION_CRITERION_VERSION, TARGET, VERSION,
+                     assert_target_config, causal_pairs, contrast_report,
+                     inference_workload, matched_update_budget, plan,
+                     require_study_receipt, validate_execution)
 from .fixture import TinyQwen
 
 torch.set_num_threads(1)
@@ -182,9 +183,13 @@ class BudgetAndGuardTests(unittest.TestCase):
 
     def test_new_controls_and_unchanged_checkpoint_are_required(self):
         r = {"study_version": VERSION, "checkpoint_unchanged": True,
+             "criterion_version": QUALIFICATION_CRITERION_VERSION,
              "checks": {k: {"passed": True} for k in ("all_local_stream", "frontloaded_stream")}}
         require_study_receipt(r)
+        # A qualification judged under the superseded absolute-tolerance
+        # criterion must not be able to open the diagnostic.
         for change in ({"study_version": 1}, {"study_version": 2.0},
+                       {"criterion_version": 1}, {"criterion_version": None},
                        {"checkpoint_unchanged": False}, {"checkpoint_unchanged": 1}, {"checks": {}}):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 require_study_receipt(dict(r, **change))

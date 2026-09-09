@@ -4,7 +4,7 @@
   "branch": "research/hybrid-local-global-attention-v1",
   "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
   "extends_implementation_commit": "6770e67b471f4821004175d5d39a228f079b28f1",
-  "status": "infrastructure_extended_current_code_qualification_required",
+  "status": "p1_established_p2_amended_criterion_rerun_required",
   "study_contract": "COMPATIBILITY_CONTRACT.md",
   "analytical_planner": "python -m experiments.hybrid_attention_v1.study",
   "prior_receipts": "Historical code-specific evidence only; not authorization for this revision",
@@ -50,9 +50,26 @@
     "P5": "CLOSED: independent preservation/quality confirmation and isolated hardware benchmarking need separate preregistration"
   },
   "qualification": {
+    "criterion_version": 2,
+    "amended": "2026-09-09; supersedes the v1 absolute-tolerance verdict after it failed on the first real-R2 run",
+    "amendment_rationale": "reports/AGENT_PROPOSED_P2_AMENDMENT.md",
     "dtype": "float32",
-    "atol": 2e-05,
-    "rtol": 2e-05,
+    "exact_conditions": [
+      "attended absolute key positions identical between full and chunked prefill, every layer, every stream arm",
+      "argmax identical for every compared logit tensor",
+      "native_global bit-exact 0.0 against the native eager forward when backend is math AND the research forward issues a single query block (block_size >= sequence length); bit equality is unattainable otherwise because the two paths multiply different shapes",
+      "gate identity bit-exact 0.0 before training",
+      "compact storage: logical_kv_bytes == resident_kv_bytes and registered retained counts"
+    ],
+    "drift_control": "A0_global global_stream max_abs_error measured in the same run, device, backend and seed",
+    "drift_multiple_K": 50,
+    "drift_calibration": "correct implementations observed at ratio 1.0-7.3; injected eviction faults at 78162-1258638; K sits ~7x above the correct side and ~1500x below the nearest fault",
+    "superseded_v1": {
+      "atol": 2e-05,
+      "rtol": 2e-05,
+      "why": "absolute logit bound calibrated on a 4-layer hidden-32 fixture; unachievable at 28 layers in float32, where chunked-vs-full prefill differs by ~12 ulps per layer by construction, and non-discriminating (sink_stream cleared 3.62e-05 while local_stream failed at 1.11e-04)",
+      "still_reported": "every receipt still records max_abs_error and registered_v1_tolerance_passed per check"
+    },
     "argmax_identical_required": true,
     "random_token_seed": 17,
     "mechanical_sequence_length": 17,

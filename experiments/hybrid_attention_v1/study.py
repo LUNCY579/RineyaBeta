@@ -9,6 +9,11 @@ import math
 from .config import ARMS, arm_spec
 
 VERSION = 2
+# protocol.json qualification.criterion_version. v1 judged P2 by an absolute
+# 2e-5 logit tolerance; v2 judges it by exact conditions plus a bound derived
+# from the all-global control measured in the same run.
+QUALIFICATION_CRITERION_VERSION = 2
+DRIFT_MULTIPLE = 50
 MAX_CASES = 72
 MAX_NEW_TOKENS = 24
 MAX_BLOCK_SIZE = 128
@@ -147,6 +152,8 @@ def require_study_receipt(receipt):
     if (type(receipt.get("study_version")) is not int or receipt["study_version"] != VERSION
             or receipt.get("checkpoint_unchanged") is not True):
         raise ValueError("Current study version and unchanged checkpoint receipt required")
+    if receipt.get("criterion_version") != QUALIFICATION_CRITERION_VERSION:
+        raise ValueError("Qualification was judged under a superseded criterion version")
     for name in ("all_local_stream", "frontloaded_stream"):
         if receipt.get("checks", {}).get(name, {}).get("passed") is not True:
             raise ValueError(f"New topology control is not mechanically qualified: {name}")

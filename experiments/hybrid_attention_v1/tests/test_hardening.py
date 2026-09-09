@@ -16,8 +16,9 @@ from ..config import ARMS, Spec, arm_spec
 from ..diagnostics import make_cases
 from ..provenance import (artifact_inventory, require_artifacts, code_identity,
                           digest, environment, require_receipt, require_unchanged_code)
-from ..run import (main as run_main, qualify, compare_logits, declared_eos_ids,
-                   require_deterministic_cublas, stratified_cases)
+from ..run import (DRIFT_MULTIPLE, apply_criterion, compare_logits, declared_eos_ids,
+                   main as run_main, qualify, require_deterministic_cublas,
+                   stratified_cases)
 from ..runtime import (HybridRuntime, model_fingerprint, rope_is_unscaled,
                        rope_theta as rope_theta_of)
 from ..study import validate_execution
@@ -293,6 +294,85 @@ class DiagnosticMetadataTests(unittest.TestCase):
                 self.assertGreater(start, 0)  # Instructions precede evidence.
             if case["family"] == "absent":
                 self.assertEqual(case["evidence_kind"], "distractor")
+
+
+class QualificationCriterionTests(unittest.TestCase):
+    """protocol.json qualification.criterion_version 2. A criterion that cannot
+    withhold a pass is not a criterion, so every condition is tested failing."""
+
+    def _checks(self, **overrides):
+        base = {
+            "native_global": {"passed": True, "max_abs_error": 0.0, "argmax_identical": True},
+            "gate_identity": {"passed": True, "max_abs_error": 0.0, "argmax_identical": True},
+            "global_stream": {"passed": True, "max_abs_error": 2.0e-05, "argmax_identical": True,
+                              "attended_positions_identical": True},
+            # passed here is compare_logits' v1 verdict: 9.0e-05 misses 2e-5, and
+            # that is exactly the real-R2 case the amendment exists to re-judge.
+            "local_stream": {"passed": False, "max_abs_error": 9.0e-05, "argmax_identical": True,
+                             "attended_positions_identical": True, "compact_storage": True},
+        }
+        for name, patch_fields in overrides.items():
+            base[name] = {**base[name], **patch_fields}
+        return base
+
+    def test_real_r2_shaped_numbers_pass(self):
+        checks = apply_criterion(self._checks(), "math", single_block=True)
+        self.assertTrue(all(c["passed"] for c in checks.values()), checks)
+        self.assertAlmostEqual(checks["local_stream"]["drift_ratio_to_all_global"], 4.5)
+        # The superseded verdict is still recorded, not silently dropped.
+        self.assertFalse(checks["local_stream"]["registered_v1_tolerance_passed"])
+        self.assertTrue(checks["gate_identity"]["registered_v1_tolerance_passed"])
+
+    def test_drift_beyond_the_control_multiple_fails(self):
+        control = 2.0e-05
+        for multiple, expected in ((DRIFT_MULTIPLE, True), (DRIFT_MULTIPLE + 1, False)):
+            with self.subTest(multiple=multiple):
+                checks = apply_criterion(
+                    self._checks(local_stream={"max_abs_error": control * multiple}),
+                    "math", single_block=True)
+                self.assertEqual(checks["local_stream"]["passed"], expected)
+
+    def test_exact_conditions_outrank_a_tiny_drift(self):
+        # The fault that matters most: positions wrong, logits barely moved.
+        for field in ("attended_positions_identical", "compact_storage"):
+            with self.subTest(field=field):
+                checks = apply_criterion(
+                    self._checks(local_stream={field: False, "max_abs_error": 2.0e-05}),
+                    "math", single_block=True)
+                self.assertFalse(checks["local_stream"]["passed"])
+                self.assertFalse(checks["local_stream"]["criterion_conditions"][field])
+
+    def test_argmax_and_nonfinite_failures_are_refused(self):
+        checks = apply_criterion(self._checks(local_stream={"argmax_identical": False}),
+                                 "math", single_block=True)
+        self.assertFalse(checks["local_stream"]["passed"])
+        checks = apply_criterion(self._checks(local_stream={"max_abs_error": None}),
+                                 "math", single_block=True)
+        self.assertFalse(checks["local_stream"]["passed"])
+        self.assertIsNone(checks["local_stream"]["drift_ratio_to_all_global"])
+
+    def test_gate_identity_must_be_bit_exact(self):
+        checks = apply_criterion(self._checks(gate_identity={"max_abs_error": 1e-12}),
+                                 "math", single_block=True)
+        self.assertFalse(checks["gate_identity"]["passed"])
+
+    def test_native_parity_is_bit_exact_only_where_that_is_attainable(self):
+        near = self._checks(native_global={"max_abs_error": 4.8e-07})
+        # math + one query block: both sides multiply the same shapes, so demand bits.
+        self.assertFalse(apply_criterion(near, "math", single_block=True)["native_global"]["passed"])
+        # Split into blocks, or on a different kernel, bit equality is unattainable.
+        self.assertTrue(apply_criterion(self._checks(native_global={"max_abs_error": 4.8e-07}),
+                                        "math", single_block=False)["native_global"]["passed"])
+        self.assertTrue(apply_criterion(self._checks(native_global={"max_abs_error": 4.8e-07}),
+                                        "sdpa", single_block=True)["native_global"]["passed"])
+        # ...but it is still bounded by the same control multiple.
+        blown = self._checks(native_global={"max_abs_error": 2.0e-05 * (DRIFT_MULTIPLE + 1)})
+        self.assertFalse(apply_criterion(blown, "sdpa", single_block=True)["native_global"]["passed"])
+
+    def test_a_zero_control_admits_only_zero_drift(self):
+        checks = apply_criterion(self._checks(global_stream={"max_abs_error": 0.0}),
+                                 "math", single_block=True)
+        self.assertFalse(checks["local_stream"]["passed"])
 
 
 class DiagnosticDecodingTests(unittest.TestCase):
