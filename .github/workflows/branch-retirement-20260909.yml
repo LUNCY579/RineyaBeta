@@ -1,0 +1,139 @@
+name: Guarded branch retirement 2026-09-09
+on:
+  push:
+    branches: [maintenance/branch-retirement-20260909]
+    paths:
+      - maintenance/branch_retirement_20260909/**
+      - .github/workflows/branch-retirement-20260909.yml
+permissions:
+  contents: read
+concurrency:
+  group: rineyabeta-branch-retirement-20260909
+  cancel-in-progress: false
+jobs:
+  planner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          lfs: false
+      - name: Test allowlist, exact leases, archival preservation, and atomic race rejection
+        run: python maintenance/branch_retirement_20260909/test_retire.py
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - kind: query
+            sha: 5500e875c5fa80c8e00b831702a020e57cc1145d
+            torch: 2.8.0
+          - kind: composition
+            sha: 5785ef1af91359547da62136a7326e23b9183b57
+            torch: 2.8.0
+          - kind: hybrid
+            sha: 2b1131ea5b94d7ffe29225c15a51b74060bbb42c
+            torch: 2.6.0
+    env:
+      KIND: ${{ matrix.kind }}
+      TESTED_SHA: ${{ matrix.sha }}
+      TORCH_VERSION: ${{ matrix.torch }}
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+      CUBLAS_WORKSPACE_CONFIG: ':4096:8'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    defaults:
+      run:
+        shell: bash
+        working-directory: src
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: control
+          persist-credentials: false
+          lfs: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ matrix.sha }}
+          path: src
+          persist-credentials: false
+          lfs: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11'
+      - name: Install matching isolated CPU runtime
+        run: |
+          python -m pip install "torch==$TORCH_VERSION" --index-url https://download.pytorch.org/whl/cpu
+          if [ "$KIND" = hybrid ]; then
+            python -m pip install transformers==4.57.1
+          else
+            python -m pip install -r experiments/official_family_v1/requirements.txt
+          fi
+          python -m pip freeze > gate-environment.txt
+          python -c 'from transformers import Qwen3Config, Qwen3ForCausalLM'
+      - name: Run all mechanical tests on the exact prospective survivor
+        run: |
+          set +e
+          if [ "$KIND" = hybrid ]; then
+            python -m experiments.hybrid_attention_v1.verify --run-id branch-retirement-native --require-hf > gate-tests.log 2>&1
+          else
+            tests=(experiments/official_family_v1/tests)
+            for name in composition_qrr_v1 query_refinement_v1; do
+              if [ -d "experiments/$name/tests" ]; then tests+=("experiments/$name/tests"); fi
+            done
+            python -m pytest -c /dev/null --import-mode=importlib -q "${tests[@]}" --junitxml=family-tests.xml > gate-tests.log 2>&1
+          fi
+          rc=$?
+          echo "$rc" > gate-exit-code.txt
+          cat gate-tests.log
+          exit "$rc"
+      - name: Bind the actual result to source and this run; missing tests fail closed
+        if: always()
+        run: python ../control/maintenance/branch_retirement_20260909/gate_receipt.py "$KIND" "$TESTED_SHA"
+      - name: Preserve success or failure evidence without model weights
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ matrix.kind }}
+          path: |
+            src/gate.json
+            src/gate-tests.log
+            src/gate-environment.txt
+            src/family-tests.xml
+            src/experiments/hybrid_attention_v1/runs/branch-retirement-native/receipt.json
+          if-no-files-found: warn
+          retention-days: 90
+  archive-and-retire:
+    needs: [planner, gates]
+    if: ${{ always() && needs.planner.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          lfs: false
+      - uses: actions/download-artifact@v4
+        with:
+          path: gate-artifacts
+      - name: Archive first; retire only passing replacements; stop on concurrent ref changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python maintenance/branch_retirement_20260909/retire.py
+      - name: Preserve the actual ref transaction report even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: branch-retirement-report
+          path: retirement-report.json
+          if-no-files-found: warn
+          retention-days: 90
