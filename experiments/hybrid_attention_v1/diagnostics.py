@@ -10,6 +10,16 @@ from .provenance import digest
 
 
 DIAGNOSTIC_SCHEMA_VERSION = 2
+
+# Readout v2, registered 2026-09-09. v1 scored only full-string equality over
+# the whole generation. This checkpoint is chat-shaped while the registered
+# prompt protocol is raw completion, so no turn boundary is ever reached and no
+# stop token is ever the argmax: the reference arm emitted the correct answer
+# as its first content in 47 of 72 cases while the endpoint read 0 of 72.
+# v2 registers a newline stop so termination is reachable, and adds
+# first_content_exact so an arm that answers but overruns is still resolvable.
+READOUT_VERSION = 2
+
 # Case-set v2, registered 2026-09-09. v1 was (511, 512, 513, 1023, 1024, 1025):
 # measured against the window rule, NONE of its 72 cases could put the answer
 # outside a 1024-wide window, so A1_local1024 and A7_sink1024 were incapable of
@@ -88,15 +98,18 @@ def score(case, text, generation):
             f"Case lacks diagnostic schema v{DIAGNOSTIC_SCHEMA_VERSION} fields {missing}; "
             "scoring a case without attribution metadata is refused")
     trimmed = text.strip()
+    # The answer occupies the first line; everything after it is overrun.
+    first_line = trimmed.split("\n")[0].strip()
     counts = Counter(generation["token_ids"])
     if generation["stopped_eos"]:
-        termination = "eos"
+        termination = generation.get("stop_kind", "eos")
     elif generation["budget_exhausted"]:
         termination = "budget"
     else:
         termination = "other"
     return {
         "diagnostic_schema_version": DIAGNOSTIC_SCHEMA_VERSION,
+        "readout_version": READOUT_VERSION,
         "id": case["id"], "family": case["family"], "depth": case["depth"],
         "tokens": case["tokens"], "answerable": case["answerable"],
         "prompt_sha256": case["prompt_sha256"], "answer": case["answer"],
@@ -104,7 +117,12 @@ def score(case, text, generation):
         "evidence_to_question_gap": case["evidence_to_question_gap"],
         "evidence_kind": case["evidence_kind"],
         "text": text, "strict_exact": text == case["answer"],
-        "trimmed_exact": trimmed == case["answer"], "abstained": trimmed == "UNKNOWN",
+        "trimmed_exact": trimmed == case["answer"],
+        "first_content_exact": first_line == case["answer"],
+        "first_line": first_line,
+        "abstained": first_line == "UNKNOWN",
+        "stop_token_id": generation.get("stop_token_id"),
+        "terminated": bool(generation["stopped_eos"]),
         "empty": not trimmed, "generated_tokens": len(generation["token_ids"]),
         "unique_generated_tokens": len(counts),
         "max_token_repeat": max(counts.values(), default=0),
@@ -125,7 +143,10 @@ def _cell(rows):
         "n": n,
         "strict_exact": rate("strict_exact", rows),
         "trimmed_exact": rate("trimmed_exact", rows),
-        "answerable_accuracy": rate("trimmed_exact", a),
+        "first_content_exact": rate("first_content_exact", rows),
+        "answerable_accuracy": rate("first_content_exact", a),
+        "answerable_accuracy_trimmed": rate("trimmed_exact", a),
+        "terminated_rate": rate("terminated", rows),
         "false_abstention_rate": rate("abstained", a),
         "unanswerable_abstention_rate": rate("abstained", u),
         "budget_exhaustion_rate": rate("budget_exhausted", rows),

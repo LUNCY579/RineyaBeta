@@ -244,7 +244,7 @@ class HybridRuntime(nn.Module):
     def generate(self, input_ids, *, max_new_tokens=24, eos_token_ids=(), chunk_size=128):
         # Reset before validation, including when a caller abandons cached forward.
         self.reset()
-        generated, stopped = [], False
+        generated, stopped, stop_token = [], False, None
         try:
             if (not isinstance(input_ids, torch.Tensor) or input_ids.ndim != 2
                     or input_ids.shape[0] != 1 or input_ids.shape[1] < 1
@@ -267,13 +267,14 @@ class HybridRuntime(nn.Module):
                 token = int(logits[0, -1].argmax())
                 generated.append(token)
                 if token in eos_token_ids:
-                    stopped = True
+                    stopped, stop_token = True, token
                     break
                 if step + 1 < max_new_tokens:
                     next_id = torch.tensor([[token]], device=input_ids.device, dtype=torch.long)
                     logits = self(next_id, use_cache=True, last_only=True)
             return {
                 "token_ids": generated, "stopped_eos": stopped,
+                "stop_token_id": stop_token,
                 "budget_exhausted": not stopped and len(generated) == max_new_tokens,
                 "cache": [x.metrics() for x in self.cache], "attention_stats": dict(self.stats),
             }

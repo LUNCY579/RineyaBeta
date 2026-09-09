@@ -4,7 +4,7 @@
   "branch": "research/hybrid-local-global-attention-v1",
   "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
   "extends_implementation_commit": "6770e67b471f4821004175d5d39a228f079b28f1",
-  "status": "p2_qualified_under_criterion_v2_p3_open",
+  "status": "p2_qualified_criterion_v2_p3_readout_v2_rerun",
   "study_contract": "COMPATIBILITY_CONTRACT.md",
   "analytical_planner": "python -m experiments.hybrid_attention_v1.study",
   "prior_receipts": "Historical code-specific evidence only; not authorization for this revision",
@@ -107,19 +107,21 @@
     ],
     "seed": 17,
     "cases": 72,
-    "decoding": "greedy, max_new_tokens24, original EOS; no repetition/abstention bias",
+    "decoding": "greedy, max_new_tokens24; stop set = the checkpoint's declared EOS ids UNION every token whose decoding contains a newline; no repetition/abstention bias",
     "max_arms": 10,
     "max_generations": 720,
     "max_emitted_tokens": 17280,
     "max_block_size": 128,
     "max_allocator_mib": 6144,
     "metrics": [
-      "strict_exact",
+      "first_content_exact",
       "trimmed_exact",
+      "strict_exact",
       "answerable_accuracy",
       "false_abstention_rate",
       "unanswerable_abstention_rate",
       "empty_rate",
+      "terminated_rate",
       "budget_exhaustion_rate",
       "max_token_repeat"
     ],
@@ -140,7 +142,17 @@
       "why": "measured against the window rule, 0 of 72 cases could put the answer outside a 1024-wide window, so A1_local1024 and A7_sink1024 could not exhibit a window effect at all; only 12 of 72 at question-read (24 of 72 by end of generation) could do so for a 512-wide window",
       "registered_before_any_p3_run": true
     },
-    "length_rationale": "these straddle the eviction threshold of BOTH registered windows; 512 remains an all-visible control; still 6 lengths x 4 families x 3 depths = 72 cases, within every registered budget"
+    "length_rationale": "these straddle the eviction threshold of BOTH registered windows; 512 remains an all-visible control; still 6 lengths x 4 families x 3 depths = 72 cases, within every registered budget",
+    "readout_version": 2,
+    "stop_rule": "the registered prompt ends with a newline then 'Answer:' and the answer occupies the first line, so the line break is this task's turn boundary; the newline stop id set is derived from the tokenizer at run time, not hand-listed",
+    "primary_metric": "first_content_exact",
+    "superseded_readout_v1": {
+      "decoding": "greedy, max_new_tokens24, original EOS; no repetition/abstention bias",
+      "primary_metric": "trimmed_exact",
+      "why": "the checkpoint is chat-shaped while the prompt protocol is raw completion, so no turn boundary is ever reached and neither declared stop token is ever the argmax; run hlga-p3-20260909-cuda-math scored trimmed_exact 0.000 on ALL TEN arms with budget_exhaustion 1.000, while the reference arm emitted the correct answer as its first content in 47 of 72 cases",
+      "both_still_reported": "trimmed_exact and strict_exact remain registered metrics and remain in the contrast report, so v1 and v2 can be compared side by side",
+      "registered_before_the_rerun": true
+    }
   },
   "compute_matching": {
     "frozen": "Hold checkpoint/data/order/precision/backend/chunking/decoder fixed; report visible pairs, issued rectangles, full modeled matmuls and actual EOS length separately",

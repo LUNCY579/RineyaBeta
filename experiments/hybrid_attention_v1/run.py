@@ -10,7 +10,8 @@ import time
 from pathlib import Path
 import torch
 from .config import ARMS, arm_spec
-from .diagnostics import make_cases, paired_result, score, summarize
+from .diagnostics import (READOUT_VERSION, make_cases, paired_result, score,
+                          summarize)
 from .provenance import (ROOT, BASE_COMMIT, checkpoint_inventory, code_identity, digest,
                          environment, new_run, require_receipt, write_json,
                          artifact_inventory, require_artifacts, require_unchanged_code)
@@ -68,6 +69,22 @@ def _generation_config_eos(path):
     if not source.is_file() or source.is_symlink():
         return None
     return json.loads(source.read_text(encoding="utf-8")).get("eos_token_id")
+
+
+def newline_stop_ids(tokenizer, vocab_size):
+    """Every token whose decoding contains a newline (readout v2).
+
+    The registered prompt ends with a newline then "Answer:", and the answer
+    occupies the first line, so the line break IS this task's turn boundary.
+    Without it the model answers correctly and then runs to the token cap, and
+    full-string equality reads zero for every arm -- which is exactly what
+    happened on the first P3 run. Derived from the tokenizer rather than
+    hand-listed, so it cannot go stale against a different vocabulary.
+    """
+    ids = tuple(i for i in range(vocab_size) if "\n" in tokenizer.decode([i]))
+    if not ids:
+        raise ValueError("Tokenizer exposes no newline token; the stop rule cannot apply")
+    return ids
 
 
 def stratified_cases(cases, limit):
@@ -333,7 +350,11 @@ def main(argv=None):
                     "actual_eos_stopped_work_is_not_compute_matched": True})
                 all_rows, summaries = {}, {}
                 eos = declared_eos_ids(args.model, model.config, model.config.vocab_size)
-                receipt["eos_token_ids"] = list(eos)
+                newline = newline_stop_ids(tokenizer, model.config.vocab_size)
+                stops = tuple(sorted(set(eos) | set(newline)))
+                receipt.update(eos_token_ids=list(eos), readout_version=READOUT_VERSION,
+                               newline_stop_token_count=len(newline),
+                               stop_token_count=len(stops))
                 for name in ARMS:
                     rt = HybridRuntime(model, specs[name])
                     rows, cache_metrics = [], []
@@ -344,7 +365,10 @@ def main(argv=None):
                     for case in cases:
                         ids = torch.tensor([case["input_ids"]], device=args.device, dtype=torch.long)
                         gen = rt.generate(ids, max_new_tokens=MAX_NEW_TOKENS,
-                                          eos_token_ids=eos, chunk_size=args.block_size)
+                                          eos_token_ids=stops, chunk_size=args.block_size)
+                        # Keep the two stop kinds distinguishable in the row.
+                        gen["stop_kind"] = ("eos" if gen["stop_token_id"] in eos
+                                            else "stop_sequence") if gen["stopped_eos"] else None
                         work = validate_execution(rt.spec, model.config, case, gen)
                         text_ids = gen["token_ids"][:-1] if gen["stopped_eos"] else gen["token_ids"]
                         text = tokenizer.decode(text_ids, skip_special_tokens=False,

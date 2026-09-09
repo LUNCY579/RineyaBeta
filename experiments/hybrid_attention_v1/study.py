@@ -166,7 +166,7 @@ def contrast_report(all_rows):
     for name, reference, treatment in CONTRASTS:
         a, b = all_rows[reference], all_rows[treatment]
         item = {"reference": reference, "treatment": treatment, "metrics": {}}
-        for metric in ("strict_exact", "trimmed_exact"):
+        for metric in ("strict_exact", "trimmed_exact", "first_content_exact"):
             for subset in ("all", "answerable", "unanswerable"):
                 use = lambda r: subset == "all" or r["answerable"] == (subset == "answerable")
                 aa = [dict(r, trimmed_exact=r[metric]) for r in a if use(r)]

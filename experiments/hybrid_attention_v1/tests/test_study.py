@@ -236,7 +236,8 @@ class BudgetAndGuardTests(unittest.TestCase):
 class ContrastTests(unittest.TestCase):
     def rows(self):
         return {name: [dict(id=str(i), prompt_sha256=str(i), answer="1" if i == 0 else "UNKNOWN",
-                    answerable=i == 0, strict_exact=False, trimmed_exact=False) for i in range(2)] for name in ARMS}
+                    answerable=i == 0, strict_exact=False, trimmed_exact=False,
+                    first_content_exact=False) for i in range(2)] for name in ARMS}
 
     def test_strict_and_trimmed_endpoints_stay_separate(self):
         rows = self.rows()
@@ -248,6 +249,19 @@ class ContrastTests(unittest.TestCase):
         self.assertEqual(metrics["trimmed_exact/all"]["accuracy_delta"], 0.5)
         self.assertEqual(metrics["trimmed_exact/answerable"]["accuracy_delta"], 1)
         self.assertEqual(metrics["trimmed_exact/unanswerable"]["accuracy_delta"], 0)
+        # Readout v2 reports the first-line endpoint alongside, never instead.
+        self.assertEqual(metrics["first_content_exact/all"]["accuracy_delta"], 0)
+
+    def test_first_content_endpoint_is_scored_independently(self):
+        # An arm that answers correctly then overruns moves ONLY the first-line
+        # endpoint; that separation is the whole point of the readout amendment.
+        rows = self.rows()
+        rows["A3_sink512"][0]["first_content_exact"] = True
+        metrics = contrast_report(rows)["primary_frozen_sink_retrofit"]["metrics"]
+        self.assertEqual(metrics["first_content_exact/all"]["accuracy_delta"], 0.5)
+        self.assertEqual(metrics["first_content_exact/answerable"]["accuracy_delta"], 1)
+        self.assertEqual(metrics["trimmed_exact/all"]["accuracy_delta"], 0)
+        self.assertEqual(metrics["strict_exact/all"]["accuracy_delta"], 0)
 
     def test_contrast_direction_and_membership(self):
         rows = self.rows()

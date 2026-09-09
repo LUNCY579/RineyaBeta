@@ -62,3 +62,70 @@ class DiagnosticReportingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReadoutV2Tests(unittest.TestCase):
+    """The first P3 run scored 0/72 on every arm because the model answered and
+    then overran. These pin the amendment that makes the endpoint resolvable."""
+
+    def _case(self, answer="42"):
+        return {"id": "dev-0000", "family": "retrieval", "depth": 0.0, "tokens": 512,
+                "answerable": answer != "UNKNOWN", "prompt_sha256": "x", "answer": answer,
+                "evidence_span": [20, 30], "question_span": [500, 512],
+                "evidence_to_question_gap": 470, "evidence_kind": "support_or_conflict"}
+
+    def _gen(self, *, eos=False, exhausted=True, stop=None, kind=None, ids=(7, 7, 8)):
+        g = {"token_ids": list(ids), "stopped_eos": eos, "budget_exhausted": exhausted,
+             "stop_token_id": stop}
+        if kind is not None:
+            g["stop_kind"] = kind
+        return g
+
+    def test_the_exact_failure_that_floored_the_first_run(self):
+        # A0_global on dev-0000: correct answer, then overrun to the cap.
+        row = score(self._case("64285"), " 64285\nAnswer: 64285\nAnswer: 64285", self._gen())
+        self.assertFalse(row["trimmed_exact"])       # v1 endpoint: blind
+        self.assertFalse(row["strict_exact"])
+        self.assertTrue(row["first_content_exact"])  # v2 endpoint: resolves it
+        self.assertEqual(row["first_line"], "64285")
+        self.assertEqual(row["termination"], "budget")
+        self.assertFalse(row["terminated"])
+
+    def test_a_cleanly_terminated_answer_satisfies_both_endpoints(self):
+        row = score(self._case("64285"), " 64285",
+                    self._gen(eos=True, exhausted=False, stop=198, kind="stop_sequence"))
+        self.assertTrue(row["trimmed_exact"])
+        self.assertTrue(row["first_content_exact"])
+        self.assertTrue(row["terminated"])
+        self.assertEqual(row["termination"], "stop_sequence")
+        self.assertEqual(row["stop_token_id"], 198)
+
+    def test_stop_kinds_stay_distinguishable(self):
+        for kind, stop in (("eos", 32744), ("stop_sequence", 198)):
+            with self.subTest(kind=kind):
+                row = score(self._case(), "42",
+                            self._gen(eos=True, exhausted=False, stop=stop, kind=kind))
+                self.assertEqual(row["termination"], kind)
+
+    def test_a_wrong_first_line_is_not_rescued_by_later_text(self):
+        # The endpoint must not become "the answer appears somewhere".
+        row = score(self._case("42"), "I think\n42", self._gen())
+        self.assertFalse(row["first_content_exact"])
+        self.assertFalse(row["trimmed_exact"])
+
+    def test_abstention_is_read_from_the_first_line_too(self):
+        row = score(self._case("UNKNOWN"), " UNKNOWN\nAnswer: UNKNOWN", self._gen())
+        self.assertTrue(row["abstained"])
+        self.assertTrue(row["first_content_exact"])
+        self.assertFalse(row["trimmed_exact"])
+
+    def test_cell_reports_both_endpoints_and_termination(self):
+        rows = [score(self._case("42"), " 42\nAnswer: 42", self._gen()),
+                score(self._case("42"), " 42",
+                      self._gen(eos=True, exhausted=False, stop=198, kind="stop_sequence"))]
+        cell = summarize(rows)["overall"]
+        self.assertEqual(cell["first_content_exact"], 1.0)
+        self.assertEqual(cell["trimmed_exact"], 0.5)
+        self.assertEqual(cell["terminated_rate"], 0.5)
+        self.assertEqual(cell["answerable_accuracy"], 1.0)
+        self.assertEqual(cell["answerable_accuracy_trimmed"], 0.5)
