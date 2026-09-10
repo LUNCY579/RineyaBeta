@@ -24,9 +24,11 @@ torch.set_num_threads(1)
 
 class ControlTests(unittest.TestCase):
     def test_topologies_and_stable_original_arms(self):
-        self.assertEqual(len(ARMS), 10)
+        self.assertEqual(len(ARMS), 11)
         self.assertEqual(arm_spec("A2_local512", 28).global_layers, (3, 7, 11, 15, 19, 23, 27))
         self.assertEqual(arm_spec("A8_all_local512", 28).global_layers, ())
+        self.assertEqual(arm_spec("A10_all_local_sink512", 28).global_layers, ())
+        self.assertEqual(ARMS["A10_all_local_sink512"], (512, 4, False))
         self.assertEqual(arm_spec("A9_frontloaded512", 28).global_layers, (0, 1, 2, 3, 4, 5, 27))
         self.assertEqual(ARMS["A3_sink512"], (512, 4, False))
 
@@ -147,7 +149,8 @@ class AccountingTests(unittest.TestCase):
 class BudgetAndGuardTests(unittest.TestCase):
     def test_plan_is_bounded_and_does_not_authorize(self):
         p = plan()
-        self.assertEqual(p["max_generations"], 720)
+        self.assertEqual(p["max_generations"], 72 * len(ARMS))
+        self.assertEqual(p["max_arms"], len(ARMS))
         self.assertFalse(p["licenses_training"])
         self.assertFalse(p["licenses_sealed_evaluation"])
         self.assertFalse(p["established_quality_improvement"])

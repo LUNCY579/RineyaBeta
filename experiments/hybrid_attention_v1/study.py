@@ -34,6 +34,11 @@ CONTRASTS = (
     ("sink_at_1024", "A1_local1024", "A7_sink1024"),
     ("periodic_global_access", "A8_all_local512", "A2_local512"),
     ("placement_at_equal_work", "A9_frontloaded512", "A2_local512"),
+    # The globals x sinks square. The sinks-absent row (A8 -> A2) had zero power
+    # because both arms were at floor; these two move the same question into the
+    # sinks-present row, and measure sink repair with no global layer present.
+    ("global_layers_given_sinks", "A10_all_local_sink512", "A3_sink512"),
+    ("sink_without_global_layers", "A8_all_local512", "A10_all_local_sink512"),
     ("global_gate_identity", "A0_global", "A4_global_gate"),
     ("local_gate_identity", "A2_local512", "A5_local512_gate"),
     ("sink_gate_identity", "A3_sink512", "A6_sink512_gate"),

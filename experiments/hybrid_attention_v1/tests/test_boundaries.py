@@ -21,6 +21,8 @@ from .fixture import CharacterTokenizer
 torch.set_num_threads(1)
 
 WINDOW_BOUNDARIES = (511, 512, 513, 1023, 1024, 1025)
+# Mechanistic controls that deliberately carry no global layer at all.
+NO_GLOBAL_ARMS = ("A8_all_local512", "A10_all_local_sink512")
 
 
 def _tensors(n, seed=17):
@@ -301,7 +303,7 @@ class RegisteredTopologyTests(unittest.TestCase):
             for layers in (1, 5, 12, 19, 26, 27, 28, 29, 36):
                 with self.subTest(arm=arm, layers=layers):
                     placement = arm_spec(arm, layers).global_layers
-                    if arm == "A8_all_local512":
+                    if arm in NO_GLOBAL_ARMS:
                         self.assertEqual(placement, ())
                     else:
                         self.assertEqual(placement[-1], layers - 1)
@@ -309,3 +311,45 @@ class RegisteredTopologyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class GlobalsBySinksSquareTests(unittest.TestCase):
+    """A10 completes the globals x sinks square. The sinks-absent row (A8 vs A2)
+    was unmeasurable because every arm in it sat at exactly 0.000; A10 moves the
+    global-layer question into the sinks-present row."""
+
+    def test_a10_differs_from_a3_only_in_global_layers(self):
+        a10, a3 = arm_spec("A10_all_local_sink512", 28), arm_spec("A3_sink512", 28)
+        self.assertEqual((a10.window, a10.sinks, a10.gate), (a3.window, a3.sinks, a3.gate))
+        self.assertEqual(a10.global_layers, ())
+        self.assertEqual(a3.global_layers, (3, 7, 11, 15, 19, 23, 27))
+
+    def test_a10_differs_from_a8_only_in_sinks(self):
+        a10, a8 = arm_spec("A10_all_local_sink512", 28), arm_spec("A8_all_local512", 28)
+        self.assertEqual(a10.global_layers, a8.global_layers)
+        self.assertEqual((a10.window, a10.gate), (a8.window, a8.gate))
+        self.assertEqual((a10.sinks, a8.sinks), (4, 0))
+
+    def test_the_square_is_closed(self):
+        square = {("A2_local512", 7, 0), ("A3_sink512", 7, 4),
+                  ("A8_all_local512", 0, 0), ("A10_all_local_sink512", 0, 4)}
+        for arm, globals_, sinks in square:
+            with self.subTest(arm=arm):
+                spec = arm_spec(arm, 28)
+                self.assertEqual(len(spec.global_layers), globals_)
+                self.assertEqual(spec.sinks, sinks)
+
+    def test_a10_is_cheaper_than_a3_and_that_is_not_compute_matched(self):
+        # Recorded so the contrast is never read as compute-matched: A10 drops
+        # seven quadratic layers, so it is strictly cheaper by construction.
+        a10, a3 = arm_spec("A10_all_local_sink512", 28), arm_spec("A3_sink512", 28)
+        self.assertLess(a10.cache_bytes(2048, 8, 128, 4), a3.cache_bytes(2048, 8, 128, 4))
+        self.assertEqual(a10.cache_bytes(2048, 8, 128, 4),
+                         arm_spec("A8_all_local512", 28).cache_bytes(2048, 8, 128, 4))
+
+    def test_every_arm_still_constructs_and_stays_registered(self):
+        self.assertEqual(len(ARMS), 11)
+        for arm in ARMS:
+            for layers in (1, 5, 12, 28, 36):
+                with self.subTest(arm=arm, layers=layers):
+                    arm_spec(arm, layers)

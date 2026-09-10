@@ -4,7 +4,7 @@
   "branch": "research/hybrid-local-global-attention-v1",
   "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
   "extends_implementation_commit": "6770e67b471f4821004175d5d39a228f079b28f1",
-  "status": "p2_qualified_criterion_v2_p3_readout_v2_rerun",
+  "status": "p3_complete_a10_registered_for_the_globals_by_sinks_square",
   "study_contract": "COMPATIBILITY_CONTRACT.md",
   "analytical_planner": "python -m experiments.hybrid_attention_v1.study",
   "prior_receipts": "Historical code-specific evidence only; not authorization for this revision",
@@ -39,7 +39,8 @@
     "A6_sink512_gate": "A3 + same identity gate",
     "A7_sink1024": "A1 with four initial slots inside W1024; secondary sink control",
     "A8_all_local512": "all layers W512; no globals, sinks or gates; NOT compute-matched to A2",
-    "A9_frontloaded512": "same number of globals and final-global layer as A2, earlier global placements; equal modeled work/cache/parameters"
+    "A9_frontloaded512": "same number of globals and final-global layer as A2, earlier global placements; equal modeled work/cache/parameters",
+    "A10_all_local_sink512": "A8 plus the four prefix sinks: all layers W512, no global layers. Completes the globals x sinks square; NOT compute-matched to A3, deliberately"
   },
   "stages": {
     "P0": "CPU fixture and separately required native HF random-model integration; neither proves R2 quality",
@@ -108,9 +109,9 @@
     "seed": 17,
     "cases": 72,
     "decoding": "greedy, max_new_tokens24; stop set = the checkpoint's declared EOS ids UNION every token whose decoding contains a newline; no repetition/abstention bias",
-    "max_arms": 10,
-    "max_generations": 720,
-    "max_emitted_tokens": 17280,
+    "max_arms": 11,
+    "max_generations": 792,
+    "max_emitted_tokens": 19008,
     "max_block_size": 128,
     "max_allocator_mib": 6144,
     "metrics": [
@@ -152,7 +153,9 @@
       "why": "the checkpoint is chat-shaped while the prompt protocol is raw completion, so no turn boundary is ever reached and neither declared stop token is ever the argmax; run hlga-p3-20260909-cuda-math scored trimmed_exact 0.000 on ALL TEN arms with budget_exhaustion 1.000, while the reference arm emitted the correct answer as its first content in 47 of 72 cases",
       "both_still_reported": "trimmed_exact and strict_exact remain registered metrics and remain in the contrast report, so v1 and v2 can be compared side by side",
       "registered_before_the_rerun": true
-    }
+    },
+    "arm_set_version": 2,
+    "arm_set_amendment": "A10_all_local_sink512 added 2026-09-09, registered with its predictions in reports/AGENT_A10_PREREGISTRATION.md BEFORE the arm existed in code. The two registered global-layer contrasts (A8->A2, A9->A2) returned p=1.0 with an effective n near 5 because every sinks-absent arm sat at exactly 0.000 above N=512; A10 moves the same question into the sinks-present row where it is measurable"
   },
   "compute_matching": {
     "frozen": "Hold checkpoint/data/order/precision/backend/chunking/decoder fixed; report visible pairs, issued rectangles, full modeled matmuls and actual EOS length separately",

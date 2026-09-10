@@ -57,6 +57,7 @@ ARMS = {
     "A7_sink1024": (1024, 4, False),
     "A8_all_local512": (512, 0, False),
     "A9_frontloaded512": (512, 0, False),
+    "A10_all_local_sink512": (512, 4, False),
 }
 
 
@@ -69,8 +70,12 @@ def arm_spec(name, layers, *, block_size=128, backend="math"):
     glob = tuple(range(layers)) if window is None else tuple(
         i for i in range(layers) if (i + 1) % 4 == 0 or i == layers - 1
     )
-    if name == "A8_all_local512":
-        glob = ()  # Mechanistic control, deliberately NOT compute-matched to A2.
+    if name in ("A8_all_local512", "A10_all_local_sink512"):
+        # Mechanistic controls with no global layer at all, deliberately NOT
+        # compute-matched to A2/A3. A10 is A8 plus the four prefix sinks: it
+        # completes the globals x sinks square, whose sinks-absent row was
+        # unmeasurable because every arm in it sat at exactly 0.000.
+        glob = ()
     elif name == "A9_frontloaded512":
         # Same global count and final aggregation layer, no importance selection.
         glob = tuple(range(len(glob) - 1)) + (layers - 1,)
