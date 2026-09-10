@@ -169,9 +169,10 @@ def contrast_report(all_rows):
         for metric in ("strict_exact", "trimmed_exact", "first_content_exact"):
             for subset in ("all", "answerable", "unanswerable"):
                 use = lambda r: subset == "all" or r["answerable"] == (subset == "answerable")
-                aa = [dict(r, trimmed_exact=r[metric]) for r in a if use(r)]
-                bb = [dict(r, trimmed_exact=r[metric]) for r in b if use(r)]
-                item["metrics"][f"{metric}/{subset}"] = paired_result(aa, bb) if aa or bb else None
+                aa = [r for r in a if use(r)]
+                bb = [r for r in b if use(r)]
+                item["metrics"][f"{metric}/{subset}"] = (
+                    paired_result(aa, bb, metric) if aa or bb else None)
         report[name] = item
     return report
 

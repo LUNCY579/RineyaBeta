@@ -19,6 +19,7 @@ DIAGNOSTIC_SCHEMA_VERSION = 2
 # v2 registers a newline stop so termination is reachable, and adds
 # first_content_exact so an arm that answers but overruns is still resolvable.
 READOUT_VERSION = 2
+PRIMARY_METRIC = "first_content_exact"
 
 # Case-set v2, registered 2026-09-09. v1 was (511, 512, 513, 1023, 1024, 1025):
 # measured against the window rule, NONE of its 72 cases could put the answer
@@ -184,7 +185,14 @@ def summarize(rows):
     }
 
 
-def paired_result(base, variant):
+def paired_result(base, variant, metric=PRIMARY_METRIC):
+    """Paired McNemar on an EXPLICIT metric.
+
+    This used to hardcode trimmed_exact while callers believed they were
+    comparing the registered primary. It agreed only because the two happened
+    to be row-identical; an arm that answered and then overran would have made
+    the headline silently report a non-primary endpoint under a primary label.
+    """
     if not base or len(base) != len(variant):
         raise ValueError("Paired comparison requires equal nonzero row counts")
     b = {r["id"]: r for r in base}
@@ -195,10 +203,12 @@ def paired_result(base, variant):
     for key in b:
         if (b[key]["prompt_sha256"], b[key]["answer"]) != (v[key]["prompt_sha256"], v[key]["answer"]):
             raise ValueError("Case content differs")
-        wins += bool(v[key]["trimmed_exact"] and not b[key]["trimmed_exact"])
-        losses += bool(b[key]["trimmed_exact"] and not v[key]["trimmed_exact"])
+        if metric not in b[key] or metric not in v[key]:
+            raise ValueError(f"Rows do not carry the compared metric: {metric}")
+        wins += bool(v[key][metric] and not b[key][metric])
+        losses += bool(b[key][metric] and not v[key][metric])
     d = wins + losses
     p = min(1.0, 2 * sum(math.comb(d, i) for i in range(min(wins, losses)+1)) / 2**d) if d else 1.0
-    return {"n": len(base), "wins": wins, "losses": losses,
+    return {"n": len(base), "metric": metric, "wins": wins, "losses": losses,
             "accuracy_delta": (wins-losses)/len(base), "mcnemar_exact_two_sided": p,
             "inference_scope": "exploratory correlated synthetic DEV; no significance/promotion claim"}

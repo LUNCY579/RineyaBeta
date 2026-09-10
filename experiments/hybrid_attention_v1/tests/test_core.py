@@ -9,7 +9,8 @@ from unittest.mock import patch
 import torch
 from ..attention import CompactKV, allowed_mask, blocked_attention, dense_oracle, storage_bytes
 from ..config import ARMS, Spec, arm_spec
-from ..diagnostics import make_cases, paired_result, score, summarize
+from ..diagnostics import (PRIMARY_METRIC, make_cases, paired_result, score,
+                           summarize)
 from ..provenance import (checkpoint_inventory, code_identity, digest, environment,
                           new_run, require_receipt, write_json)
 from ..runtime import HeadGate, HybridRuntime
@@ -296,16 +297,31 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(summary["budget_exhaustion_rate"], 1)
 
     def test_paired_comparison_enforces_membership_and_content(self):
-        base = [{"id": str(i), "prompt_sha256": str(i), "answer": "1", "trimmed_exact": False} for i in range(6)]
-        other = [dict(r, trimmed_exact=True) for r in reversed(base)]
+        base = [{"id": str(i), "prompt_sha256": str(i), "answer": "1",
+                 "first_content_exact": False, "trimmed_exact": False} for i in range(6)]
+        other = [dict(r, first_content_exact=True, trimmed_exact=True) for r in reversed(base)]
         r = paired_result(base, other)
         self.assertEqual(r["wins"], 6)
         self.assertEqual(r["mcnemar_exact_two_sided"], 0.03125)
+        self.assertEqual(r["metric"], PRIMARY_METRIC)
         with self.assertRaises(ValueError):
             paired_result(base, other[:-1])
         other[0]["prompt_sha256"] = "different"
         with self.assertRaises(ValueError):
             paired_result(base, other)
+
+    def test_paired_comparison_reports_the_metric_it_actually_used(self):
+        # It used to hardcode trimmed_exact while callers believed they were
+        # comparing the registered primary; the two agreed only by accident.
+        rows = [{"id": str(i), "prompt_sha256": str(i), "answer": "1",
+                 "first_content_exact": False, "trimmed_exact": False} for i in range(4)]
+        # An arm that answers correctly but overruns: primary true, trimmed false.
+        other = [dict(r, first_content_exact=True) for r in rows]
+        self.assertEqual(paired_result(rows, other)["wins"], 4)
+        self.assertEqual(paired_result(rows, other, "trimmed_exact")["wins"], 0)
+        self.assertEqual(paired_result(rows, other, "trimmed_exact")["metric"], "trimmed_exact")
+        with self.assertRaises(ValueError):
+            paired_result(rows, other, "no_such_metric")
 
     def test_missing_real_weights_fail_closed(self):
         with tempfile.TemporaryDirectory() as d:
