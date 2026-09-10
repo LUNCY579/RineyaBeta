@@ -58,6 +58,7 @@ ARMS = {
     "A8_all_local512": (512, 0, False),
     "A9_frontloaded512": (512, 0, False),
     "A10_all_local_sink512": (512, 4, False),
+    "A11_backloaded_sink512": (512, 4, False),
 }
 
 
@@ -76,6 +77,11 @@ def arm_spec(name, layers, *, block_size=128, backend="math"):
         # completes the globals x sinks square, whose sinks-absent row was
         # unmeasurable because every arm in it sat at exactly 0.000.
         glob = ()
+    elif name == "A11_backloaded_sink512":
+        # Same global COUNT as A3, moved to the deepest layers. Placement is the
+        # only difference, so this is exactly work-, cache- and FLOP-matched to
+        # A3 -- unlike A10, which drops the global layers entirely.
+        glob = tuple(range(layers - len(glob), layers))
     elif name == "A9_frontloaded512":
         # Same global count and final aggregation layer, no importance selection.
         glob = tuple(range(len(glob) - 1)) + (layers - 1,)

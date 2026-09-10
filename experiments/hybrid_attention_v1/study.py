@@ -37,8 +37,16 @@ CONTRASTS = (
     # The globals x sinks square. The sinks-absent row (A8 -> A2) had zero power
     # because both arms were at floor; these two move the same question into the
     # sinks-present row, and measure sink repair with no global layer present.
-    ("global_layers_given_sinks", "A10_all_local_sink512", "A3_sink512"),
+    # NOT "the global-layer contribution": A3 scores ~0 wherever the evidence is
+    # evicted, so this contrast can only move in the stratum where both arms
+    # already reach the answer locally and the global layers are redundant.
+    ("global_layers_given_visible_evidence_and_sinks", "A10_all_local_sink512", "A3_sink512"),
+    # A replication of the established sink effect in a globals-free topology,
+    # not a new finding and not validation of the 2x2.
     ("sink_without_global_layers", "A8_all_local512", "A10_all_local_sink512"),
+    # Placement at EXACTLY matched work. Read on the evicted stratum, where the
+    # reference is an exact zero and the test is genuinely one-sided.
+    ("global_placement_given_sinks", "A3_sink512", "A11_backloaded_sink512"),
     ("global_gate_identity", "A0_global", "A4_global_gate"),
     ("local_gate_identity", "A2_local512", "A5_local512_gate"),
     ("sink_gate_identity", "A3_sink512", "A6_sink512_gate"),

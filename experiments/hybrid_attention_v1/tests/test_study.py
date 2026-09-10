@@ -24,7 +24,7 @@ torch.set_num_threads(1)
 
 class ControlTests(unittest.TestCase):
     def test_topologies_and_stable_original_arms(self):
-        self.assertEqual(len(ARMS), 11)
+        self.assertEqual(len(ARMS), 12)
         self.assertEqual(arm_spec("A2_local512", 28).global_layers, (3, 7, 11, 15, 19, 23, 27))
         self.assertEqual(arm_spec("A8_all_local512", 28).global_layers, ())
         self.assertEqual(arm_spec("A10_all_local_sink512", 28).global_layers, ())

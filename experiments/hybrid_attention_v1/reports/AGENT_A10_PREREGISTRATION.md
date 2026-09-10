@@ -92,3 +92,68 @@ So a "positive" A10 means *the cheaper topology is no worse than the more
 expensive one, both being much worse than the reference*. That is a real and
 useful architectural finding. It is not evidence of improved intelligence, and
 it does not authorise touching a published Rineya core.
+
+---
+
+# AMENDMENT — A11 added, A10's role corrected (still before either arm was run)
+
+An independent preregistration review returned **run-modified**, and its central
+objection checks out against the completed run.
+
+## The objection, verified
+
+**A10 → A3 cannot measure the global-layer contribution.** Across all eight
+windowed arms already run there are only **3 correct answers in 280 arm-case
+opportunities** where the evidence lies outside that arm's own window — and
+**0 of 140** on the unanswerable evicted cases, where being correct requires
+only abstention and no retrieval at all. A0_global scores 27/40 on those same
+cases. A3 itself is 17/32 reachable and **1/40 evicted**.
+
+So the sinks-present row does not rescue the global-layer question, it
+relocates the floor. A10 → A3 can only produce discordance in the stratum where
+both arms already reach the answer locally and the global layers are causally
+redundant. My original framing of that contrast was over-promising.
+
+## What changed
+
+1. **Contrast renamed** to `global_layers_given_visible_evidence_and_sinks`.
+   It estimates the effect of restoring unbounded key access at 7 of 28 layers
+   *conditional on the answer already lying inside the local window*. It is not
+   "the global-layer contribution", and a null here is uninformative in either
+   direction.
+2. **`sink_without_global_layers` (A8 → A10) is pre-labelled a replication** of
+   the established sink effect in a globals-free topology — not a new finding.
+   It is the contrast most likely to look like a clean positive result, so it is
+   labelled before the fact and must be reported eviction-stratified.
+3. **New arm `A11_backloaded_sink512`** — A3's global *count* moved to the
+   deepest layers (21-27), W512 + 4 sinks. Verified **exactly work-, cache- and
+   FLOP-matched to A3** at every diagnostic length, so unlike A10 it carries no
+   compute caveat. New contrast `global_placement_given_sinks` (A3 → A11), read
+   on the **evicted stratum**, where the reference is a near-exact zero and the
+   test is genuinely one-sided: with A3 at 1/40, k wins for A11 gives roughly
+   p = 2/2^k, so about six wins would reach significance.
+4. **The 2x2 interaction is dropped as an estimand.** The sinks factor is
+   applied to 21 layers in the globals-present row and 28 in the globals-absent
+   row; A2/A3's global layers already attend positions 0-3 as part of full
+   causal attention, so the sinks-absent cells are not prefix-free; and A2 and
+   A8 both score exactly 0 above N=512, so that row carries no variance. The
+   square may be shown descriptively with the asymmetry stated alongside.
+
+## Registered prediction for A11
+
+**Null, like A10.** A3's placement already includes layers 19, 23 and 27, so
+"deep globals" is not wholly untested, and I expect A11 ≈ A3 overall
+(0.20-0.28) with **0-2 of 40 on the evicted stratum**.
+
+Running it anyway is still worth 72 generations, because a null *at exactly
+matched work* converts "we could not measure this" into a measured bound: 0/40
+gives a one-sided 95% upper bound near 0.07 on evicted-evidence recovery,
+against A0's 27/40 = 0.675 on the same cases. That makes "no 7-of-28 global
+topology, at any of three placements, recovers evicted evidence" a measured
+statement rather than an absence of evidence.
+
+**What would overturn my prediction:** A11 winning six or more evicted cases
+that A3 loses. That would mean placement, not count, governs whether global
+layers can rescue evicted evidence — the first positive architectural lever
+this study would have found, and it would immediately motivate a placement
+sweep rather than a training stage.

@@ -348,8 +348,49 @@ class GlobalsBySinksSquareTests(unittest.TestCase):
                          arm_spec("A8_all_local512", 28).cache_bytes(2048, 8, 128, 4))
 
     def test_every_arm_still_constructs_and_stays_registered(self):
-        self.assertEqual(len(ARMS), 11)
+        self.assertEqual(len(ARMS), 12)
         for arm in ARMS:
             for layers in (1, 5, 12, 28, 36):
                 with self.subTest(arm=arm, layers=layers):
                     arm_spec(arm, layers)
+
+
+class BackloadedPlacementTests(unittest.TestCase):
+    """A11 moves A3's global COUNT to the deepest layers. Placement is the only
+    difference, so it is exactly work-matched -- unlike A10, which drops the
+    global layers and is therefore strictly cheaper."""
+
+    def test_a11_has_a3s_global_count_at_the_deepest_layers(self):
+        a11, a3 = arm_spec("A11_backloaded_sink512", 28), arm_spec("A3_sink512", 28)
+        self.assertEqual(a11.global_layers, (21, 22, 23, 24, 25, 26, 27))
+        self.assertEqual(len(a11.global_layers), len(a3.global_layers))
+        self.assertEqual((a11.window, a11.sinks, a11.gate), (a3.window, a3.sinks, a3.gate))
+
+    def test_a11_is_exactly_work_matched_to_a3(self):
+        from ..study import TARGET, inference_workload
+        a11, a3 = arm_spec("A11_backloaded_sink512", 28), arm_spec("A3_sink512", 28)
+        for n in DIAGNOSTIC_LENGTHS:
+            with self.subTest(n=n):
+                self.assertEqual(inference_workload(a11, TARGET, n, 24),
+                                 inference_workload(a3, TARGET, n, 24))
+
+    def test_a10_is_not_work_matched_and_that_is_recorded(self):
+        from ..study import TARGET, inference_workload
+        a10, a3 = arm_spec("A10_all_local_sink512", 28), arm_spec("A3_sink512", 28)
+        self.assertLess(inference_workload(a10, TARGET, 2048, 24)["resident_kv_bytes"],
+                        inference_workload(a3, TARGET, 2048, 24)["resident_kv_bytes"])
+
+    def test_the_three_registered_placements_are_distinct(self):
+        placements = {arm: arm_spec(arm, 28).global_layers for arm in
+                      ("A3_sink512", "A9_frontloaded512", "A11_backloaded_sink512")}
+        self.assertEqual(len(set(placements.values())), 3)
+        self.assertEqual({len(v) for v in placements.values()}, {7})
+
+    def test_backloaded_construction_stays_valid_at_every_depth(self):
+        for layers in (1, 2, 4, 5, 12, 19, 28, 36):
+            with self.subTest(layers=layers):
+                g = arm_spec("A11_backloaded_sink512", layers).global_layers
+                self.assertEqual(g, tuple(sorted(set(g))))
+                self.assertTrue(all(0 <= i < layers for i in g))
+                self.assertEqual(g[-1], layers - 1)
+                self.assertEqual(len(g), len(arm_spec("A2_local512", layers).global_layers))
