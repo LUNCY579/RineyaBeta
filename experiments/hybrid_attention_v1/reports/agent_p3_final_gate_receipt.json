@@ -909,7 +909,7 @@
       "registered_v1_tolerance_passed": true
     }
   },
-  "code_identity": "6ac74b664eb5b703a0ca601b2f2460ffbd1ecf7f00eb9e2752076d3036013b7c",
+  "code_identity": "57bb7678183d84ac3701b3d25566a91ff59e8ba221c4fd551c5799b61181a65a",
   "criterion_version": 2,
   "cuda_preflight": {
     "allocator_cap_mib": 6144,
@@ -960,8 +960,8 @@
   },
   "passed": true,
   "quality_improvement_established": false,
-  "receipt_sha256": "9527f89045702c30a46cdfd3d5db5464053dcbf2516aca6913f984d50b5c3be9",
-  "run_id": "hlga-r3-gate-20260909-cuda-math",
+  "receipt_sha256": "87f01d0f026a90cedf6429443a6c026421333a30046559f43571f8c19838da9e",
+  "run_id": "hlga-r4-gate-20260909-cuda-math",
   "source_unchanged": true,
   "stage": "real_model_qualification",
   "study_version": 2,

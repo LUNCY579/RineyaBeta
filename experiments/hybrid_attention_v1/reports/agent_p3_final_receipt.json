@@ -1,44 +1,44 @@
 {
   "artifacts": {
     "A0_global.json": {
-      "bytes": 634199,
-      "sha256": "92aeecff81e3a136d0c0909ae1d77b1ce6c915c6afdc9179b1bd276bfc6dbfe5"
+      "bytes": 634200,
+      "sha256": "e8ad7b28f3d7ba812cc7cbae1b434d67eddb3e62d1603f293c680740c9bcc59a"
     },
     "A1_local1024.json": {
       "bytes": 641826,
-      "sha256": "628606b4420c2b14dc71229c8fe59e95177a34fcfce672076f4ee5ceb17c1af4"
+      "sha256": "e0a9a707b8198533467e133e8e4d9308da64237b610cf8a41b9cf3f6920785c7"
     },
     "A2_local512.json": {
-      "bytes": 645596,
-      "sha256": "f609ed6784c258b6085a98aa52d708ff3ff8bf6afbcd2242f84272df6d084712"
+      "bytes": 645597,
+      "sha256": "7757e2645446d74374d8fba5cdf62788fa09ce6cc184673d87dc3b964dc114d3"
     },
     "A3_sink512.json": {
-      "bytes": 631621,
-      "sha256": "8963640698c6077c404c542301e05cf4d2fa35f7b0103606c5ea10a37cf83e41"
+      "bytes": 631619,
+      "sha256": "c19a710552fd5d46801878f9399847a441ca03537ba37667a51ea9a173f6fe76"
     },
     "A4_global_gate.json": {
-      "bytes": 635352,
-      "sha256": "d3de5022e8872d13b3b5c0e4b5e6bff010c2ac24837d36f4807795499a7efccf"
+      "bytes": 635351,
+      "sha256": "ee60c67f4eaa80ba2ebab98a0db6db37eff9a647fef10f980113344e09bf0c3d"
     },
     "A5_local512_gate.json": {
       "bytes": 646748,
-      "sha256": "ed849b3935542e99dda2a5a10f031342ce238a3e6338e3558b122487b01db5ab"
+      "sha256": "7bc41e24c43df46d4abe2fc4ee125e371116bb2a92bcb0c3dddd7f647aa42518"
     },
     "A6_sink512_gate.json": {
-      "bytes": 632765,
-      "sha256": "d2855175fb34f7750ca3b7ac73c927ca211ddd9f690c186b69500c63ddfd1cb7"
+      "bytes": 632771,
+      "sha256": "357ceb3d2defeee0b98a1125efde8d1f4cae7dae3e2a6923304c82b254527338"
     },
     "A7_sink1024.json": {
-      "bytes": 632977,
-      "sha256": "03ccde3dc45e2c821ec1d5e9ea8d5d7fbdf5ef98ffeea0c46ebb7fb44789d5b3"
+      "bytes": 632975,
+      "sha256": "c1b5a1e783b39ad831c81b42cf3f19f0c7bb47455c5ec15ddb6264926c23f920"
     },
     "A8_all_local512.json": {
-      "bytes": 639702,
-      "sha256": "ae13a40ce9600f3eedac410c343a8f756c7191c5c370c10a9b84e09ef27aa977"
+      "bytes": 639703,
+      "sha256": "ada1134bac7f6cec301b99bb53b97c47dc71995697b33ae91aeabb48f8ef08ff"
     },
     "A9_frontloaded512.json": {
       "bytes": 641297,
-      "sha256": "8b185fd6403470dd714799b3d9f17ef1c19f4b49448048a75fd4d7b703bff201"
+      "sha256": "e8f508d72204257f9726936fed25e58d5210003fa6600c95cc9f634abc4ec5e5"
     },
     "checkpoint_inventory.json": {
       "bytes": 1916,
@@ -49,8 +49,8 @@
       "sha256": "893971b1b8036511b942c032f89979bc7a0921e80eb2da141e73396eca9ca3ac"
     },
     "summary.json": {
-      "bytes": 598961,
-      "sha256": "06825e08e2b9a4f18d8add26e0579b2cdf931d3bb2a66892ef8fd62057726d5a"
+      "bytes": 602935,
+      "sha256": "9e22d716496e740d73e85a40b2576e9f220304a2b0416e6a4eb4eff63783de8b"
     },
     "workload_envelope.json": {
       "bytes": 52409,
@@ -59,17 +59,17 @@
   },
   "authorizing_receipt": {
     "checkpoint_id": "409eb848c56983377c5d9d975b1deffdbfced992aaee35b349a1a36ffadb6fab",
-    "code_identity": "6ac74b664eb5b703a0ca601b2f2460ffbd1ecf7f00eb9e2752076d3036013b7c",
-    "path": "experiments\\hybrid_attention_v1\\runs\\hlga-r3-gate-20260909-cuda-math\\receipt.json",
-    "receipt_sha256": "9527f89045702c30a46cdfd3d5db5464053dcbf2516aca6913f984d50b5c3be9",
-    "run_id": "hlga-r3-gate-20260909-cuda-math"
+    "code_identity": "57bb7678183d84ac3701b3d25566a91ff59e8ba221c4fd551c5799b61181a65a",
+    "path": "experiments\\hybrid_attention_v1\\runs\\hlga-r4-gate-20260909-cuda-math\\receipt.json",
+    "receipt_sha256": "87f01d0f026a90cedf6429443a6c026421333a30046559f43571f8c19838da9e",
+    "run_id": "hlga-r4-gate-20260909-cuda-math"
   },
   "backend": "math",
   "base_commit": "3532c7bc8dbdd48ef8801ba6080cb80b0e90379a",
   "block_size": 128,
   "checkpoint_id": "409eb848c56983377c5d9d975b1deffdbfced992aaee35b349a1a36ffadb6fab",
   "checkpoint_unchanged": true,
-  "code_identity": "6ac74b664eb5b703a0ca601b2f2460ffbd1ecf7f00eb9e2752076d3036013b7c",
+  "code_identity": "57bb7678183d84ac3701b3d25566a91ff59e8ba221c4fd551c5799b61181a65a",
   "cuda_preflight": {
     "allocator_cap_mib": 6144,
     "free_bytes": 7411335168,
@@ -126,8 +126,8 @@
   "passed": true,
   "quality_improvement_established": false,
   "readout_version": 2,
-  "receipt_sha256": "386b75cedcd5804afc66a5f4dd486355fd18903db2b8da8c1f4ad08d497fb580",
-  "run_id": "hlga-p3v2b-20260909-cuda-math",
+  "receipt_sha256": "e6ee15ec860f2684bb91048835491a70e441980e4a5aa0a4efa5fb30c2ab8b9b",
+  "run_id": "hlga-p3v2c-20260909-cuda-math",
   "source_unchanged": true,
   "stage": "open_synthetic_diagnostic",
   "stop_token_count": 775,

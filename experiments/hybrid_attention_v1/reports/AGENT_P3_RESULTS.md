@@ -5,12 +5,17 @@ block 128, allocator cap 6144 MiB, float32. Registered primary metric
 `first_content_exact` (does the generation's first line equal the answer),
 case set v2 `(512, 1024, 1280, 1536, 1792, 2048)`, readout v2.
 
-Numbers below are from run `hlga-p3v2b-20260909-cuda-math`, gated by
-`hlga-p2-gate`-lineage receipt on the same code identity. They are being
-regenerated as `hlga-p3v2c-20260909-cuda-math` on the corrected metric-labelling
-code; every arm completed so far reproduces the previous run **byte-identically**
-(72/72 token_ids and 72/72 metric values per arm), confirming that fix was
-label-only. `AGENT_RECEIPT_INDEX.md` records which receipts are live.
+Run `hlga-p3v2c-20260909-cuda-math` (`agent_p3_final_receipt.json`), authorized
+by P2 receipt `hlga-r4-gate-20260909-cuda-math`
+(`agent_p3_final_gate_receipt.json`), both at code identity
+`57bb7678183d84ac...`, matching the source exactly. `checkpoint_unchanged` and
+`source_unchanged` both true.
+
+This run regenerated an earlier identical one on corrected metric-labelling
+code: **all ten arms are byte-identical** across the two (72/72 `token_ids` and
+72/72 metric values per arm), so the fix was label-only as claimed and the
+pipeline is deterministic. `AGENT_RECEIPT_INDEX.md` records which receipts are
+live.
 
 **Outcome: the registered "P2 pass + P3 degradation" case.** The retrofit is
 mechanically faithful and capability-damaging when frozen. Within that, four
