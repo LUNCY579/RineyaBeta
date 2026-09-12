@@ -12,7 +12,8 @@ from .interventions import (SinkIntervention, apply_sink_intervention,
 def run_checks():
     protocol = json.loads(Path(__file__).with_name("protocol.json").read_text())
     arms = protocol["arms"]
-    assert len(arms) == 10 and len({a["id"] for a in arms}) == 10
+    assert len(arms) == 11 and len({a["id"] for a in arms}) == 11
+    assert any(a["count"] == 4 and a["visible"] is False for a in arms)
     assert protocol["execution"]["training_authorized"] is False
     qp = kp = torch.arange(20)
     for count in (0, 1, 2, 4, 8):

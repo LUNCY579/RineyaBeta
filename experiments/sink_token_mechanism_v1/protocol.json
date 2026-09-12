@@ -14,10 +14,11 @@
     {"id": "M6_zeroK", "count": 4, "placement": "prefix", "content": "zero_k", "visible": true},
     {"id": "M7_zeroV", "count": 4, "placement": "prefix", "content": "zero_v", "visible": true},
     {"id": "M8_permuteV", "count": 4, "placement": "prefix", "content": "permute_v", "visible": true},
-    {"id": "M9_meanV", "count": 4, "placement": "prefix", "content": "mean_v", "visible": true}
+    {"id": "M9_meanV", "count": 4, "placement": "prefix", "content": "mean_v", "visible": true},
+    {"id": "M10_prefix4_hidden", "count": 4, "placement": "prefix", "content": "intact", "visible": false}
   ],
   "primary_contrasts": ["M0_no_sink:M1_prefix4", "M1_prefix4:M5_interior4", "M1_prefix4:M6_zeroK", "M1_prefix4:M7_zeroV"],
-  "secondary_contrasts": ["M0_no_sink:M2_prefix1", "M0_no_sink:M3_prefix2", "M1_prefix4:M4_prefix8", "M1_prefix4:M8_permuteV", "M1_prefix4:M9_meanV"],
+  "secondary_contrasts": ["M0_no_sink:M2_prefix1", "M0_no_sink:M3_prefix2", "M1_prefix4:M4_prefix8", "M1_prefix4:M8_permuteV", "M1_prefix4:M9_meanV", "M0_no_sink:M10_prefix4_hidden"],
   "diagnostics": ["sink_attention_mass_by_layer_head", "attention_entropy_by_layer_head", "sink_value_contribution_norm", "first_token_logit_KL", "token_identity", "first_content_exact"],
   "interpretation": {"zeroK_loses": "key-based routing/softmax allocation is necessary", "zeroV_loses": "value information is necessary", "permuteV_preserved": "aggregate value reservoir, not token identity", "interior4_preserved": "persistence more important than prefix position", "count_curve": "dose response rather than a four-token special case"},
   "multiplicity": "Holm correction over four primary paired McNemar tests; secondary contrasts descriptive with bootstrap intervals",

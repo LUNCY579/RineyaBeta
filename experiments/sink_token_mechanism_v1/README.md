@@ -10,7 +10,7 @@ Those rows are not new learned register parameters. STM-1 asks whether their
 benefit comes from stable position, key-based routing/softmax capacity, value
 information, or dose.
 
-Ten frozen arms form four primary causal contrasts and a secondary count curve.
+Eleven frozen arms form four primary causal contrasts, a visibility control and a secondary count curve.
 All arms use zero global layers and exactly the same W512 total key budget.
 `zero_k` retains values while destroying learned key routing; `zero_v` retains
 the attention denominator but removes sink information; `permute_v` breaks the
