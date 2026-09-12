@@ -1,0 +1,27 @@
+{
+  "experiment": "STM-1 sink-token causal decomposition",
+  "base_commit": "efb05337d55491478ddd1aa92550f0db18ce5e4f",
+  "source_result": {"contrast": "A8_all_local512 -> A10_all_local_sink512", "delta": 0.153, "wins": 11, "losses": 0, "p": 0.00098, "holm_survives": true, "replication_index": 3},
+  "estimand": "Which properties of persistently retained ordinary prefix KV states cause the frozen W512 all-local benefit?",
+  "fixed": {"checkpoint": "same qualified R2 artifact", "window": 512, "global_layers": 0, "backend": "math", "decoding": "greedy first_content_exact", "recent_plus_persistent_budget": 512},
+  "arms": [
+    {"id": "M0_no_sink", "count": 0, "placement": "prefix", "content": "intact", "visible": false},
+    {"id": "M1_prefix4", "count": 4, "placement": "prefix", "content": "intact", "visible": true},
+    {"id": "M2_prefix1", "count": 1, "placement": "prefix", "content": "intact", "visible": true},
+    {"id": "M3_prefix2", "count": 2, "placement": "prefix", "content": "intact", "visible": true},
+    {"id": "M4_prefix8", "count": 8, "placement": "prefix", "content": "intact", "visible": true},
+    {"id": "M5_interior4", "count": 4, "placement": "interior", "content": "intact", "visible": true},
+    {"id": "M6_zeroK", "count": 4, "placement": "prefix", "content": "zero_k", "visible": true},
+    {"id": "M7_zeroV", "count": 4, "placement": "prefix", "content": "zero_v", "visible": true},
+    {"id": "M8_permuteV", "count": 4, "placement": "prefix", "content": "permute_v", "visible": true},
+    {"id": "M9_meanV", "count": 4, "placement": "prefix", "content": "mean_v", "visible": true}
+  ],
+  "primary_contrasts": ["M0_no_sink:M1_prefix4", "M1_prefix4:M5_interior4", "M1_prefix4:M6_zeroK", "M1_prefix4:M7_zeroV"],
+  "secondary_contrasts": ["M0_no_sink:M2_prefix1", "M0_no_sink:M3_prefix2", "M1_prefix4:M4_prefix8", "M1_prefix4:M8_permuteV", "M1_prefix4:M9_meanV"],
+  "diagnostics": ["sink_attention_mass_by_layer_head", "attention_entropy_by_layer_head", "sink_value_contribution_norm", "first_token_logit_KL", "token_identity", "first_content_exact"],
+  "interpretation": {"zeroK_loses": "key-based routing/softmax allocation is necessary", "zeroV_loses": "value information is necessary", "permuteV_preserved": "aggregate value reservoir, not token identity", "interior4_preserved": "persistence more important than prefix position", "count_curve": "dose response rather than a four-token special case"},
+  "multiplicity": "Holm correction over four primary paired McNemar tests; secondary contrasts descriptive with bootstrap intervals",
+  "gates": ["schema_and_arm_invariants", "mask_causality_and_exact_budget", "intervention_locality", "inherited_checkpoint_and_source_hashes", "native_global_oracle_unchanged", "full_vs_stream_trace_identity", "diagnostic_finiteness"],
+  "execution": {"mechanical_validation_authorized": true, "frozen_open_dev_authorized_after_all_gates": true, "training_authorized": false, "sealed_evaluation_authorized": false, "promotion_authorized": false},
+  "claims": {"architecture_improvement": false, "efficiency": false, "production_readiness": false}
+}
